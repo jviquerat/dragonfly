@@ -3,27 +3,31 @@ import os
 import numpy as np
 
 # Custom imports
-from environment import *
 from ppo         import *
-from ppo_cma     import *
+#from ppo_cma     import *
 
 # Start training
-def launch_training(actor, n_params, init_obs,
-                    x_min, x_max, y_min, y_max,
-                    n_gen, n_ind,
-                    clip, entropy, learn_rate, actor_epochs,
-                    n_batch, clip_adv, mirror_adv):
+def launch_training(actor, env_name,
+                    n_episodes, max_ep_steps, render_every,
+                    learn_rate, batch_size, actor_epochs,
+                    clip, entropy, gamma, gae_lambda, update_alpha):
+
 
     # Declare environement and agent
-    env   = env_opt(init_obs, n_params, x_min, x_max, y_min, y_max)
-    if (actor == 'ppo'):     agent = ppo    (n_params, n_params,
+    env = gym.make(env_name)
+    act_dim = env.action_space.shape
+    obs_dim = env.observation_space.shape
+
+    print(act_dim, obs_dim)
+    exit()
+    if (actor == 'ppo'):     agent = ppo    (act_dim, obs_dim,
                                              n_gen, n_ind,
                                              clip, entropy,
                                              learn_rate, actor_epochs)
-    if (actor == 'ppo-cma'): agent = ppo_cma(n_params, n_params,
-                                             n_gen, n_ind, n_batch,
-                                             learn_rate, actor_epochs,
-                                             clip_adv, mirror_adv)
+    # if (actor == 'ppo-cma'): agent = ppo_cma(n_params, n_params,
+    #                                          n_gen, n_ind, n_batch,
+    #                                          learn_rate, actor_epochs,
+    #                                          clip_adv, mirror_adv)
 
     # Initialize parameters
     episode   = 0
