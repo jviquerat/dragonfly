@@ -9,7 +9,7 @@ from ppo         import *
 # Start training
 def launch_training(actor, env_name,
                     n_episodes, n_steps, render_every,
-                    learn_rate, batch_size, n_epochs,
+                    learn_rate, buff_size, batch_size, n_epochs,
                     clip, entropy, gamma, gae_lambda, update_alpha):
 
 
@@ -18,10 +18,10 @@ def launch_training(actor, env_name,
     act_dim = env.action_space.shape
     obs_dim = env.observation_space.shape
 
-    if (actor == 'ppo'): agent = ppo(act_dim, obs_dim, n_episodes, n_steps,
-                                     learn_rate, batch_size, n_epochs,
-                                     clip, entropy, gamma, gae_lambda,
-                                     update_alpha)
+    if (actor == 'ppo'):
+        agent = ppo(act_dim, obs_dim, n_episodes, n_steps,
+                    learn_rate, buff_size, batch_size, n_epochs,
+                    clip, entropy, gamma, gae_lambda, update_alpha)
 
     # Initialize parameters
     #episode = 0
@@ -38,7 +38,10 @@ def launch_training(actor, env_name,
 
             # Make one iteration
             act, mu, sig          = agent.get_actions(obs)
+            val                   = agent.get_value(obs)
             new_obs, rwd, done, _ = env.step(act)
+            new_val               = agent.get_value(new_obs)
+            delta                 = agent.compute_delta(rwd, val, new_val)
             agent.store_transition(obs, act, rwd, mu, sig)
 
             # Store a few things

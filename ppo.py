@@ -18,7 +18,7 @@ tf.logging.set_verbosity(tf.logging.FATAL)
 class ppo:
     def __init__(self,
                  act_dim, obs_dim, n_episodes, n_steps,
-                 learn_rate, batch_size, n_epochs,
+                 learn_rate, buff_size, batch_size, n_epochs,
                  clip, entropy, gamma, gae_lambda, update_alpha):
 
         # Initialize from arguments
@@ -31,8 +31,9 @@ class ppo:
         self.size         = n_steps*n_episodes
 
         self.learn_rate   = learn_rate
+        self.buff_size    = buff_size
         self.batch_size   = batch_size
-        self.n_epochs = n_epochs
+        self.n_epochs     = n_epochs
         self.clip         = clip
         self.entropy      = entropy
         self.gamma        = gamma
@@ -40,17 +41,17 @@ class ppo:
         self.update_alpha = update_alpha
 
         # Build actors
-        self.critic    = self.build_critic()
-        self.actor     = self.build_actor()
-        self.old_actor = self.build_actor()
-        self.old_actor.set_weights(self.actor.get_weights())
+        self.critic     = self.build_critic()
+        self.actor      = self.build_actor()
+        self.old_actor  = self.build_actor()
+        self.old_actor.set_weights (self.actor.get_weights())
 
         # Generate dummy inputs for custom loss
         self.dummy_adv  = np.zeros((1, 1))
         self.dummy_pred = np.zeros((1, 2*self.act_dim))
 
         # Storing buffers
-        self.idx       = 0
+        self.idx      = 0
 
         self.gen      = np.zeros( self.size,                dtype=np.int32)
         self.ep       = np.zeros( self.size,                dtype=np.int32)
@@ -82,8 +83,8 @@ class ppo:
                self.sig[rnd,:], self.drw[rnd,:], \
                self.val[rnd,:]
 
-    # Custom ppo loss
-    def ppo_loss(self, adv, old_act):
+    # Policy loss
+    def policy_loss(self, adv, old_act):
 
         # Log prob density function
         def log_density(pred, y_true):
@@ -125,6 +126,23 @@ class ppo:
 
         return loss
 
+    # Value loss
+    def value_loss(self, old_val):
+
+        def loss(y_true, y_pred):
+
+            # Baseline mse
+            surrogate1 = kb.square(y_pred - y_true)
+
+            # Compute actor loss following Schulman
+            clip_val   = kb.clip(y_pred,
+                                 min_value = old_val - self.clip,
+                                 max_value = old_val + self.clip)
+            surrogate2 = kb.square(clip_val - y_true)
+
+            return kb.mean(tk.backend.minimum(surrogate1, surrogate2))
+        return loss
+
     # Build actor network using keras
     def build_actor(self):
 
@@ -155,10 +173,10 @@ class ppo:
 
         # Generate actor
         actor     = tk.Model(inputs  = [obs, adv, old_act],
-                            outputs = outputs)
+                             outputs = outputs)
         optimizer = tk.optimizers.Adam(lr = self.learn_rate)
         actor.compile(optimizer = optimizer,
-                      loss      = self.ppo_loss(adv, old_act))
+                      loss      = self.policy_loss(adv, old_act))
 
         return actor
 
@@ -167,6 +185,7 @@ class ppo:
 
         # Input layers
         obs     = tk.layers.Input(shape=(self.obs_dim,))
+        old_val = tk.layers.Input(shape=(1,),          )
 
         # Use orthogonal layers initialization
         #init_1  = tk.initializers.Orthogonal(gain=0.5, seed=None)
@@ -179,17 +198,18 @@ class ppo:
                                     activation         = 'linear')(dense)
 
         # Generate actor
-        critic    = tk.Model(inputs  = obs,
-                              outputs = value)
+        critic    = tk.Model(inputs  = [obs, old_val],
+                             outputs = value)
         optimizer = tk.optimizers.Adam(lr = self.learn_rate)
         crtic.compile(optimizer = optimizer,
-                      loss      = 'mean_squared_error')
+                      loss      = self.value_loss(old_val))
 
         return critic
 
-    # Copy new actor weights to old actor
-    def update_old_actor(self):
+    # Copy new network weights to old one
+    def update_old_network(self):
 
+        # Actor
         actor_weights = self.actor.get_weights()
         self.old_actor.set_weights(actor_weights)
 
@@ -221,17 +241,17 @@ class ppo:
         state = state.reshape(1,self.obs_dim)
 
         # Predict value
-        val   = self.critic.predict(state)
+        val   = self.critic.predict([state,self.dummuy_adv])
 
         return val
 
-    # Train actor network
+    # Train networks
     def train_network(self):
 
         # Get batch
         obs, act, adv, mu, sig, drw, val = self.get_batch()
 
-        # Compute old action
+        # Compute old actions and values
         old_act = self.get_old_actions(obs)
 
         # Train networks
@@ -239,7 +259,7 @@ class ppo:
                         y       = act,
                         epochs  = self.n_epochs,
                         verbose = 0)
-        self.critic.fit(x       = obs,
+        self.critic.fit(x       = [obs, 
                         y       = drw,
                         epochs  = self.n_epochs,
                         verbose = 0)
@@ -271,6 +291,14 @@ class ppo:
         avg_rwd      = np.mean(self.rwd[start:end])
         std_rwd      = np.std( self.rwd[start:end])
         self.adv[:]  = (self.rwd[:] - avg_rwd)/(std_rwd + 1.0e-7)
+
+    # Compute delta
+    def compute_delta(self, rwd, val, new_val):
+
+        # Follow eq. (12) in PPO paper
+        delta = rwd + self.gamma*new_val - val
+
+        return delta
 
     # Get actions from previous policy
     def get_old_actions(self, state):

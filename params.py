@@ -33,6 +33,7 @@ render_every = 100
 
 learn_rate   = 5.0e-3
 batch_size   = 256
+buff_size    = 4*batch_size
 n_epochs     = 64
 
 # PPO specific
