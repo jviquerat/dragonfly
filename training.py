@@ -24,25 +24,48 @@ def launch_training(actor, env_name,
                     clip, entropy, gamma, gae_lambda, update_alpha)
 
     # Initialize parameters
-    #episode = 0
-    
+    ep   = 0
+    done = True
 
     # Loop over episodes
-    for ep in range(n_episodes):
+    while (ep < n_episodes):
 
         # Reset environment
-        obs = env.reset()
+        if done:
+            buff_cnt = 0
+            done     = False
+            obs      = env.reset()
 
-        # Loop over steps
-        for step in range(n_steps):
+        # Loop while episode not over and buff not full
+        while ((not done) and (buff_cnt < buff_size)):
 
             # Make one iteration
             act, mu, sig          = agent.get_actions(obs)
             val                   = agent.get_value(obs)
             new_obs, rwd, done, _ = env.step(act)
             new_val               = agent.get_value(new_obs)
-            delta                 = agent.compute_delta(rwd, val, new_val)
-            agent.store_transition(obs, act, rwd, mu, sig)
+            dlt                   = agent.compute_delta(rwd, val, new_val)
+            agent.store_transition(obs, act, rwd, val, dlt)
+
+            # Update observation
+            obs = new_obs
+
+            batch_cnt += 1
+
+        # Handle value of last state
+        if (    terminal): target_val = 0
+        if (not terminal): target_val = agent.get_value(obs)
+
+        # Compute discounted rewards
+        batch_target_values = []
+        for reward in reversed(batch_rewards):
+            target_value = reward + DISCOUNT_FACTOR * target_value
+            batch_target_values.append(target_value)
+        # Reverse the batch target values, so they are in the correct order
+        # again.
+        batch_target_values.reverse()
+
+
 
             # Store a few things
             #agent.ep [episode] = episode

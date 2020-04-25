@@ -53,21 +53,19 @@ class ppo:
         # Storing buffers
         self.idx      = 0
 
-        self.gen      = np.zeros( self.size,                dtype=np.int32)
-        self.ep       = np.zeros( self.size,                dtype=np.int32)
         self.obs      = np.zeros((self.size, self.obs_dim), dtype=np.float32)
         self.act      = np.zeros((self.size, self.act_dim), dtype=np.float32)
         self.rwd      = np.zeros( self.size,                dtype=np.float32)
         self.val      = np.zeros( self.size,                dtype=np.float32)
+        self.dlt      = np.zeros( self.size,                dtype=np.float32)
         self.drw      = np.zeros( self.size,                dtype=np.float32)
-        self.mu       = np.zeros((self.size, self.mu_dim),  dtype=np.float32)
-        self.sig      = np.zeros((self.size, self.sig_dim), dtype=np.float32)
+        self.adv      = np.zeros( self.size,                dtype=np.float32)
 
-        self.bst_rwd  = np.zeros( self.n_gen,               dtype=np.float32)
+        #self.gen      = np.zeros( self.size,                dtype=np.int32)
+        #self.ep       = np.zeros( self.size,                dtype=np.int32)
+        #self.bst_rwd  = np.zeros( self.n_gen,               dtype=np.float32)
         #self.bst_gen  = np.zeros( self.n_gen,               dtype=np.int32)
         #self.bst_ep   = np.zeros( self.n_gen,               dtype=np.int32)
-
-        self.adv      = np.zeros( self.size,                dtype=np.float32)
 
     # Get batch of obs, actions and rewards
     def get_batch(self):
