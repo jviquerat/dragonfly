@@ -28,6 +28,7 @@ import tensorflow.keras as K
 from scipy import signal
 
 
+
 # %%
 class MemoryPPO:
     """
@@ -131,12 +132,11 @@ class Agent:
         # CONSTANTS
         self.TRAINING_BATCH_SIZE = TRAINING_BATCH_SIZE
         self.TRAJECTORY_BUFFER_SIZE = TRAJECTORY_BUFFER_SIZE
-        self.TARGET_UPDATE_ALPHA = 0.95
+        self.TARGET_UPDATE_ALPHA = 1.0
         self.GAMMA = 0.99
         self.GAE_LAMBDA = 0.95
-        self.CLIPPING_LOSS_RATIO = 0.1
+        self.CLIPPING_LOSS_RATIO = 0.2
         self.ENTROPY_LOSS_RATIO = 0.001
-        self.TARGET_UPDATE_ALPHA = 0.9
         self.NOISE = 1.0  # Exploration noise, for continous action space
         # create actor and critic neural networks
         self.critic_network = self._build_critic_network()
@@ -231,7 +231,7 @@ class Agent:
         mu = K.layers.Dense(self.action_n, activation='tanh',name="actor_output_mu")(dense)
         #mu = 2 * muactor_output_layer_continuous
         # in addtion, we have a second output layer representing the sigma for each action
-        sigma = K.layers.Dense(self.action_n, activation='softplus', name="actor_output_sigma")(dense)
+        sigma = K.layers.Dense(self.action_n, activation='sigmoid', name="actor_output_sigma")(dense)
         #sigma = sigma + K.backend.epsilon()
         # concat layers. The alterative would be to have two output heads but this would then require to make a custom
         # keras.function insead of the .compile and .fit routine adding more distraciton
@@ -240,8 +240,10 @@ class Agent:
         actor_network = K.Model(
             inputs=[state, advantage, old_prediction], outputs=mu_and_sigma)
         # compile. Here the connection to the PPO loss fuction is made. The input placeholders are passed.
+        optimizer = K.optimizers.Adam(lr = 1.0e-3)
         actor_network.compile(
-            optimizer='adam', loss=self.ppo_loss(advantage, old_prediction))
+            optimizer=optimizer,
+            loss=self.ppo_loss(advantage, old_prediction))
         # summary and return
         actor_network.summary()
         return actor_network
@@ -265,7 +267,9 @@ class Agent:
         # make keras.Model
         critic_network = K.Model(inputs=state, outputs=V)
         # compile. Here the connection to the PPO loss fuction is made. The input placeholders are passed.
-        critic_network.compile(optimizer='Adam', loss='mean_squared_error')
+        optimizer = K.optimizers.Adam(lr = 1.0e-3)
+        critic_network.compile(optimizer=optimizer,
+                               loss='mean_squared_error')
         # summary and return
         critic_network.summary()
         return critic_network
@@ -322,9 +326,11 @@ class Agent:
         batch_old_prediction = self.get_old_prediction(states)
         # commit training
         self.actor_network.fit(
-            x=[states, gae_advantages, batch_old_prediction], y=actions, verbose=0)
+            x=[states, gae_advantages, batch_old_prediction],
+            y=actions, epochs=32, verbose=0)
         self.critic_network.fit(
-            x=states, y=discounted_rewards, epochs=1, verbose=0)
+            x=states, y=discounted_rewards,
+            epochs=32, verbose=0)
         # soft update the target network(aka actor_old).
         self.update_tartget_network()
 
@@ -352,16 +358,18 @@ class Agent:
 
 # %%
 ENV_NAME = "BipedalWalker-v2"
-EPOCHS = 1000
+EPOCHS = 500
 MAX_EPISODE_STEPS = 2000
 # train at the end of each epoch for simplicity. Not necessarily better.
 TRAJECTORY_BUFFER_SIZE = MAX_EPISODE_STEPS
-BATCH_SIZE = 256
-RENDER_EVERY = 10
+BATCH_SIZE = 512
+RENDER_EVERY = 100
 
 
 if __name__ == "__main__":
     env = gym.make(ENV_NAME)
+    env = gym.wrappers.Monitor(env, './vids/'+str(time.time())+'/',
+                               video_callable=False)
     agent = Agent(env.action_space.shape[0], env.observation_space.shape,
                   BATCH_SIZE, TRAJECTORY_BUFFER_SIZE)
     for epoch in range(EPOCHS):
@@ -369,14 +377,15 @@ if __name__ == "__main__":
         r_sum = 0
         for t in range(MAX_EPISODE_STEPS):
             # sometimes render
-            #if epoch % RENDER_EVERY == 0:
-            #    env.render()
+            if epoch % RENDER_EVERY == 0:
+                env.render()
             # get action from agent given state
             a = agent.choose_action(s)
             # get s_,r,done
             s_, r, done, _ = env.step(a)
             # store transitions to agent.memory
             agent.store_transition(s, a, r)
+            s = s_
             r_sum += r
             if done or (t == MAX_EPISODE_STEPS-1):
                 # predict critic for s_ (value of s_)

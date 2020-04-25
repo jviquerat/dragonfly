@@ -13,7 +13,7 @@ for i in range(n_avg):
     print('### Avg run #'+str(i))
     launch_training(actor, env_name,
                     n_episodes, max_ep_steps, render_every,
-                    learn_rate, batch_size, actor_epochs,
+                    learn_rate, batch_size, n_epochs,
                     clip, entropy, gamma, gae_lambda, update_alpha)
 
     #f         = np.loadtxt('optimisation.dat')

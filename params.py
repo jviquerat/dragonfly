@@ -27,13 +27,13 @@ actor        = 'ppo' # 'ppo' or 'ppo-cma'
 env_name     = "Pendulum-v0"
 
 n_episodes   = 100
-max_ep_steps = 1000
+n_steps      = 1000
 n_avg        = 1
 render_every = 100
 
 learn_rate   = 5.0e-3
 batch_size   = 256
-actor_epochs = 64
+n_epochs     = 64
 
 # PPO specific
 clip         = 0.3

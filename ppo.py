@@ -17,24 +17,30 @@ tf.logging.set_verbosity(tf.logging.FATAL)
 ### A standard PPO agent
 class ppo:
     def __init__(self,
-                 act_dim, obs_dim, n_gen, n_ind,
-                 clip, entropy, learn_rate, actor_epochs):
+                 act_dim, obs_dim, n_episodes, n_steps,
+                 learn_rate, batch_size, n_epochs,
+                 clip, entropy, gamma, gae_lambda, update_alpha):
 
         # Initialize from arguments
         self.act_dim      = act_dim
         self.obs_dim      = obs_dim
         self.mu_dim       = act_dim
         self.sig_dim      = act_dim
-        self.n_gen        = n_gen
-        self.n_ind        = n_ind
-        self.size         = self.n_gen*self.n_ind
+        self.n_episodes   = n_episodes
+        self.n_steps      = n_steps
+        self.size         = n_steps*n_episodes
 
+        self.learn_rate   = learn_rate
+        self.batch_size   = batch_size
+        self.n_epochs = n_epochs
         self.clip         = clip
         self.entropy      = entropy
-        self.learn_rate   = learn_rate
-        self.actor_epochs = actor_epochs
+        self.gamma        = gamma
+        self.gae_lambda   = gae_lambda
+        self.update_alpha = update_alpha
 
         # Build actors
+        self.critic    = self.build_critic()
         self.actor     = self.build_actor()
         self.old_actor = self.build_actor()
         self.old_actor.set_weights(self.actor.get_weights())
@@ -50,28 +56,31 @@ class ppo:
         self.ep       = np.zeros( self.size,                dtype=np.int32)
         self.obs      = np.zeros((self.size, self.obs_dim), dtype=np.float32)
         self.act      = np.zeros((self.size, self.act_dim), dtype=np.float32)
-        self.cact     = np.zeros((self.size, self.act_dim), dtype=np.float32)
         self.rwd      = np.zeros( self.size,                dtype=np.float32)
+        self.val      = np.zeros( self.size,                dtype=np.float32)
+        self.drw      = np.zeros( self.size,                dtype=np.float32)
         self.mu       = np.zeros((self.size, self.mu_dim),  dtype=np.float32)
         self.sig      = np.zeros((self.size, self.sig_dim), dtype=np.float32)
 
-        self.bst_cact = np.zeros((self.n_gen,self.act_dim), dtype=np.float32)
         self.bst_rwd  = np.zeros( self.n_gen,               dtype=np.float32)
-        self.bst_gen  = np.zeros( self.n_gen,               dtype=np.int32)
-        self.bst_ep   = np.zeros( self.n_gen,               dtype=np.int32)
+        #self.bst_gen  = np.zeros( self.n_gen,               dtype=np.int32)
+        #self.bst_ep   = np.zeros( self.n_gen,               dtype=np.int32)
 
         self.adv      = np.zeros( self.size,                dtype=np.float32)
 
-    # Get batch of observations, actions and rewards
+    # Get batch of obs, actions and rewards
     def get_batch(self):
 
-        # Starting and ending indices based on the required size of batch
-        start = max(0,self.idx - self.n_ind)
+        # Start and end indices based on the required size of batch
+        # Then draw a randomized version
+        start = max(0,self.idx - self.batch_size)
         end   = self.idx
+        rnd   = np.random.randint(start,end,self.batch_size)
 
-        return self.obs[start:end,:], self.act[start:end,:], \
-               self.adv[start:end],   self.mu [start:end,:], \
-               self.sig[start:end,:]
+        return self.obs[rnd,:], self.act[rnd,:], \
+               self.adv[rnd],   self.mu [rnd,:], \
+               self.sig[rnd,:], self.drw[rnd,:], \
+               self.val[rnd,:]
 
     # Custom ppo loss
     def ppo_loss(self, adv, old_act):
@@ -99,6 +108,7 @@ class ppo:
             # Compute actor loss following Schulman
             ratio      = kb.exp(log_density_new - log_density_old)
             surrogate1 = ratio*adv
+
             clip_ratio = kb.clip(ratio,
                                  min_value = 1.0 - self.clip,
                                  max_value = 1.0 + self.clip)
@@ -152,6 +162,31 @@ class ppo:
 
         return actor
 
+    # Build critic network using keras
+    def build_critic(self):
+
+        # Input layers
+        obs     = tk.layers.Input(shape=(self.obs_dim,))
+
+        # Use orthogonal layers initialization
+        #init_1  = tk.initializers.Orthogonal(gain=0.5, seed=None)
+        #init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+
+        # Dense layer, then one branch for mu and one for sigma
+        dense     = tk.layers.Dense(2,
+                                    activation         = 'relu')(obs)
+        value     = tk.layers.Dense(1,
+                                    activation         = 'linear')(dense)
+
+        # Generate actor
+        critic    = tk.Model(inputs  = obs,
+                              outputs = value)
+        optimizer = tk.optimizers.Adam(lr = self.learn_rate)
+        crtic.compile(optimizer = optimizer,
+                      loss      = 'mean_squared_error')
+
+        return critic
+
     # Copy new actor weights to old actor
     def update_old_actor(self):
 
@@ -179,31 +214,45 @@ class ppo:
 
         return actions, mu, sig
 
+    # Get value from network
+    def get_value(self, state):
+
+        # Reshape state
+        state = state.reshape(1,self.obs_dim)
+
+        # Predict value
+        val   = self.critic.predict(state)
+
+        return val
+
     # Train actor network
     def train_network(self):
 
         # Get batch
-        obs, act, adv, mu, sig = self.get_batch()
+        obs, act, adv, mu, sig, drw, val = self.get_batch()
 
         # Compute old action
-        old_act       = self.get_old_actions(obs)
+        old_act = self.get_old_actions(obs)
 
-        # Train network
-        self.actor.fit(x       = [obs, adv, old_act],
-                       y       = act,
-                       epochs  = self.actor_epochs,
-                       verbose = 0)
+        # Train networks
+        self.actor.fit (x       = [obs, adv, old_act],
+                        y       = act,
+                        epochs  = self.n_epochs,
+                        verbose = 0)
+        self.critic.fit(x       = obs,
+                        y       = drw,
+                        epochs  = self.n_epochs,
+                        verbose = 0)
 
         # Update old actor
         self.update_old_actor()
 
     # Store transitions into buffer
-    def store_transition(self, obs, act, cact, rwd, mu, sig):
+    def store_transition(self, obs, act, rwd, mu, sig):
 
         # Fill buffers
         self.obs [self.idx] = obs
         self.act [self.idx] = act
-        self.cact[self.idx] = cact
         self.rwd [self.idx] = rwd
         self.mu  [self.idx] = mu
         self.sig [self.idx] = sig
