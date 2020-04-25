@@ -23,6 +23,14 @@ def launch_training(actor, env_name,
                     learn_rate, buff_size, batch_size, n_epochs,
                     clip, entropy, gamma, gae_lambda, update_alpha)
 
+    # Initialize buffers
+    buff_obs = np.zeros(buff_size, obs_dim)
+    buff_act = np.zeros(buff_size, act_dim)
+    buff_rwd = np.zeros(buff_size)
+    buff_dlt = np.zeros(buff_size)
+    buff_val = np.zeros(buff_size)
+    buff_tgt = np.zeros(buff_size)
+
     # Initialize parameters
     ep   = 0
     done = True
@@ -32,9 +40,15 @@ def launch_training(actor, env_name,
 
         # Reset environment
         if done:
-            buff_cnt = 0
-            done     = False
-            obs      = env.reset()
+            buff_cnt      = 0
+            done          = False
+            obs           = env.reset()
+            buff_obs[:,:] = 0.0
+            buff_act[:,:] = 0.0
+            buff_rwd[:]   = 0.0
+            buff_dlt[:]   = 0.0
+            buff_val[:]   = 0.0
+            buff_tgt[:]   = 0.0
 
         # Loop while episode not over and buff not full
         while ((not done) and (buff_cnt < buff_size)):
@@ -45,25 +59,30 @@ def launch_training(actor, env_name,
             new_obs, rwd, done, _ = env.step(act)
             new_val               = agent.get_value(new_obs)
             dlt                   = agent.compute_delta(rwd, val, new_val)
-            agent.store_transition(obs, act, rwd, val, dlt)
 
-            # Update observation
-            obs = new_obs
+            # Store in buffers
+            buff_obs[buff_cnt,:]  = obs
+            buff_act[buff_cnt,:]  = act
+            buff_rwd[buff_cnt]    = rwd
+            buff_dlt[buff_cnt]    = dlt
+            buff_val[buff_cnt]    = val
 
-            batch_cnt += 1
+            #agent.store_transition(obs, act, rwd, val, dlt)
+
+            # Update observation and buffer counter
+            obs       = new_obs
+            buff_cnt += 1
 
         # Handle value of last state
         if (    terminal): target_val = 0
         if (not terminal): target_val = agent.get_value(obs)
 
-        # Compute discounted rewards
-        batch_target_values = []
-        for reward in reversed(batch_rewards):
-            target_value = reward + DISCOUNT_FACTOR * target_value
-            batch_target_values.append(target_value)
-        # Reverse the batch target values, so they are in the correct order
-        # again.
-        batch_target_values.reverse()
+        # Compute target values using reversed reward buffer
+        rev_rwd = buff_rwd.reverse()
+        for i in range(buff_size):
+            target_val  = rev_rwd[i] + gamma*target_val
+            buff_tgt[i] = target_val
+        buff_tgt.reverse()
 
 
 

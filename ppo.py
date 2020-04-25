@@ -53,13 +53,21 @@ class ppo:
         # Storing buffers
         self.idx      = 0
 
-        self.obs      = np.zeros((self.size, self.obs_dim), dtype=np.float32)
-        self.act      = np.zeros((self.size, self.act_dim), dtype=np.float32)
-        self.rwd      = np.zeros( self.size,                dtype=np.float32)
-        self.val      = np.zeros( self.size,                dtype=np.float32)
-        self.dlt      = np.zeros( self.size,                dtype=np.float32)
-        self.drw      = np.zeros( self.size,                dtype=np.float32)
-        self.adv      = np.zeros( self.size,                dtype=np.float32)
+        self.obs      = []
+        self.act      = []
+        self.rwd      = []
+        self.val      = []
+        self.dlt      = []
+        self.drw      = []
+        self.adv      = []
+
+        # self.obs      = np.zeros((self.size, self.obs_dim), dtype=np.float32)
+        # self.act      = np.zeros((self.size, self.act_dim), dtype=np.float32)
+        # self.rwd      = np.zeros( self.size,                dtype=np.float32)
+        # self.val      = np.zeros( self.size,                dtype=np.float32)
+        # self.dlt      = np.zeros( self.size,                dtype=np.float32)
+        # self.drw      = np.zeros( self.size,                dtype=np.float32)
+        # self.adv      = np.zeros( self.size,                dtype=np.float32)
 
         #self.gen      = np.zeros( self.size,                dtype=np.int32)
         #self.ep       = np.zeros( self.size,                dtype=np.int32)
