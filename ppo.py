@@ -257,7 +257,7 @@ class ppo:
         for i in range(self.buff_size):
             tgt_val     = rev_rwd[i] + self.gamma*tgt_val
             buff_tgt[i] = tgt_val
-        buff_tgt = np.flip(buff_tgt)
+        buff_tgt = np.flip(buff_tgt).copy()
 
     # Compute advantages
     def compute_advantages(self, buff_dlt, buff_adv):
@@ -268,7 +268,7 @@ class ppo:
         for i in range(self.buff_size):
             adv         = rev_dlt[i] + self.gamma*self.gae_lambda*adv
             buff_adv[i] = adv
-        buff_adv = np.flip(buff_adv)
+        buff_adv = np.flip(buff_adv).copy()
 
     # Store buffers
     def store_buffers(self, obs, act, rwd, val, dlt, tgt, adv):
