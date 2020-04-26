@@ -260,18 +260,15 @@ class ppo:
         buff_tgt = np.flip(buff_tgt)
 
     # Compute advantages
-    def compute_advantages(self):
+    def compute_advantages(self, buff_dlt, buff_adv):
 
-        # Start and end indices of last generation
-        start        = max(0,self.idx - self.n_ind)
-        end          = self.idx
-
-        # Compute normalized advantage
-        avg_rwd      = np.mean(self.rwd[start:end])
-        std_rwd      = np.std( self.rwd[start:end])
-        self.adv[:]  = (self.rwd[:] - avg_rwd)/(std_rwd + 1.0e-7)
-
-    
+        # Compute GAE using reversed delta buffer
+        rev_dlt = np.flip(buff_dlt)
+        adv     = 0.0
+        for i in range(self.buff_size):
+            adv         = rev_dlt[i] + self.gamma*self.gae_lambda*adv
+            buff_adv[i] = adv
+        buff_adv = np.flip(buff_adv)
 
     # Store buffers
     def store_buffers(self, obs, act, rwd, val, dlt, tgt, adv):
