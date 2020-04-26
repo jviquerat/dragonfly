@@ -9,7 +9,7 @@ from ppo         import *
 #from ppo_cma     import *
 
 # Start training
-def launch_training(actor, env_name,
+def launch_training(env_name,
                     n_episodes, n_steps, render_every,
                     learn_rate, buff_size, batch_size, n_epochs,
                     clip, entropy, gamma, gae_lambda, update_alpha):
@@ -21,7 +21,7 @@ def launch_training(actor, env_name,
     act_dim = env.action_space.shape[0]
     obs_dim = env.observation_space.shape[0]
 
-    agent = ppo(act_dim, obs_dim, n_episodes, n_steps,
+    agent = ppo(act_dim, obs_dim, n_episodes,
                 learn_rate, buff_size, batch_size, n_epochs,
                 clip, entropy, gamma, gae_lambda, update_alpha)
 

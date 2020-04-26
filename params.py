@@ -1,22 +1,6 @@
 # Generic imports
 import numpy as np
 
-# Choose actor
-actor        = 'ppo' # 'ppo' or 'ppo-cma'
-
-# Generic parameters
-#n_params     = 2
-#init_obs     = np.zeros(n_params)
-#x_min        =-5.0
-#x_max        = 5.0
-#y_min        =-5.0
-#y_max        = 5.0
-
-#x_min        =-2.0
-#x_max        = 2.0
-#y_min        =-1.0
-#y_max        = 3.0
-
 # A list of continuous environments and their action_space size
 # - Pendulum-v0              (1)
 # - MountainCarContinuous-v0 (1)
@@ -36,7 +20,6 @@ batch_size   = 32
 n_epochs     = 8
 buff_size    = n_epochs*batch_size
 
-# PPO specific
 clip         = 0.2
 entropy      = 0.001
 gamma        = 0.99
