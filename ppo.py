@@ -133,7 +133,7 @@ class ppo:
         init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(16,
+        dense     = tk.layers.Dense(64,
                                    activation         = 'relu',
                                    kernel_initializer = init_1)(obs)
         mu        = tk.layers.Dense(self.act_dim,
@@ -162,14 +162,16 @@ class ppo:
         obs     = tk.layers.Input(shape=(self.obs_dim,)  )
 
         # Use orthogonal layers initialization
-        #init_1  = tk.initializers.Orthogonal(gain=0.5, seed=None)
-        #init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+        init_1  = tk.initializers.Orthogonal(gain=0.5, seed=None)
+        init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(16,
-                                    activation = 'relu')(obs)
+        dense     = tk.layers.Dense(64,
+                                    activation = 'relu',
+                                    kernel_initializer = init_1)(obs)
         value     = tk.layers.Dense(1,
-                                    activation = 'relu')(dense)
+                                    activation = 'relu',
+                                    kernel_initializer = init_1)(dense)
 
         # Generate actor
         critic    = tk.Model(inputs  = obs,
@@ -229,14 +231,16 @@ class ppo:
         old_act = self.get_old_actions(obs)
 
         # Train networks
-        self.actor.fit (x       = [obs, adv, old_act],
-                        y       = act,
-                        epochs  = self.n_epochs,
-                        verbose = 0)
-        self.critic.fit(x       = obs,
-                        y       = tgt,
-                        epochs  = self.n_epochs,
-                        verbose = 0)
+        self.actor.fit (x          = [obs, adv, old_act],
+                        y          = act,
+                        epochs     = self.n_epochs,
+                        batch_size = self.batch_size,
+                        verbose    = 0)
+        self.critic.fit(x          = obs,
+                        y          = tgt,
+                        epochs     = self.n_epochs,
+                        batch_size = self.batch_size,
+                        verbose    = 0)
 
         # Update old actor
         self.update_old_actor()
@@ -253,22 +257,28 @@ class ppo:
     def compute_targets(self, tgt_val, buff_rwd, buff_tgt):
 
         # Compute target values using reversed reward buffer
-        rev_rwd = np.flip(buff_rwd)
+        rev_rwd    = buff_rwd.copy()
+        rev_rwd[:] = np.flip(rev_rwd)[:]
+
         for i in range(self.buff_size):
             tgt_val     = rev_rwd[i] + self.gamma*tgt_val
             buff_tgt[i] = tgt_val
-        buff_tgt = np.flip(buff_tgt).copy()
+
+        buff_tgt[:] = np.flip(buff_tgt)[:]
 
     # Compute advantages
     def compute_advantages(self, buff_dlt, buff_adv):
 
         # Compute GAE using reversed delta buffer
-        rev_dlt = np.flip(buff_dlt)
-        adv     = 0.0
+        rev_dlt    = buff_dlt.copy()
+        rev_dlt[:] = np.flip(rev_dlt)[:]
+        adv        = 0.0
+
         for i in range(self.buff_size):
             adv         = rev_dlt[i] + self.gamma*self.gae_lambda*adv
             buff_adv[i] = adv
-        buff_adv = np.flip(buff_adv).copy()
+
+        buff_adv[:] = np.flip(buff_adv)[:]
 
     # Store buffers
     def store_buffers(self, obs, act, rwd, val, dlt, tgt, adv):

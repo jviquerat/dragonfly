@@ -53,8 +53,8 @@ def launch_training(env_name,
 
         # Reset other stuff if episode is done
         if done:
-            done          = False
-            obs           = env.reset()
+            done = False
+            obs  = env.reset()
 
             # Printings
             if (ep != -1):
@@ -80,13 +80,11 @@ def launch_training(env_name,
             rwd_sum += rwd
 
             # Store in buffers
-            buff_obs[buff_cnt,:]  = obs
-            buff_act[buff_cnt,:]  = act
-            buff_rwd[buff_cnt]    = rwd
-            buff_val[buff_cnt]    = val
-            buff_dlt[buff_cnt]    = dlt
-
-            #agent.store_transition(obs, act, rwd, val, dlt)
+            buff_obs[buff_cnt,:] = obs
+            buff_act[buff_cnt,:] = act
+            buff_rwd[buff_cnt]   = rwd
+            buff_val[buff_cnt]   = val
+            buff_dlt[buff_cnt]   = dlt
 
             # Update observation and buffer counter
             obs       = new_obs
@@ -99,6 +97,13 @@ def launch_training(env_name,
         # Compute targets and advantages
         agent.compute_targets(tgt_val, buff_rwd, buff_tgt)
         agent.compute_advantages(buff_dlt, buff_adv)
+
+        #rev_dlt = np.flip(buff_dlt)
+        #adv     = 0.0
+        #for i in range(buff_size):
+        #    adv         = rev_dlt[i] + gamma*gae_lambda*adv
+        #    buff_adv[i] = adv
+        #buff_adv = np.flip(buff_adv)
 
         # Store buffers
         agent.store_buffers(buff_obs, buff_act, buff_rwd,
