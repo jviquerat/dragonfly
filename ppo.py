@@ -50,28 +50,13 @@ class ppo:
         self.dummy_pred = np.zeros((1, 2*self.act_dim))
 
         # Storing buffers
-        self.idx      = 0
-        self.obs      = cl.deque()
-        self.act      = cl.deque()
-        self.rwd      = cl.deque()
-        self.val      = cl.deque()
-        self.dlt      = cl.deque()
-        self.tgt      = cl.deque()
-        self.adv      = cl.deque()
-
-    # Get batch of obs, actions and rewards
-    def get_batch(self):
-
-        # Start and end indices based on the required size of batch
-        # Then draw a randomized version
-        start = max(0,self.idx - self.batch_size)
-        end   = self.idx
-        rnd   = np.random.randint(start,end,self.batch_size)
-
-        return self.obs[rnd,:], self.act[rnd,:], \
-               self.adv[rnd],   self.mu [rnd,:], \
-               self.sig[rnd,:], self.drw[rnd,:], \
-               self.val[rnd,:]
+        self.obs = cl.deque()
+        self.act = cl.deque()
+        self.rwd = cl.deque()
+        self.val = cl.deque()
+        self.dlt = cl.deque()
+        self.tgt = cl.deque()
+        self.adv = cl.deque()
 
     # Policy loss
     def policy_loss(self, adv, old_act):
@@ -256,18 +241,23 @@ class ppo:
         # Update old actor
         self.update_old_actor()
 
-    # Store transitions into buffer
-    def store_transition(self, obs, act, rwd, mu, sig):
+    # Compute delta
+    def compute_delta(self, rwd, val, new_val):
 
-        # Fill buffers
-        self.obs [self.idx] = obs
-        self.act [self.idx] = act
-        self.rwd [self.idx] = rwd
-        self.mu  [self.idx] = mu
-        self.sig [self.idx] = sig
+        # Follow eq. (12) in PPO paper
+        delta = rwd + self.gamma*new_val - val
 
-        # Update index
-        self.idx           += 1
+        return delta
+
+    # Compute targets
+    def compute_targets(self, tgt_val, buff_rwd, buff_tgt):
+
+        # Compute target values using reversed reward buffer
+        rev_rwd = np.flip(buff_rwd)
+        for i in range(self.buff_size):
+            tgt_val     = rev_rwd[i] + self.gamma*tgt_val
+            buff_tgt[i] = tgt_val
+        buff_tgt = np.flip(buff_tgt)
 
     # Compute advantages
     def compute_advantages(self):
@@ -281,13 +271,19 @@ class ppo:
         std_rwd      = np.std( self.rwd[start:end])
         self.adv[:]  = (self.rwd[:] - avg_rwd)/(std_rwd + 1.0e-7)
 
-    # Compute delta
-    def compute_delta(self, rwd, val, new_val):
+    
 
-        # Follow eq. (12) in PPO paper
-        delta = rwd + self.gamma*new_val - val
+    # Store buffers
+    def store_buffers(self, obs, act, rwd, val, dlt, tgt, adv):
 
-        return delta
+        # Append to global buffers
+        self.obs.append(obs)
+        self.act.append(act)
+        self.rwd.append(rwd)
+        self.val.append(val)
+        self.dlt.append(dlt)
+        self.tgt.append(tgt)
+        self.adv.append(adv)
 
     # Get actions from previous policy
     def get_old_actions(self, state):

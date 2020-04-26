@@ -95,15 +95,12 @@ def launch_training(env_name,
         # Handle value of last state
 
         print(done, buff_cnt)
-        if (    done): target_val = 0
-        if (not done): target_val = agent.get_value(obs)
+        if (    done): tgt_val = 0
+        if (not done): tgt_val = agent.get_value(obs)
 
-        # Compute target values using reversed reward buffer
-        rev_rwd = np.flip(buff_rwd)
-        for i in range(buff_size):
-            target_val  = rev_rwd[i] + gamma*target_val
-            buff_tgt[i] = target_val
-        buff_tgt = np.flip(buff_tgt)
+        # Compute targets
+        agent.compute_targets(tgt_val, buff_rwd, buff_tgt)
+        
 
         # Compute GAE using reversed delta buffer
         rev_dlt = np.flip(buff_dlt)
@@ -114,13 +111,10 @@ def launch_training(env_name,
         buff_adv = np.flip(buff_adv)
 
         # Store buffers
-        agent.obs.append(buff_obs)
-        agent.act.append(buff_act)
-        agent.rwd.append(buff_rwd)
-        agent.val.append(buff_val)
-        agent.dlt.append(buff_dlt)
-        agent.tgt.append(buff_tgt)
-        agent.adv.append(buff_adv)
+        agent.store_buffers(buff_obs, buff_act, buff_rwd,
+                            buff_val, buff_dlt, buff_tgt,
+                            buff_adv)
+        
 
             # Store a few things
             #agent.ep [episode] = episode
