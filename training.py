@@ -1,5 +1,7 @@
 # Generic imports
 import os
+import time
+import collections
 import numpy as np
 
 # Custom imports
@@ -15,40 +17,55 @@ def launch_training(actor, env_name,
 
     # Declare environement and agent
     env     = gym.make(env_name)
-    act_dim = env.action_space.shape
-    obs_dim = env.observation_space.shape
+    #env = gym.wrappers.Monitor(env, './vids/'+str(time.time())+'/')
+    act_dim = env.action_space.shape[0]
+    obs_dim = env.observation_space.shape[0]
 
-    if (actor == 'ppo'):
-        agent = ppo(act_dim, obs_dim, n_episodes, n_steps,
-                    learn_rate, buff_size, batch_size, n_epochs,
-                    clip, entropy, gamma, gae_lambda, update_alpha)
+    agent = ppo(act_dim, obs_dim, n_episodes, n_steps,
+                learn_rate, buff_size, batch_size, n_epochs,
+                clip, entropy, gamma, gae_lambda, update_alpha)
 
     # Initialize buffers
-    buff_obs = np.zeros(buff_size, obs_dim)
-    buff_act = np.zeros(buff_size, act_dim)
-    buff_rwd = np.zeros(buff_size)
-    buff_dlt = np.zeros(buff_size)
-    buff_val = np.zeros(buff_size)
-    buff_tgt = np.zeros(buff_size)
+    buff_obs = np.zeros((buff_size, obs_dim))
+    buff_act = np.zeros((buff_size, act_dim))
+    buff_rwd = np.zeros((buff_size))
+    buff_val = np.zeros((buff_size))
+    buff_dlt = np.zeros((buff_size))
+    buff_tgt = np.zeros((buff_size))
+    buff_adv = np.zeros((buff_size))
 
     # Initialize parameters
-    ep   = 0
+    ep   =-1
     done = True
 
     # Loop over episodes
     while (ep < n_episodes):
 
-        # Reset environment
+        # Reset buffer in any case
+        buff_cnt      = 0
+        buff_obs[:,:] = 0.0
+        buff_act[:,:] = 0.0
+        buff_rwd[:]   = 0.0
+        buff_val[:]   = 0.0
+        buff_dlt[:]   = 0.0
+        buff_tgt[:]   = 0.0
+        buff_adv[:]   = 0.0
+
+        # Reset other stuff if episode is done
         if done:
-            buff_cnt      = 0
             done          = False
             obs           = env.reset()
-            buff_obs[:,:] = 0.0
-            buff_act[:,:] = 0.0
-            buff_rwd[:]   = 0.0
-            buff_dlt[:]   = 0.0
-            buff_val[:]   = 0.0
-            buff_tgt[:]   = 0.0
+
+            # Printings
+            if (ep != -1):
+                #if ((ep % render_every) == 0):
+                #    env.render()
+                if (ep == n_episodes-1): end = '\n'
+                if (ep != n_episodes-1): end = '\r'
+                print('# Ep #'+str(ep)+', rwd_sum = '+str(rwd_sum))#,end=end)
+
+            ep     += 1
+            rwd_sum = 0.0
 
         # Loop while episode not over and buff not full
         while ((not done) and (buff_cnt < buff_size)):
@@ -60,12 +77,14 @@ def launch_training(actor, env_name,
             new_val               = agent.get_value(new_obs)
             dlt                   = agent.compute_delta(rwd, val, new_val)
 
+            rwd_sum += rwd
+
             # Store in buffers
             buff_obs[buff_cnt,:]  = obs
             buff_act[buff_cnt,:]  = act
             buff_rwd[buff_cnt]    = rwd
-            buff_dlt[buff_cnt]    = dlt
             buff_val[buff_cnt]    = val
+            buff_dlt[buff_cnt]    = dlt
 
             #agent.store_transition(obs, act, rwd, val, dlt)
 
@@ -74,17 +93,34 @@ def launch_training(actor, env_name,
             buff_cnt += 1
 
         # Handle value of last state
-        if (    terminal): target_val = 0
-        if (not terminal): target_val = agent.get_value(obs)
+
+        print(done, buff_cnt)
+        if (    done): target_val = 0
+        if (not done): target_val = agent.get_value(obs)
 
         # Compute target values using reversed reward buffer
-        rev_rwd = buff_rwd.reverse()
+        rev_rwd = np.flip(buff_rwd)
         for i in range(buff_size):
             target_val  = rev_rwd[i] + gamma*target_val
             buff_tgt[i] = target_val
-        buff_tgt.reverse()
+        buff_tgt = np.flip(buff_tgt)
 
+        # Compute GAE using reversed delta buffer
+        rev_dlt = np.flip(buff_dlt)
+        adv     = 0.0
+        for i in range(buff_size):
+            adv         = rev_dlt[i] + gamma*gae_lambda*adv
+            buff_adv[i] = adv
+        buff_adv = np.flip(buff_adv)
 
+        # Store buffers
+        agent.obs.append(buff_obs)
+        agent.act.append(buff_act)
+        agent.rwd.append(buff_rwd)
+        agent.val.append(buff_val)
+        agent.dlt.append(buff_dlt)
+        agent.tgt.append(buff_tgt)
+        agent.adv.append(buff_adv)
 
             # Store a few things
             #agent.ep [episode] = episode
@@ -104,13 +140,8 @@ def launch_training(actor, env_name,
         #agent.bst_cact[gen] = bst_cact
 
         # Train network after one generation
-        agent.compute_advantages()
-        agent.train_network()
-
-        # Printings
-        if (ep == n_episodes-1): end = '\n'
-        if (ep != n_episodes-1): end = '\r'
-        print('#   Episode #'+str(ep)+', rwd_sum = '+str(rwd_sum), end=end)
+        #agent.compute_advantages()
+        agent.train_network(buff_obs, buff_act, buff_adv, buff_tgt)
 
     # # Write to files
     # filename = 'database.opt.dat'

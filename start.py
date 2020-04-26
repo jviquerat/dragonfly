@@ -12,7 +12,7 @@ from training import *
 for i in range(n_avg):
     print('### Avg run #'+str(i))
     launch_training(actor, env_name,
-                    n_episodes, max_ep_steps, render_every,
+                    n_episodes, n_steps, render_every,
                     learn_rate, buff_size, batch_size, n_epochs,
                     clip, entropy, gamma, gae_lambda, update_alpha)
 

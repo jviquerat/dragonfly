@@ -2,7 +2,8 @@
 import os
 import gym
 import warnings
-import numpy as np
+import collections as cl
+import numpy       as np
 
 # Import tensorflow and filter warning messages
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '10'
@@ -52,14 +53,13 @@ class ppo:
 
         # Storing buffers
         self.idx      = 0
-
-        self.obs      = []
-        self.act      = []
-        self.rwd      = []
-        self.val      = []
-        self.dlt      = []
-        self.drw      = []
-        self.adv      = []
+        self.obs      = cl.deque()
+        self.act      = cl.deque()
+        self.rwd      = cl.deque()
+        self.val      = cl.deque()
+        self.dlt      = cl.deque()
+        self.tgt      = cl.deque()
+        self.adv      = cl.deque()
 
         # self.obs      = np.zeros((self.size, self.obs_dim), dtype=np.float32)
         # self.act      = np.zeros((self.size, self.act_dim), dtype=np.float32)
@@ -164,7 +164,7 @@ class ppo:
         init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(2,
+        dense     = tk.layers.Dense(16,
                                    activation         = 'relu',
                                    kernel_initializer = init_1)(obs)
         mu        = tk.layers.Dense(self.act_dim,
@@ -190,30 +190,29 @@ class ppo:
     def build_critic(self):
 
         # Input layers
-        obs     = tk.layers.Input(shape=(self.obs_dim,))
-        old_val = tk.layers.Input(shape=(1,),          )
+        obs     = tk.layers.Input(shape=(self.obs_dim,)  )
 
         # Use orthogonal layers initialization
         #init_1  = tk.initializers.Orthogonal(gain=0.5, seed=None)
         #init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(2,
-                                    activation         = 'relu')(obs)
+        dense     = tk.layers.Dense(16,
+                                    activation = 'relu')(obs)
         value     = tk.layers.Dense(1,
-                                    activation         = 'linear')(dense)
+                                    activation = 'relu')(dense)
 
         # Generate actor
-        critic    = tk.Model(inputs  = [obs, old_val],
+        critic    = tk.Model(inputs  = obs,
                              outputs = value)
         optimizer = tk.optimizers.Adam(lr = self.learn_rate)
-        crtic.compile(optimizer = optimizer,
-                      loss      = self.value_loss(old_val))
+        critic.compile(optimizer = optimizer,
+                      loss      = 'mean_squared_error')
 
         return critic
 
     # Copy new network weights to old one
-    def update_old_network(self):
+    def update_old_actor(self):
 
         # Actor
         actor_weights = self.actor.get_weights()
@@ -247,15 +246,15 @@ class ppo:
         state = state.reshape(1,self.obs_dim)
 
         # Predict value
-        val   = self.critic.predict([state,self.dummuy_adv])
+        val   = self.critic.predict(state)
 
         return val
 
     # Train networks
-    def train_network(self):
+    def train_network(self, obs, act, adv, tgt):
 
         # Get batch
-        obs, act, adv, mu, sig, drw, val = self.get_batch()
+        #obs, act, adv, mu, sig, drw, val = self.get_batch()
 
         # Compute old actions and values
         old_act = self.get_old_actions(obs)
@@ -265,8 +264,8 @@ class ppo:
                         y       = act,
                         epochs  = self.n_epochs,
                         verbose = 0)
-        self.critic.fit(x       = [obs, 
-                        y       = drw,
+        self.critic.fit(x       = obs,
+                        y       = tgt,
                         epochs  = self.n_epochs,
                         verbose = 0)
 
@@ -310,7 +309,7 @@ class ppo:
     def get_old_actions(self, state):
 
         # This is a batch of states, unlike in get_actions routine
-        state   = state.reshape(min(self.n_ind,len(state)), self.obs_dim)
+        state   = state.reshape(self.buff_size, self.obs_dim)
         outputs = self.old_actor.predict_on_batch([state,
                                                    self.dummy_adv,
                                                    self.dummy_pred])
