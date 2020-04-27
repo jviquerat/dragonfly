@@ -180,9 +180,9 @@ class ppo:
         dense     = tk.layers.Dense(16,
                                    activation         = 'tanh',
                                    kernel_initializer = init_1)(obs)
-        #dense     = tk.layers.Dense(16,
-        #                           activation         = 'tanh',
-        #                           kernel_initializer = init_1)(dense)
+        dense     = tk.layers.Dense(16,
+                                   activation         = 'tanh',
+                                   kernel_initializer = init_1)(dense)
         mu        = tk.layers.Dense(self.act_dim,
                                    activation         = 'softmax',
                                    kernel_initializer = init_2)(dense)
@@ -255,7 +255,11 @@ class ppo:
                 actions[i] = np.random.normal(loc=mu[i], scale=sig[i])
 
         if (self.alg_type == 'discrete'):
-            actions = np.random.choice(self.act_dim, p=outputs[0,:])
+            probs   = outputs[0,:]
+            #print(probs)
+            actions = np.random.multinomial(1, probs, size=1)
+            actions = np.argmax(actions)
+            #print(actions)
 
         return actions
 
