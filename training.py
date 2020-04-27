@@ -17,7 +17,7 @@ def launch_training(env_name,
 
     # Declare environement and agent
     env     = gym.make(env_name)
-    #env = gym.wrappers.Monitor(env, './vids/'+str(time.time())+'/')
+    env = gym.wrappers.Monitor(env, './vids/'+str(time.time())+'/')
     act_dim = env.action_space.shape[0]
     obs_dim = env.observation_space.shape[0]
 
@@ -71,10 +71,13 @@ def launch_training(env_name,
         while ((not done) and (buff_cnt < buff_size)):
 
             # Make one iteration
+            obs                   = np.clip(obs,-10,10)
             act, mu, sig          = agent.get_actions(obs)
             val                   = agent.get_value(obs)
             new_obs, rwd, done, _ = env.step(act)
+            new_obs               = np.clip(new_obs,-10,10)
             new_val               = agent.get_value(new_obs)
+            rwd                   = np.clip(rwd,-5,5)
             dlt                   = agent.compute_delta(rwd, val, new_val)
 
             rwd_sum += rwd
@@ -94,7 +97,7 @@ def launch_training(env_name,
         if (    done): tgt_val = 0
         if (not done): tgt_val = agent.get_value(obs)
 
-        # Compute targets and advantages
+        # Compute deltas, targets and advantages
         agent.compute_targets(tgt_val, buff_rwd, buff_tgt)
         agent.compute_advantages(buff_dlt, buff_adv)
 

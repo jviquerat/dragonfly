@@ -129,18 +129,21 @@ class ppo:
         old_act = tk.layers.Input(shape=(2*self.act_dim,))
 
         # Use orthogonal layers initialization
-        init_1  = tk.initializers.Orthogonal(gain=0.5, seed=None)
-        init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+        init_1  = tk.initializers.Orthogonal(gain=1.0, seed=None)
+        init_2  = tk.initializers.Orthogonal(gain=1.0, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(64,
-                                   activation         = 'relu',
+        dense     = tk.layers.Dense(16,
+                                   activation         = 'tanh',
                                    kernel_initializer = init_1)(obs)
+        #dense     = tk.layers.Dense(16,
+        #                           activation         = 'tanh',
+        #                           kernel_initializer = init_1)(dense)
         mu        = tk.layers.Dense(self.act_dim,
-                                   activation         = 'linear',
+                                   activation         = 'tanh',
                                    kernel_initializer = init_2)(dense)
         sig       = tk.layers.Dense(self.act_dim,
-                                   activation         = 'softplus',
+                                   activation         = 'sigmoid',
                                    kernel_initializer = init_2)(dense)
 
         # Concatenate outputs
@@ -162,13 +165,16 @@ class ppo:
         obs     = tk.layers.Input(shape=(self.obs_dim,)  )
 
         # Use orthogonal layers initialization
-        init_1  = tk.initializers.Orthogonal(gain=0.5, seed=None)
-        init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+        init_1  = tk.initializers.Orthogonal(gain=1.0, seed=None)
+        init_2  = tk.initializers.Orthogonal(gain=1.0, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(64,
-                                    activation = 'relu',
+        dense     = tk.layers.Dense(16,
+                                    activation = 'tanh',
                                     kernel_initializer = init_1)(obs)
+        #dense     = tk.layers.Dense(16,
+        #                           activation         = 'tanh',
+        #                           kernel_initializer = init_1)(dense)
         value     = tk.layers.Dense(1,
                                     activation = 'relu',
                                     kernel_initializer = init_1)(dense)
@@ -224,9 +230,6 @@ class ppo:
     # Train networks
     def train_network(self, obs, act, adv, tgt):
 
-        # Get batch
-        #obs, act, adv, mu, sig, drw, val = self.get_batch()
-
         # Compute old actions and values
         old_act = self.get_old_actions(obs)
 
@@ -235,11 +238,13 @@ class ppo:
                         y          = act,
                         epochs     = self.n_epochs,
                         batch_size = self.batch_size,
+                        shuffle    = True,
                         verbose    = 0)
         self.critic.fit(x          = obs,
                         y          = tgt,
                         epochs     = self.n_epochs,
                         batch_size = self.batch_size,
+                        shuffle    = True,
                         verbose    = 0)
 
         # Update old actor
@@ -279,6 +284,8 @@ class ppo:
             buff_adv[i] = adv
 
         buff_adv[:] = np.flip(buff_adv)[:]
+
+        buff_adv = (buff_adv - np.mean(buff_adv))/np.std(buff_adv)
 
     # Store buffers
     def store_buffers(self, obs, act, rwd, val, dlt, tgt, adv):
