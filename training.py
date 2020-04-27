@@ -17,9 +17,9 @@ def launch_training(env_name,
 
     # Declare environement and agent
     env     = gym.make(env_name)
-    #env     = gym.wrappers.Monitor(env,
-    #                               './vids/'+str(time.time())+'/',
-    #                               video_callable=lambda episode_id: episode_id%10==0)
+    env     = gym.wrappers.Monitor(env,
+                                   './vids/'+str(time.time())+'/',
+                                   video_callable=lambda episode_id: episode_id%10==0)
     act_dim = env.action_space.shape[0]
     obs_dim = env.observation_space.shape[0]
 
@@ -57,14 +57,12 @@ def launch_training(env_name,
             new_obs               = np.clip(new_obs,-10,10)
             new_val               = agent.get_value(new_obs)
             rwd                   = np.clip(rwd,-5,5)
-            #dlt                   = agent.compute_delta(rwd, val, new_val)
 
             # Store in buffers
             buff_obs[buff_cnt,:] = obs
             buff_act[buff_cnt,:] = act
             buff_rwd[buff_cnt]   = rwd
             buff_val[buff_cnt]   = val
-            #buff_dlt[buff_cnt]   = dlt
             buff_msk[buff_cnt]   = float(not done)
 
             # Update observation and buffer counter
@@ -79,8 +77,6 @@ def launch_training(env_name,
                 # Compute deltas, targets and advantages
                 agent.compute_dlt_tgt_adv(buff_rwd, buff_tgt, buff_dlt,
                                           buff_adv, buff_val, buff_msk)
-                #agent.compute_targets   (buff_rwd, buff_tgt, buff_trm)
-                #agent.compute_advantages(buff_dlt, buff_adv, buff_trm)
 
                 # Store buffers
                 agent.store_buffers(buff_obs, buff_act, buff_rwd,

@@ -21,7 +21,7 @@ n_epochs     = 10           # Nb of epochs for training
 buff_size    = 1*batch_size # Size of buffer for training
 
 clip         = 0.2
-entropy      = 0.0
-gamma        = 0.99
-gae_lambda   = 0.95
+entropy      = 0.01
+gamma        = 0.9
+gae_lambda   = 0.9
 update_alpha = 0.90

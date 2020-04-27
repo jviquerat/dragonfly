@@ -129,8 +129,8 @@ class ppo:
         old_act = tk.layers.Input(shape=(2*self.act_dim,))
 
         # Use orthogonal layers initialization
-        init_1  = tk.initializers.Orthogonal(gain=1.0, seed=None)
-        init_2  = tk.initializers.Orthogonal(gain=1.0, seed=None)
+        init_1  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+        init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
         dense     = tk.layers.Dense(16,
@@ -165,8 +165,8 @@ class ppo:
         obs     = tk.layers.Input(shape=(self.obs_dim,)  )
 
         # Use orthogonal layers initialization
-        init_1  = tk.initializers.Orthogonal(gain=1.0, seed=None)
-        init_2  = tk.initializers.Orthogonal(gain=1.0, seed=None)
+        init_1  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+        init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
         dense     = tk.layers.Dense(16,
@@ -250,14 +250,6 @@ class ppo:
         # Update old actor
         self.update_old_actor()
 
-    # Compute delta
-    # def compute_delta(self, rwd, val, new_val):
-
-    #     # Follow eq. (12) in PPO paper
-    #     delta = rwd + self.gamma*new_val - val
-
-    #     return delta
-
     # Compute deltas, targets and advantages
     def compute_dlt_tgt_adv(self, buff_rwd, buff_tgt,
                                   buff_dlt, buff_adv,
@@ -293,73 +285,6 @@ class ppo:
 
         # Normalize advantages
         buff_adv[:] = (buff_adv[:] - np.mean(buff_adv))/np.std(buff_adv)
-
-        # Flip buffers
-        #rev_rwd    = buff_rwd.copy()
-        #rev_rwd[:] = np.flip(rev_rwd)[:]
-
-        #rev_dlt    = buff_dlt.copy()
-        #rev_dlt[:] = np.flip(rev_dlt)[:]        
-
-
-        #rev_trm    = buff_trm.copy()
-        #rev_trm[:] = np.flip(rev_trm)[:]
-
-        # Compute target values using reversed reward buffer
-        
-        # tgt        = 0.0
-
-        # for i in range(self.buff_size):
-        #     # If this is terminal state, restart counting from 0
-        #     if (rev_trm[i]): tgt = 0.0
-
-        #     tgt         = rev_rwd[i] + self.gamma*tgt
-        #     buff_tgt[i] = tgt
-
-        # buff_tgt[:] = np.flip(buff_tgt)[:]
-
-
-
-
-    # def compute_targets(self, buff_rwd, buff_tgt, buff_trm):
-
-    #     # Compute target values using reversed reward buffer
-    #     rev_rwd    = buff_rwd.copy()
-    #     rev_rwd[:] = np.flip(rev_rwd)[:]
-    #     rev_trm    = buff_trm.copy()
-    #     rev_trm[:] = np.flip(rev_trm)[:]
-    #     tgt        = 0.0
-
-    #     for i in range(self.buff_size):
-    #         # If this is terminal state, restart counting from 0
-    #         if (rev_trm[i]): tgt = 0.0
-
-    #         tgt         = rev_rwd[i] + self.gamma*tgt
-    #         buff_tgt[i] = tgt
-
-    #     buff_tgt[:] = np.flip(buff_tgt)[:]
-
-    # # Compute advantages
-    # def compute_advantages(self, buff_dlt, buff_adv, buff_trm):
-
-    #     # Compute GAE using reversed delta buffer
-    #     rev_dlt    = buff_dlt.copy()
-    #     rev_dlt[:] = np.flip(rev_dlt)[:]
-    #     rev_trm    = buff_trm.copy()
-    #     rev_trm[:] = np.flip(rev_trm)[:]
-    #     adv        = 0.0
-
-    #     for i in range(self.buff_size):
-    #         # If this is terminal state, restart counting from 0
-    #         if (rev_trm[i]): adv = 0.0
-
-    #         adv         = rev_dlt[i] + self.gamma*self.gae_lambda*adv
-    #         buff_adv[i] = adv
-
-    #     buff_adv[:] = np.flip(buff_adv)[:]
-
-    #     # Normalize
-    #     buff_adv = (buff_adv - np.mean(buff_adv))/np.std(buff_adv)
 
     # Store buffers
     def store_buffers(self, obs, act, rwd, val, dlt, tgt, adv):
