@@ -35,7 +35,7 @@ def launch_training(env_name,
     buff_dlt = np.zeros((buff_size))
     buff_tgt = np.zeros((buff_size))
     buff_adv = np.zeros((buff_size))
-    buff_trm = np.zeros((buff_size), dtype=bool)
+    buff_msk = np.ones ((buff_size))
 
     # Loop over episodes
     for ep in range(n_episodes):
@@ -52,21 +52,20 @@ def launch_training(env_name,
             # Make one iteration
             obs                   = np.clip(obs,-10,10)
             act, mu, sig          = agent.get_actions(obs)
-            print(act)
             val                   = agent.get_value(obs)
             new_obs, rwd, done, _ = env.step(act)
             new_obs               = np.clip(new_obs,-10,10)
             new_val               = agent.get_value(new_obs)
             rwd                   = np.clip(rwd,-5,5)
-            dlt                   = agent.compute_delta(rwd, val, new_val)
+            #dlt                   = agent.compute_delta(rwd, val, new_val)
 
             # Store in buffers
             buff_obs[buff_cnt,:] = obs
             buff_act[buff_cnt,:] = act
             buff_rwd[buff_cnt]   = rwd
             buff_val[buff_cnt]   = val
-            buff_dlt[buff_cnt]   = dlt
-            buff_trm[buff_cnt]   = done
+            #buff_dlt[buff_cnt]   = dlt
+            buff_msk[buff_cnt]   = float(not done)
 
             # Update observation and buffer counter
             obs       = new_obs
@@ -78,8 +77,10 @@ def launch_training(env_name,
             if (buff_cnt == buff_size):
 
                 # Compute deltas, targets and advantages
-                agent.compute_targets   (buff_rwd, buff_tgt, buff_trm)
-                agent.compute_advantages(buff_dlt, buff_adv, buff_trm)
+                agent.compute_dlt_tgt_adv(buff_rwd, buff_tgt, buff_dlt,
+                                          buff_adv, buff_val, buff_msk)
+                #agent.compute_targets   (buff_rwd, buff_tgt, buff_trm)
+                #agent.compute_advantages(buff_dlt, buff_adv, buff_trm)
 
                 # Store buffers
                 agent.store_buffers(buff_obs, buff_act, buff_rwd,
@@ -98,7 +99,7 @@ def launch_training(env_name,
                 buff_dlt[:]   = 0.0
                 buff_tgt[:]   = 0.0
                 buff_adv[:]   = 0.0
-                buff_trm[:]   = False
+                buff_msk[:]   = 1.0
 
             # Check if episode is over
             if (done):

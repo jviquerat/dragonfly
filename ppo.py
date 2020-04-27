@@ -251,53 +251,112 @@ class ppo:
         self.update_old_actor()
 
     # Compute delta
-    def compute_delta(self, rwd, val, new_val):
+    # def compute_delta(self, rwd, val, new_val):
 
-        # Follow eq. (12) in PPO paper
-        delta = rwd + self.gamma*new_val - val
+    #     # Follow eq. (12) in PPO paper
+    #     delta = rwd + self.gamma*new_val - val
 
-        return delta
+    #     return delta
 
-    # Compute targets
-    def compute_targets(self, buff_rwd, buff_tgt, buff_trm):
+    # Compute deltas, targets and advantages
+    def compute_dlt_tgt_adv(self, buff_rwd, buff_tgt,
+                                  buff_dlt, buff_adv,
+                                  buff_val, buff_msk):
+
+        prev_tgt = 0.0
+        prev_val = 0.0
+        prev_adv = 0.0
+        coeff    = self.gamma*self.gae_lambda
+
+        # Loop from the end of the buffer
+        for i in reversed(range(self.buff_size)):
+
+            # Get local variables
+            # Mask is 0 when current state is the end of a trajectory
+            rwd = buff_rwd[i]
+            msk = buff_msk[i]
+            val = buff_val[i]
+
+            # V(s_t) = r_t + gamma*V(s_t+1)
+            buff_tgt[i] = rwd + self.gamma*prev_tgt*msk
+
+            # delta(s_t) = r_t + gamma*V(s_t+1) - V(s_t)
+            buff_dlt[i] = rwd + self.gamma*prev_val*msk - val
+
+            # A(s_t, a_t) = delta(s_t) + gamma*lamda*A(s_t+1, a_t+1)
+            buff_adv[i] = buff_dlt[i] + coeff*prev_adv*msk
+
+            # Update variables
+            prev_tgt = buff_tgt[i]
+            prev_val = val
+            prev_adv = buff_adv[i]
+
+        # Flip buffers
+        #rev_rwd    = buff_rwd.copy()
+        #rev_rwd[:] = np.flip(rev_rwd)[:]
+
+        #rev_dlt    = buff_dlt.copy()
+        #rev_dlt[:] = np.flip(rev_dlt)[:]        
+
+
+        #rev_trm    = buff_trm.copy()
+        #rev_trm[:] = np.flip(rev_trm)[:]
 
         # Compute target values using reversed reward buffer
-        rev_rwd    = buff_rwd.copy()
-        rev_rwd[:] = np.flip(rev_rwd)[:]
-        rev_trm    = buff_trm.copy()
-        rev_trm[:] = np.flip(rev_trm)[:]
-        tgt        = 0.0
+        
+        # tgt        = 0.0
 
-        for i in range(self.buff_size):
-            # If this is terminal state, restart counting from 0
-            if (rev_trm[i]): tgt = 0.0
+        # for i in range(self.buff_size):
+        #     # If this is terminal state, restart counting from 0
+        #     if (rev_trm[i]): tgt = 0.0
 
-            tgt         = rev_rwd[i] + self.gamma*tgt
-            buff_tgt[i] = tgt
+        #     tgt         = rev_rwd[i] + self.gamma*tgt
+        #     buff_tgt[i] = tgt
 
-        buff_tgt[:] = np.flip(buff_tgt)[:]
+        # buff_tgt[:] = np.flip(buff_tgt)[:]
 
-    # Compute advantages
-    def compute_advantages(self, buff_dlt, buff_adv, buff_trm):
 
-        # Compute GAE using reversed delta buffer
-        rev_dlt    = buff_dlt.copy()
-        rev_dlt[:] = np.flip(rev_dlt)[:]
-        rev_trm    = buff_trm.copy()
-        rev_trm[:] = np.flip(rev_trm)[:]
-        adv        = 0.0
 
-        for i in range(self.buff_size):
-            # If this is terminal state, restart counting from 0
-            if (rev_trm[i]): adv = 0.0
 
-            adv         = rev_dlt[i] + self.gamma*self.gae_lambda*adv
-            buff_adv[i] = adv
+    # def compute_targets(self, buff_rwd, buff_tgt, buff_trm):
 
-        buff_adv[:] = np.flip(buff_adv)[:]
+    #     # Compute target values using reversed reward buffer
+    #     rev_rwd    = buff_rwd.copy()
+    #     rev_rwd[:] = np.flip(rev_rwd)[:]
+    #     rev_trm    = buff_trm.copy()
+    #     rev_trm[:] = np.flip(rev_trm)[:]
+    #     tgt        = 0.0
 
-        # Normalize
-        buff_adv = (buff_adv - np.mean(buff_adv))/np.std(buff_adv)
+    #     for i in range(self.buff_size):
+    #         # If this is terminal state, restart counting from 0
+    #         if (rev_trm[i]): tgt = 0.0
+
+    #         tgt         = rev_rwd[i] + self.gamma*tgt
+    #         buff_tgt[i] = tgt
+
+    #     buff_tgt[:] = np.flip(buff_tgt)[:]
+
+    # # Compute advantages
+    # def compute_advantages(self, buff_dlt, buff_adv, buff_trm):
+
+    #     # Compute GAE using reversed delta buffer
+    #     rev_dlt    = buff_dlt.copy()
+    #     rev_dlt[:] = np.flip(rev_dlt)[:]
+    #     rev_trm    = buff_trm.copy()
+    #     rev_trm[:] = np.flip(rev_trm)[:]
+    #     adv        = 0.0
+
+    #     for i in range(self.buff_size):
+    #         # If this is terminal state, restart counting from 0
+    #         if (rev_trm[i]): adv = 0.0
+
+    #         adv         = rev_dlt[i] + self.gamma*self.gae_lambda*adv
+    #         buff_adv[i] = adv
+
+    #     buff_adv[:] = np.flip(buff_adv)[:]
+
+    #     # Normalize
+    #     buff_adv = (buff_adv - np.mean(buff_adv))/np.std(buff_adv)
 
     # Store buffers
     def store_buffers(self, obs, act, rwd, val, dlt, tgt, adv):
