@@ -176,7 +176,7 @@ class ppo:
         #                           activation         = 'tanh',
         #                           kernel_initializer = init_1)(dense)
         value     = tk.layers.Dense(1,
-                                    activation = 'relu',
+                                    activation = 'linear',
                                     kernel_initializer = init_1)(dense)
 
         # Generate actor
@@ -228,7 +228,7 @@ class ppo:
         return val
 
     # Train networks
-    def train_network(self, obs, act, adv, tgt):
+    def train_networks(self, obs, act, adv, tgt):
 
         # Compute old actions and values
         old_act = self.get_old_actions(obs)
@@ -259,32 +259,44 @@ class ppo:
         return delta
 
     # Compute targets
-    def compute_targets(self, tgt_val, buff_rwd, buff_tgt):
+    def compute_targets(self, buff_rwd, buff_tgt, buff_trm):
 
         # Compute target values using reversed reward buffer
         rev_rwd    = buff_rwd.copy()
         rev_rwd[:] = np.flip(rev_rwd)[:]
+        rev_trm    = buff_trm.copy()
+        rev_trm[:] = np.flip(rev_trm)[:]
+        tgt        = 0.0
 
         for i in range(self.buff_size):
-            tgt_val     = rev_rwd[i] + self.gamma*tgt_val
-            buff_tgt[i] = tgt_val
+            # If this is terminal state, restart counting from 0
+            if (rev_trm[i]): tgt = 0.0
+
+            tgt         = rev_rwd[i] + self.gamma*tgt
+            buff_tgt[i] = tgt
 
         buff_tgt[:] = np.flip(buff_tgt)[:]
 
     # Compute advantages
-    def compute_advantages(self, buff_dlt, buff_adv):
+    def compute_advantages(self, buff_dlt, buff_adv, buff_trm):
 
         # Compute GAE using reversed delta buffer
         rev_dlt    = buff_dlt.copy()
         rev_dlt[:] = np.flip(rev_dlt)[:]
+        rev_trm    = buff_trm.copy()
+        rev_trm[:] = np.flip(rev_trm)[:]
         adv        = 0.0
 
         for i in range(self.buff_size):
+            # If this is terminal state, restart counting from 0
+            if (rev_trm[i]): adv = 0.0
+
             adv         = rev_dlt[i] + self.gamma*self.gae_lambda*adv
             buff_adv[i] = adv
 
         buff_adv[:] = np.flip(buff_adv)[:]
 
+        # Normalize
         buff_adv = (buff_adv - np.mean(buff_adv))/np.std(buff_adv)
 
     # Store buffers

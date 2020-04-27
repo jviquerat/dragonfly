@@ -33,42 +33,19 @@ def launch_training(env_name,
     buff_dlt = np.zeros((buff_size))
     buff_tgt = np.zeros((buff_size))
     buff_adv = np.zeros((buff_size))
-
-    # Initialize parameters
-    ep   =-1
-    done = True
+    buff_trm = np.zeros((buff_size), dtype=bool)
 
     # Loop over episodes
-    while (ep < n_episodes):
+    for ep in range(n_episodes):
 
-        # Reset buffer in any case
-        buff_cnt      = 0
-        buff_obs[:,:] = 0.0
-        buff_act[:,:] = 0.0
-        buff_rwd[:]   = 0.0
-        buff_val[:]   = 0.0
-        buff_dlt[:]   = 0.0
-        buff_tgt[:]   = 0.0
-        buff_adv[:]   = 0.0
+        # Reset env
+        ep_rwd   = 0.0
+        ep_lgt   = 0
+        obs      = env.reset()
+        buff_cnt = 0
 
-        # Reset other stuff if episode is done
-        if done:
-            done = False
-            obs  = env.reset()
-
-            # Printings
-            if (ep != -1):
-                #if ((ep % render_every) == 0):
-                #    env.render()
-                if (ep == n_episodes-1): end = '\n'
-                if (ep != n_episodes-1): end = '\r'
-                print('# Ep #'+str(ep)+', rwd_sum = '+str(rwd_sum))#,end=end)
-
-            ep     += 1
-            rwd_sum = 0.0
-
-        # Loop while episode not over and buff not full
-        while ((not done) and (buff_cnt < buff_size)):
+        # Loop over buff size
+        for step in range(n_steps):
 
             # Make one iteration
             obs                   = np.clip(obs,-10,10)
@@ -80,72 +57,56 @@ def launch_training(env_name,
             rwd                   = np.clip(rwd,-5,5)
             dlt                   = agent.compute_delta(rwd, val, new_val)
 
-            rwd_sum += rwd
-
             # Store in buffers
             buff_obs[buff_cnt,:] = obs
             buff_act[buff_cnt,:] = act
             buff_rwd[buff_cnt]   = rwd
             buff_val[buff_cnt]   = val
             buff_dlt[buff_cnt]   = dlt
+            buff_trm[buff_cnt]   = done
 
             # Update observation and buffer counter
             obs       = new_obs
+            ep_rwd   += rwd
+            ep_lgt   += 1
             buff_cnt += 1
 
-        # Handle value of last state
-        if (    done): tgt_val = 0
-        if (not done): tgt_val = agent.get_value(obs)
+            # Check if it is time for training
+            if (buff_cnt == buff_size):
+                ## Handle value of last state
+                #if (    done): tgt_val = 0
+                #if (not done): tgt_val = agent.get_value(obs)
 
-        # Compute deltas, targets and advantages
-        agent.compute_targets(tgt_val, buff_rwd, buff_tgt)
-        agent.compute_advantages(buff_dlt, buff_adv)
+                # Compute deltas, targets and advantages
+                agent.compute_targets   (buff_rwd, buff_tgt, buff_trm)
+                agent.compute_advantages(buff_dlt, buff_adv, buff_trm)
 
-        #rev_dlt = np.flip(buff_dlt)
-        #adv     = 0.0
-        #for i in range(buff_size):
-        #    adv         = rev_dlt[i] + gamma*gae_lambda*adv
-        #    buff_adv[i] = adv
-        #buff_adv = np.flip(buff_adv)
+                # Store buffers
+                agent.store_buffers(buff_obs, buff_act, buff_rwd,
+                                    buff_val, buff_dlt, buff_tgt,
+                                    buff_adv)
 
-        # Store buffers
-        agent.store_buffers(buff_obs, buff_act, buff_rwd,
-                            buff_val, buff_dlt, buff_tgt,
-                            buff_adv)
+                # Train networks
+                agent.train_networks(buff_obs, buff_act, buff_adv, buff_tgt)
 
-            # Store a few things
-            #agent.ep [episode] = episode
-            #agent.gen[episode] = gen
+                # Reset buffers
+                buff_cnt      = 0
+                buff_obs[:,:] = 0.0
+                buff_act[:,:] = 0.0
+                buff_rwd[:]   = 0.0
+                buff_val[:]   = 0.0
+                buff_dlt[:]   = 0.0
+                buff_tgt[:]   = 0.0
+                buff_adv[:]   = 0.0
+                buff_trm[:]   = False
 
-            #if (rwd > bst_rwd):
-            #    bst_rwd  = rwd
-            #    bst_cact = cact
+            # Check if episode is over
+            if (done):
+                # Printings
+                #if ((ep % render_every) == 0):
+                 #   env.render()
+                if (ep == n_episodes-1): end = '\n'
+                if (ep != n_episodes-1): end = '\r'
+                print('# Ep #'+str(ep)+', ep_rwd = '+str(ep_rwd))#,end=end)
 
-            # Update global index
-            #episode += 1
-
-        # Store a few things
-        #agent.bst_gen [gen] = gen
-        #agent.bst_ep  [gen] = episode
-        #agent.bst_rwd [gen] = bst_rwd
-        #agent.bst_cact[gen] = bst_cact
-
-        # Train network after one generation
-        #agent.compute_advantages()
-        agent.train_network(buff_obs, buff_act, buff_adv, buff_tgt)
-
-    # # Write to files
-    # filename = 'database.opt.dat'
-    # np.savetxt(filename, np.transpose([agent.gen,
-    #                                    agent.ep,
-    #                                    agent.cact[:,0],
-    #                                    agent.cact[:,1],
-    #                                    agent.rwd*(-1.0),
-    #                                    np.zeros(n_gen*n_ind)]))
-
-    # filename = 'optimisation.dat'
-    # np.savetxt(filename, np.transpose([agent.bst_gen+1,
-    #                                    agent.bst_ep,
-    #                                    agent.bst_cact[:,0],
-    #                                    agent.bst_cact[:,1],
-    #                                    agent.bst_rwd*(-1.0)]))
+                break
