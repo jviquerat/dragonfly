@@ -86,15 +86,13 @@ class ppo:
             # Compute loss
             ratio      = new_prob/old_prob
             surrogate1 = ratio*adv
-
-            clip_ratio = kb.clip(ratio,
-                                 min_value = 1.0 - self.clip,
-                                 max_value = 1.0 + self.clip)
+            clip_ratio = kb.clip(ratio, 1.0-self.clip, 1.0+self.clip)
             surrogate2 = clip_ratio*adv
             loss_actor =-kb.mean(kb.minimum(surrogate1, surrogate2))
 
             # Compute entropy loss
-            loss_entropy = kb.mean((-kb.log(2.0*np.pi*new_var)+1.0)/2.0)
+            #loss_entropy = kb.mean((-kb.log(2.0*np.pi*new_var)+1.0)/2.0)
+            loss_entropy = kb.mean(-new_prob*kb.log(new_prob))
 
             # Total loss
             return loss_actor + self.entropy*loss_entropy
@@ -127,8 +125,8 @@ class ppo:
         old_act = tk.layers.Input(shape=(2*self.act_dim,))
 
         # Use orthogonal layers initialization
-        init_1  = tk.initializers.Orthogonal(gain=0.1, seed=None)
-        init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+        init_1  = tk.initializers.Orthogonal(gain=1.0, seed=None)
+        init_2  = tk.initializers.Orthogonal(gain=1.0, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
         dense     = tk.layers.Dense(16,
@@ -167,8 +165,8 @@ class ppo:
         old_act = tk.layers.Input(shape=(2*self.act_dim,))
 
         # Use orthogonal layers initialization
-        init_1  = tk.initializers.Orthogonal(gain=0.1, seed=None)
-        init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+        init_1  = tk.initializers.Orthogonal(gain=1.0, seed=None)
+        init_2  = tk.initializers.Orthogonal(gain=1.0, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
         dense     = tk.layers.Dense(16,
