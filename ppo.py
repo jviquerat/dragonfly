@@ -291,6 +291,9 @@ class ppo:
             prev_val = val
             prev_adv = buff_adv[i]
 
+        # Normalize advantages
+        buff_adv[:] = (buff_adv[:] - np.mean(buff_adv))/np.std(buff_adv)
+
         # Flip buffers
         #rev_rwd    = buff_rwd.copy()
         #rev_rwd[:] = np.flip(rev_rwd)[:]
