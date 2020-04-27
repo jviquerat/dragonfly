@@ -37,6 +37,7 @@ def launch_training(env_name, alg_type,
     buff_tgt = np.zeros((buff_size))
     buff_adv = np.zeros((buff_size))
     buff_msk = np.ones ((buff_size))
+    buff_cnt = 0
 
     # Loop over episodes
     for ep in range(n_episodes):
@@ -45,7 +46,6 @@ def launch_training(env_name, alg_type,
         ep_rwd   = 0.0
         ep_lgt   = 0
         obs      = env.reset()
-        buff_cnt = 0
 
         # Loop over buff size
         for step in range(n_steps):
@@ -54,7 +54,7 @@ def launch_training(env_name, alg_type,
             #obs                   = np.clip(obs,-10,10)
             act                   = agent.get_actions(obs)
             val                   = agent.get_value(obs)
-            new_obs, rwd, done, _ = env.step(act)
+            new_obs, rwd, done, _ = env.step(np.argmax(act))
             #new_obs               = np.clip(new_obs,-10,10)
             new_val               = agent.get_value(new_obs)
             #rwd                   = np.clip(rwd,-5,5)

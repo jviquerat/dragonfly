@@ -258,7 +258,7 @@ class ppo:
             probs   = outputs[0,:]
             #print(probs)
             actions = np.random.multinomial(1, probs, size=1)
-            actions = np.argmax(actions)
+            #actions = np.argmax(actions)
             #print(actions)
 
         return actions
