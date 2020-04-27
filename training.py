@@ -17,9 +17,9 @@ def launch_training(env_name,
 
     # Declare environement and agent
     env     = gym.make(env_name)
-    env     = gym.wrappers.Monitor(env,
-                                   './vids/'+str(time.time())+'/',
-                                   video_callable=lambda episode_id: episode_id%10==0)
+    #env     = gym.wrappers.Monitor(env,
+    #                               './vids/'+str(time.time())+'/',
+    #                               video_callable=lambda episode_id: episode_id%10==0)
     act_dim = env.action_space.shape[0]
     obs_dim = env.observation_space.shape[0]
 
@@ -50,13 +50,13 @@ def launch_training(env_name,
         for step in range(n_steps):
 
             # Make one iteration
-            obs                   = np.clip(obs,-10,10)
+            #obs                   = np.clip(obs,-10,10)
             act, mu, sig          = agent.get_actions(obs)
             val                   = agent.get_value(obs)
             new_obs, rwd, done, _ = env.step(act)
-            new_obs               = np.clip(new_obs,-10,10)
+            #new_obs               = np.clip(new_obs,-10,10)
             new_val               = agent.get_value(new_obs)
-            rwd                   = np.clip(rwd,-5,5)
+            #rwd                   = np.clip(rwd,-5,5)
 
             # Store in buffers
             buff_obs[buff_cnt,:] = obs
