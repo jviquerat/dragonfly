@@ -20,7 +20,8 @@ def launch_training(env_name, alg_type,
     #env     = gym.wrappers.Monitor(env,
     #                               './vids/'+str(time.time())+'/',
     #                               video_callable=lambda episode_id: episode_id%10==0)
-    act_dim = env.action_space.shape[0]
+    print(env.action_space.shape)
+    act_dim = env.action_space.n
     obs_dim = env.observation_space.shape[0]
 
     agent = ppo(alg_type, act_dim, obs_dim, n_episodes,
@@ -51,7 +52,7 @@ def launch_training(env_name, alg_type,
 
             # Make one iteration
             #obs                   = np.clip(obs,-10,10)
-            act, mu, sig          = agent.get_actions(obs)
+            act                   = agent.get_actions(obs)
             val                   = agent.get_value(obs)
             new_obs, rwd, done, _ = env.step(act)
             #new_obs               = np.clip(new_obs,-10,10)

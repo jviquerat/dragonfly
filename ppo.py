@@ -52,7 +52,10 @@ class ppo:
 
         # Generate dummy inputs for custom loss
         self.dummy_adv  = np.zeros((1, 1))
-        self.dummy_pred = np.zeros((1, 2*self.act_dim))
+        if (self.alg_type == 'continuous'):
+            self.dummy_pred = np.zeros((1, 2*self.act_dim))
+        if (self.alg_type == 'discrete'):
+            self.dummy_pred = np.zeros((1,   self.act_dim))
 
         # Storing buffers
         self.obs = cl.deque()
@@ -63,7 +66,7 @@ class ppo:
         self.tgt = cl.deque()
         self.adv = cl.deque()
 
-    # Continuous_policy loss
+    # Continuous policy loss
     def continuous_policy_loss(self, adv, old_act):
         def loss(y_true, y_pred):
 
@@ -84,7 +87,7 @@ class ppo:
             old_prob /= old_den
 
             # Compute loss
-            ratio      = new_prob/old_prob
+            ratio      = new_prob/(old_prob + kb.epsilon())
             surrogate1 = ratio*adv
             clip_ratio = kb.clip(ratio, 1.0-self.clip, 1.0+self.clip)
             surrogate2 = clip_ratio*adv
@@ -92,26 +95,31 @@ class ppo:
 
             # Compute entropy loss
             #loss_entropy = kb.mean((-kb.log(2.0*np.pi*new_var)+1.0)/2.0)
-            loss_entropy = kb.mean(-new_prob*kb.log(new_prob))
+            loss_entropy = kb.mean(new_prob*kb.log(new_prob + kb.epsilon()))
 
             # Total loss
             return loss_actor + self.entropy*loss_entropy
         return loss
 
-    # Value loss
-    def value_loss(self, old_val):
+    # Discrete policy loss
+    def discrete_policy_loss(self, adv, old_act):
         def loss(y_true, y_pred):
 
-            # Baseline mse
-            surrogate1 = kb.square(y_pred - y_true)
+            new_prob = kb.sum(y_true*y_pred,  axis=-1)
+            old_prob = kb.sum(y_true*old_act, axis=-1)
+            ratio    = new_prob/(old_prob + kb.epsilon())
 
-            # Compute actor loss following Schulman
-            clip_val   = kb.clip(y_pred,
-                                 min_value = old_val - self.clip,
-                                 max_value = old_val + self.clip)
-            surrogate2 = kb.square(clip_val - y_true)
+            surrogate1 = ratio*adv
+            clip_ratio = kb.clip(ratio, 1.0-self.clip, 1.0+self.clip)
+            surrogate2 = clip_ratio*adv
+            loss_actor =-kb.mean(kb.minimum(surrogate1, surrogate2))
 
-            return kb.mean(kb.minimum(surrogate1, surrogate2))
+            # Compute entropy loss
+            #loss_entropy = kb.mean((-kb.log(2.0*np.pi*new_var)+1.0)/2.0)
+            loss_entropy = kb.mean(new_prob*kb.log(new_prob + kb.epsilon()))
+
+            # Total loss
+            return loss_actor + self.entropy*loss_entropy
         return loss
 
     # Build continuous actor network using keras
@@ -162,7 +170,7 @@ class ppo:
         # Advantage and old_action are only used in custom loss
         obs     = tk.layers.Input(shape=(self.obs_dim,)  )
         adv     = tk.layers.Input(shape=(1,),            )
-        old_act = tk.layers.Input(shape=(2*self.act_dim,))
+        old_act = tk.layers.Input(shape=(self.act_dim,))
 
         # Use orthogonal layers initialization
         init_1  = tk.initializers.Orthogonal(gain=1.0, seed=None)
@@ -235,16 +243,21 @@ class ppo:
         # The two last parameters are dummy arguments: they are
         # only required for the custom loss used for training
         outputs = self.actor.predict([state,self.dummy_adv,self.dummy_pred])
-        mu      = outputs[0,            0:self.act_dim]
-        sig     = outputs[0, self.act_dim:            ]
 
-        # Draw action from normal law defined by mu and sigma
-        actions = np.zeros(self.act_dim)
+        if (self.alg_type == 'continuous'):
+            mu      = outputs[0,            0:self.act_dim]
+            sig     = outputs[0, self.act_dim:            ]
 
-        for i in range(self.act_dim):
-            actions[i] = np.random.normal(loc=mu[i], scale=sig[i])
+            # Draw action from normal law defined by mu and sigma
+            actions = np.zeros(self.act_dim)
 
-        return actions, mu, sig
+            for i in range(self.act_dim):
+                actions[i] = np.random.normal(loc=mu[i], scale=sig[i])
+
+        if (self.alg_type == 'discrete'):
+            actions = np.random.choice(self.act_dim, p=outputs[0,:])
+
+        return actions
 
     # Get value from network
     def get_value(self, state):

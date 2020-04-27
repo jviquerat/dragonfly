@@ -8,22 +8,22 @@ import numpy as np
 # - BipedalWalker-v2         (4)
 # - BipedalWalkerHardcore-v2 (4)
 
-env_name     = "MountainCarContinuous-v0"
+env_name     = 'CartPole-v1'
 
-alg_type     = 'continuous' # 'discrete' or 'continuous'
+alg_type     = 'discrete' # 'discrete' or 'continuous'
 
 n_episodes   = 300  # Max nb of episodes
 n_steps      = 5000 # Max nb of steps per episode
 n_avg        = 1    # Nb of runs for averaged results
 render_every = 30   # Rendering frequency (in episodes)
 
-learn_rate   = 1.0e-2       # Learning rate
+learn_rate   = 1.0e-4       # Learning rate
 batch_size   = 512          # Batch size
 n_epochs     = 10           # Nb of epochs for training
 buff_size    = 1*batch_size # Size of buffer for training
 
-clip         = 0.2
+clip         = 0.1
 entropy      = 0.001
-gamma        = 0.9
-gae_lambda   = 0.9
+gamma        = 0.99
+gae_lambda   = 0.95
 update_alpha = 0.90
