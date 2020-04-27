@@ -11,7 +11,7 @@ from training import *
 
 for i in range(n_avg):
     print('### Avg run #'+str(i))
-    launch_training(env_name,
+    launch_training(env_name, alg_type,
                     n_episodes, n_steps, render_every,
                     learn_rate, buff_size, batch_size, n_epochs,
                     clip, entropy, gamma, gae_lambda, update_alpha)

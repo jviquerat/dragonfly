@@ -18,11 +18,12 @@ tf.logging.set_verbosity(tf.logging.FATAL)
 ### A standard PPO agent
 class ppo:
     def __init__(self,
-                 act_dim, obs_dim, n_episodes,
+                 alg_type, act_dim, obs_dim, n_episodes,
                  learn_rate, buff_size, batch_size, n_epochs,
                  clip, entropy, gamma, gae_lambda, update_alpha):
 
         # Initialize from arguments
+        self.alg_type     = alg_type
         self.act_dim      = act_dim
         self.obs_dim      = obs_dim
         self.mu_dim       = act_dim
@@ -41,8 +42,12 @@ class ppo:
 
         # Build actors
         self.critic     = self.build_critic()
-        self.actor      = self.build_actor()
-        self.old_actor  = self.build_actor()
+        if (self.alg_type == 'continuous'):
+            self.actor      = self.build_continuous_actor()
+            self.old_actor  = self.build_continuous_actor()
+        if (self.alg_type == 'discrete'):
+            self.actor      = self.build_discrete_actor()
+            self.old_actor  = self.build_discrete_actor()
         self.old_actor.set_weights (self.actor.get_weights())
 
         # Generate dummy inputs for custom loss
@@ -58,52 +63,45 @@ class ppo:
         self.tgt = cl.deque()
         self.adv = cl.deque()
 
-    # Policy loss
-    def policy_loss(self, adv, old_act):
-
-        # Log prob density function
-        def log_density(pred, y_true):
-
-            # Compute log prob density
-            mu      = pred[:, 0:self.act_dim]
-            sig     = pred[:, self.act_dim:]
-            var     = kb.square(sig)
-
-            factor  = 1.0/kb.sqrt(2.*np.pi*var)
-            pdf     = factor*kb.exp(-kb.square(y_true - mu)/(2.0*var))
-            log_pdf = kb.log(pdf + kb.epsilon())
-
-            return log_pdf
-
+    # Continuous_policy loss
+    def continuous_policy_loss(self, adv, old_act):
         def loss(y_true, y_pred):
 
-            # Get the log prob density
-            log_density_new = log_density(y_pred,  y_true)
-            log_density_old = log_density(old_act, y_true)
+            # New policy density
+            new_mu    = y_pred[:,:self.act_dim ]
+            new_sig   = y_pred[:, self.act_dim:]
+            new_var   = kb.square(new_sig)
+            new_den   = kb.sqrt(2.0*np.pi*new_var)
+            new_prob  = kb.exp(-kb.square(y_true - new_mu)/(2.0*new_var))
+            new_prob /= new_den
 
-            # Compute actor loss following Schulman
-            ratio      = kb.exp(log_density_new - log_density_old)
+            # Old policy density
+            old_mu    = old_act[:,:self.act_dim ]
+            old_sig   = old_act[:, self.act_dim:]
+            old_var   = kb.square(old_sig)
+            old_den   = kb.sqrt(2.0*np.pi*old_var)
+            old_prob  = kb.exp(-kb.square(y_true - old_mu)/(2.0*old_var))
+            old_prob /= old_den
+
+            # Compute loss
+            ratio      = new_prob/old_prob
             surrogate1 = ratio*adv
 
             clip_ratio = kb.clip(ratio,
                                  min_value = 1.0 - self.clip,
                                  max_value = 1.0 + self.clip)
             surrogate2 = clip_ratio*adv
-            loss_actor =-kb.mean(tk.backend.minimum(surrogate1, surrogate2))
+            loss_actor =-kb.mean(kb.minimum(surrogate1, surrogate2))
 
             # Compute entropy loss
-            sig          = y_pred[:, self.act_dim:]
-            var          = kb.square(sig)
-            loss_entropy = kb.mean(-(kb.log(2.0*np.pi*var)+1.0)/2.0)
+            loss_entropy = kb.mean((-kb.log(2.0*np.pi*new_var)+1.0)/2.0)
 
             # Total loss
             return loss_actor + self.entropy*loss_entropy
-
         return loss
 
     # Value loss
     def value_loss(self, old_val):
-
         def loss(y_true, y_pred):
 
             # Baseline mse
@@ -115,11 +113,11 @@ class ppo:
                                  max_value = old_val + self.clip)
             surrogate2 = kb.square(clip_val - y_true)
 
-            return kb.mean(tk.backend.minimum(surrogate1, surrogate2))
+            return kb.mean(kb.minimum(surrogate1, surrogate2))
         return loss
 
-    # Build actor network using keras
-    def build_actor(self):
+    # Build continuous actor network using keras
+    def build_continuous_actor(self):
 
         # Input layers
         # Forward network pass only requires observation
@@ -154,7 +152,41 @@ class ppo:
                              outputs = outputs)
         optimizer = tk.optimizers.Adam(lr = self.learn_rate)
         actor.compile(optimizer = optimizer,
-                      loss      = self.policy_loss(adv, old_act))
+                      loss      = self.continuous_policy_loss(adv, old_act))
+
+        return actor
+
+    # Build discrete actor network using keras
+    def build_discrete_actor(self):
+
+        # Input layers
+        # Forward network pass only requires observation
+        # Advantage and old_action are only used in custom loss
+        obs     = tk.layers.Input(shape=(self.obs_dim,)  )
+        adv     = tk.layers.Input(shape=(1,),            )
+        old_act = tk.layers.Input(shape=(2*self.act_dim,))
+
+        # Use orthogonal layers initialization
+        init_1  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+        init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+
+        # Dense layer, then one branch for mu and one for sigma
+        dense     = tk.layers.Dense(16,
+                                   activation         = 'tanh',
+                                   kernel_initializer = init_1)(obs)
+        #dense     = tk.layers.Dense(16,
+        #                           activation         = 'tanh',
+        #                           kernel_initializer = init_1)(dense)
+        mu        = tk.layers.Dense(self.act_dim,
+                                   activation         = 'softmax',
+                                   kernel_initializer = init_2)(dense)
+
+        # Generate actor
+        actor     = tk.Model(inputs  = [obs, adv, old_act],
+                             outputs = mu)
+        optimizer = tk.optimizers.Adam(lr = self.learn_rate)
+        actor.compile(optimizer = optimizer,
+                      loss      = self.discrete_policy_loss(adv, old_act))
 
         return actor
 

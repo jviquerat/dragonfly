@@ -10,6 +10,8 @@ import numpy as np
 
 env_name     = "MountainCarContinuous-v0"
 
+alg_type     = 'continuous' # 'discrete' or 'continuous'
+
 n_episodes   = 300  # Max nb of episodes
 n_steps      = 5000 # Max nb of steps per episode
 n_avg        = 1    # Nb of runs for averaged results
