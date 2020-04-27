@@ -17,7 +17,9 @@ def launch_training(env_name,
 
     # Declare environement and agent
     env     = gym.make(env_name)
-    #env = gym.wrappers.Monitor(env, './vids/'+str(time.time())+'/')
+    #env     = gym.wrappers.Monitor(env,
+    #                               './vids/'+str(time.time())+'/',
+    #                               video_callable=lambda episode_id: episode_id%10==0)
     act_dim = env.action_space.shape[0]
     obs_dim = env.observation_space.shape[0]
 
@@ -73,9 +75,6 @@ def launch_training(env_name,
 
             # Check if it is time for training
             if (buff_cnt == buff_size):
-                ## Handle value of last state
-                #if (    done): tgt_val = 0
-                #if (not done): tgt_val = agent.get_value(obs)
 
                 # Compute deltas, targets and advantages
                 agent.compute_targets   (buff_rwd, buff_tgt, buff_trm)
@@ -107,6 +106,7 @@ def launch_training(env_name,
                  #   env.render()
                 if (ep == n_episodes-1): end = '\n'
                 if (ep != n_episodes-1): end = '\r'
-                print('# Ep #'+str(ep)+', ep_rwd = '+str(ep_rwd))#,end=end)
+                print('# Ep #'+str(ep)+', ep_rwd = '\
+                    +str(ep_rwd)+', ep_lgt = '+str(ep_lgt))
 
                 break
