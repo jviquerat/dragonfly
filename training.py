@@ -52,6 +52,7 @@ def launch_training(env_name,
             # Make one iteration
             obs                   = np.clip(obs,-10,10)
             act, mu, sig          = agent.get_actions(obs)
+            print(act)
             val                   = agent.get_value(obs)
             new_obs, rwd, done, _ = env.step(act)
             new_obs               = np.clip(new_obs,-10,10)
