@@ -17,7 +17,7 @@ def launch_training(env_name,
 
     # Declare environement and agent
     env     = gym.make(env_name)
-    env = gym.wrappers.Monitor(env, './vids/'+str(time.time())+'/')
+    #env = gym.wrappers.Monitor(env, './vids/'+str(time.time())+'/')
     act_dim = env.action_space.shape[0]
     obs_dim = env.observation_space.shape[0]
 
