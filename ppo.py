@@ -113,15 +113,18 @@ class ppo:
             surrogate1 = ratio*adv
             clip_ratio = kb.clip(ratio, 1.0-self.clip, 1.0+self.clip)
             surrogate2 = clip_ratio*adv
-            lossmin = tf.reshape(kb.minimum(surrogate1, surrogate2),[-1])
-            loss_actor =-kb.mean(lossmin)
+            loss_actor = kb.minimum(surrogate1, surrogate2)
+            #loss_actor =-kb.mean(lossmin)
 
             # Compute entropy loss
             #loss_entropy = kb.mean((-kb.log(2.0*np.pi*new_var)+1.0)/2.0)
-            loss_entropy = kb.mean(new_prob*kb.log(new_prob + kb.epsilon()))
+            loss_entropy =-new_prob*kb.log(new_prob)
+
+            loss_total =-kb.mean(loss_actor + self.entropy*loss_entropy)
 
             # Total loss
-            return loss_actor #+ self.entropy*loss_entropy
+            #return loss_actor + self.entropy*loss_entropy
+            return loss_total
         return loss
 
     # Build continuous actor network using keras
@@ -180,10 +183,15 @@ class ppo:
 
         # Dense layer, then one branch for mu and one for sigma
         dense     = tk.layers.Dense(32,
-                                   activation         = 'tanh')(obs)
+                                    use_bias=False,
+                                   activation         = 'relu')(obs)
                                    #kernel_initializer = init_1)(obs)
         dense     = tk.layers.Dense(32,
-                                   activation         = 'tanh')(dense)
+                                    use_bias=False,
+                                   activation         = 'relu')(dense)
+        dense     = tk.layers.Dense(32,
+                                    use_bias=False,
+                                   activation         = 'relu')(dense)
                                    #kernel_initializer = init_1)(dense)
         mu        = tk.layers.Dense(self.act_dim,
                                    activation         = 'softmax')(dense)
@@ -192,7 +200,7 @@ class ppo:
         # Generate actor
         actor     = tk.Model(inputs  = [obs, adv, old_act],
                              outputs = mu)
-        optimizer = tk.optimizers.Adam(lr = self.learn_rate)
+        optimizer = tk.optimizers.Adam(lr = 1.0e-2)
         actor.compile(optimizer = optimizer,
                       loss      = self.discrete_policy_loss(adv, old_act))
 
@@ -209,20 +217,22 @@ class ppo:
         #init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(32,
-                                    activation = 'relu')(obs)
+        dense     = tk.layers.Dense(100,
+                                    use_bias=False,
+                                    activation = 'sigmoid')(obs)
                                     #kernel_initializer = init_1)(obs)
         #dense     = tk.layers.Dense(16,
         #                           activation         = 'tanh',
         #                           kernel_initializer = init_1)(dense)
         value     = tk.layers.Dense(1,
-                                    activation = 'relu')(dense)
+                                    use_bias=False,
+                                    activation = 'linear')(dense)
                                     #kernel_initializer = init_1)(dense)
 
         # Generate actor
         critic    = tk.Model(inputs  = obs,
                              outputs = value)
-        optimizer = tk.optimizers.Adam(lr = self.learn_rate)
+        optimizer = tk.optimizers.Adam(lr = 1.0e-3)
         critic.compile(optimizer = optimizer,
                        loss = 'mean_squared_error')
 
