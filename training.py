@@ -28,16 +28,7 @@ def launch_training(env_name, alg_type,
                 learn_rate, buff_size, batch_size, n_epochs,
                 clip, entropy, gamma, gae_lambda, update_alpha)
 
-    # Initialize buffers
-    buff_obs = np.zeros((buff_size, obs_dim))
-    buff_act = np.zeros((buff_size, act_dim))
-    buff_rwd = np.zeros((buff_size))
-    buff_val = np.zeros((buff_size))
-    buff_dlt = np.zeros((buff_size))
-    buff_tgt = np.zeros((buff_size))
-    buff_adv = np.zeros((buff_size))
-    buff_msk = np.ones ((buff_size))
-    buff_cnt = 0
+    # Initialize buffer
 
     # Loop over episodes
     for ep in range(n_episodes):
@@ -46,9 +37,18 @@ def launch_training(env_name, alg_type,
         ep_rwd   = 0.0
         ep_lgt   = 0
         obs      = env.reset()
+        done     = False
+
+        buff_obs = []
+        buff_act = []
+        buff_rwd = []
+        buff_val = []
+        #buff_dlt = []
+        #buff_tgt = []
+        #buff_adv = []
 
         # Loop over buff size
-        for step in range(n_steps):
+        while (not done):
 
             # Make one iteration
             #obs                   = np.clip(obs,-10,10)
@@ -56,56 +56,54 @@ def launch_training(env_name, alg_type,
             val                   = agent.get_value(obs)
             new_obs, rwd, done, _ = env.step(np.argmax(act))
             #new_obs               = np.clip(new_obs,-10,10)
-            new_val               = agent.get_value(new_obs)
+            #new_val               = agent.get_value(new_obs)
             #rwd                   = np.clip(rwd,-5,5)
 
             # Store in buffers
-            buff_obs[buff_cnt,:] = obs
-            buff_act[buff_cnt,:] = act
-            buff_rwd[buff_cnt]   = rwd
-            buff_val[buff_cnt]   = val
-            buff_msk[buff_cnt]   = float(not done)
+            buff_obs.append(obs)
+            buff_act.append(act)
+            buff_rwd.append(rwd)
+            buff_val.append(val)
 
             # Update observation and buffer counter
             obs       = new_obs
             ep_rwd   += rwd
             ep_lgt   += 1
-            buff_cnt += 1
 
             # Check if it is time for training
-            if (buff_cnt == buff_size):
+            #if done:
+
+        buff_act = np.vstack(buff_act)
+        buff_rwd = np.array(buff_rwd)
+        buff_obs = np.vstack(buff_obs)
+        buff_val = np.array(buff_val)
+
+        buff_tgt = agent.compute_tgts(buff_rwd)
+        buff_adv = agent.compute_advs(buff_rwd, buff_val)
 
                 # Compute deltas, targets and advantages
-                agent.compute_dlt_tgt_adv(buff_rwd, buff_tgt, buff_dlt,
-                                          buff_adv, buff_val, buff_msk)
+                #agent.compute_dlt_tgt_adv(buff_rwd, buff_tgt, buff_dlt,
+                #                          buff_adv, buff_val, buff_msk)
 
                 # Store buffers
-                agent.store_buffers(buff_obs, buff_act, buff_rwd,
-                                    buff_val, buff_dlt, buff_tgt,
-                                    buff_adv)
+                #agent.store_buffers(buff_obs, buff_act, buff_rwd,
+                #                    buff_val, buff_dlt, buff_tgt,
+                #                    buff_adv)
 
-                # Train networks
-                agent.train_networks(buff_obs, buff_act, buff_adv, buff_tgt)
+        # Train networks
+        agent.train_networks(buff_obs, buff_act, buff_adv, buff_tgt)
 
-                # Reset buffers
-                buff_cnt      = 0
-                buff_obs[:,:] = 0.0
-                buff_act[:,:] = 0.0
-                buff_rwd[:]   = 0.0
-                buff_val[:]   = 0.0
-                buff_dlt[:]   = 0.0
-                buff_tgt[:]   = 0.0
-                buff_adv[:]   = 0.0
-                buff_msk[:]   = 1.0
+        # Reset buffers
+        buff_obs = []
+        buff_act = []
+        buff_rwd = []
+        buff_val = []
 
             # Check if episode is over
-            if (done or (step == n_steps-1)):
+            #if (done or (step == n_steps-1)):
                 # Printings
                 #if ((ep % render_every) == 0):
                  #   env.render()
-                if (ep == n_episodes-1): end = '\n'
-                if (ep != n_episodes-1): end = '\r'
-                print('# Ep #'+str(ep)+', ep_rwd = '\
-                    +str(ep_rwd)+', ep_lgt = '+str(ep_lgt))
-
-                break
+        if (ep == n_episodes-1): end = '\n'
+        if (ep != n_episodes-1): end = '\r'
+        print('# Ep #'+str(ep)+', ep_rwd = '+str(ep_rwd)+', ep_lgt = '+str(ep_lgt))

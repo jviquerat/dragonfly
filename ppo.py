@@ -105,9 +105,10 @@ class ppo:
     def discrete_policy_loss(self, adv, old_act):
         def loss(y_true, y_pred):
 
-            new_prob = kb.sum(y_true*y_pred,  axis=-1)
-            old_prob = kb.sum(y_true*old_act, axis=-1)
-            ratio    = new_prob/(old_prob + kb.epsilon())
+            new_prob = kb.sum(y_true*y_pred,  axis=1)
+            old_prob = kb.sum(y_true*old_act, axis=1)
+            #ratio    = new_prob/(old_prob + kb.epsilon())
+            ratio    = new_prob/old_prob
 
             surrogate1 = ratio*adv
             clip_ratio = kb.clip(ratio, 1.0-self.clip, 1.0+self.clip)
@@ -119,7 +120,7 @@ class ppo:
             loss_entropy = kb.mean(new_prob*kb.log(new_prob + kb.epsilon()))
 
             # Total loss
-            return loss_actor + self.entropy*loss_entropy
+            return loss_actor #+ self.entropy*loss_entropy
         return loss
 
     # Build continuous actor network using keras
@@ -173,19 +174,19 @@ class ppo:
         old_act = tk.layers.Input(shape=(self.act_dim,))
 
         # Use orthogonal layers initialization
-        init_1  = tk.initializers.Orthogonal(gain=1.0, seed=None)
-        init_2  = tk.initializers.Orthogonal(gain=1.0, seed=None)
+        #init_1  = tk.initializers.Orthogonal(gain=1.0, seed=None)
+        #init_2  = tk.initializers.Orthogonal(gain=1.0, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
         dense     = tk.layers.Dense(16,
-                                   activation         = 'tanh',
-                                   kernel_initializer = init_1)(obs)
+                                   activation         = 'tanh')(obs)
+                                   #kernel_initializer = init_1)(obs)
         dense     = tk.layers.Dense(16,
-                                   activation         = 'tanh',
-                                   kernel_initializer = init_1)(dense)
+                                   activation         = 'tanh')(dense)
+                                   #kernel_initializer = init_1)(dense)
         mu        = tk.layers.Dense(self.act_dim,
-                                   activation         = 'softmax',
-                                   kernel_initializer = init_2)(dense)
+                                   activation         = 'softmax')(dense)
+                                   #kernel_initializer = init_2)(dense)
 
         # Generate actor
         actor     = tk.Model(inputs  = [obs, adv, old_act],
@@ -203,19 +204,19 @@ class ppo:
         obs     = tk.layers.Input(shape=(self.obs_dim,)  )
 
         # Use orthogonal layers initialization
-        init_1  = tk.initializers.Orthogonal(gain=0.1, seed=None)
-        init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+        #init_1  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+        #init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
         dense     = tk.layers.Dense(16,
-                                    activation = 'tanh',
-                                    kernel_initializer = init_1)(obs)
+                                    activation = 'tanh')(obs)
+                                    #kernel_initializer = init_1)(obs)
         #dense     = tk.layers.Dense(16,
         #                           activation         = 'tanh',
         #                           kernel_initializer = init_1)(dense)
         value     = tk.layers.Dense(1,
-                                    activation = 'linear',
-                                    kernel_initializer = init_1)(dense)
+                                    activation = 'linear')(dense)
+                                    #kernel_initializer = init_1)(dense)
 
         # Generate actor
         critic    = tk.Model(inputs  = obs,
@@ -280,58 +281,74 @@ class ppo:
         # Compute old actions and values
         old_act = self.get_old_actions(obs)
 
+        #outputs = self.actor.predict_on_batch([obs,
+        #                                       self.dummy_adv,
+        #                                       self.dummy_pred])
+        #print(old_act)
+        #print(outputs)
+        #exit()
+
+        #for i in range(len(act)):
+        #    probs   = outputs[i,:]
+        #    #print(probs)
+        #    actions = np.random.multinomial(1, probs, size=1)
+        #    print(actions, act[i,:])
+
+        #exit()
+
+        #print(old_act)
+        #print(act)
+
+        #exit()
+
         # Train networks
         self.actor.fit (x          = [obs, adv, old_act],
                         y          = act,
-                        epochs     = self.n_epochs,
-                        batch_size = self.batch_size,
-                        shuffle    = True,
-                        verbose    = 0)
+                        shuffle=False)
+                        #epochs     = self.n_epochs,
+                        #batch_size = self.batch_size,
+                        #shuffle    = True,
+                        #verbose    = 0)
         self.critic.fit(x          = obs,
                         y          = tgt,
-                        epochs     = self.n_epochs,
-                        batch_size = self.batch_size,
-                        shuffle    = True,
-                        verbose    = 0)
+                        shuffle=False)
+                        #epochs     = self.n_epochs,
+                        #batch_size = self.batch_size,
+                        #shuffle    = True,
+                        #verbose    = 0)
 
         # Update old actor
         self.update_old_actor()
 
-    # Compute deltas, targets and advantages
-    def compute_dlt_tgt_adv(self, buff_rwd, buff_tgt,
-                                  buff_dlt, buff_adv,
-                                  buff_val, buff_msk):
+    def compute_tgts(self, buff_rwd):
 
-        prev_tgt = 0.0
-        prev_val = 0.0
-        prev_adv = 0.0
-        coeff    = self.gamma*self.gae_lambda
+        tgt      = 0.0
+        buff_tgt = np.zeros_like(buff_rwd)
 
         # Loop from the end of the buffer
-        for i in reversed(range(self.buff_size)):
+        for r in reversed(range(len(buff_rwd))):
 
-            # Get local variables
-            # Mask is 0 when current state is the end of a trajectory
-            rwd = buff_rwd[i]
-            msk = buff_msk[i]
-            val = buff_val[i]
+            tgt         = self.gamma*tgt + buff_rwd[r]
+            buff_tgt[r] = tgt
 
-            # V(s_t) = r_t + gamma*V(s_t+1)
-            buff_tgt[i] = rwd + self.gamma*prev_tgt*msk
+        return buff_tgt
 
-            # delta(s_t) = r_t + gamma*V(s_t+1) - V(s_t)
-            buff_dlt[i] = rwd + self.gamma*prev_val*msk - val
+    # Compute deltas, targets and advantages
+    def compute_advs(self, buff_rwd, buff_val):
 
-            # A(s_t, a_t) = delta(s_t) + gamma*lamda*A(s_t+1, a_t+1)
-            buff_adv[i] = buff_dlt[i] + coeff*prev_adv*msk
+        buff_adv = np.zeros_like(buff_rwd)
+        coeff    = self.gamma*self.gae_lambda
 
-            # Update variables
-            prev_tgt = buff_tgt[i]
-            prev_val = val
-            prev_adv = buff_adv[i]
-
-        # Normalize advantages
+        for t in range(len(buff_rwd)):
+            adv = 0.0
+            for l in range(0, len(buff_rwd)-t-1):
+                dlt = buff_rwd[t+l] + self.gamma*buff_val[t+l+1] - buff_val[t+l]
+                adv += dlt*(self.gamma*self.gae_lambda)**l
+            adv += (buff_rwd[t+l] - buff_val[t+l])*(self.gamma*self.gae_lambda)**l
+            buff_adv[t] = adv
         buff_adv[:] = (buff_adv[:] - np.mean(buff_adv))/np.std(buff_adv)
+
+        return buff_adv
 
     # Store buffers
     def store_buffers(self, obs, act, rwd, val, dlt, tgt, adv):
@@ -349,7 +366,7 @@ class ppo:
     def get_old_actions(self, state):
 
         # This is a batch of states, unlike in get_actions routine
-        state   = state.reshape(self.buff_size, self.obs_dim)
+        #state   = state.reshape(self.buff_size, self.obs_dim)
         outputs = self.old_actor.predict_on_batch([state,
                                                    self.dummy_adv,
                                                    self.dummy_pred])
