@@ -113,7 +113,8 @@ class ppo:
             surrogate1 = ratio*adv
             clip_ratio = kb.clip(ratio, 1.0-self.clip, 1.0+self.clip)
             surrogate2 = clip_ratio*adv
-            loss_actor =-kb.mean(kb.minimum(surrogate1, surrogate2))
+            lossmin = tf.reshape(kb.minimum(surrogate1, surrogate2),[-1])
+            loss_actor =-kb.mean(lossmin)
 
             # Compute entropy loss
             #loss_entropy = kb.mean((-kb.log(2.0*np.pi*new_var)+1.0)/2.0)
@@ -178,10 +179,10 @@ class ppo:
         #init_2  = tk.initializers.Orthogonal(gain=1.0, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(16,
+        dense     = tk.layers.Dense(32,
                                    activation         = 'tanh')(obs)
                                    #kernel_initializer = init_1)(obs)
-        dense     = tk.layers.Dense(16,
+        dense     = tk.layers.Dense(32,
                                    activation         = 'tanh')(dense)
                                    #kernel_initializer = init_1)(dense)
         mu        = tk.layers.Dense(self.act_dim,
@@ -208,14 +209,14 @@ class ppo:
         #init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(16,
-                                    activation = 'tanh')(obs)
+        dense     = tk.layers.Dense(32,
+                                    activation = 'relu')(obs)
                                     #kernel_initializer = init_1)(obs)
         #dense     = tk.layers.Dense(16,
         #                           activation         = 'tanh',
         #                           kernel_initializer = init_1)(dense)
         value     = tk.layers.Dense(1,
-                                    activation = 'linear')(dense)
+                                    activation = 'relu')(dense)
                                     #kernel_initializer = init_1)(dense)
 
         # Generate actor
@@ -223,7 +224,7 @@ class ppo:
                              outputs = value)
         optimizer = tk.optimizers.Adam(lr = self.learn_rate)
         critic.compile(optimizer = optimizer,
-                      loss      = 'mean_squared_error')
+                       loss = 'mean_squared_error')
 
         return critic
 
@@ -304,14 +305,14 @@ class ppo:
         # Train networks
         self.actor.fit (x          = [obs, adv, old_act],
                         y          = act,
-                        shuffle=False)
+                        shuffle    = False)
                         #epochs     = self.n_epochs,
                         #batch_size = self.batch_size,
                         #shuffle    = True,
                         #verbose    = 0)
         self.critic.fit(x          = obs,
                         y          = tgt,
-                        shuffle=False)
+                        shuffle    = False)
                         #epochs     = self.n_epochs,
                         #batch_size = self.batch_size,
                         #shuffle    = True,
