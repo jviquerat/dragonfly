@@ -5,13 +5,12 @@ import collections
 import numpy as np
 
 # Custom imports
-from ppo         import *
-#from ppo_cma     import *
+from ppo_discrete         import *
 
 # Start training
 def launch_training(env_name, alg_type,
                     n_episodes, n_steps, render_every,
-                    learn_rate, buff_size, batch_size, n_epochs,
+                    actor_lr, critic_lr, buff_size, batch_size, n_epochs,
                     clip, entropy, gamma, gae_lambda, update_alpha):
 
 
@@ -25,9 +24,9 @@ def launch_training(env_name, alg_type,
     act_dim = env.action_space.n
     obs_dim = env.observation_space.shape[0]
 
-    agent = ppo(alg_type, act_dim, obs_dim, n_episodes,
-                learn_rate, buff_size, batch_size, n_epochs,
-                clip, entropy, gamma, gae_lambda, update_alpha)
+    agent = ppo_discrete(act_dim, obs_dim, n_episodes,
+                         actor_lr, critic_lr, buff_size, batch_size, n_epochs,
+                         clip, entropy, gamma, gae_lambda, update_alpha)
 
     # Loop over episodes
     for ep in range(n_episodes):

@@ -21,7 +21,7 @@ tf.keras.backend.set_floatx('float32')
 class ppo:
     def __init__(self,
                  alg_type, act_dim, obs_dim, n_episodes,
-                 learn_rate, buff_size, batch_size, n_epochs,
+                 actor_lr, critic_lr, buff_size, batch_size, n_epochs,
                  clip, entropy, gamma, gae_lambda, update_alpha):
 
         # Initialize from arguments
@@ -32,7 +32,8 @@ class ppo:
         self.sig_dim      = act_dim
         self.n_episodes   = n_episodes
 
-        self.learn_rate   = learn_rate
+        self.actor_lr     = actor_lr
+        self.critic_lr    = critic_lr
         self.buff_size    = buff_size
         self.batch_size   = batch_size
         self.n_epochs     = n_epochs
@@ -111,18 +112,19 @@ class ppo:
 
         new_prob = tf.reduce_sum(act*pol,     axis=1)
         old_prob = tf.reduce_sum(act*old_pol, axis=1)
-        ratio    = new_prob/(old_prob+1e-10)
+        ratio    = new_prob/(old_prob + 1e-10)
 
-        adv = tf.cast(adv, tf.float32)
-        p1  = tf.multiply(ratio,adv)
-        p2  = tf.clip_by_value(ratio, 1.0-self.clip, 1.0+self.clip)
-        p2  = tf.multiply(p2,adv)
-        loss_actor = -tf.reduce_mean(tf.minimum(p1,p2))
+        adv        = tf.cast(adv, tf.float32)
+        p1         = tf.multiply(ratio,adv)
+        p2         = tf.clip_by_value(ratio, 1.0-self.clip, 1.0+self.clip)
+        p2         = tf.multiply(p2,adv)
+        loss_actor =-tf.reduce_mean(tf.minimum(p1,p2))
 
         # Compute entropy loss
-        #loss_entropy =-tf.reduce_mean(-(new_prob*tf.log(new_prob+1.0e-10)))
+        entropy      =-(new_prob*tf.math.log(new_prob + 1.0e-10))
+        loss_entropy =-tf.reduce_mean(entropy)
 
-        loss_total = loss_actor #+ self.entropy*loss_entropy
+        loss_total = loss_actor + self.entropy*loss_entropy
 
         return loss_total
 
@@ -291,8 +293,6 @@ class ppo:
     # Train networks
     def train_networks(self, obs, act, adv, tgt):
 
-        
-
         @tf.function
         def train_actor(obs, adv):
             with tf.GradientTape() as tape:
@@ -317,12 +317,9 @@ class ppo:
                 grads   = zip(grads,self.critic.trainable_variables)
                 self.opt_critic.apply_gradients(grads)
 
-        #for epoch in range(self.n_epochs):
-            # not sure how are you taking care of batches, but putting it here just in case
-            #for data_batch in dataset: 
-                #train_step(data_batch)
-        train_actor (obs, adv)
-        train_critic(obs, tgt)
+        for epoch in range(self.n_epochs):
+            train_actor (obs, adv)
+            train_critic(obs, tgt)
 
         # Update old actor
         self.update_old_actor()
