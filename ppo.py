@@ -8,10 +8,12 @@ import numpy       as np
 # Import tensorflow and filter warning messages
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '10'
 warnings.filterwarnings('ignore',category=FutureWarning)
-import tensorflow               as tf
-import tensorflow.keras         as tk
-import tensorflow.keras.backend as kb
-tf.logging.set_verbosity(tf.logging.FATAL)
+import tensorflow               as     tf
+import tensorflow.keras         as     tk
+import tensorflow.keras.backend as     kb
+from   tensorflow.keras.layers  import Dense
+#tf.logging.set_verbosity(tf.logging.FATAL)
+tf.keras.backend.set_floatx('float32')
 
 ###############################################
 ### Class ppo
@@ -49,6 +51,9 @@ class ppo:
             self.actor      = self.build_discrete_actor()
             self.old_actor  = self.build_discrete_actor()
         self.old_actor.set_weights (self.actor.get_weights())
+
+        self.opt_actor  = tk.optimizers.Adam(lr=0.005)
+        self.opt_critic = tk.optimizers.Adam(lr=0.001)
 
         # Generate dummy inputs for custom loss
         self.dummy_adv  = np.zeros((1, 1))
@@ -102,30 +107,24 @@ class ppo:
         return loss
 
     # Discrete policy loss
-    def discrete_policy_loss(self, adv, old_act):
-        def loss(y_true, y_pred):
+    def discrete_policy_loss(self, act, adv, pol, old_pol):
 
-            new_prob = kb.sum(y_true*y_pred,  axis=1)
-            old_prob = kb.sum(y_true*old_act, axis=1)
-            ratio = kb.exp(kb.log(new_prob+1e-10) - kb.log(old_prob+1e-10))
-            #ratio    = new_prob/(old_prob + kb.epsilon())
-            #ratio    = new_prob/old_prob
+        new_prob = tf.reduce_sum(act*pol,     axis=1)
+        old_prob = tf.reduce_sum(act*old_pol, axis=1)
+        ratio    = new_prob/(old_prob+1e-10)
 
-            p1 = ratio*adv
-            p2 = kb.clip(ratio, 1.0-self.clip, 1.0+self.clip)*adv
-            loss_actor = -kb.mean(kb.minimum(p1,p2))
-            #loss_actor =-kb.mean(lossmin)
+        adv = tf.cast(adv, tf.float32)
+        p1  = tf.multiply(ratio,adv)
+        p2  = tf.clip_by_value(ratio, 1.0-self.clip, 1.0+self.clip)
+        p2  = tf.multiply(p2,adv)
+        loss_actor = -tf.reduce_mean(tf.minimum(p1,p2))
 
-            # Compute entropy loss
-            #loss_entropy = kb.mean((-kb.log(2.0*np.pi*new_var)+1.0)/2.0)
-            loss_entropy =-kb.mean(-(new_prob*kb.log(new_prob+1.0e-10)))
+        # Compute entropy loss
+        #loss_entropy =-tf.reduce_mean(-(new_prob*tf.log(new_prob+1.0e-10)))
 
-            loss_total = loss_actor + self.entropy*loss_entropy
+        loss_total = loss_actor #+ self.entropy*loss_entropy
 
-            # Total loss
-            #return loss_actor + self.entropy*loss_entropy
-            return loss_total
-        return loss
+        return loss_total
 
     # Build continuous actor network using keras
     def build_continuous_actor(self):
@@ -173,38 +172,38 @@ class ppo:
         # Input layers
         # Forward network pass only requires observation
         # Advantage and old_action are only used in custom loss
-        obs     = tk.layers.Input(shape=(self.obs_dim,)  )
-        adv     = tk.layers.Input(shape=(1,),            )
+        obs     = tk.layers.Input(shape=(self.obs_dim,))
+        adv     = tk.layers.Input(shape=(1,),          )
         old_act = tk.layers.Input(shape=(self.act_dim,))
 
         # Use orthogonal layers initialization
-        init  = tk.initializers.Orthogonal(gain=1.0, seed=None)
+        init  = tk.initializers.Orthogonal(gain=1.0)
         #init_2  = tk.initializers.Orthogonal(gain=1.0, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(32,
-                                    use_bias=False,
-                                    activation         = 'relu',
-                                    kernel_initializer = init)(obs)
-        dense     = tk.layers.Dense(32,
-                                    use_bias=False,
-                                    activation         = 'relu',
-                                    kernel_initializer = init)(dense)
-        dense     = tk.layers.Dense(32,
-                                    use_bias=False,
-                                    activation         = 'relu',
-                                    kernel_initializer = init)(dense)
-        mu        = tk.layers.Dense(self.act_dim,
-                                    activation         = 'softmax',
-                                    kernel_initializer = init)(dense)
+        dense     = Dense(32,
+                          use_bias=False,
+                          activation         = 'relu',
+                          kernel_initializer = init)(obs)
+        dense     = Dense(32,
+                          use_bias=False,
+                          activation         = 'relu',
+                          kernel_initializer = init)(dense)
+        dense     = Dense(32,
+                          use_bias=False,
+                          activation         = 'relu',
+                          kernel_initializer = init)(dense)
+        mu        = Dense(self.act_dim,
+                          activation         = 'softmax',
+                          kernel_initializer = init)(dense)
 
         # Generate actor
         actor     = tk.Model(inputs  = [obs, adv, old_act],
                              outputs = mu)
-        optimizer = tk.optimizers.Adam(lr=0.005, beta_1=0.9, beta_2=0.99,
-                                       epsilon=1e-08, decay=1.0e-4)
-        actor.compile(optimizer = optimizer,
-                      loss      = self.discrete_policy_loss(adv, old_act))
+        #optimizer = tk.optimizers.Adam(lr=0.005, beta_1=0.9, beta_2=0.99,
+        #                               epsilon=1e-08, decay=1.0e-4)
+        #actor.compile(optimizer = optimizer,
+        #              loss      = self.discrete_policy_loss(adv, old_act))
 
         return actor
 
@@ -212,35 +211,32 @@ class ppo:
     def build_critic(self):
 
         # Input layers
-        obs     = tk.layers.Input(shape=(self.obs_dim,)  )
+        obs     = tk.layers.Input(shape=(self.obs_dim,))
 
         # Use orthogonal layers initialization
-        #init_1  = tk.initializers.Orthogonal(gain=0.1, seed=None)
-        #init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
+        init    = tk.initializers.Orthogonal(gain=1.0)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(64,
-                                    use_bias=False,
-                                    activation = 'relu')(obs)
-        dense     = tk.layers.Dense(64,
-                                    use_bias=False,
-                                    activation = 'relu')(dense)
-                                    #kernel_initializer = init_1)(obs)
-        #dense     = tk.layers.Dense(16,
-        #                           activation         = 'tanh',
-        #                           kernel_initializer = init_1)(dense)
-        value     = tk.layers.Dense(1,
-                                    use_bias=False,
-                                    activation = 'linear')(dense)
-                                    #kernel_initializer = init_1)(dense)
+        dense   = Dense(32,
+                        use_bias=False,
+                        activation = 'relu',
+                        kernel_initializer = init)(obs)
+        dense   = Dense(32,
+                        use_bias=False,
+                        activation = 'relu',
+                        kernel_initializer = init)(dense)
+        value   = Dense(1,
+                        use_bias=False,
+                        activation = 'linear',
+                        kernel_initializer = init)(dense)
 
         # Generate actor
         critic    = tk.Model(inputs  = obs,
                              outputs = value)
-        optimizer = tk.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.99,
-                                       epsilon=1e-08, decay=1.0e-4)
-        critic.compile(optimizer = optimizer,
-                       loss = 'mean_squared_error')
+        #optimizer = tk.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.99,
+        #                               epsilon=1e-08, decay=1.0e-4)
+        #critic.compile(optimizer = optimizer,
+        #               loss = 'mean_squared_error')
 
         return critic
 
@@ -295,44 +291,38 @@ class ppo:
     # Train networks
     def train_networks(self, obs, act, adv, tgt):
 
-        # Compute old actions and values
-        old_act = self.get_old_actions(obs)
+        
 
-        #outputs = self.actor.predict_on_batch([obs,
-        #                                       self.dummy_adv,
-        #                                       self.dummy_pred])
-        #print(old_act)
-        #print(outputs)
-        #exit()
+        @tf.function
+        def train_actor(obs, adv):
+            with tf.GradientTape() as tape:
+                pol     = self.actor([obs,
+                                      self.dummy_adv,
+                                      self.dummy_pred], training=True)
+                old_pol = self.old_actor([obs,
+                                          self.dummy_adv,
+                                          self.dummy_pred], training=True)
+                loss    = self.discrete_policy_loss(act, adv, pol, old_pol)
+                grads   = tape.gradient(loss,self.actor.trainable_variables)
+                grads   = zip(grads,self.actor.trainable_variables)
+                self.opt_actor.apply_gradients(grads)
 
-        #for i in range(len(act)):
-        #    probs   = outputs[i,:]
-        #    #print(probs)
-        #    actions = np.random.multinomial(1, probs, size=1)
-        #    print(actions, act[i,:])
+        @tf.function
+        def train_critic(obs, tgt):
+            with tf.GradientTape() as tape:
+                val     = self.critic(obs, training=True)
+                tgt     = tf.cast(tgt, tf.float32)
+                loss    = -tf.reduce_mean(tf.square(tgt - val))
+                grads   = tape.gradient(loss,self.critic.trainable_variables)
+                grads   = zip(grads,self.critic.trainable_variables)
+                self.opt_critic.apply_gradients(grads)
 
-        #exit()
-
-        #print(old_act)
-        #print(act)
-
-        #exit()
-
-        # Train networks
-        self.actor.fit (x          = [obs, adv, old_act],
-                        y          = act,
-                        shuffle    = False)
-                        #epochs     = self.n_epochs,
-                        #batch_size = self.batch_size,
-                        #shuffle    = True,
-                        #verbose    = 0)
-        self.critic.fit(x          = obs,
-                        y          = tgt,
-                        shuffle    = False)
-                        #epochs     = self.n_epochs,
-                        #batch_size = self.batch_size,
-                        #shuffle    = True,
-                        #verbose    = 0)
+        #for epoch in range(self.n_epochs):
+            # not sure how are you taking care of batches, but putting it here just in case
+            #for data_batch in dataset: 
+                #train_step(data_batch)
+        train_actor (obs, adv)
+        train_critic(obs, tgt)
 
         # Update old actor
         self.update_old_actor()

@@ -30,7 +30,7 @@ def launch_training(env_name, alg_type,
                 clip, entropy, gamma, gae_lambda, update_alpha)
 
     # Loop over episodes
-    for ep in range(n_episodes+1):
+    for ep in range(n_episodes):
 
         # Reset env
         ep_rwd   = 0.0
