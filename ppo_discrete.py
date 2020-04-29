@@ -13,7 +13,7 @@ import tensorflow.keras         as     tk
 import tensorflow.keras.backend as     kb
 from   tensorflow.keras.layers  import Dense
 #tf.logging.set_verbosity(tf.logging.FATAL)
-tf.keras.backend.set_floatx('float32')
+#tf.keras.backend.set_floatx('float32')
 
 ###############################################
 ### A discrete PPO agent
@@ -184,6 +184,12 @@ class ppo_discrete:
 
     # Train networks
     def train_networks(self, obs, act, adv, tgt):
+
+        # Cast to proper tf types
+        obs = tf.cast(obs, tf.float32)
+        act = tf.cast(act, tf.float32)
+        adv = tf.cast(adv, tf.float32)
+        tgt = tf.cast(tgt, tf.float32)
 
         # Optimizers
         opt_actor  = tk.optimizers.Adam(lr=self.actor_lr)

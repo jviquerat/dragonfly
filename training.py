@@ -5,7 +5,7 @@ import collections
 import numpy as np
 
 # Custom imports
-from ppo_discrete         import *
+from ppo_discrete import *
 
 # Start training
 def launch_training(env_name, alg_type,
