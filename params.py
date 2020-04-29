@@ -20,10 +20,10 @@ n_steps      = 5000 # Max nb of steps per episode
 n_avg        = 1    # Nb of runs for averaged results
 render_every = 50   # Rendering frequency (in episodes)
 
-actor_lr     = 1.0e-3       # Learning rate
-critic_lr    = 1.0e-4
-batch_size   = 64          # Batch size
-n_epochs     = 10           # Nb of epochs for training
+actor_lr     = 5.0e-3       # Actor  learning rate
+critic_lr    = 1.0e-3       # Critic learning rate
+batch_size   = 64           # Batch size
+n_epochs     = 8           # Nb of epochs for training
 buff_size    = 4*batch_size # Size of buffer for training
 
 clip         = 0.1

@@ -185,9 +185,11 @@ class ppo_discrete:
     # Train networks
     def train_networks(self, obs, act, adv, tgt):
 
+        # Optimizers
         opt_actor  = tk.optimizers.Adam(lr=self.actor_lr)
         opt_critic = tk.optimizers.Adam(lr=self.critic_lr)
 
+        # Training functions
         @tf.function
         def train_actor(obs, adv):
             with tf.GradientTape() as tape:
@@ -212,9 +214,9 @@ class ppo_discrete:
                 grads   = zip(grads,self.critic.trainable_variables)
                 opt_critic.apply_gradients(grads)
 
-        for epoch in range(self.n_epochs):
-            train_actor (obs, adv)
-            train_critic(obs, tgt)
+        # Train
+        train_actor (obs, adv)
+        train_critic(obs, tgt)
 
         # Update old actor
         self.update_old_actor()
@@ -222,13 +224,13 @@ class ppo_discrete:
     # Compute targets
     def compute_tgts(self, buff_rwd):
 
+        # Initialize
         tgt      = 0.0
         buff_tgt = np.zeros_like(buff_rwd)
 
-        # Loop from the end of the buffer
+        # Loop backward to compute discountet reward
         for r in reversed(range(len(buff_rwd))):
-
-            tgt         = self.gamma*tgt + buff_rwd[r]
+            tgt         = buff_rwd[r] + self.gamma*tgt
             buff_tgt[r] = tgt
 
         return buff_tgt
@@ -236,6 +238,7 @@ class ppo_discrete:
     # Compute deltas and advantages
     def compute_advs(self, buff_rwd, buff_val):
 
+        # Initialize
         buff_adv = np.zeros_like(buff_rwd)
         coeff    = self.gamma*self.gae_lambda
 
