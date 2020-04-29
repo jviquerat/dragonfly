@@ -14,7 +14,7 @@ for i in range(n_avg):
     launch_training(env_name, alg_type,
                     n_episodes, n_steps, render_every,
                     actor_lr, critic_lr, buff_size, batch_size, n_epochs,
-                    clip, entropy, gamma, gae_lambda, update_alpha)
+                    clip, entropy, gamma, gae_lambda, alpha)
 
     #f         = np.loadtxt('optimisation.dat')
     #idx       = f[:,0]

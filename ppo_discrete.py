@@ -21,7 +21,7 @@ class ppo_discrete:
     def __init__(self,
                  act_dim, obs_dim, n_episodes,
                  actor_lr, critic_lr, buff_size, batch_size, n_epochs,
-                 clip, entropy, gamma, gae_lambda, update_alpha):
+                 clip, entropy, gamma, gae_lambda, alpha):
 
         # Initialize from arguments
         self.act_dim      = act_dim
@@ -39,7 +39,7 @@ class ppo_discrete:
         self.entropy      = entropy
         self.gamma        = gamma
         self.gae_lambda   = gae_lambda
-        self.update_alpha = update_alpha
+        self.alpha        = alpha
 
         # Build actors
         self.critic    = self.build_critic()
@@ -149,12 +149,14 @@ class ppo_discrete:
 
         return critic
 
-    # Copy new network weights to old one
+    # Update weights of old actor
     def update_old_actor(self):
 
-        # Actor
-        actor_weights = self.actor.get_weights()
-        self.old_actor.set_weights(actor_weights)
+        # Compute averaged weights
+        new_w   = np.asarray(self.actor.get_weights())
+        old_w   = np.asarray(self.old_actor.get_weights())
+        weights = self.alpha*new_w + (1.0-self.alpha)*old_w
+        self.old_actor.set_weights(weights)
 
     # Get actions from network
     def get_actions(self, state):

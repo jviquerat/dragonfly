@@ -15,19 +15,19 @@ env_name     = 'CartPole-v1'
 
 alg_type     = 'discrete' # 'discrete' or 'continuous'
 
-n_episodes   = 500          # Max nb of episodes
+n_episodes   = 300          # Max nb of episodes
 n_steps      = 5000         # Max nb of steps per episode
 n_avg        = 1            # Nb of runs for averaged results
-render_every = 1            # Rendering frequency (in episodes)
+render_every = 1          # Rendering frequency (in episodes)
 
 actor_lr     = 5.0e-3       # Actor  learning rate
-critic_lr    = 1.0e-3       # Critic learning rate
+critic_lr    = 0.5*actor_lr # Critic learning rate
 batch_size   = 64           # Batch size
 n_epochs     = 8            # Nb of epochs for training
 buff_size    = 4*batch_size # Size of buffer for training
 
 clip         = 0.1          # Clipping parameter
-entropy      = 0.001        # Entropy coefficient
-gamma        = 0.99         # Discount coefficient
+entropy      = 0.005        # Entropy coefficient
+gamma        = 0.999        # Discount coefficient
 gae_lambda   = 0.95         # GAE coefficient
-alpha        = 0.90         # Smooth update parameter
+alpha        = 0.5          # Smooth update parameter
