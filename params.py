@@ -8,6 +8,9 @@ import numpy as np
 # - BipedalWalker-v2         (4)
 # - BipedalWalkerHardcore-v2 (4)
 
+# MountainCar-v0
+# CartPole-v1
+
 env_name     = 'CartPole-v1'
 
 alg_type     = 'discrete' # 'discrete' or 'continuous'
@@ -15,15 +18,15 @@ alg_type     = 'discrete' # 'discrete' or 'continuous'
 n_episodes   = 500  # Max nb of episodes
 n_steps      = 5000 # Max nb of steps per episode
 n_avg        = 1    # Nb of runs for averaged results
-render_every = 30   # Rendering frequency (in episodes)
+render_every = 50   # Rendering frequency (in episodes)
 
 learn_rate   = 1.0e-3       # Learning rate
 batch_size   = 64          # Batch size
 n_epochs     = 10           # Nb of epochs for training
 buff_size    = 4*batch_size # Size of buffer for training
 
-clip         = 0.2
-entropy      = 0.0
-gamma        = 0.98
-gae_lambda   = 1.0
+clip         = 0.1
+entropy      = 0.01
+gamma        = 0.99
+gae_lambda   = 0.95
 update_alpha = 0.90

@@ -107,20 +107,20 @@ class ppo:
 
             new_prob = kb.sum(y_true*y_pred,  axis=1)
             old_prob = kb.sum(y_true*old_act, axis=1)
+            ratio = kb.exp(kb.log(new_prob+1e-10) - kb.log(old_prob+1e-10))
             #ratio    = new_prob/(old_prob + kb.epsilon())
-            ratio    = new_prob/old_prob
+            #ratio    = new_prob/old_prob
 
-            surrogate1 = ratio*adv
-            clip_ratio = kb.clip(ratio, 1.0-self.clip, 1.0+self.clip)
-            surrogate2 = clip_ratio*adv
-            loss_actor = kb.minimum(surrogate1, surrogate2)
+            p1 = ratio*adv
+            p2 = kb.clip(ratio, 1.0-self.clip, 1.0+self.clip)*adv
+            loss_actor = -kb.mean(kb.minimum(p1,p2))
             #loss_actor =-kb.mean(lossmin)
 
             # Compute entropy loss
             #loss_entropy = kb.mean((-kb.log(2.0*np.pi*new_var)+1.0)/2.0)
-            loss_entropy =-new_prob*kb.log(new_prob)
+            loss_entropy =-kb.mean(-(new_prob*kb.log(new_prob+1.0e-10)))
 
-            loss_total =-kb.mean(loss_actor + self.entropy*loss_entropy)
+            loss_total = loss_actor + self.entropy*loss_entropy
 
             # Total loss
             #return loss_actor + self.entropy*loss_entropy
@@ -178,29 +178,31 @@ class ppo:
         old_act = tk.layers.Input(shape=(self.act_dim,))
 
         # Use orthogonal layers initialization
-        #init_1  = tk.initializers.Orthogonal(gain=1.0, seed=None)
+        init  = tk.initializers.Orthogonal(gain=1.0, seed=None)
         #init_2  = tk.initializers.Orthogonal(gain=1.0, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
         dense     = tk.layers.Dense(32,
                                     use_bias=False,
-                                   activation         = 'relu')(obs)
-                                   #kernel_initializer = init_1)(obs)
+                                    activation         = 'relu',
+                                    kernel_initializer = init)(obs)
         dense     = tk.layers.Dense(32,
                                     use_bias=False,
-                                   activation         = 'relu')(dense)
+                                    activation         = 'relu',
+                                    kernel_initializer = init)(dense)
         dense     = tk.layers.Dense(32,
                                     use_bias=False,
-                                   activation         = 'relu')(dense)
-                                   #kernel_initializer = init_1)(dense)
+                                    activation         = 'relu',
+                                    kernel_initializer = init)(dense)
         mu        = tk.layers.Dense(self.act_dim,
-                                   activation         = 'softmax')(dense)
-                                   #kernel_initializer = init_2)(dense)
+                                    activation         = 'softmax',
+                                    kernel_initializer = init)(dense)
 
         # Generate actor
         actor     = tk.Model(inputs  = [obs, adv, old_act],
                              outputs = mu)
-        optimizer = tk.optimizers.Adam(lr = 1.0e-2)
+        optimizer = tk.optimizers.Adam(lr=0.005, beta_1=0.9, beta_2=0.99,
+                                       epsilon=1e-08, decay=1.0e-4)
         actor.compile(optimizer = optimizer,
                       loss      = self.discrete_policy_loss(adv, old_act))
 
@@ -217,9 +219,12 @@ class ppo:
         #init_2  = tk.initializers.Orthogonal(gain=0.1, seed=None)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense     = tk.layers.Dense(100,
+        dense     = tk.layers.Dense(64,
                                     use_bias=False,
-                                    activation = 'sigmoid')(obs)
+                                    activation = 'relu')(obs)
+        dense     = tk.layers.Dense(64,
+                                    use_bias=False,
+                                    activation = 'relu')(dense)
                                     #kernel_initializer = init_1)(obs)
         #dense     = tk.layers.Dense(16,
         #                           activation         = 'tanh',
@@ -232,7 +237,8 @@ class ppo:
         # Generate actor
         critic    = tk.Model(inputs  = obs,
                              outputs = value)
-        optimizer = tk.optimizers.Adam(lr = 1.0e-3)
+        optimizer = tk.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.99,
+                                       epsilon=1e-08, decay=1.0e-4)
         critic.compile(optimizer = optimizer,
                        loss = 'mean_squared_error')
 
@@ -357,7 +363,7 @@ class ppo:
                 adv += dlt*(self.gamma*self.gae_lambda)**l
             adv += (buff_rwd[t+l] - buff_val[t+l])*(self.gamma*self.gae_lambda)**l
             buff_adv[t] = adv
-        buff_adv[:] = (buff_adv[:] - np.mean(buff_adv))/np.std(buff_adv)
+        buff_adv = (buff_adv-np.mean(buff_adv))/(np.std(buff_adv) + 1.0e-10)
 
         return buff_adv
 
