@@ -70,13 +70,8 @@ def launch_training(env_name, alg_type,
         buff_tgt = agent.compute_tgts(buff_rwd)
         buff_adv = agent.compute_advs(buff_rwd, buff_val)
 
-        agent.train_networks(buff_obs, buff_act, buff_adv, buff_tgt)
-
-        # Reset buffers
-        buff_obs = []
-        buff_act = []
-        buff_rwd = []
-        buff_val = []
+        agent.train_networks(buff_obs, buff_act,
+                             buff_adv, buff_tgt)
 
         # Printings
         print('# Ep #'+str(ep)+', ep_rwd = '+str(ep_rwd)+', ep_lgt = '+str(ep_lgt))

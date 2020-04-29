@@ -30,6 +30,8 @@ class ppo_discrete:
         self.sig_dim      = act_dim
         self.n_episodes   = n_episodes
 
+        self.actor_lr     = actor_lr
+        self.critic_lr    = critic_lr
         self.buff_size    = buff_size
         self.batch_size   = batch_size
         self.n_epochs     = n_epochs
@@ -183,8 +185,8 @@ class ppo_discrete:
     # Train networks
     def train_networks(self, obs, act, adv, tgt):
 
-        opt_actor  = tk.optimizers.Adam(lr=actor_lr)
-        opt_critic = tk.optimizers.Adam(lr=critic_lr)
+        opt_actor  = tk.optimizers.Adam(lr=self.actor_lr)
+        opt_critic = tk.optimizers.Adam(lr=self.critic_lr)
 
         @tf.function
         def train_actor(obs, adv):
@@ -198,7 +200,7 @@ class ppo_discrete:
                 loss    = self.policy_loss(act, adv, pol, old_pol)
                 grads   = tape.gradient(loss,self.actor.trainable_variables)
                 grads   = zip(grads,self.actor.trainable_variables)
-                self.opt_actor.apply_gradients(grads)
+                opt_actor.apply_gradients(grads)
 
         @tf.function
         def train_critic(obs, tgt):
@@ -208,7 +210,7 @@ class ppo_discrete:
                 loss    = -tf.reduce_mean(tf.square(tgt - val))
                 grads   = tape.gradient(loss,self.critic.trainable_variables)
                 grads   = zip(grads,self.critic.trainable_variables)
-                self.opt_critic.apply_gradients(grads)
+                opt_critic.apply_gradients(grads)
 
         for epoch in range(self.n_epochs):
             train_actor (obs, adv)
