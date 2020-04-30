@@ -25,10 +25,9 @@ def launch_training(env_name, alg_type,
                                    video_callable=video)
     act_dim = env.action_space.n
     obs_dim = env.observation_space.shape[0]
-
-    agent = ppo_discrete(act_dim, obs_dim, n_episodes,
-                         actor_lr, critic_lr, buff_size, batch_size, n_epochs,
-                         clip, entropy, gamma, gae_lambda, alpha)
+    agent   = ppo_discrete(act_dim, obs_dim, n_episodes, actor_lr, critic_lr,
+                           buff_size, batch_size, n_epochs,
+                           clip, entropy, gamma, gae_lambda, alpha)
 
     # Loop over episodes
     for ep in range(n_episodes):

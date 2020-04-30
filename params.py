@@ -29,5 +29,5 @@ buff_size    = 4*batch_size # Size of buffer for training
 clip         = 0.1          # Clipping parameter
 entropy      = 0.01         # Entropy coefficient
 gamma        = 0.99         # Discount coefficient
-gae_lambda   = 0.95         # GAE coefficient
-alpha        = 0.8          # Smooth update parameter
+gae_lambda   = 0.99         # GAE coefficient
+alpha        = 1.0          # Smooth update parameter

@@ -45,8 +45,8 @@ class ppo_discrete:
         self.old_actor.set_weights(self.actor.get_weights())
 
         # Generate dummy inputs for custom loss
-        self.dummy_adv  = np.zeros((1, 1))
-        self.dummy_pred = np.zeros((1, self.act_dim))
+        self.dum_adv  = np.zeros((1, 1))
+        self.dum_pred = np.zeros((1, self.act_dim))
 
         # Storing for file outputs
         self.eps = [] # episode number
@@ -154,7 +154,7 @@ class ppo_discrete:
         # Predict means and deviations
         # The two last parameters are dummy arguments: they are
         # only required for the custom loss used for training
-        outputs = self.actor.predict([state,self.dummy_adv,self.dummy_pred])
+        outputs = self.actor.predict([state,self.dum_adv,self.dum_pred])
         probs   = outputs[0,:]
         actions = np.random.multinomial(1, probs, size=1)
         actions = actions[0]
@@ -191,14 +191,14 @@ class ppo_discrete:
         def train_actor(obs, adv):
             with tf.GradientTape() as tape:
                 pol     = self.actor([obs,
-                                      self.dummy_adv,
-                                      self.dummy_pred], training=True)
+                                      self.dum_adv,
+                                      self.dum_pred], training=True)
                 old_pol = self.old_actor([obs,
-                                          self.dummy_adv,
-                                          self.dummy_pred], training=True)
+                                          self.dum_adv,
+                                          self.dum_pred], training=True)
                 loss    = self.policy_loss(act, adv, pol, old_pol)
-                grads   = tape.gradient(loss,self.actor.trainable_variables)
-                grads   = zip(grads,self.actor.trainable_variables)
+                grads   = tape.gradient(loss, self.actor.trainable_variables)
+                grads   = zip(grads, self.actor.trainable_variables)
                 opt_actor.apply_gradients(grads)
 
             return loss
@@ -206,11 +206,11 @@ class ppo_discrete:
         @tf.function
         def train_critic(obs, tgt):
             with tf.GradientTape() as tape:
-                val     = self.critic(obs, training=True)
-                tgt     = tf.cast(tgt, tf.float32)
-                loss    = tf.reduce_mean(tf.square(tgt - val))
-                grads   = tape.gradient(loss,self.critic.trainable_variables)
-                grads   = zip(grads,self.critic.trainable_variables)
+                val   = self.critic(obs, training=True)
+                tgt   = tf.cast(tgt, tf.float32)
+                loss  = tf.reduce_mean(tf.square(tgt - val))
+                grads = tape.gradient(loss, self.critic.trainable_variables)
+                grads = zip(grads, self.critic.trainable_variables)
                 opt_critic.apply_gradients(grads)
 
             return loss
@@ -227,13 +227,15 @@ class ppo_discrete:
     def compute_tgts(self, buff_rwd):
 
         # Initialize
-        tgt      = 0.0
         buff_tgt = np.zeros_like(buff_rwd)
+        gm       = self.gamma
+        t_t      = 0.0
 
         # Loop backward to compute discountet reward
         for r in reversed(range(len(buff_rwd))):
-            tgt         = buff_rwd[r] + self.gamma*tgt
-            buff_tgt[r] = tgt
+            r_t         = buff_rwd[r]
+            t_t         = r_t + gm*t_t
+            buff_tgt[r] = t_t
 
         return buff_tgt
 
@@ -242,15 +244,28 @@ class ppo_discrete:
 
         # Initialize
         buff_adv = np.zeros_like(buff_rwd)
-        coeff    = self.gamma*self.gae_lambda
+        buff_dlt = np.zeros_like(buff_rwd)
+        gm       = self.gamma
+        lbd      = self.gae_lambda
 
+        # Compute deltas
+        for t in range(len(buff_rwd)-1):
+            r_t         = buff_rwd[t]
+            v_t         = buff_val[t]
+            v_tp        = buff_val[t+1]
+            buff_dlt[t] = r_t + gm*v_tp - v_t
+        buff_dlt[-1]    = buff_rwd[-1] - buff_val[-1]
+
+        # Compute advantages
         for t in range(len(buff_rwd)):
-            adv = 0.0
-            for l in range(0, len(buff_rwd)-t-1):
-                dlt = buff_rwd[t+l] + self.gamma*buff_val[t+l+1] - buff_val[t+l]
-                adv += dlt*(self.gamma*self.gae_lambda)**l
-            adv += (buff_rwd[t+l] - buff_val[t+l])*(self.gamma*self.gae_lambda)**l
-            buff_adv[t] = adv
+            # Loop from t to end of buffer and build a_t
+            a_t = 0.0
+            for l in range(t,len(buff_rwd)):
+                d_l  = buff_dlt[l]
+                a_t += d_l*(gm*lbd)**(l-t)
+            buff_adv[t] = a_t
+
+        # Normalize
         buff_adv = (buff_adv-np.mean(buff_adv))/(np.std(buff_adv) + 1.0e-10)
 
         return buff_adv
