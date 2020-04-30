@@ -10,10 +10,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '10'
 warnings.filterwarnings('ignore',category=FutureWarning)
 import tensorflow               as     tf
 import tensorflow.keras         as     tk
-import tensorflow.keras.backend as     kb
 from   tensorflow.keras.layers  import Dense
-#tf.logging.set_verbosity(tf.logging.FATAL)
-#tf.keras.backend.set_floatx('float32')
 
 ###############################################
 ### A discrete PPO agent
@@ -96,23 +93,27 @@ class ppo_discrete:
 
         # Use orthogonal layers initialization
         init   = tk.initializers.Orthogonal(gain=1.0)
+        reg    = tk.regularizers.l2(0.01)
 
         # Dense layer, then one branch for mu and one for sigma
         dense  = Dense(64,
                        use_bias=False,
                        activation         = 'relu',
-                       kernel_initializer = init)(obs)
+                       kernel_initializer = init,
+                       kernel_regularizer=reg)(obs)
         dense  = Dense(64,
                        use_bias=False,
                        activation         = 'relu',
-                       kernel_initializer = init)(dense)
+                       kernel_initializer = init,
+                       kernel_regularizer=reg)(dense)
         #dense  = Dense(32,
         #               use_bias=False,
         #               activation         = 'relu',
         #               kernel_initializer = init)(dense)
         policy = Dense(self.act_dim,
                        activation         = 'softmax',
-                       kernel_initializer = init)(dense)
+                       kernel_initializer = init,
+                       kernel_regularizer=reg)(dense)
 
         # Generate actor
         actor = tk.Model(inputs  = [obs, adv, old_policy],
@@ -212,20 +213,26 @@ class ppo_discrete:
                 grads   = zip(grads,self.actor.trainable_variables)
                 opt_actor.apply_gradients(grads)
 
+            return loss
+
         @tf.function
         def train_critic(obs, tgt):
             with tf.GradientTape() as tape:
                 val     = self.critic(obs, training=True)
                 tgt     = tf.cast(tgt, tf.float32)
-                loss    = -tf.reduce_mean(tf.square(tgt - val))
+                loss    =-tf.reduce_mean(tf.square(tgt - val))
                 grads   = tape.gradient(loss,self.critic.trainable_variables)
                 grads   = zip(grads,self.critic.trainable_variables)
                 opt_critic.apply_gradients(grads)
 
+            return loss
+
         # Train
         for epoch in range(self.n_epochs):
-            train_actor (obs, adv)
-            train_critic(obs, tgt)
+            loss_actor  = train_actor (obs, adv)
+            loss_critic = train_critic(obs, tgt)
+
+        print (loss_actor, loss_critic)
 
         # Update old actor
         self.update_old_actor()
