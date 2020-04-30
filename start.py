@@ -52,16 +52,20 @@ def launch_training(env_name, alg_type,
             val                   = agent.get_value(obs)
             new_obs, rwd, done, _ = env.step(np.argmax(act))
 
-            # Store in buffers
+            # Store in local buffers
             buff_obs.append(obs)
             buff_act.append(act)
-            buff_rwd.append(rwd*0.1)
+            buff_rwd.append(rwd)
             buff_val.append(val)
 
             # Update observation and buffer counter
             obs       = new_obs
             ep_rwd   += rwd
             ep_lgt   += 1
+
+            # Store in global buffers
+            #agent.stp.append(agent.step)
+            #agent.step += 1
 
         # Episode is finished, proceed to training
         buff_act = np.vstack(buff_act)
@@ -75,8 +79,27 @@ def launch_training(env_name, alg_type,
         agent.train_networks(buff_obs, buff_act,
                              buff_adv, buff_tgt)
 
+        # Store in global buffers
+        agent.eps.append(ep)
+        agent.rwd.append(ep_rwd)
+        agent.lgt.append(ep_lgt)
+        #agent.val.extend(buff_val)
+        #agent.tgt.extend(buff_tgt)
+        #agent.adv.extend(buff_adv)
+
         # Printings
         print('# Ep #'+str(ep)+', ep_rwd = '+str(ep_rwd)+', ep_lgt = '+str(ep_lgt))
+
+    # Write global buffers
+    filename = 'ppo.dat'
+    #print(agent.stp)
+    #print(agent.rwd)
+    #print(agent.val)
+    #print(agent.tgt)
+    #print(agent.adv)
+    np.savetxt(filename, np.transpose([np.asarray(agent.eps),
+                                       np.asarray(agent.rwd),
+                                       np.asarray(agent.lgt)]))
 
 
 # Average results over multiple runs

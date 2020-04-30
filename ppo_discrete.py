@@ -2,8 +2,7 @@
 import os
 import gym
 import warnings
-import collections as cl
-import numpy       as np
+import numpy as np
 
 # Import tensorflow and filter warning messages
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '10'
@@ -37,6 +36,7 @@ class ppo_discrete:
         self.gamma        = gamma
         self.gae_lambda   = gae_lambda
         self.alpha        = alpha
+        self.step         = 0
 
         # Build actors
         self.critic    = self.build_critic()
@@ -48,14 +48,17 @@ class ppo_discrete:
         self.dummy_adv  = np.zeros((1, 1))
         self.dummy_pred = np.zeros((1, self.act_dim))
 
-        # Storing buffers
-        self.obs = cl.deque()
-        self.act = cl.deque()
-        self.rwd = cl.deque()
-        self.val = cl.deque()
-        self.dlt = cl.deque()
-        self.tgt = cl.deque()
-        self.adv = cl.deque()
+        # Storing for file outputs
+        self.eps = [] # episode number
+        self.rwd = [] # episode reward
+        self.lgt = [] # episode length
+        #self.val = [] # value
+        #self.tgt = [] # target
+        #self.adv = [] # advantage
+        #self.stp = [] # step
+        #self.ent = cl.deque() # entropy
+        #self.als = cl.deque() # actor loss
+        #self.cls = cl.deque() # critic loss
 
     # Discrete policy loss
     def policy_loss(self, act, adv, pol, old_pol):
@@ -87,9 +90,9 @@ class ppo_discrete:
         # Input layers
         # Forward network pass only requires observation
         # Advantage and old_action are only used in custom loss
-        obs        = tk.layers.Input(shape=(self.obs_dim,))
-        adv        = tk.layers.Input(shape=(1,),          )
-        old_policy = tk.layers.Input(shape=(self.act_dim,))
+        obs     = tk.layers.Input(shape=(self.obs_dim,))
+        adv     = tk.layers.Input(shape=(1,),          )
+        old_pol = tk.layers.Input(shape=(self.act_dim,))
 
         # Use orthogonal layers initialization
         init   = tk.initializers.Orthogonal(gain=1.0)
@@ -106,18 +109,13 @@ class ppo_discrete:
                        activation         = 'relu',
                        kernel_initializer = init,
                        kernel_regularizer=reg)(dense)
-        #dense  = Dense(32,
-        #               use_bias=False,
-        #               activation         = 'relu',
-        #               kernel_initializer = init)(dense)
-        policy = Dense(self.act_dim,
+        pol    = Dense(self.act_dim,
                        activation         = 'softmax',
                        kernel_initializer = init,
                        kernel_regularizer=reg)(dense)
 
         # Generate actor
-        actor = tk.Model(inputs  = [obs, adv, old_policy],
-                         outputs = policy)
+        actor = tk.Model(inputs = [obs, adv, old_pol], outputs = pol)
 
         return actor
 
@@ -127,26 +125,14 @@ class ppo_discrete:
         # Input layers
         obs  = tk.layers.Input(shape=(self.obs_dim,))
 
-        # Use orthogonal layers initialization
-        init = tk.initializers.Orthogonal(gain=1.0)
-
         # Dense layer, then one branch for mu and one for sigma
         dense = Dense(64,
-                      use_bias=False,
-                      activation = 'relu',
-                      kernel_initializer = init)(obs)
-        #dense = Dense(32,
-        #              use_bias=False,
-        #              activation = 'relu',
-        #              kernel_initializer = init)(dense)
+                      activation = 'relu')(obs)
         value = Dense(1,
-                      use_bias=False,
-                      activation = 'linear',
-                      kernel_initializer = init)(dense)
+                      activation = 'linear')(dense)
 
         # Generate actor
-        critic = tk.Model(inputs  = obs,
-                          outputs = value)
+        critic = tk.Model(inputs = obs, outputs = value)
 
         return critic
 
@@ -171,6 +157,7 @@ class ppo_discrete:
         outputs = self.actor.predict([state,self.dummy_adv,self.dummy_pred])
         probs   = outputs[0,:]
         actions = np.random.multinomial(1, probs, size=1)
+        actions = actions[0]
 
         return actions
 
@@ -182,6 +169,7 @@ class ppo_discrete:
 
         # Predict value
         val   = self.critic.predict(state)
+        val   = float(val)
 
         return val
 
@@ -220,7 +208,7 @@ class ppo_discrete:
             with tf.GradientTape() as tape:
                 val     = self.critic(obs, training=True)
                 tgt     = tf.cast(tgt, tf.float32)
-                loss    =-tf.reduce_mean(tf.square(tgt - val))
+                loss    = tf.reduce_mean(tf.square(tgt - val))
                 grads   = tape.gradient(loss,self.critic.trainable_variables)
                 grads   = zip(grads,self.critic.trainable_variables)
                 opt_critic.apply_gradients(grads)
@@ -231,8 +219,6 @@ class ppo_discrete:
         for epoch in range(self.n_epochs):
             loss_actor  = train_actor (obs, adv)
             loss_critic = train_critic(obs, tgt)
-
-        print (loss_actor, loss_critic)
 
         # Update old actor
         self.update_old_actor()
