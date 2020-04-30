@@ -53,7 +53,7 @@ def launch_training(env_name, alg_type,
             # Store in buffers
             buff_obs.append(obs)
             buff_act.append(act)
-            buff_rwd.append(rwd)
+            buff_rwd.append(rwd*0.1)
             buff_val.append(val)
 
             # Update observation and buffer counter

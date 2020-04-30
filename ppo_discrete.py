@@ -98,18 +98,18 @@ class ppo_discrete:
         init   = tk.initializers.Orthogonal(gain=1.0)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense  = Dense(32,
+        dense  = Dense(64,
                        use_bias=False,
                        activation         = 'relu',
                        kernel_initializer = init)(obs)
-        dense  = Dense(32,
+        dense  = Dense(64,
                        use_bias=False,
                        activation         = 'relu',
                        kernel_initializer = init)(dense)
-        dense  = Dense(32,
-                       use_bias=False,
-                       activation         = 'relu',
-                       kernel_initializer = init)(dense)
+        #dense  = Dense(32,
+        #               use_bias=False,
+        #               activation         = 'relu',
+        #               kernel_initializer = init)(dense)
         policy = Dense(self.act_dim,
                        activation         = 'softmax',
                        kernel_initializer = init)(dense)
@@ -130,14 +130,14 @@ class ppo_discrete:
         init = tk.initializers.Orthogonal(gain=1.0)
 
         # Dense layer, then one branch for mu and one for sigma
-        dense = Dense(32,
+        dense = Dense(64,
                       use_bias=False,
                       activation = 'relu',
                       kernel_initializer = init)(obs)
-        dense = Dense(32,
-                      use_bias=False,
-                      activation = 'relu',
-                      kernel_initializer = init)(dense)
+        #dense = Dense(32,
+        #              use_bias=False,
+        #              activation = 'relu',
+        #              kernel_initializer = init)(dense)
         value = Dense(1,
                       use_bias=False,
                       activation = 'linear',
@@ -223,8 +223,9 @@ class ppo_discrete:
                 opt_critic.apply_gradients(grads)
 
         # Train
-        train_actor (obs, adv)
-        train_critic(obs, tgt)
+        for epoch in range(self.n_epochs):
+            train_actor (obs, adv)
+            train_critic(obs, tgt)
 
         # Update old actor
         self.update_old_actor()
