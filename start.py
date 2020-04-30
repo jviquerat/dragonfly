@@ -23,7 +23,6 @@ def launch_training(env_name, alg_type,
     env     = gym.wrappers.Monitor(env,
                                    './vids/'+str(time.time())+'/',
                                    video_callable=video)
-    print(env.action_space.shape)
     act_dim = env.action_space.n
     obs_dim = env.observation_space.shape[0]
 
