@@ -231,17 +231,18 @@ class ppo_discrete:
 
             return loss
 
+        # Save current actor before training
+        self.copy_actor(self.actor, self.tmp_actor)
+
         # Train
         for epoch in range(self.n_epochs):
-            # Save current actor before training
-            self.copy_actor(self.actor, self.tmp_actor)
 
             # Update actor and critic
             loss_actor  = train_actor (obs, adv)
             loss_critic = train_critic(obs, tgt)
 
-            # Set old actor
-            self.copy_actor(self.tmp_actor, self.prv_actor)
+        # Set old actor
+        self.copy_actor(self.tmp_actor, self.prv_actor)
 
         # Update actors
         #self.update_actors()
