@@ -20,14 +20,16 @@ n_steps      = 5000         # Max nb of steps per episode
 n_avg        = 1            # Nb of runs for averaged results
 render_every = 300          # Rendering frequency (in episodes)
 
-actor_lr     = 1.0e-2       # Actor  learning rate
+actor_lr     = 5.0e-3       # Actor  learning rate
 critic_lr    = 1.0e-3       # Critic learning rate
 batch_size   = 64           # Batch size
 n_epochs     = 1            # Nb of epochs for training
-buff_size    = 4*batch_size # Size of buffer for training
+buff_size    = 64           # Size of buffer for training
+l2_reg       = 0.01         # Actor L2 regularization
+orth_gain    = 1.414          # Actor orhogonal initialization gain
 
 clip         = 0.1          # Clipping parameter
 entropy      = 0.01         # Entropy coefficient
 gamma        = 0.99         # Discount coefficient
-gae_lambda   = 0.99         # GAE coefficient
+gae_lambda   = 0.95         # GAE coefficient
 alpha        = 1.0          # Smooth update parameter

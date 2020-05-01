@@ -15,16 +15,15 @@ from   tensorflow.keras.layers  import Dense
 ### A discrete PPO agent
 class ppo_discrete:
     def __init__(self,
-                 act_dim, obs_dim, n_episodes,
+                 act_dim, obs_dim,
                  actor_lr, critic_lr, buff_size, batch_size, n_epochs,
-                 clip, entropy, gamma, gae_lambda, alpha):
+                 l2_reg, orth_gain, clip, entropy, gamma, gae_lambda, alpha):
 
         # Initialize from arguments
         self.act_dim      = act_dim
         self.obs_dim      = obs_dim
         self.mu_dim       = act_dim
         self.sig_dim      = act_dim
-        self.n_episodes   = n_episodes
 
         self.actor_lr     = actor_lr
         self.critic_lr    = critic_lr
@@ -37,6 +36,8 @@ class ppo_discrete:
         self.gae_lambda   = gae_lambda
         self.alpha        = alpha
         self.step         = 0
+        self.l2_reg       = l2_reg
+        self.orth_gain    = orth_gain
 
         # Build actors
         self.critic    = self.build_critic()
@@ -95,8 +96,8 @@ class ppo_discrete:
         old_pol = tk.layers.Input(shape=(self.act_dim,))
 
         # Use orthogonal layers initialization
-        init   = tk.initializers.Orthogonal(gain=1.0)
-        reg    = tk.regularizers.l2(0.01)
+        init   = tk.initializers.Orthogonal(gain=self.orth_gain)
+        reg    = tk.regularizers.l2(self.l2_reg)
 
         # Dense layer, then one branch for mu and one for sigma
         dense  = Dense(64,
@@ -125,10 +126,20 @@ class ppo_discrete:
         # Input layers
         obs  = tk.layers.Input(shape=(self.obs_dim,))
 
+        # Use orthogonal layers initialization
+        init = tk.initializers.Orthogonal(gain=self.orth_gain)
+        reg  = tk.regularizers.l2(self.l2_reg)
+
         # Dense layer, then one branch for mu and one for sigma
         dense = Dense(64,
+                      use_bias=False,
+                      kernel_initializer = init,
+                      kernel_regularizer=reg,
                       activation = 'relu')(obs)
         value = Dense(1,
+                      use_bias=False,
+                      kernel_initializer = init,
+                      kernel_regularizer=reg,
                       activation = 'linear')(dense)
 
         # Generate actor
@@ -217,6 +228,12 @@ class ppo_discrete:
 
         # Train
         for epoch in range(self.n_epochs):
+            #shuffle = np.random.randint(low  = 0,
+            #                            high = self.buff_size,
+            #                            size = self.batch_size)
+
+            #print(obs[shuffle])
+            #exit()
             loss_actor  = train_actor (obs, adv)
             loss_critic = train_critic(obs, tgt)
 
@@ -224,7 +241,7 @@ class ppo_discrete:
         self.update_old_actor()
 
     # Compute targets
-    def compute_tgts(self, buff_rwd):
+    def compute_tgts(self, buff_rwd, buff_msk):
 
         # Initialize
         buff_tgt = np.zeros_like(buff_rwd)
@@ -233,14 +250,15 @@ class ppo_discrete:
 
         # Loop backward to compute discountet reward
         for r in reversed(range(len(buff_rwd))):
+            m_t         = buff_msk[r]
             r_t         = buff_rwd[r]
-            t_t         = r_t + gm*t_t
+            t_t         = r_t + gm*t_t*m_t
             buff_tgt[r] = t_t
 
         return buff_tgt
 
     # Compute deltas and advantages
-    def compute_advs(self, buff_rwd, buff_val):
+    def compute_advs(self, buff_rwd, buff_val, buff_msk):
 
         # Initialize
         buff_adv = np.zeros_like(buff_rwd)
@@ -250,13 +268,14 @@ class ppo_discrete:
 
         # Compute deltas
         for t in range(len(buff_rwd)-1):
+            m_t         = buff_msk[t]
             r_t         = buff_rwd[t]
             v_t         = buff_val[t]
             v_tp        = buff_val[t+1]
-            buff_dlt[t] = r_t + gm*v_tp - v_t
+            buff_dlt[t] = r_t + gm*v_tp*m_t - v_t
         buff_dlt[-1]    = buff_rwd[-1] - buff_val[-1]
 
-        # Compute advantages
+        # Compute advantages with GAE
         for t in range(len(buff_rwd)):
             # Loop from t to end of buffer and build a_t
             a_t = 0.0
@@ -269,15 +288,3 @@ class ppo_discrete:
         buff_adv = (buff_adv-np.mean(buff_adv))/(np.std(buff_adv) + 1.0e-10)
 
         return buff_adv
-
-    # Store buffers
-    def store_buffers(self, obs, act, rwd, val, dlt, tgt, adv):
-
-        # Append to global buffers
-        self.obs.append(obs)
-        self.act.append(act)
-        self.rwd.append(rwd)
-        self.val.append(val)
-        self.dlt.append(dlt)
-        self.tgt.append(tgt)
-        self.adv.append(adv)
