@@ -24,7 +24,7 @@ def launch_training():
     agent   = ppo_discrete(act_dim, obs_dim, actor_lr, critic_lr,
                            buff_size, batch_size, n_epochs, l2_reg,
                            orth_gain, clip, entropy, gamma, gae_lambda,
-                           alpha, actor_arch, critic_arch)
+                           alpha, actor_arch, critic_arch, swa)
 
     # Initialize buffer-related parameters
     buff_obs = []
@@ -79,6 +79,10 @@ def launch_training():
 
                 agent.train_networks(buff_obs, buff_act,
                                      buff_adv, buff_tgt)
+
+                #if (ep_rwd > agent.best_rwd[0]):
+                #    idx = np.searchsorted(agent.best_rwd, ep_rwd)
+
 
 
                 # Reset buffers

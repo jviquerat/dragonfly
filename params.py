@@ -23,13 +23,14 @@ render_every = 300          # Rendering frequency (in episodes)
 actor_lr     = 5.0e-3       # Actor  learning rate
 critic_lr    = 1.0e-3       # Critic learning rate
 batch_size   = 64           # Batch size
-n_epochs     = 1            # Nb of epochs for training
+n_epochs     = 4            # Nb of epochs for training
 buff_size    = 64           # Size of buffer for training
-l2_reg       = 0.1          # Actor L2 regularization
-orth_gain    = 1.414          # Actor orhogonal initialization gain
+l2_reg       = 0.01         # Actor L2 regularization
+orth_gain    = 0.5          # Actor orhogonal initialization gain
 
-actor_arch   = [128, 128]
-critic_arch  = [128]
+actor_arch   = [64, 64]
+critic_arch  = [64]
+swa          = 10
 
 clip         = 0.1          # Clipping parameter
 entropy      = 0.01         # Entropy coefficient

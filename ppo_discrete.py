@@ -18,7 +18,7 @@ class ppo_discrete:
                  act_dim, obs_dim,
                  actor_lr, critic_lr, buff_size, batch_size, n_epochs,
                  l2_reg, orth_gain, clip, entropy, gamma, gae_lambda,
-                 alpha, actor_arch, critic_arch):
+                 alpha, actor_arch, critic_arch, swa):
 
         # Initialize from arguments
         self.act_dim      = act_dim
@@ -41,16 +41,20 @@ class ppo_discrete:
         self.orth_gain    = orth_gain
         self.actor_arch   = actor_arch
         self.critic_arch  = critic_arch
+        self.swa          = swa
 
         # Build actors
         self.critic    = self.build_critic()
         self.actor     = self.build_actor()
-        self.old_actor = self.build_actor()
-        self.old_actor.set_weights(self.actor.get_weights())
+        self.prv_actor = self.build_actor()
+        self.tmp_actor = self.build_actor()
+        self.prv_actor.set_weights(self.actor.get_weights())
 
         # Generate dummy inputs for custom loss
         self.dum_adv  = np.zeros((1, 1))
         self.dum_pred = np.zeros((1, self.act_dim))
+
+        self.best_rwd = np.zeros((self.swa,2))
 
         # Storing for file outputs
         self.eps = [] # episode number
@@ -151,14 +155,11 @@ class ppo_discrete:
 
         return critic
 
-    # Update weights of old actor
-    def update_old_actor(self):
+    # Copy actor 1 in actor 2
+    def copy_actor(self, act1, act2):
 
-        # Compute averaged weights
-        new_w   = np.asarray(self.actor.get_weights())
-        old_w   = np.asarray(self.old_actor.get_weights())
-        weights = self.alpha*new_w + (1.0-self.alpha)*old_w
-        self.old_actor.set_weights(weights)
+        # Copy weights
+        act2.set_weights(act1.get_weights())
 
     # Get actions from network
     def get_actions(self, state):
@@ -208,7 +209,7 @@ class ppo_discrete:
                 pol     = self.actor([obs,
                                       self.dum_adv,
                                       self.dum_pred], training=True)
-                old_pol = self.old_actor([obs,
+                old_pol = self.prv_actor([obs,
                                           self.dum_adv,
                                           self.dum_pred], training=True)
                 loss    = self.policy_loss(act, adv, pol, old_pol)
@@ -232,17 +233,18 @@ class ppo_discrete:
 
         # Train
         for epoch in range(self.n_epochs):
-            #shuffle = np.random.randint(low  = 0,
-            #                            high = self.buff_size,
-            #                            size = self.batch_size)
+            # Save current actor before training
+            self.copy_actor(self.actor, self.tmp_actor)
 
-            #print(obs[shuffle])
-            #exit()
+            # Update actor and critic
             loss_actor  = train_actor (obs, adv)
             loss_critic = train_critic(obs, tgt)
 
-        # Update old actor
-        self.update_old_actor()
+            # Set old actor
+            self.copy_actor(self.tmp_actor, self.prv_actor)
+
+        # Update actors
+        #self.update_actors()
 
     # Compute targets
     def compute_tgts(self, buff_rwd, buff_msk):
