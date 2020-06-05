@@ -1,12 +1,11 @@
 # Generic imports
 import os
 import time
-import collections
 import numpy as np
 
 # Custom imports
-from params       import *
-from ppo_discrete import *
+from params import *
+from ppo    import *
 
 ########################
 # Process training

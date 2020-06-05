@@ -13,11 +13,10 @@ import numpy as np
 # Acrobot-v1
 # LunarLander-v2
 
-
 env_name     = 'CartPole-v0'
 
 n_episodes   = 300          # Max nb of episodes
-n_avg        = 10            # Nb of runs for averaged results
+n_avg        = 1            # Nb of runs for averaged results
 render_every = 500           # Rendering frequency (in episodes)
 
 actor_lr     = 1.0e-2       # Actor  learning rate
