@@ -1,12 +1,11 @@
 # Generic imports
 import os
 import time
-import collections
 import numpy as np
 
 # Custom imports
-from params       import *
-from ppo_discrete import *
+from params import *
+from ppo    import *
 
 ########################
 # Process training
@@ -52,9 +51,9 @@ def launch_training():
             # Store transition
             if (not bootstrap): mask = float(not done)
             if (    bootstrap):
-                if (not done):                 mask = 1.0
-                if (    done and step <  200): mask = 0.0
-                if (    done and step == 200): mask = 1.0
+                if (not done):                    mask = 1.0
+                if (    done and step <  ep_end): mask = 0.0
+                if (    done and step == ep_end): mask = 1.0
 
             agent.store_transition(obs, nxt, act, rwd, mask)
 
