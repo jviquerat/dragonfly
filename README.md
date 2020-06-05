@@ -2,13 +2,14 @@
 
 This repository contains a PPO implementation for discrete environments.   
 It does **not** strictly follows the original implementation from Schulman *et al.* (see https://arxiv.org/abs/1707.06347).  
-Below are a few tests made on several classic ```gym``` environments.
 
 The current implementation contains several variations compared to the original paper, such as:
 
 - Advantage clipping : negative advantages can be clipped to 0
 - Off-policy learning : the experience buffers from previous policies are kept and re-used several times before being discarded
 - Bootstrapping : a specific care is given to the handling of the ```done``` signal, depending on its type (environment failure or episode termination)
+
+Below are a few tests made on several classic ```gym``` environments.
 
 ## CartPole-v0
 
