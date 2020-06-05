@@ -1,12 +1,11 @@
 # Generic imports
 import os
 import time
-import collections
 import numpy as np
 
 # Custom imports
-from params       import *
-from ppo_discrete import *
+from params import *
+from ppo    import *
 
 ########################
 # Process training
@@ -49,14 +48,17 @@ def launch_training():
             nxt, rwd, done, _ = env.step(np.argmax(act))
             step             += 1
 
-            # Store transition
-            if (not bootstrap): mask = float(not done)
+            # Handle termination state
+            if (not bootstrap):
+                if (not done): term = 0
+                if (    done): term = 1
             if (    bootstrap):
-                if (not done):                 mask = 1.0
-                if (    done and step <  200): mask = 0.0
-                if (    done and step == 200): mask = 1.0
+                if (not done):                    term = 0
+                if (    done and step <  ep_end): term = 1
+                if (    done and step == ep_end): term = 2
 
-            agent.store_transition(obs, nxt, act, rwd, mask)
+            # Store transition
+            agent.store_transition(obs, nxt, act, rwd, term)
 
             # Update observation and buffer counter
             obs       = nxt

@@ -1,74 +1,9 @@
 # Generic imports
-import os
 import gym
-import warnings
 import numpy as np
 
-# Import tensorflow and filter warning messages
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '10'
-warnings.filterwarnings('ignore',category=FutureWarning)
-import tensorflow                    as     tf
-import tensorflow.keras              as     tk
-import tensorflow_addons             as     tfa
-from   tensorflow.keras              import Model
-from   tensorflow.keras.layers       import Dense
-from   tensorflow.keras.initializers import Orthogonal
-
-###############################################
-### PPO actor
-class actor(Model):
-    def __init__(self, arch, act_dim):
-        super(actor, self).__init__()
-
-        # Define network
-        self.ac = []
-        for layer in range(len(arch)):
-            self.ac.append(Dense(arch[layer],
-                                 kernel_initializer=Orthogonal(gain=1.0),
-                                 activation = 'tanh'))
-        self.ac.append(Dense(act_dim,
-                             kernel_initializer=Orthogonal(gain=0.1),
-                             activation = 'softmax'))
-
-    # Network forward pass
-    def call(self, state):
-
-        # Copy input
-        var = state
-
-        # Compute output
-        for layer in range(len(self.ac)):
-            var = self.ac[layer](var)
-
-        return var
-
-###############################################
-### PPO critic
-class critic(Model):
-    def __init__(self, arch):
-        super(critic, self).__init__()
-
-        # Define network
-        self.ct = []
-        for layer in range(len(arch)):
-            self.ct.append(Dense(arch[layer],
-                                 kernel_initializer=Orthogonal(gain=1.0),
-                                 activation = 'tanh'))
-        self.ct.append(Dense(1,
-                             kernel_initializer=Orthogonal(gain=0.1),
-                             activation = 'linear'))
-
-    # Network forward pass
-    def call(self, state):
-
-        # Copy input
-        var = state
-
-        # Compute output
-        for layer in range(len(self.ct)):
-            var = self.ct[layer](var)
-
-        return var
+# Custom imports
+from agent import *
 
 ###############################################
 ### A discrete PPO agent
@@ -101,27 +36,15 @@ class ppo_discrete:
         self.actor_arch   = actor_arch
         self.critic_arch  = critic_arch
 
+        # Sanity check for batch_size
+        if (batch_size > n_buff*buff_size):
+            print('Error: batch_size too large')
+            exit()
+
         # Build networks
-        self.critic     = critic(critic_arch)
-        self.actor      = actor (actor_arch, act_dim)
-        self.old_actor  = actor (actor_arch, act_dim)
-
-        # Optimizers
-        self.opt_actor  = tk.optimizers.Nadam(lr       = actor_lr,
-                                              clipnorm = grd_clip,
-                                              beta_1   = 0.9,
-                                              beta_2   = 0.99,
-                                              epsilon  = 1.0e-5)
-        self.opt_critic = tk.optimizers.Nadam(lr       = critic_lr,
-                                              clipnorm = grd_clip,
-                                              beta_1   = 0.9,
-                                              beta_2   = 0.99,
-                                              epsilon  = 1.0e-5)
-
-        #self.opt_actor  = tfa.optimizers.RectifiedAdam(lr       = actor_lr,
-        #                                               clipnorm = grd_clip)
-        #self.opt_critic = tfa.optimizers.RectifiedAdam(lr       = critic_lr,
-        #                                               clipnorm = grd_clip)
+        self.critic     = critic(critic_arch, critic_lr, grd_clip)
+        self.actor      = actor (actor_arch, act_dim, actor_lr, grd_clip)
+        self.old_actor  = actor (actor_arch, act_dim, actor_lr, grd_clip)
 
         # Init parameters
         dummy = self.critic   (tf.ones([1,self.obs_dim]))
@@ -159,8 +82,14 @@ class ppo_discrete:
 
         # Forward pass to get policy
         policy  = self.actor(state)
+
+        # Sanitize output
+        policy       = tf.cast(policy, dtype=tf.float64)
+        policy, norm = tf.linalg.normalize(policy, ord=1)
+
         policy  = np.asarray(policy)[0]
         actions = np.random.multinomial(1, policy)
+        actions = np.float32(actions)
 
         return actions
 
@@ -186,14 +115,14 @@ class ppo_discrete:
         nxt = self.buff_nxt
         act = self.buff_act
         rwd = self.buff_rwd
-        msk = self.buff_msk
+        trm = self.buff_trm
 
         # Get previous policy and values
         val = np.array(self.critic(tf.cast(obs, dtype=tf.float32)))
         nxt = np.array(self.critic(tf.cast(nxt, dtype=tf.float32)))
 
         # Compute advantages
-        tgt, adv = self.compute_adv(rwd, val, nxt, msk)
+        tgt, adv = self.compute_adv(rwd, val, nxt, trm)
 
         # Store in global buffers
         self.obs = np.append(self.obs, obs, axis=0)
@@ -209,7 +138,7 @@ class ppo_discrete:
         act    = self.act[-n_buff*self.buff_size:]
 
         # Retrieve learning rate
-        lr = self.opt_actor._decayed_lr(tf.float32)
+        lr = self.actor.opt._decayed_lr(tf.float32)
 
         # Save actor weights
         act_weights = self.actor.get_weights()
@@ -220,7 +149,6 @@ class ppo_discrete:
             # Randomize batch
             sample = np.arange(n_buff*self.buff_size)
             np.random.shuffle(sample)
-            self.batch_size = n_buff*self.buff_size
             sample = sample[:self.batch_size]
 
             btc_obs = [obs[i] for i in sample]
@@ -247,11 +175,18 @@ class ppo_discrete:
         return act_out + crt_out + [lr]
 
     # Compute deltas and advantages
-    def compute_adv(self, rwd, val, nxt, msk):
+    def compute_adv(self, rwd, val, nxt, trm):
 
         # Initialize
         gm  = self.gamma
         lbd = self.gae_lambda
+
+        # Handle mask from termination signals
+        msk = np.zeros(len(trm))
+        for i in range(len(trm)):
+            if (trm[i] == 0): msk[i] = 1.0
+            if (trm[i] == 1): msk[i] = 0.0
+            if (trm[i] == 2): msk[i] = 1.0
 
         # Compute deltas
         buff = zip(rwd, msk, nxt, val)
@@ -260,6 +195,13 @@ class ppo_discrete:
 
         # Compute advantages
         adv = dlt.copy()
+
+        # Handle mask from termination signals
+        msk = np.zeros(len(trm))
+        for i in range(len(trm)):
+            if (trm[i] == 0): msk[i] = 1.0
+            if (trm[i] == 1): msk[i] = 0.0
+            if (trm[i] == 2): msk[i] = 0.0
 
         for t in reversed(range(len(dlt)-1)):
             adv[t] += msk[t]*gm*lbd*adv[t+1]
@@ -316,7 +258,7 @@ class ppo_discrete:
             act_var = self.actor.trainable_variables
             grads   = tape.gradient(loss, act_var)
             norm    = tf.linalg.global_norm(grads)
-        self.opt_actor.apply_gradients(zip(grads,act_var))
+        self.actor.opt.apply_gradients(zip(grads,act_var))
 
         return [loss_ppo, loss, entropy, norm, kl]
 
@@ -335,7 +277,7 @@ class ppo_discrete:
             crt_var     = self.critic.trainable_variables
             grads       = tape.gradient(loss, crt_var)
             norm        = tf.linalg.global_norm(grads)
-        self.opt_critic.apply_gradients(zip(grads,crt_var))
+        self.critic.opt.apply_gradients(zip(grads,crt_var))
 
         return [loss, norm]
 
@@ -379,16 +321,16 @@ class ppo_discrete:
         self.buff_nxt = np.array([])
         self.buff_act = np.array([])
         self.buff_rwd = np.array([])
-        self.buff_msk = np.array([])
+        self.buff_trm = np.array([])
 
     # Store transition in local buffers
-    def store_transition(self, obs, nxt, act, rwd, msk):
+    def store_transition(self, obs, nxt, act, rwd, trm):
 
         self.buff_obs = np.append(self.buff_obs, obs)
         self.buff_nxt = np.append(self.buff_nxt, nxt)
         self.buff_act = np.append(self.buff_act, act)
         self.buff_rwd = np.append(self.buff_rwd, rwd)
-        self.buff_msk = np.append(self.buff_msk, msk)
+        self.buff_trm = np.append(self.buff_trm, trm)
 
     # Reshape local buffers
     def reshape_local_buffers(self):
@@ -397,4 +339,4 @@ class ppo_discrete:
         self.buff_nxt = np.reshape(self.buff_nxt,(self.buff_size,self.obs_dim))
         self.buff_act = np.reshape(self.buff_act,(self.buff_size,self.act_dim))
         self.buff_rwd = np.reshape(self.buff_rwd,(self.buff_size,1))
-        self.buff_msk = np.reshape(self.buff_msk,(self.buff_size,1))
+        self.buff_trm = np.reshape(self.buff_trm,(self.buff_size,1))
