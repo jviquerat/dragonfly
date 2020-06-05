@@ -1,14 +1,9 @@
 # Generic imports
-import os
 import gym
-import warnings
 import numpy as np
 
 # Custom imports
 from agent import *
-#os.environ['TF_CPP_MIN_LOG_LEVEL'] = '10'
-#warnings.filterwarnings('ignore',category=FutureWarning)
-#import tensorflow as tf
 
 ###############################################
 ### A discrete PPO agent
