@@ -77,8 +77,14 @@ class ppo_discrete:
 
         # Forward pass to get policy
         policy  = self.actor(state)
+
+        # Sanitize output
+        policy       = tf.cast(policy, dtype=tf.float64)
+        policy, norm = tf.linalg.normalize(policy, ord=1)
+
         policy  = np.asarray(policy)[0]
         actions = np.random.multinomial(1, policy)
+        actions = np.float32(actions)
 
         return actions
 
