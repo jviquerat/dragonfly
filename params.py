@@ -21,7 +21,7 @@ render_every = 100          # Rendering frequency (in episodes)
 
 actor_lr     = 1.0e-2       # Actor  learning rate
 critic_lr    = 1.0e-2       # Critic learning rate
-batch_size   = 64           # Batch size
+batch_size   = 128           # Batch size
 n_epochs     = 16           # Nb   of epochs  for training
 buff_size    = 128          # Size of buffer  for training
 n_buff       = 4            # Nb   of buffers for training

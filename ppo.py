@@ -36,6 +36,11 @@ class ppo_discrete:
         self.actor_arch   = actor_arch
         self.critic_arch  = critic_arch
 
+        # Sanity check for batch_size
+        if (batch_size > n_buff*buff_size):
+            print('Error: batch_size too large')
+            exit()
+
         # Build networks
         self.critic     = critic(critic_arch, critic_lr, grd_clip)
         self.actor      = actor (actor_arch, act_dim, actor_lr, grd_clip)
@@ -144,7 +149,6 @@ class ppo_discrete:
             # Randomize batch
             sample = np.arange(n_buff*self.buff_size)
             np.random.shuffle(sample)
-            self.batch_size = n_buff*self.buff_size
             sample = sample[:self.batch_size]
 
             btc_obs = [obs[i] for i in sample]
