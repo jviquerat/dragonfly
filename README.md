@@ -7,7 +7,7 @@ The current implementation contains several variations compared to the original 
 
 - Advantage clipping : negative advantages can be clipped to 0
 - Off-policy learning : the experience buffers from previous policies are kept and re-used several times before being discarded
-- Bootstrapping : a specific care is given to the handling of the ```done``` signal, depending on its type (environment failure or episode termination)
+- Bootstrapping : a specific care is given to the handling of the ```done``` signal, depending on its type (environment failure or episode termination), in the fashion of what is done in the [`Tensorforce`](https://github.com/tensorforce/tensorforce) library.
 
 Below are a few tests made on several classic ```gym``` environments.
 
