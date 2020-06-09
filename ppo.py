@@ -77,8 +77,14 @@ class ppo_discrete:
 
         # Forward pass to get policy
         policy  = self.actor(state)
+
+        # Sanitize output
+        policy       = tf.cast(policy, dtype=tf.float64)
+        policy, norm = tf.linalg.normalize(policy, ord=1)
+
         policy  = np.asarray(policy)[0]
         actions = np.random.multinomial(1, policy)
+        actions = np.float32(actions)
 
         return actions
 
@@ -104,14 +110,14 @@ class ppo_discrete:
         nxt = self.buff_nxt
         act = self.buff_act
         rwd = self.buff_rwd
-        msk = self.buff_msk
+        trm = self.buff_trm
 
         # Get previous policy and values
         val = np.array(self.critic(tf.cast(obs, dtype=tf.float32)))
         nxt = np.array(self.critic(tf.cast(nxt, dtype=tf.float32)))
 
         # Compute advantages
-        tgt, adv = self.compute_adv(rwd, val, nxt, msk)
+        tgt, adv = self.compute_adv(rwd, val, nxt, trm)
 
         # Store in global buffers
         self.obs = np.append(self.obs, obs, axis=0)
@@ -165,11 +171,18 @@ class ppo_discrete:
         return act_out + crt_out + [lr]
 
     # Compute deltas and advantages
-    def compute_adv(self, rwd, val, nxt, msk):
+    def compute_adv(self, rwd, val, nxt, trm):
 
         # Initialize
         gm  = self.gamma
         lbd = self.gae_lambda
+
+        # Handle mask from termination signals
+        msk = np.zeros(len(trm))
+        for i in range(len(trm)):
+            if (trm[i] == 0): msk[i] = 1.0
+            if (trm[i] == 1): msk[i] = 0.0
+            if (trm[i] == 2): msk[i] = 1.0
 
         # Compute deltas
         buff = zip(rwd, msk, nxt, val)
@@ -178,6 +191,13 @@ class ppo_discrete:
 
         # Compute advantages
         adv = dlt.copy()
+
+        # Handle mask from termination signals
+        msk = np.zeros(len(trm))
+        for i in range(len(trm)):
+            if (trm[i] == 0): msk[i] = 1.0
+            if (trm[i] == 1): msk[i] = 0.0
+            if (trm[i] == 2): msk[i] = 0.0
 
         for t in reversed(range(len(dlt)-1)):
             adv[t] += msk[t]*gm*lbd*adv[t+1]
@@ -297,16 +317,16 @@ class ppo_discrete:
         self.buff_nxt = np.array([])
         self.buff_act = np.array([])
         self.buff_rwd = np.array([])
-        self.buff_msk = np.array([])
+        self.buff_trm = np.array([])
 
     # Store transition in local buffers
-    def store_transition(self, obs, nxt, act, rwd, msk):
+    def store_transition(self, obs, nxt, act, rwd, trm):
 
         self.buff_obs = np.append(self.buff_obs, obs)
         self.buff_nxt = np.append(self.buff_nxt, nxt)
         self.buff_act = np.append(self.buff_act, act)
         self.buff_rwd = np.append(self.buff_rwd, rwd)
-        self.buff_msk = np.append(self.buff_msk, msk)
+        self.buff_trm = np.append(self.buff_trm, trm)
 
     # Reshape local buffers
     def reshape_local_buffers(self):
@@ -315,4 +335,4 @@ class ppo_discrete:
         self.buff_nxt = np.reshape(self.buff_nxt,(self.buff_size,self.obs_dim))
         self.buff_act = np.reshape(self.buff_act,(self.buff_size,self.act_dim))
         self.buff_rwd = np.reshape(self.buff_rwd,(self.buff_size,1))
-        self.buff_msk = np.reshape(self.buff_msk,(self.buff_size,1))
+        self.buff_trm = np.reshape(self.buff_trm,(self.buff_size,1))

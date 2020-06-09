@@ -48,14 +48,17 @@ def launch_training():
             nxt, rwd, done, _ = env.step(np.argmax(act))
             step             += 1
 
-            # Store transition
-            if (not bootstrap): mask = float(not done)
+            # Handle termination state
+            if (not bootstrap):
+                if (not done): term = 0
+                if (    done): term = 1
             if (    bootstrap):
-                if (not done):                    mask = 1.0
-                if (    done and step <  ep_end): mask = 0.0
-                if (    done and step == ep_end): mask = 1.0
+                if (not done):                    term = 0
+                if (    done and step <  ep_end): term = 1
+                if (    done and step == ep_end): term = 2
 
-            agent.store_transition(obs, nxt, act, rwd, mask)
+            # Store transition
+            agent.store_transition(obs, nxt, act, rwd, term)
 
             # Update observation and buffer counter
             obs       = nxt

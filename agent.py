@@ -8,9 +8,13 @@ warnings.filterwarnings('ignore',category=FutureWarning)
 import tensorflow                    as     tf
 import tensorflow.keras              as     tk
 import tensorflow_addons             as     tfa
+import tensorflow_probability        as     tfp
 from   tensorflow.keras              import Model
 from   tensorflow.keras.layers       import Dense
 from   tensorflow.keras.initializers import Orthogonal
+
+# Define alias
+tfd = tfp.distributions
 
 ###############################################
 ### PPO actor

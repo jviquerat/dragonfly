@@ -9,15 +9,15 @@ import numpy as np
 # - BipedalWalkerHardcore-v2 (4)
 
 # MountainCar-v0
-# CartPole-v1
+# CartPole-v0
 # Acrobot-v1
 # LunarLander-v2
 
 env_name     = 'CartPole-v0'
 ep_end       = 200          # Nb of max episode steps
 n_episodes   = 300          # Max nb of episodes
-n_avg        = 10           # Nb of runs for averaged results
-render_every = 500          # Rendering frequency (in episodes)
+n_avg        = 5            # Nb of runs for averaged results
+render_every = 100          # Rendering frequency (in episodes)
 
 actor_lr     = 1.0e-2       # Actor  learning rate
 critic_lr    = 1.0e-2       # Critic learning rate
