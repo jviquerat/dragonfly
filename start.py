@@ -67,11 +67,6 @@ def launch_training():
             obs       = nxt
             score    += rwd
 
-            # Test if loop is over
-            loop     = agent.test_loop(done, bf_step)
-            ep_step += 1
-            bf_step += 1
-
             # Reset if episode is done
             if done:
                 # Store for future file printing
@@ -85,6 +80,13 @@ def launch_training():
                 score   = 0
                 ep_step = 0
                 ep     += 1
+            else:
+                ep_step +=1
+
+            # Test if loop is over
+            loop     = agent.test_loop(done, bf_step)
+            bf_step += 1
+            #ep_step += 1
 
         # Train
         outputs = agent.train()

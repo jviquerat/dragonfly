@@ -15,9 +15,9 @@ critic_lr    = 1.0e-2       # Critic learning rate
 actor_arch   = [16,16]      # Actor  hidden layers
 critic_arch  = [16,16]      # Critic hidden layers
 
-update_style = 'buff'       # 'ep' or 'buff'
-batch_size   = 64           # Batch size                   ('ep', 'buff')
-n_buff       = 4            # Nb   of buffers for training ('ep', 'buff')
+update_style = 'ep'       # 'ep' or 'buff'
+batch_size   = 128           # Batch size                   ('ep', 'buff')
+n_buff       = 16            # Nb   of buffers for training ('ep', 'buff')
 n_epochs     = 16           # Nb   of epochs  for training ('ep', 'buff')
 buff_size    = 128          # Size of buffer  for training ('buff' only)
 

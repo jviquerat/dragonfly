@@ -180,7 +180,7 @@ class ppo_discrete:
 
             # Train networks
             act_out = self.train_actor (btc_obs, btc_adv, btc_act)
-            crt_out = self.train_critic(btc_obs, btc_tgt)
+            crt_out = self.train_critic(btc_obs, btc_tgt, batch_size)
 
         # Update old networks
         self.old_actor.set_weights(act_weights)
@@ -277,12 +277,12 @@ class ppo_discrete:
 
     # Training function for critic
     @tf.function
-    def train_critic(self, obs, tgt):
+    def train_critic(self, obs, tgt, btc):
         with tf.GradientTape() as tape:
 
             # Compute loss
             val  = tf.convert_to_tensor(self.critic(obs))
-            val  = tf.reshape(val,     [self.batch_size])
+            val  = tf.reshape(val, [btc])
             p1   = tf.square(tgt - val)
             loss = tf.reduce_mean(p1)
 
