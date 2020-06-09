@@ -68,14 +68,14 @@ def launch_training():
             score    += rwd
 
             # Test if loop is over
-            loop     = agent.test_loop(ep_step, bf_step)
+            loop     = agent.test_loop(done, bf_step)
             ep_step += 1
             bf_step += 1
 
             # Reset if episode is done
             if done:
                 # Store for future file printing
-                agent.store_learning_data(ep, score, outputs)
+                agent.store_learning_data(ep, ep_step, score, outputs)
 
                 # Print and reset
                 avg     = np.mean(agent.score[-25:])

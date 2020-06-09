@@ -37,10 +37,16 @@ class ppo_discrete:
         self.update_style = update_style
         self.ep_end       = ep_end
 
-        # Sanity check for batch_size
-        if (batch_size > n_buff*buff_size):
-            print('Error: batch_size too large')
+        # Sanity check for update_style
+        if (update_style not in ['ep', 'buff']):
+            print('Error: unkown update style')
             exit()
+
+        # Sanity check for batch_size
+        if (update_style == 'ep'):
+            if (batch_size > n_buff*buff_size):
+                print('Error: batch_size too large')
+                exit()
 
         # Build networks
         self.critic     = critic(critic_arch, critic_lr, grd_clip)
@@ -63,17 +69,18 @@ class ppo_discrete:
         self.act = np.empty((0,self.act_dim))
 
         # Arrays to store learning data
-        self.ep      = np.array([]) # episode number
-        self.score   = np.array([]) # episode reward
-        self.stp     = np.array([]) # step    number
-        self.ls_ppo  = np.array([]) # ppo     loss
-        self.ls_act  = np.array([]) # actor   loss
-        self.ls_crt  = np.array([]) # critic  loss
-        self.ent     = np.array([]) # entropy
-        self.nrm_act = np.array([]) # actor  gradient norm
-        self.nrm_crt = np.array([]) # critic gradient norm
-        self.kl_div  = np.array([]) # approx. kl divergence
-        self.lr      = np.array([]) # learning rate schedule
+        self.ep      = np.array([], dtype=np.float32) # episode number
+        self.score   = np.array([], dtype=np.float32) # episode reward
+        self.stp     = np.array([], dtype=np.float32) # step    number
+        self.ls_ppo  = np.array([], dtype=np.float32) # ppo     loss
+        self.ls_act  = np.array([], dtype=np.float32) # actor   loss
+        self.ls_crt  = np.array([], dtype=np.float32) # critic  loss
+        self.ent     = np.array([], dtype=np.float32) # entropy
+        self.nrm_act = np.array([], dtype=np.float32) # actor  gradient norm
+        self.nrm_crt = np.array([], dtype=np.float32) # critic gradient norm
+        self.kl_div  = np.array([], dtype=np.float32) # approx. kl divergence
+        self.lr      = np.array([], dtype=np.float32) # learning rate schedule
+        self.length  = np.array([], dtype=np.uint16 ) # episode length
 
     # Get actions from network
     def get_actions(self, state):
@@ -132,11 +139,16 @@ class ppo_discrete:
         self.act = np.append(self.act, act, axis=0)
 
         # Retrieve n_buff buffers from history
-        n_buff = min(self.n_buff, len(self.obs)//self.buff_size)
-        obs    = self.obs[-n_buff*self.buff_size:]
-        adv    = self.adv[-n_buff*self.buff_size:]
-        tgt    = self.tgt[-n_buff*self.buff_size:]
-        act    = self.act[-n_buff*self.buff_size:]
+        lgt, obs, adv, tgt, act = self.get_buffers()
+
+        # Handle insufficient history compared to batch_size
+        batch_size = min(self.batch_size, lgt)
+
+        #n_buff = min(self.n_buff, len(self.obs)//self.buff_size)
+        #obs    = self.obs[-n_buff*self.buff_size:]
+        #adv    = self.adv[-n_buff*self.buff_size:]
+        #tgt    = self.tgt[-n_buff*self.buff_size:]
+        #act    = self.act[-n_buff*self.buff_size:]
 
         # Retrieve learning rate
         lr = self.actor.opt._decayed_lr(tf.float32)
@@ -148,9 +160,9 @@ class ppo_discrete:
         for epoch in range(self.n_epochs):
 
             # Randomize batch
-            sample = np.arange(n_buff*self.buff_size)
+            sample = np.arange(lgt)
             np.random.shuffle(sample)
-            sample = sample[:self.batch_size]
+            sample = sample[:batch_size]
 
             btc_obs = [obs[i] for i in sample]
             btc_adv = [adv[i] for i in sample]
@@ -158,13 +170,13 @@ class ppo_discrete:
             btc_act = [act[i] for i in sample]
 
             btc_obs = tf.reshape(tf.cast(btc_obs, tf.float32),
-                                 [self.batch_size,self.obs_dim])
+                                 [batch_size,self.obs_dim])
             btc_adv = tf.reshape(tf.cast(btc_adv, tf.float32),
-                                 [self.batch_size])
+                                 [batch_size])
             btc_tgt = tf.reshape(tf.cast(btc_tgt, tf.float32),
-                                 [self.batch_size])
+                                 [batch_size])
             btc_act = tf.reshape(tf.cast(btc_act, tf.float32),
-                                 [self.batch_size,self.act_dim])
+                                 [batch_size,self.act_dim])
 
             # Train networks
             act_out = self.train_actor (btc_obs, btc_adv, btc_act)
@@ -283,7 +295,7 @@ class ppo_discrete:
         return [loss, norm]
 
     # Store for printing
-    def store_learning_data(self, ep, score, outputs):
+    def store_learning_data(self, ep, length, score, outputs):
 
         ls_ppo  = outputs[0]
         ls_act  = outputs[1]
@@ -304,6 +316,7 @@ class ppo_discrete:
         self.nrm_crt = np.append(self.nrm_crt, nrm_crt)
         self.kl_div  = np.append(self.kl_div,  kl_div)
         self.lr      = np.append(self.lr,      lr)
+        self.length  = np.append(self.length,  length)
 
     # Write learning data
     def write_learning_data(self):
@@ -336,17 +349,37 @@ class ppo_discrete:
     # Reshape local buffers
     def reshape_local_buffers(self):
 
-        self.buff_obs = np.reshape(self.buff_obs,(self.buff_size,self.obs_dim))
-        self.buff_nxt = np.reshape(self.buff_nxt,(self.buff_size,self.obs_dim))
-        self.buff_act = np.reshape(self.buff_act,(self.buff_size,self.act_dim))
-        self.buff_rwd = np.reshape(self.buff_rwd,(self.buff_size,1))
-        self.buff_trm = np.reshape(self.buff_trm,(self.buff_size,1))
+        self.buff_obs = np.reshape(self.buff_obs,(-1,self.obs_dim))
+        self.buff_nxt = np.reshape(self.buff_nxt,(-1,self.obs_dim))
+        self.buff_act = np.reshape(self.buff_act,(-1,self.act_dim))
+        self.buff_rwd = np.reshape(self.buff_rwd,(-1,1))
+        self.buff_trm = np.reshape(self.buff_trm,(-1,1))
+
+    # Get buffers
+    def get_buffers(self):
+
+        # Handle insufficient history
+        n_buff = self.n_buff
+        if (self.update_style == 'ep'):
+            n_buff = int(min(n_buff, self.ep[-1]+1))
+            length = sum(self.length[-n_buff:])
+        if (self.update_style == 'buff'):
+            n_buff = int(min(n_buff, len(self.obs)//self.buff_size))
+            length = n_buff*self.buff_size
+
+        # Retrieve buffers
+        obs    = self.obs[-length:]
+        adv    = self.adv[-length:]
+        tgt    = self.tgt[-length:]
+        act    = self.act[-length:]
+
+        return length, obs, adv, tgt, act
 
     # Test looping criterion
-    def test_loop(self, ep_step, bf_step):
+    def test_loop(self, done, bf_step):
 
         if (self.update_style == 'ep'):
-            if (ep_step == self.ep_end-1):
+            if (done):
                 return False
             else:
                 return True
