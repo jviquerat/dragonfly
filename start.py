@@ -23,12 +23,13 @@ def launch_training():
     agent   = ppo_discrete(act_dim, obs_dim, actor_lr, critic_lr,
                            buff_size, batch_size, n_epochs, n_buff,
                            pol_clip, grd_clip, adv_clip, bootstrap,
-                           entropy, gamma, gae_lambda,
-                           actor_arch, critic_arch)
+                           entropy, gamma, gae_lambda, ep_end,
+                           actor_arch, critic_arch, update_style)
 
     # Initialize parameters
     ep      = 0
-    step    = 0
+    ep_step = 0
+    bf_step = 0
     score   = 0.0
     mask    = 1.0
     outputs = 8*[0.0]
@@ -39,23 +40,25 @@ def launch_training():
 
         # Reset local buffers
         agent.reset_local_buffers()
+        bf_step = 0
+        loop    = True
 
         # Loop over buff size
-        for _ in range(buff_size):
+        while (loop):
+        #for _ in range(buff_size):
 
             # Make one iteration
             act               = agent.get_actions(obs)
             nxt, rwd, done, _ = env.step(np.argmax(act))
-            step             += 1
 
             # Handle termination state
             if (not bootstrap):
                 if (not done): term = 0
                 if (    done): term = 1
             if (    bootstrap):
-                if (not done):                    term = 0
-                if (    done and step <  ep_end): term = 1
-                if (    done and step == ep_end): term = 2
+                if (not done):                         term = 0
+                if (    done and ep_step <  ep_end-1): term = 1
+                if (    done and ep_step == ep_end-1): term = 2
 
             # Store transition
             agent.store_transition(obs, nxt, act, rwd, term)
@@ -70,13 +73,18 @@ def launch_training():
                 agent.store_learning_data(ep, score, outputs)
 
                 # Print and reset
-                avg = np.mean(agent.score[-25:])
-                avg = f"{avg:.3f}"
+                avg     = np.mean(agent.score[-25:])
+                avg     = f"{avg:.3f}"
                 print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\r')
-                obs   = env.reset()
-                score = 0
-                step  = 0
-                ep   += 1
+                obs     = env.reset()
+                score   = 0
+                ep_step = 0
+                ep     += 1
+
+            # Test if loop is over
+            loop     = agent.test_loop(ep_step, bf_step)
+            ep_step += 1
+            bf_step += 1
 
         # Train
         outputs = agent.train()

@@ -9,12 +9,11 @@ from agent import *
 ### A discrete PPO agent
 class ppo_discrete:
     def __init__(self,
-                 act_dim, obs_dim,
-                 actor_lr, critic_lr, buff_size, batch_size,
-                 n_epochs, n_buff,
+                 act_dim, obs_dim, actor_lr, critic_lr,
+                 buff_size, batch_size, n_epochs, n_buff,
                  pol_clip, grd_clip, adv_clip, bootstrap,
-                 entropy, gamma, gae_lambda,
-                 actor_arch, critic_arch):
+                 entropy, gamma, gae_lambda, ep_end,
+                 actor_arch, critic_arch, update_style):
 
         # Initialize from arguments
         self.act_dim      = act_dim
@@ -35,6 +34,8 @@ class ppo_discrete:
         self.gae_lambda   = gae_lambda
         self.actor_arch   = actor_arch
         self.critic_arch  = critic_arch
+        self.update_style = update_style
+        self.ep_end       = ep_end
 
         # Sanity check for batch_size
         if (batch_size > n_buff*buff_size):
@@ -340,3 +341,18 @@ class ppo_discrete:
         self.buff_act = np.reshape(self.buff_act,(self.buff_size,self.act_dim))
         self.buff_rwd = np.reshape(self.buff_rwd,(self.buff_size,1))
         self.buff_trm = np.reshape(self.buff_trm,(self.buff_size,1))
+
+    # Test looping criterion
+    def test_loop(self, ep_step, bf_step):
+
+        if (self.update_style == 'ep'):
+            if (ep_step == self.ep_end-1):
+                return False
+            else:
+                return True
+
+        if (self.update_style == 'buff'):
+            if (bf_step == self.buff_size-1):
+                return False
+            else:
+                return True
