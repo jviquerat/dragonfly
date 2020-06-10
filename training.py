@@ -24,7 +24,6 @@ def launch_training(params):
     ep_step = 0
     bf_step = 0
     score   = 0.0
-    mask    = 1.0
     outputs = 8*[0.0]
     obs     = env.reset()
 
