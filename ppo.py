@@ -14,7 +14,7 @@ class ppo_discrete:
                  buff_size, batch_frac, n_epochs, n_buff,
                  pol_clip, grd_clip, adv_clip, bootstrap,
                  entropy, gamma, gae_lambda, ep_end,
-                 actor_arch, critic_arch, update_style):
+                 actor_arch, critic_arch):
 
         # Initialize from arguments
         self.act_dim      = act_dim
@@ -35,13 +35,13 @@ class ppo_discrete:
         self.gae_lambda   = gae_lambda
         self.actor_arch   = actor_arch
         self.critic_arch  = critic_arch
-        self.update_style = update_style
+        #self.update_style = update_style
         self.ep_end       = ep_end
 
-        # Sanity check for update_style
-        if (update_style not in ['ep', 'buff']):
-            print('Error: unkown update style')
-            exit()
+        ## Sanity check for update_style
+        #if (update_style not in ['ep', 'buff']):
+        #    print('Error: unkown update style')
+        #    exit()
 
         # Build networks
         self.critic     = critic(critic_arch, critic_lr, grd_clip)
@@ -346,12 +346,12 @@ class ppo_discrete:
 
         # Handle insufficient history
         n_buff = self.n_buff
-        if (self.update_style == 'ep'):
-            n_buff = int(min(n_buff, self.ep[-1]+1))
-            length = sum(self.length[-n_buff:])
-        if (self.update_style == 'buff'):
-            n_buff = int(min(n_buff, len(self.obs)//self.buff_size))
-            length = n_buff*self.buff_size
+        #if (self.update_style == 'ep'):
+        #    n_buff = int(min(n_buff, self.ep[-1]+1))
+        #    length = sum(self.length[-n_buff:])
+        #if (self.update_style == 'buff'):
+        n_buff = int(min(n_buff, len(self.obs)//self.buff_size))
+        length = n_buff*self.buff_size
 
         # Retrieve buffers
         obs    = self.obs[-length:]
@@ -364,14 +364,14 @@ class ppo_discrete:
     # Test looping criterion
     def test_loop(self, done, bf_step):
 
-        if (self.update_style == 'ep'):
-            if (done):
-                return False
-            else:
-                return True
+        #if (self.update_style == 'ep'):
+        #    if (done):
+        #        return False
+        #    else:
+        #        return True
 
-        if (self.update_style == 'buff'):
-            if (bf_step == self.buff_size-1):
-                return False
-            else:
-                return True
+        #if (self.update_style == 'buff'):
+        if (bf_step == self.buff_size-1):
+            return False
+        else:
+            return True

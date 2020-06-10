@@ -24,7 +24,7 @@ def launch_training():
                            buff_size, batch_frac, n_epochs, n_buff,
                            pol_clip, grd_clip, adv_clip, bootstrap,
                            entropy, gamma, gae_lambda, ep_end,
-                           actor_arch, critic_arch, update_style)
+                           actor_arch, critic_arch)
 
     # Initialize parameters
     ep      = 0

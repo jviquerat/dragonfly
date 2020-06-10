@@ -7,7 +7,7 @@
 env_name     = 'CartPole-v0'
 ep_end       = 200          # Nb of max episode steps
 n_episodes   = 300          # Max nb of episodes
-n_avg        = 10           # Nb of runs for averaged results
+n_avg        = 5           # Nb of runs for averaged results
 render_every = 500          # Rendering frequency (in episodes)
 
 actor_lr     = 1.0e-2       # Actor  learning rate
@@ -15,13 +15,6 @@ critic_lr    = 1.0e-2       # Critic learning rate
 actor_arch   = [16,16]      # Actor  hidden layers
 critic_arch  = [16,16]      # Critic hidden layers
 
-#update_style = 'ep'         # 'ep' or 'buff'
-#batch_frac   = 1.0          # Batch fraction               ('ep', 'buff')
-#n_buff       = 8            # Nb   of buffers for training ('ep', 'buff')
-#n_epochs     = 8            # Nb   of epochs  for training ('ep', 'buff')
-#buff_size    = 128          # Size of buffer  for training ('buff' only)
-
-update_style = 'buff'       # 'ep' or 'buff'
 batch_frac   = 0.5          # Batch fraction               ('ep', 'buff')
 n_buff       = 8            # Nb   of buffers for training ('ep', 'buff')
 n_epochs     = 16           # Nb   of epochs  for training ('ep', 'buff')
