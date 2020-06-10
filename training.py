@@ -62,7 +62,7 @@ def launch_training(params):
             # Reset if episode is done
             if done:
                 # Store for future file printing
-                agent.store_learning_data(ep, ep_step, score, outputs)
+                agent.store_learning_data(ep, ep_step+1, score, outputs)
 
                 # Print and reset
                 avg     = np.mean(agent.score[-25:])
