@@ -14,7 +14,7 @@ def launch_training():
 
     # Declare environement and agent
     env     = gym.make(env_name)
-    video   = lambda episode_id: episode_id%render_every==0
+    video   = lambda ep: (ep%render_every==0 and ep != 0)
     env     = gym.wrappers.Monitor(env,
                                    './vids/'+str(time.time())+'/',
                                    video_callable=video)
