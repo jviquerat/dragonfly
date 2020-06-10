@@ -1,5 +1,6 @@
 # Generic imports
 import gym
+import math
 import numpy as np
 
 # Custom imports
@@ -10,7 +11,7 @@ from agent import *
 class ppo_discrete:
     def __init__(self,
                  act_dim, obs_dim, actor_lr, critic_lr,
-                 buff_size, batch_size, n_epochs, n_buff,
+                 buff_size, batch_frac, n_epochs, n_buff,
                  pol_clip, grd_clip, adv_clip, bootstrap,
                  entropy, gamma, gae_lambda, ep_end,
                  actor_arch, critic_arch, update_style):
@@ -22,7 +23,7 @@ class ppo_discrete:
         self.actor_lr     = actor_lr
         self.critic_lr    = critic_lr
         self.buff_size    = buff_size
-        self.batch_size   = batch_size
+        self.batch_frac   = batch_frac
         self.n_epochs     = n_epochs
         self.n_buff       = n_buff
         self.pol_clip     = pol_clip
@@ -41,12 +42,6 @@ class ppo_discrete:
         if (update_style not in ['ep', 'buff']):
             print('Error: unkown update style')
             exit()
-
-        # Sanity check for batch_size
-        if (update_style == 'ep'):
-            if (batch_size > n_buff*buff_size):
-                print('Error: batch_size too large')
-                exit()
 
         # Build networks
         self.critic     = critic(critic_arch, critic_lr, grd_clip)
@@ -72,7 +67,6 @@ class ppo_discrete:
         self.ep      = np.array([], dtype=np.float32) # episode number
         self.score   = np.array([], dtype=np.float32) # episode reward
         self.stp     = np.array([], dtype=np.float32) # step    number
-        self.ls_ppo  = np.array([], dtype=np.float32) # ppo     loss
         self.ls_act  = np.array([], dtype=np.float32) # actor   loss
         self.ls_crt  = np.array([], dtype=np.float32) # critic  loss
         self.ent     = np.array([], dtype=np.float32) # entropy
@@ -142,13 +136,7 @@ class ppo_discrete:
         lgt, obs, adv, tgt, act = self.get_buffers()
 
         # Handle insufficient history compared to batch_size
-        batch_size = min(self.batch_size, lgt)
-
-        #n_buff = min(self.n_buff, len(self.obs)//self.buff_size)
-        #obs    = self.obs[-n_buff*self.buff_size:]
-        #adv    = self.adv[-n_buff*self.buff_size:]
-        #tgt    = self.tgt[-n_buff*self.buff_size:]
-        #act    = self.act[-n_buff*self.buff_size:]
+        batch_size = math.floor(self.batch_frac*lgt)
 
         # Retrieve learning rate
         lr = self.actor.opt._decayed_lr(tf.float32)
@@ -273,7 +261,7 @@ class ppo_discrete:
             norm    = tf.linalg.global_norm(grads)
         self.actor.opt.apply_gradients(zip(grads,act_var))
 
-        return [loss_ppo, loss, entropy, norm, kl]
+        return [loss, entropy, norm, kl]
 
     # Training function for critic
     @tf.function
@@ -297,18 +285,16 @@ class ppo_discrete:
     # Store for printing
     def store_learning_data(self, ep, length, score, outputs):
 
-        ls_ppo  = outputs[0]
-        ls_act  = outputs[1]
-        ent     = outputs[2]
-        nrm_act = outputs[3]
-        kl_div  = outputs[4]
-        ls_crt  = outputs[5]
-        nrm_crt = outputs[6]
-        lr      = outputs[7]
+        ls_act  = outputs[0]
+        ent     = outputs[1]
+        nrm_act = outputs[2]
+        kl_div  = outputs[3]
+        ls_crt  = outputs[4]
+        nrm_crt = outputs[5]
+        lr      = outputs[6]
 
         self.ep      = np.append(self.ep,      ep)
         self.score   = np.append(self.score,   score)
-        self.ls_ppo  = np.append(self.ls_ppo,  ls_ppo)
         self.ls_act  = np.append(self.ls_act,  ls_act)
         self.ls_crt  = np.append(self.ls_crt,  ls_crt)
         self.ent     = np.append(self.ent,     ent)
@@ -323,7 +309,7 @@ class ppo_discrete:
 
         filename = 'ppo.dat'
         np.savetxt(filename, np.transpose([self.ep,      self.score,
-                                           self.ls_ppo,  self.ls_act,
+                                           self.length,  self.ls_act,
                                            self.ls_crt,  self.ent,
                                            self.nrm_act, self.nrm_crt,
                                            self.kl_div,  self.lr]))

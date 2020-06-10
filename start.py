@@ -21,7 +21,7 @@ def launch_training():
     act_dim = env.action_space.n
     obs_dim = env.observation_space.shape[0]
     agent   = ppo_discrete(act_dim, obs_dim, actor_lr, critic_lr,
-                           buff_size, batch_size, n_epochs, n_buff,
+                           buff_size, batch_frac, n_epochs, n_buff,
                            pol_clip, grd_clip, adv_clip, bootstrap,
                            entropy, gamma, gae_lambda, ep_end,
                            actor_arch, critic_arch, update_style)
@@ -45,7 +45,6 @@ def launch_training():
 
         # Loop over buff size
         while (loop):
-        #for _ in range(buff_size):
 
             # Make one iteration
             act               = agent.get_actions(obs)
@@ -86,7 +85,6 @@ def launch_training():
             # Test if loop is over
             loop     = agent.test_loop(done, bf_step)
             bf_step += 1
-            #ep_step += 1
 
         # Train
         outputs = agent.train()
