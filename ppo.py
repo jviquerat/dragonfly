@@ -9,34 +9,34 @@ from agent import *
 ###############################################
 ### A discrete PPO agent
 class ppo_discrete:
-    def __init__(self,
-                 act_dim, obs_dim, actor_lr, critic_lr,
-                 buff_size, batch_frac, n_epochs, n_buff,
-                 pol_clip, grd_clip, adv_clip, bootstrap,
-                 entropy, gamma, gae_lambda, ep_end,
-                 actor_arch, critic_arch):
+    def __init__(self, act_dim, obs_dim, params):
+                 #act_dim, obs_dim, actor_lr, critic_lr,
+                 #buff_size, batch_frac, n_epochs, n_buff,
+                 #pol_clip, grd_clip, adv_clip, bootstrap,
+                 #entropy, gamma, gae_lambda, ep_end,
+                 #actor_arch, critic_arch):
 
         # Initialize from arguments
         self.act_dim      = act_dim
         self.obs_dim      = obs_dim
 
-        self.actor_lr     = actor_lr
-        self.critic_lr    = critic_lr
-        self.buff_size    = buff_size
-        self.batch_frac   = batch_frac
-        self.n_epochs     = n_epochs
-        self.n_buff       = n_buff
-        self.pol_clip     = pol_clip
-        self.grd_clip     = grd_clip
-        self.adv_clip     = adv_clip
-        self.bootstrap    = bootstrap
-        self.entropy      = entropy
-        self.gamma        = gamma
-        self.gae_lambda   = gae_lambda
-        self.actor_arch   = actor_arch
-        self.critic_arch  = critic_arch
-        #self.update_style = update_style
-        self.ep_end       = ep_end
+        self.actor_lr     = params.actor_lr
+        self.critic_lr    = params.critic_lr
+        self.buff_size    = params.buff_size
+        self.batch_frac   = params.batch_frac
+        self.n_epochs     = params.n_epochs
+        self.n_buff       = params.n_buff
+        self.pol_clip     = params.pol_clip
+        self.grd_clip     = params.grd_clip
+        self.adv_clip     = params.adv_clip
+        self.bootstrap    = params.bootstrap
+        self.entropy      = params.entropy
+        self.gamma        = params.gamma
+        self.gae_lambda   = params.gae_lambda
+        self.actor_arch   = params.actor_arch
+        self.critic_arch  = params.critic_arch
+        #self.update_style = params. update_style
+        self.ep_end       = params.ep_end
 
         ## Sanity check for update_style
         #if (update_style not in ['ep', 'buff']):
@@ -44,9 +44,17 @@ class ppo_discrete:
         #    exit()
 
         # Build networks
-        self.critic     = critic(critic_arch, critic_lr, grd_clip)
-        self.actor      = actor (actor_arch, act_dim, actor_lr, grd_clip)
-        self.old_actor  = actor (actor_arch, act_dim, actor_lr, grd_clip)
+        self.critic     = critic(self.critic_arch,
+                                 self.critic_lr,
+                                 self.grd_clip)
+        self.actor      = actor (self.actor_arch,
+                                 self.act_dim,
+                                 self.actor_lr,
+                                 self.grd_clip)
+        self.old_actor  = actor (self.actor_arch,
+                                 self.act_dim,
+                                 self.actor_lr,
+                                 self.grd_clip)
 
         # Init parameters
         dummy = self.critic   (tf.ones([1,self.obs_dim]))
@@ -375,3 +383,28 @@ class ppo_discrete:
             return False
         else:
             return True
+
+    # Handle termination state
+    def handle_termination(self, done, ep_step, ep_end):
+
+        if (not self.bootstrap):
+            if (not done): term = 0
+            if (    done): term = 1
+        if (    self.bootstrap):
+            if (not done):                         term = 0
+            if (    done and ep_step <  ep_end-1): term = 1
+            if (    done and ep_step == ep_end-1): term = 2
+
+        return term
+
+    # Printings at the end of an episode
+    def print_episode(self, ep, n_ep):
+
+        avg = np.mean(self.score[-25:])
+        avg = f"{avg:.3f}"
+        
+        if (ep < n_ep-1):
+            print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\r')
+        if (ep == n_ep-1):
+            print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\n')
+
