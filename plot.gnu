@@ -23,9 +23,9 @@ set multiplot layout 3,3
 plot "ppo_avg.dat" u 1:3:4 w filledc lt 1 notitle, \
      "ppo_avg.dat" u 1:2  smooth csplines w l ls 1 t "score"
 
-# Plot ppo loss
+# Plot episode length
 plot "ppo_avg.dat" u 1:6:7 w filledc lt 2 notitle, \
-     "ppo_avg.dat" u 1:5  smooth csplines w l ls 2 t "ppo loss"
+     "ppo_avg.dat" u 1:5  smooth csplines w l ls 2 t "ep length"
 
 # Plot actor loss
 plot "ppo_avg.dat" u 1:9:10 w filledc lt 3 notitle, \
