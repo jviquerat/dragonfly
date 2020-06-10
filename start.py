@@ -1,11 +1,11 @@
 # Generic imports
 import os
 import time
+import json
 import numpy as np
 
 # Custom imports
-from params import *
-from ppo    import *
+from ppo import *
 
 ########################
 # Process training
@@ -98,6 +98,12 @@ def launch_training():
 ########################
 # Average training over multiple runs
 ########################
+
+# Read json parameter file
+with open("cartpole.json", "r") as f:
+    data = json.load(f)
+    print(data)
+    exit()
 
 # Storage arrays
 n_data    = 9
