@@ -383,3 +383,28 @@ class ppo_discrete:
             return False
         else:
             return True
+
+    # Handle termination state
+    def handle_termination(self, done, ep_step, ep_end):
+
+        if (not self.bootstrap):
+            if (not done): term = 0
+            if (    done): term = 1
+        if (    self.bootstrap):
+            if (not done):                         term = 0
+            if (    done and ep_step <  ep_end-1): term = 1
+            if (    done and ep_step == ep_end-1): term = 2
+
+        return term
+
+    # Printings at the end of an episode
+    def print_episode(self, ep, n_ep):
+
+        avg = np.mean(self.score[-25:])
+        avg = f"{avg:.3f}"
+        
+        if (ep < n_ep-1):
+            print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\r')
+        if (ep == n_ep-1):
+            print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\n')
+

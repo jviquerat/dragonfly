@@ -44,13 +44,7 @@ def launch_training(params):
             nxt, rwd, done, _ = env.step(np.argmax(act))
 
             # Handle termination state
-            if (not params.bootstrap):
-                if (not done): term = 0
-                if (    done): term = 1
-            if (    params.bootstrap):
-                if (not done):                                term = 0
-                if (    done and ep_step <  params.ep_end-1): term = 1
-                if (    done and ep_step == params.ep_end-1): term = 2
+            term = agent.handle_termination(done, ep_step, params.ep_end)
 
             # Store transition
             agent.store_transition(obs, nxt, act, rwd, term)
@@ -58,22 +52,21 @@ def launch_training(params):
             # Update observation and buffer counter
             obs       = nxt
             score    += rwd
+            ep_step  += 1
 
             # Reset if episode is done
             if done:
                 # Store for future file printing
-                agent.store_learning_data(ep, ep_step+1, score, outputs)
+                agent.store_learning_data(ep, ep_step, score, outputs)
 
-                # Print and reset
-                avg     = np.mean(agent.score[-25:])
-                avg     = f"{avg:.3f}"
-                print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\r')
+                # Print
+                agent.print_episode(ep, params.n_ep)
+
+                # Reset
                 obs     = env.reset()
                 score   = 0
                 ep_step = 0
                 ep     += 1
-            else:
-                ep_step +=1
 
             # Test if loop is over
             loop     = agent.test_loop(done, bf_step)
@@ -86,4 +79,4 @@ def launch_training(params):
     agent.write_learning_data()
 
     # Last printing
-    print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\n')
+    agent.print_episode(ep, params.n_ep)
