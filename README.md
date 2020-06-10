@@ -19,3 +19,7 @@ The agent learns to balance a pole fixed to a moving cart. The episode ends when
   <img width="430" alt="" src="https://user-images.githubusercontent.com/44053700/83844966-45bfdc00-a708-11ea-98ee-5623162e1fe1.gif">
   <img width="430" alt="" src="https://user-images.githubusercontent.com/44053700/83844541-7a7f6380-a707-11ea-8a2c-148ca0c8f67b.gif">
 </p>
+
+<p align="center">
+  <img width="800" alt="" src="https://user-images.githubusercontent.com/44053700/84241508-daa74880-aaff-11ea-9c48-885f7df49bde.png">
+</p>
