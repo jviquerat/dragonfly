@@ -1,5 +1,6 @@
 # Generic imports
 import os
+import sys
 import json
 import collections
 import numpy as np
@@ -17,8 +18,15 @@ def params_decoder(p_dict):
 # Average training over multiple runs
 ########################
 
+# Check command-line input for json file
+if (len(sys.argv) == 2):
+    json_file = sys.argv[1]
+else:
+    print('Command line error, please use as follows:')
+    print('python3 start.py my_file.json')
+
 # Read json parameter file
-with open("cartpole.json", "r") as f:
+with open(json_file, "r") as f:
     params = json.load(f, object_hook=params_decoder)
 
 # Storage arrays

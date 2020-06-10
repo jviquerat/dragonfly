@@ -402,7 +402,7 @@ class ppo_discrete:
 
         avg = np.mean(self.score[-25:])
         avg = f"{avg:.3f}"
-        
+
         if (ep < n_ep-1):
             print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\r')
         if (ep == n_ep-1):

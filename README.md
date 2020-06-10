@@ -14,7 +14,7 @@ Below are a few tests made on several classic ```gym``` environments.
 
 ## CartPole-v0
 
-The agent learns to balance a pole fixed to a moving cart. The episode ends when the cart gets out of screen, or when the pole exceeds a certain angle. The goal is to balance the pole for 200 timesteps. The graphs shown below are averaged over 5 runs.
+The agent learns to balance a pole fixed to a moving cart. The episode ends when the cart gets out of screen, or when the pole exceeds a certain angle. The goal is to balance the pole for 200 timesteps. The graphs shown below are averaged over 5 runs. The agent usually learns to balance the pole perfectly within 50 to 100 episodes.
 
 <p align="center">
   <img width="430" alt="" src="https://user-images.githubusercontent.com/44053700/83844966-45bfdc00-a708-11ea-98ee-5623162e1fe1.gif">
