@@ -24,7 +24,7 @@ def launch_training(params):
     ep_step = 0
     bf_step = 0
     score   = 0.0
-    outputs = 8*[0.0]
+    outputs = [0.0 for _ in range(8)]
     obs     = env.reset()
 
     # Loop until max episode number is reached

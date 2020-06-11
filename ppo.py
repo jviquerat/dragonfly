@@ -10,11 +10,6 @@ from agent import *
 ### A discrete PPO agent
 class ppo_discrete:
     def __init__(self, act_dim, obs_dim, params):
-                 #act_dim, obs_dim, actor_lr, critic_lr,
-                 #buff_size, batch_frac, n_epochs, n_buff,
-                 #pol_clip, grd_clip, adv_clip, bootstrap,
-                 #entropy, gamma, gae_lambda, ep_end,
-                 #actor_arch, critic_arch):
 
         # Initialize from arguments
         self.act_dim      = act_dim
@@ -37,6 +32,7 @@ class ppo_discrete:
         self.critic_arch  = params.critic_arch
         #self.update_style = params. update_style
         self.ep_end       = params.ep_end
+        self.n_cpu        = params.n_cpu
 
         ## Sanity check for update_style
         #if (update_style not in ['ep', 'buff']):
