@@ -114,15 +114,6 @@ class ppo_discrete:
     # Train networks
     def train(self, buff):
 
-        # Reshape buffers
-        #self.reshape_local_buffers()
-
-        #obs = buff.obs
-        #nxt = buff.nxt
-        #act = buff.act
-        #rwd = buff.rwd
-        #trm = buff.trm
-
         # Get current and next values
         crt_val = np.array(self.critic(tf.cast(buff.obs, dtype=tf.float32)))
         nxt_val = np.array(self.critic(tf.cast(buff.nxt, dtype=tf.float32)))
