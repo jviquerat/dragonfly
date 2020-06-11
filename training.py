@@ -2,7 +2,8 @@
 import time
 
 # Custom imports
-from ppo import *
+from ppo  import *
+from buff import *
 
 ########################
 # Process training
@@ -11,12 +12,13 @@ def launch_training(params):
 
     # Declare environement and agent
     env     = gym.make(params.env_name)
-    video   = lambda ep: (ep%params.render_every==0 and ep != 0)
-    env     = gym.wrappers.Monitor(env,
-                                   './vids/'+str(time.time())+'/',
-                                   video_callable=video)
+    #video   = lambda ep: (ep%params.render_every==0 and ep != 0)
+    #env     = gym.wrappers.Monitor(env,
+    #                               './vids/'+str(time.time())+'/',
+    #                               video_callable=video)
     act_dim = env.action_space.n
     obs_dim = env.observation_space.shape[0]
+    buff = loc_buff(params.n_cpu, obs_dim, act_dim)
     agent   = ppo_discrete(act_dim, obs_dim, params)
 
     # Initialize parameters
@@ -31,7 +33,8 @@ def launch_training(params):
     while (ep < params.n_ep):
 
         # Reset local buffers
-        agent.reset_local_buffers()
+        #agent.reset_local_buffers()
+        buff.reset()
         bf_step = 0
         loop    = True
 
@@ -43,10 +46,11 @@ def launch_training(params):
             nxt, rwd, done, _ = env.step(np.argmax(act))
 
             # Handle termination state
-            term = agent.handle_termination(done, ep_step, params.ep_end)
+            trm = agent.handle_termination(done, ep_step, params.ep_end)
 
             # Store transition
-            agent.store_transition(obs, nxt, act, rwd, term)
+            buff.store(obs, nxt, act, rwd, trm)
+            #agent.store_transition(obs, nxt, act, rwd, term)
 
             # Update observation and buffer counter
             obs       = nxt
@@ -72,7 +76,8 @@ def launch_training(params):
             bf_step += 1
 
         # Train
-        outputs = agent.train()
+        buff.reshape()
+        outputs = agent.train(buff)
 
     # Write learning data on file
     agent.write_learning_data()

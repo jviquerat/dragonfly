@@ -59,7 +59,7 @@ class ppo_discrete:
         self.old_actor.set_weights (self.actor.get_weights())
 
         # Local buffers
-        self.reset_local_buffers()
+        #self.reset_local_buffers()
 
         # Global buffers for off-policy training
         self.obs = np.empty((0,self.obs_dim))
@@ -112,29 +112,29 @@ class ppo_discrete:
         return val
 
     # Train networks
-    def train(self):
+    def train(self, buff):
 
         # Reshape buffers
-        self.reshape_local_buffers()
+        #self.reshape_local_buffers()
 
-        obs = self.buff_obs
-        nxt = self.buff_nxt
-        act = self.buff_act
-        rwd = self.buff_rwd
-        trm = self.buff_trm
+        #obs = buff.obs
+        #nxt = buff.nxt
+        #act = buff.act
+        #rwd = buff.rwd
+        #trm = buff.trm
 
-        # Get previous policy and values
-        val = np.array(self.critic(tf.cast(obs, dtype=tf.float32)))
-        nxt = np.array(self.critic(tf.cast(nxt, dtype=tf.float32)))
+        # Get current and next values
+        crt_val = np.array(self.critic(tf.cast(buff.obs, dtype=tf.float32)))
+        nxt_val = np.array(self.critic(tf.cast(buff.nxt, dtype=tf.float32)))
 
         # Compute advantages
-        tgt, adv = self.compute_adv(rwd, val, nxt, trm)
+        tgt, adv = self.compute_adv(buff.rwd, crt_val, nxt_val, buff.trm)
 
         # Store in global buffers
-        self.obs = np.append(self.obs, obs, axis=0)
-        self.adv = np.append(self.adv, adv, axis=0)
-        self.tgt = np.append(self.tgt, tgt, axis=0)
-        self.act = np.append(self.act, act, axis=0)
+        self.obs = np.append(self.obs, buff.obs, axis=0)
+        self.adv = np.append(self.adv,      adv, axis=0)
+        self.tgt = np.append(self.tgt,      tgt, axis=0)
+        self.act = np.append(self.act, buff.act, axis=0)
 
         # Retrieve n_buff buffers from history
         lgt, obs, adv, tgt, act = self.get_buffers()
@@ -318,32 +318,32 @@ class ppo_discrete:
                                            self.nrm_act, self.nrm_crt,
                                            self.kl_div,  self.lr]))
 
-    # Reset local buffers
-    def reset_local_buffers(self):
+    # # Reset local buffers
+    # def reset_local_buffers(self):
 
-        self.buff_obs = np.array([])
-        self.buff_nxt = np.array([])
-        self.buff_act = np.array([])
-        self.buff_rwd = np.array([])
-        self.buff_trm = np.array([])
+    #     self.buff_obs = np.array([])
+    #     self.buff_nxt = np.array([])
+    #     self.buff_act = np.array([])
+    #     self.buff_rwd = np.array([])
+    #     self.buff_trm = np.array([])
 
-    # Store transition in local buffers
-    def store_transition(self, obs, nxt, act, rwd, trm):
+    # # Store transition in local buffers
+    # def store_transition(self, obs, nxt, act, rwd, trm):
 
-        self.buff_obs = np.append(self.buff_obs, obs)
-        self.buff_nxt = np.append(self.buff_nxt, nxt)
-        self.buff_act = np.append(self.buff_act, act)
-        self.buff_rwd = np.append(self.buff_rwd, rwd)
-        self.buff_trm = np.append(self.buff_trm, trm)
+    #     self.buff_obs = np.append(self.buff_obs, obs)
+    #     self.buff_nxt = np.append(self.buff_nxt, nxt)
+    #     self.buff_act = np.append(self.buff_act, act)
+    #     self.buff_rwd = np.append(self.buff_rwd, rwd)
+    #     self.buff_trm = np.append(self.buff_trm, trm)
 
-    # Reshape local buffers
-    def reshape_local_buffers(self):
+    # # Reshape local buffers
+    # def reshape_local_buffers(self):
 
-        self.buff_obs = np.reshape(self.buff_obs,(-1,self.obs_dim))
-        self.buff_nxt = np.reshape(self.buff_nxt,(-1,self.obs_dim))
-        self.buff_act = np.reshape(self.buff_act,(-1,self.act_dim))
-        self.buff_rwd = np.reshape(self.buff_rwd,(-1,1))
-        self.buff_trm = np.reshape(self.buff_trm,(-1,1))
+    #     self.buff_obs = np.reshape(self.buff_obs,(-1,self.obs_dim))
+    #     self.buff_nxt = np.reshape(self.buff_nxt,(-1,self.obs_dim))
+    #     self.buff_act = np.reshape(self.buff_act,(-1,self.act_dim))
+    #     self.buff_rwd = np.reshape(self.buff_rwd,(-1,1))
+    #     self.buff_trm = np.reshape(self.buff_trm,(-1,1))
 
     # Get buffers
     def get_buffers(self):
