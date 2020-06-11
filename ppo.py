@@ -309,33 +309,6 @@ class ppo_discrete:
                                            self.nrm_act, self.nrm_crt,
                                            self.kl_div,  self.lr]))
 
-    # # Reset local buffers
-    # def reset_local_buffers(self):
-
-    #     self.buff_obs = np.array([])
-    #     self.buff_nxt = np.array([])
-    #     self.buff_act = np.array([])
-    #     self.buff_rwd = np.array([])
-    #     self.buff_trm = np.array([])
-
-    # # Store transition in local buffers
-    # def store_transition(self, obs, nxt, act, rwd, trm):
-
-    #     self.buff_obs = np.append(self.buff_obs, obs)
-    #     self.buff_nxt = np.append(self.buff_nxt, nxt)
-    #     self.buff_act = np.append(self.buff_act, act)
-    #     self.buff_rwd = np.append(self.buff_rwd, rwd)
-    #     self.buff_trm = np.append(self.buff_trm, trm)
-
-    # # Reshape local buffers
-    # def reshape_local_buffers(self):
-
-    #     self.buff_obs = np.reshape(self.buff_obs,(-1,self.obs_dim))
-    #     self.buff_nxt = np.reshape(self.buff_nxt,(-1,self.obs_dim))
-    #     self.buff_act = np.reshape(self.buff_act,(-1,self.act_dim))
-    #     self.buff_rwd = np.reshape(self.buff_rwd,(-1,1))
-    #     self.buff_trm = np.reshape(self.buff_trm,(-1,1))
-
     # Get buffers
     def get_buffers(self):
 
