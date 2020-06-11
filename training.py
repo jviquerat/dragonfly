@@ -18,13 +18,12 @@ def launch_training(params):
     #                               video_callable=video)
     act_dim = env.action_space.n
     obs_dim = env.observation_space.shape[0]
-    buff = loc_buff(params.n_cpu, obs_dim, act_dim)
+    buff    = loc_buff(params.n_cpu, obs_dim, act_dim)
     agent   = ppo_discrete(act_dim, obs_dim, params)
 
     # Initialize parameters
     ep      = 0
     ep_step = 0
-    bf_step = 0
     score   = 0.0
     outputs = [0.0 for _ in range(8)]
     obs     = env.reset()
@@ -32,11 +31,9 @@ def launch_training(params):
     # Loop until max episode number is reached
     while (ep < params.n_ep):
 
-        # Reset local buffers
-        #agent.reset_local_buffers()
+        # Reset local buffer
         buff.reset()
-        bf_step = 0
-        loop    = True
+        loop = True
 
         # Loop over buff size
         while (loop):
@@ -50,7 +47,6 @@ def launch_training(params):
 
             # Store transition
             buff.store(obs, nxt, act, rwd, trm)
-            #agent.store_transition(obs, nxt, act, rwd, term)
 
             # Update observation and buffer counter
             obs       = nxt
@@ -72,8 +68,7 @@ def launch_training(params):
                 ep     += 1
 
             # Test if loop is over
-            loop     = agent.test_loop(done, bf_step)
-            bf_step += 1
+            loop = agent.test_loop(done, buff.size)
 
         # Train
         buff.reshape()

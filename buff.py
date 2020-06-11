@@ -28,18 +28,20 @@ class loc_buff:
         self.reset()
 
     def reset(self):
-        self.obs = np.array([])
-        self.nxt = np.array([])
-        self.act = np.array([])
-        self.rwd = np.array([])
-        self.trm = np.array([])
+        self.obs  = np.array([])
+        self.nxt  = np.array([])
+        self.act  = np.array([])
+        self.rwd  = np.array([])
+        self.trm  = np.array([])
+        self.size = 0
 
     def store(self, obs, nxt, act, rwd, trm):
-        self.obs = np.append(self.obs, obs)
-        self.nxt = np.append(self.nxt, nxt)
-        self.act = np.append(self.act, act)
-        self.rwd = np.append(self.rwd, rwd)
-        self.trm = np.append(self.trm, trm)
+        self.obs   = np.append(self.obs, obs)
+        self.nxt   = np.append(self.nxt, nxt)
+        self.act   = np.append(self.act, act)
+        self.rwd   = np.append(self.rwd, rwd)
+        self.trm   = np.append(self.trm, trm)
+        self.size += 1
 
     def reshape(self):
         self.obs = np.reshape(self.obs,(-1,self.obs_dim))
