@@ -23,80 +23,61 @@ def launch_training(params):
     buff    = loc_buff(params.n_cpu, obs_dim, act_dim)
     #agent   = ppo_agent(act_dim, obs_dim, params)
 
-    # Generate manager
-    class agentManager(BaseManager):
-        pass
+    # Initialize parameters
+    ep      = 0
+    ep_step = 0
+    score   = 0.0
+    outputs = [0.0 for _ in range(8)]
+    obs     = env.reset()
 
-    agentManager.register('ppo_agent', ppo_agent)
+    # Loop until max episode number is reached
+    while (ep < params.n_ep):
 
-    if __name__ == '__main__':
-        manager = agentManager()
-        manager.start()
-        agent = manager.ppo_agent(act_dim, obs_dim, params)
+        # Reset local buffer
+        buff.reset()
+        loop = True
 
-        pool = mp.Pool(2)
-        for i in range(33):
-            pool.apply(func=worker, args=(shared, i))
-        pool.close()
-        pool.join()
+        # Loop over buff size
+        while (loop):
 
-        exit()
+            # Make one iteration
+            act               = agent.get_actions(obs)
+            nxt, rwd, done, _ = env.step(np.argmax(act))
 
-        # Initialize parameters
-        ep      = 0
-        ep_step = 0
-        score   = 0.0
-        outputs = [0.0 for _ in range(8)]
-        obs     = env.reset()
+            # Handle termination state
+            trm = agent.handle_termination(done, ep_step, params.ep_end)
 
-        # Loop until max episode number is reached
-        while (ep < params.n_ep):
+            # Store transition
+            buff.store(obs, nxt, act, rwd, trm)
 
-            # Reset local buffer
-            buff.reset()
-            loop = True
+            # Update observation and buffer counter
+            obs       = nxt
+            score    += rwd
+            ep_step  += 1
 
-            # Loop over buff size
-            while (loop):
+            # Reset if episode is done
+            if done:
+                # Store for future file printing
+                agent.store_learning_data(ep, ep_step, score, outputs)
 
-                # Make one iteration
-                act               = agent.get_actions(obs)
-                nxt, rwd, done, _ = env.step(np.argmax(act))
+                # Print
+                agent.print_episode(ep, params.n_ep)
 
-                # Handle termination state
-                trm = agent.handle_termination(done, ep_step, params.ep_end)
+                # Reset
+                obs     = env.reset()
+                score   = 0
+                ep_step = 0
+                ep     += 1
 
-                # Store transition
-                buff.store(obs, nxt, act, rwd, trm)
+            # Test if loop is over
+            loop = agent.test_loop(done, buff.size)
 
-                # Update observation and buffer counter
-                obs       = nxt
-                score    += rwd
-                ep_step  += 1
+        # Train
+        buff.reshape()
+        outputs = agent.train(buff)
 
-                # Reset if episode is done
-                if done:
-                    # Store for future file printing
-                    agent.store_learning_data(ep, ep_step, score, outputs)
+        # Write learning data on file
+        agent.write_learning_data()
 
-                    # Print
-                    agent.print_episode(ep, params.n_ep)
-
-                    # Reset
-                    obs     = env.reset()
-                    score   = 0
-                    ep_step = 0
-                    ep     += 1
-
-                # Test if loop is over
-                loop = agent.test_loop(done, buff.size)
-
-                # Train
-                buff.reshape()
-                outputs = agent.train(buff)
-
-            # Write learning data on file
-            agent.write_learning_data()
-
-            # Last printing
-            agent.print_episode(ep, params.n_ep)
+        # Last printing
+        agent.print_episode(ep, params.n_ep)
