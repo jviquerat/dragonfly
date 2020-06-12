@@ -1,11 +1,10 @@
 # Generic imports
 import time
-import multiprocessing as mp
-from   multiprocessing.managers import BaseManager
 
 # Custom imports
-from ppo  import *
-from buff import *
+from ppo      import *
+from buff     import *
+from par_envs import *
 
 ########################
 # Process training
@@ -13,7 +12,8 @@ from buff import *
 def launch_training(params):
 
     # Declare environement and agent
-    env     = gym.make(params.env_name)
+    env = par_envs(params.env_name, params.n_cpu)
+    #env     = gym.make(params.env_name)
     #video   = lambda ep: (ep%params.render_every==0 and ep != 0)
     #env     = gym.wrappers.Monitor(env,
     #                               './vids/'+str(time.time())+'/',
@@ -21,7 +21,7 @@ def launch_training(params):
     act_dim = env.action_space.n
     obs_dim = env.observation_space.shape[0]
     buff    = loc_buff(params.n_cpu, obs_dim, act_dim)
-    #agent   = ppo_agent(act_dim, obs_dim, params)
+    agent   = ppo_agent(act_dim, obs_dim, params)
 
     # Initialize parameters
     ep      = 0
