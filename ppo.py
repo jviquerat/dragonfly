@@ -8,7 +8,7 @@ from agent import *
 
 ###############################################
 ### A discrete PPO agent
-class ppo_discrete:
+class ppo_agent:
     def __init__(self, act_dim, obs_dim, params):
 
         # Initialize from arguments
