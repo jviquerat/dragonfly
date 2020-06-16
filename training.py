@@ -21,12 +21,12 @@ def launch_training(params):
     buff    = loc_buff(params.n_cpu, env.obs_dim, env.act_dim)
     agent   = ppo_agent(env.act_dim, env.obs_dim, params)
 
-    exit()
-
     # Initialize parameters
     ep      = 0
-    ep_step = 0
-    score   = 0.0
+    #ep_step = 0
+    #score   = 0.0
+    ep_step = [0   for _ in range(params.n_cpu)]
+    score   = [0.0 for _ in range(params.n_cpu)]
     outputs = [0.0 for _ in range(8)]
     obs     = env.reset()
 
@@ -34,47 +34,81 @@ def launch_training(params):
     while (ep < params.n_ep):
 
         # Reset local buffer
-        buff.reset()
+        #buff.reset()
+        agent.loc_buff.reset()
         loop = True
 
         # Loop over buff size
         while (loop):
 
             # Make one iteration
-            act               = agent.get_actions(obs)
-            nxt, rwd, done, _ = env.step(np.argmax(act))
+            act = np.array([])
+            for cpu in range(params.n_cpu):
+                out = agent.get_actions(obs[cpu])
+                act = np.append(act,out)
+            act = np.reshape(act, (-1,agent.act_dim))
+            nxt, rwd, done = env.step(np.argmax(act, axis=1))
+
+
+            #act               = agent.get_actions(obs)
+            #nxt, rwd, done, _ = env.step(np.argmax(act))
 
             # Handle termination state
-            trm = agent.handle_termination(done, ep_step, params.ep_end)
+            trm = np.array([])
+            for cpu in range(params.n_cpu):
+                out = agent.handle_termination(done[cpu],
+                                               ep_step[cpu],
+                                               params.ep_end)
+                trm = np.append(trm,out)
+            #trm = agent.handle_termination(done, ep_step, params.ep_end)
 
             # Store transition
-            buff.store(obs, nxt, act, rwd, trm)
+            agent.loc_buff.store(obs, nxt, act, rwd, trm)
+            #buff.store(obs, nxt, act, rwd, trm)
 
             # Update observation and buffer counter
             obs       = nxt
-            score    += rwd
-            ep_step  += 1
+            score[:]  += rwd[:]
+            #score    += rwd
+            ep_step = [x+1 for x in ep_step]
+            #ep_step  += 1
 
             # Reset if episode is done
-            if done:
-                # Store for future file printing
-                agent.store_learning_data(ep, ep_step, score, outputs)
+            for cpu in range(params.n_cpu):
+                if done[cpu]:
+                    # Store for future file printing
+                    agent.store_learning_data(ep,
+                                              ep_step[cpu],
+                                              score[cpu],
+                                              outputs)
 
-                # Print
-                agent.print_episode(ep, params.n_ep)
+                    # Print
+                    agent.print_episode(ep, params.n_ep)
 
-                # Reset
-                obs     = env.reset()
-                score   = 0
-                ep_step = 0
-                ep     += 1
+                    # Reset
+                    obs[cpu]     = env.reset_single(cpu)
+                    score[cpu]   = 0
+                    ep_step[cpu] = 0
+                    ep          += 1
+            # if done:
+            #     # Store for future file printing
+            #     agent.store_learning_data(ep, ep_step, score, outputs)
+
+            #     # Print
+            #     agent.print_episode(ep, params.n_ep)
+
+            #     # Reset
+            #     obs     = env.reset()
+            #     score   = 0
+            #     ep_step = 0
+            #     ep     += 1
 
             # Test if loop is over
-            loop = agent.test_loop(done, buff.size)
+            loop = agent.test_loop()
 
         # Train
-        buff.reshape()
-        outputs = agent.train(buff)
+        #buff.reshape()
+        outputs = agent.train()
 
         # Write learning data on file
         agent.write_learning_data()

@@ -5,6 +5,7 @@ import numpy as np
 
 # Custom imports
 from agent import *
+from buff  import *
 
 ###############################################
 ### A discrete PPO agent
@@ -58,14 +59,18 @@ class ppo_agent:
         dummy = self.old_actor(tf.ones([1,self.obs_dim]))
         self.old_actor.set_weights (self.actor.get_weights())
 
+        # Init buffers
+        self.loc_buff = loc_buff(self.n_cpu, self.obs_dim, self.act_dim)
+        self.glb_buff = glb_buff(self.n_cpu, self.obs_dim, self.act_dim)
+
         # Local buffers
         #self.reset_local_buffers()
 
         # Global buffers for off-policy training
-        self.obs = np.empty((0,self.obs_dim))
-        self.adv = np.empty((0,1))
-        self.tgt = np.empty((0,1))
-        self.act = np.empty((0,self.act_dim))
+        #self.obs = np.empty((0,self.obs_dim))
+        #self.adv = np.empty((0,1))
+        #self.tgt = np.empty((0,1))
+        #self.act = np.empty((0,self.act_dim))
 
         # Arrays to store learning data
         self.ep      = np.array([], dtype=np.float32) # episode number
@@ -112,20 +117,27 @@ class ppo_agent:
         return val
 
     # Train networks
-    def train(self, buff):
+    def train(self):
+
+        #print(self.loc_buff.obs.buff)
+        obs, nxt, act, rwd, trm = self.loc_buff.flatten()
+
+        #print(obs)
+        #exit()
 
         # Get current and next values
-        crt_val = np.array(self.critic(tf.cast(buff.obs, dtype=tf.float32)))
-        nxt_val = np.array(self.critic(tf.cast(buff.nxt, dtype=tf.float32)))
+        crt_val = np.array(self.critic(tf.cast(obs, dtype=tf.float32)))
+        nxt_val = np.array(self.critic(tf.cast(nxt, dtype=tf.float32)))
 
         # Compute advantages
-        tgt, adv = self.compute_adv(buff.rwd, crt_val, nxt_val, buff.trm)
+        tgt, adv = self.compute_adv(rwd, crt_val, nxt_val, trm)
 
         # Store in global buffers
-        self.obs = np.append(self.obs, buff.obs, axis=0)
-        self.adv = np.append(self.adv,      adv, axis=0)
-        self.tgt = np.append(self.tgt,      tgt, axis=0)
-        self.act = np.append(self.act, buff.act, axis=0)
+        self.glb_buff.store(obs, adv, tgt, act)
+        #self.obs = np.append(self.obs, buff.obs, axis=0)
+        #self.adv = np.append(self.adv,      adv, axis=0)
+        #self.tgt = np.append(self.tgt,      tgt, axis=0)
+        #self.act = np.append(self.act, buff.act, axis=0)
 
         # Retrieve n_buff buffers from history
         lgt, obs, adv, tgt, act = self.get_buffers()
@@ -318,31 +330,21 @@ class ppo_agent:
         #    n_buff = int(min(n_buff, self.ep[-1]+1))
         #    length = sum(self.length[-n_buff:])
         #if (self.update_style == 'buff'):
-        n_buff = int(min(n_buff, len(self.obs)//self.buff_size))
+        n_buff = int(min(n_buff, len(self.glb_buff.obs)//self.buff_size))
         length = n_buff*self.buff_size
 
         # Retrieve buffers
-        obs    = self.obs[-length:]
-        adv    = self.adv[-length:]
-        tgt    = self.tgt[-length:]
-        act    = self.act[-length:]
+        obs    = self.glb_buff.obs[-length:]
+        adv    = self.glb_buff.adv[-length:]
+        tgt    = self.glb_buff.tgt[-length:]
+        act    = self.glb_buff.act[-length:]
 
         return length, obs, adv, tgt, act
 
     # Test looping criterion
-    def test_loop(self, done, bf_step):
+    def test_loop(self):
 
-        #if (self.update_style == 'ep'):
-        #    if (done):
-        #        return False
-        #    else:
-        #        return True
-
-        #if (self.update_style == 'buff'):
-        if (bf_step == self.buff_size-1):
-            return False
-        else:
-            return True
+        return (not (self.loc_buff.size >= self.buff_size-1))
 
     # Handle termination state
     def handle_termination(self, done, ep_step, ep_end):

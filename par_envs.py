@@ -1,5 +1,7 @@
 # Generic imports
 import gym
+import time
+import numpy           as np
 import multiprocessing as mp
 
 ###############################################
@@ -7,64 +9,98 @@ import multiprocessing as mp
 class par_envs:
     def __init__(self, env_name, n_cpu):
 
+        # Init pipes and processes
         self.n_cpu        = n_cpu
         self.parent_pipes = []
         self.processes    = []
 
+        # Start environments
         for cpu in range(n_cpu):
             parent_pipe, child_pipe = mp.Pipe()
             name                    = str(cpu)
             process = mp.Process(target = worker,
                                  name   = name,
                                  args   = (env_name, name, child_pipe))
-                    #parent_pipe, _obs_buffer, self.error_queue))
 
             self.parent_pipes.append(parent_pipe)
             self.processes.append(process)
 
             process.daemon = True
             process.start()
-            #child_pipe.close()
 
+        # Handle action and observation dimensions
         act_dim, obs_dim = self.get_dims()
-        self.act_dim = act_dim
-        self.obs_dim = obs_dim
+        self.act_dim = int(act_dim)
+        self.obs_dim = int(obs_dim)
 
+    # Reset all environments
     def reset(self):
 
+        # Send
         for pipe in self.parent_pipes:
             pipe.send(('reset', None))
-        result = zip(*[pipe.recv() for pipe in self.parent_pipes])
 
-        return results
+        # Receive
+        results = np.array([])
+        for pipe in self.parent_pipes:
+            results = np.append(results, pipe.recv())
 
+        return np.reshape(results, (-1,self.obs_dim))
+
+    # Reset a single environment
     def reset_single(self, idx):
 
+        # Send
         self.parent_pipes[idx].send(('reset',None))
-        results = self.parent_pipes[idx].recv()
 
-        return results
+        # Receive
+        results = np.array([])
+        results = np.append(results, self.parent_pipes[idx].recv())
 
+        return np.reshape(results, (-1,self.obs_dim))
+
+    # Get environment dimensions
     def get_dims(self):
 
+        # Send
         self.parent_pipes[0].send(('get_dims',None))
-        results = self.parent_pipes[0].recv()
+
+        # Receive
+        results = np.array([])
+        results = np.append(results, self.parent_pipes[0].recv())
 
         return results
 
+    # Take one step in all environments
     def step(self, actions):
 
+        # Send
         for pipe, action in zip(self.parent_pipes, actions):
             pipe.send(('step', action))
-        results = zip(*[pipe.recv() for pipe in self.parent_pipes])
 
-        return results
+        # Receive
+        nxt  = np.array([])
+        rwd  = np.array([])
+        done = np.array([], dtype=np.bool)
+        for pipe in self.parent_pipes:
+            n, r, d = pipe.recv()
+            nxt     = np.append(nxt, n)
+            rwd     = np.append(rwd, r)
+            done    = np.append(done, bool(d))
+
+        nxt  = np.reshape(nxt,  (-1,self.obs_dim))
+        #rwd  = np.reshape(rwd,  (-1,1))
+        #done = np.reshape(done, (-1,1))
+
+        #print(done)
+        #exit()
+
+        return nxt, rwd, done
 
 # Target function for process
-def worker(env_name, name, pipe):#, parent_pipe):
+def worker(env_name, name, pipe):
     env = gym.make(env_name)
     print('Started env #'+name)
-    #parent_pipe.close()
     try:
         while True:
             # Receive command
@@ -76,6 +112,7 @@ def worker(env_name, name, pipe):#, parent_pipe):
                 pipe.send(obs)
             if command == 'step':
                 nxt, rwd, done, _ = env.step(data)
+                time.sleep(1)
                 pipe.send((nxt, rwd, done))
             if command == 'seed':
                 env.seed(data)
@@ -89,6 +126,3 @@ def worker(env_name, name, pipe):#, parent_pipe):
                 break
     finally:
         env.close()
-    #except (KeyboardInterrupt, Exception):
-    #    error_queue.put((index,) + sys.exc_info()[:2])
-    #    pipe.send((None, False))
