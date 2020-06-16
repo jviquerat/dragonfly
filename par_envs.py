@@ -1,6 +1,5 @@
 # Generic imports
 import gym
-import time
 import numpy           as np
 import multiprocessing as mp
 

@@ -76,9 +76,6 @@ class glb_buff:
         self.size = 0
 
     def store(self, obs, adv, tgt, act):
-        #print(obs)
-        #print(self.obs)
-        #exit()
         self.obs = np.append(self.obs, obs, axis=0)
         self.adv = np.append(self.adv, adv, axis=0)
         self.tgt = np.append(self.tgt, tgt, axis=0)
