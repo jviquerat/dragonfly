@@ -49,12 +49,12 @@ class loc_buff:
         self.trm.append(trm)
         self.size += self.n_cpu
 
-    def flatten(self):
-        obs = self.obs.flatten()
-        nxt = self.nxt.flatten()
-        act = self.act.flatten()
-        rwd = self.rwd.flatten()
-        trm = self.trm.flatten()
+    def serialize(self):
+        obs = self.obs.serialize()
+        nxt = self.nxt.serialize()
+        act = self.act.serialize()
+        rwd = self.rwd.serialize()
+        trm = self.trm.serialize()
 
         return obs, nxt, act, rwd, trm
 
