@@ -71,6 +71,13 @@ class par_envs:
 
         return results
 
+    # Close
+    def close(self):
+
+        for p in self.processes:
+            p.terminate()
+            p.join()
+
     # Take one step in all environments
     def step(self, actions):
 
@@ -112,7 +119,6 @@ def worker(env_name, name, pipe):
                 pipe.send(obs)
             if command == 'step':
                 nxt, rwd, done, _ = env.step(data)
-                time.sleep(1)
                 pipe.send((nxt, rwd, done))
             if command == 'seed':
                 env.seed(data)

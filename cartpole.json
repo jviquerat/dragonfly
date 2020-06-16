@@ -1,9 +1,9 @@
 {
     "env_name": "CartPole-v0",
     "ep_end": 200,
-    "n_ep": 300,
-    "n_avg": 2,
-    "n_cpu": 1,
+    "n_ep": 100,
+    "n_avg": 1,
+    "n_cpu": 8,
     "render_every": 500,
     "actor_lr": 1.0e-2,
     "critic_lr": 1.0e-2,
