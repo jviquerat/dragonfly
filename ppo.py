@@ -31,14 +31,8 @@ class ppo_agent:
         self.gae_lambda   = params.gae_lambda
         self.actor_arch   = params.actor_arch
         self.critic_arch  = params.critic_arch
-        #self.update_style = params. update_style
         self.ep_end       = params.ep_end
         self.n_cpu        = params.n_cpu
-
-        ## Sanity check for update_style
-        #if (update_style not in ['ep', 'buff']):
-        #    print('Error: unkown update style')
-        #    exit()
 
         # Build networks
         self.critic     = critic(self.critic_arch,
@@ -62,15 +56,6 @@ class ppo_agent:
         # Init buffers
         self.loc_buff = loc_buff(self.n_cpu, self.obs_dim, self.act_dim)
         self.glb_buff = glb_buff(self.n_cpu, self.obs_dim, self.act_dim)
-
-        # Local buffers
-        #self.reset_local_buffers()
-
-        # Global buffers for off-policy training
-        #self.obs = np.empty((0,self.obs_dim))
-        #self.adv = np.empty((0,1))
-        #self.tgt = np.empty((0,1))
-        #self.act = np.empty((0,self.act_dim))
 
         # Arrays to store learning data
         self.ep      = np.array([], dtype=np.float32) # episode number
@@ -119,11 +104,8 @@ class ppo_agent:
     # Train networks
     def train(self):
 
-        #print(self.loc_buff.obs.buff)
-        obs, nxt, act, rwd, trm = self.loc_buff.flatten()
-
-        #print(obs)
-        #exit()
+        # Retrieve serialized arrays
+        obs, nxt, act, rwd, trm = self.loc_buff.serialize()
 
         # Get current and next values
         crt_val = np.array(self.critic(tf.cast(obs, dtype=tf.float32)))
@@ -134,10 +116,6 @@ class ppo_agent:
 
         # Store in global buffers
         self.glb_buff.store(obs, adv, tgt, act)
-        #self.obs = np.append(self.obs, buff.obs, axis=0)
-        #self.adv = np.append(self.adv,      adv, axis=0)
-        #self.tgt = np.append(self.tgt,      tgt, axis=0)
-        #self.act = np.append(self.act, buff.act, axis=0)
 
         # Retrieve n_buff buffers from history
         lgt, obs, adv, tgt, act = self.get_buffers()
@@ -326,10 +304,6 @@ class ppo_agent:
 
         # Handle insufficient history
         n_buff = self.n_buff
-        #if (self.update_style == 'ep'):
-        #    n_buff = int(min(n_buff, self.ep[-1]+1))
-        #    length = sum(self.length[-n_buff:])
-        #if (self.update_style == 'buff'):
         n_buff = int(min(n_buff, len(self.glb_buff.obs)//self.buff_size))
         length = n_buff*self.buff_size
 

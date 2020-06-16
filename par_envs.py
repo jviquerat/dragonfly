@@ -95,12 +95,7 @@ class par_envs:
             rwd     = np.append(rwd, r)
             done    = np.append(done, bool(d))
 
-        nxt  = np.reshape(nxt,  (-1,self.obs_dim))
-        #rwd  = np.reshape(rwd,  (-1,1))
-        #done = np.reshape(done, (-1,1))
-
-        #print(done)
-        #exit()
+        nxt = np.reshape(nxt, (-1,self.obs_dim))
 
         return nxt, rwd, done
 

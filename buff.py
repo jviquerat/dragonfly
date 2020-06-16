@@ -11,14 +11,12 @@ class par_buff:
 
     def reset(self):
         self.buff = [np.array([]) for _ in range(self.n_cpu)]
-        #for cpu in range(self.n_cpu):
-        #   self.buff.append(np.empty(0,self.dim))
 
     def append(self, vec):
         for cpu in range(self.n_cpu):
             self.buff[cpu] = np.append(self.buff[cpu], vec[cpu])
 
-    def flatten(self):
+    def serialize(self):
         arr = np.array([])
         for cpu in range(self.n_cpu):
             arr = np.append(arr, self.buff[cpu])
