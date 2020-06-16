@@ -18,10 +18,10 @@ def launch_training(params):
     #env     = gym.wrappers.Monitor(env,
     #                               './vids/'+str(time.time())+'/',
     #                               video_callable=video)
-    act_dim = env.action_space.n
-    obs_dim = env.observation_space.shape[0]
-    buff    = loc_buff(params.n_cpu, obs_dim, act_dim)
-    agent   = ppo_agent(act_dim, obs_dim, params)
+    buff    = loc_buff(params.n_cpu, env.obs_dim, env.act_dim)
+    agent   = ppo_agent(env.act_dim, env.obs_dim, params)
+
+    exit()
 
     # Initialize parameters
     ep      = 0
