@@ -63,6 +63,7 @@ def launch_training(params):
             # Reset if episode is done
             for cpu in range(params.n_cpu):
                 if done[cpu]:
+
                     # Store for future file printing
                     agent.store_learning_data(ep,
                                               ep_step[cpu],
@@ -87,8 +88,8 @@ def launch_training(params):
         # Write learning data on file
         agent.write_learning_data()
 
-        # Last printing
-        agent.print_episode(ep, params.n_ep)
+    # Last printing
+    agent.print_episode(ep, params.n_ep)
 
     # Close environments
     env.close()
