@@ -328,14 +328,14 @@ class ppo_agent:
             if (not done): term = 0
             if (    done): term = 1
         if (    self.bootstrap):
+            if (    done and ep_step <  ep_end-1): term = 1
+            if (    done and ep_step >= ep_end-1): term = 2
             if (not done and ep_step <  ep_end-1): term = 0
             if (not done and ep_step >= ep_end-1):
                 term = 2
                 done = True
-            if (    done and ep_step <  ep_end-1): term = 1
-            if (    done and ep_step >= ep_end-1): term = 2
 
-        return term
+        return term, done
 
     # Printings at the end of an episode
     def print_episode(self, ep, n_ep):
