@@ -1,5 +1,6 @@
 # Generic imports
 import gym
+import time
 import numpy           as np
 import multiprocessing as mp
 
@@ -7,6 +8,8 @@ import multiprocessing as mp
 ### A wrapper class for parallel environments
 class par_envs:
     def __init__(self, env_name, n_cpu):
+
+        print(gym.__file__)
 
         # Init pipes and processes
         self.n_cpu        = n_cpu
@@ -47,14 +50,14 @@ class par_envs:
         return np.reshape(results, (-1,self.obs_dim))
 
     # Reset a single environment
-    def reset_single(self, idx):
+    def reset_single(self, cpu):
 
         # Send
-        self.parent_pipes[idx].send(('reset',None))
+        self.parent_pipes[cpu].send(('reset',None))
 
         # Receive
         results = np.array([])
-        results = np.append(results, self.parent_pipes[idx].recv())
+        results = np.append(results, self.parent_pipes[cpu].recv())
 
         return np.reshape(results, (-1,self.obs_dim))
 
@@ -69,6 +72,17 @@ class par_envs:
         results = np.append(results, self.parent_pipes[0].recv())
 
         return results
+
+    # Render environment
+    def render_single(self, cpu):
+
+        # Send
+        self.parent_pipes[cpu].send(('render', None))
+
+        # Receive
+        rgb = self.parent_pipes[cpu].recv()
+
+        return rgb
 
     # Close
     def close(self):
@@ -101,7 +115,9 @@ class par_envs:
 # Target function for process
 def worker(env_name, name, pipe):
     env = gym.make(env_name)
-    print('Started env #'+name)
+    #env = gym.wrappers.Monitor(env,
+    #                           './vids/'+str(time.time())+'/',
+    #                           video_callable=None)
     try:
         while True:
             # Receive command
@@ -117,6 +133,8 @@ def worker(env_name, name, pipe):
             if command == 'seed':
                 env.seed(data)
                 pipe.send(None)
+            if command == 'render':
+                pipe.send(env.render(mode='rgb_array'))
             if (command == 'get_dims'):
                 act_dim = env.action_space.n
                 obs_dim = env.observation_space.shape[0]
