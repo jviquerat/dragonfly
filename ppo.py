@@ -104,6 +104,11 @@ class ppo_agent:
     # Train networks
     def train(self):
 
+        # Handle fixed-size buffer termination
+        for cpu in range(self.n_cpu):
+            if (self.loc_buff.trm.buff[cpu][-1] == 0):
+                self.loc_buff.trm.buff[cpu][-1] = 2
+
         # Retrieve serialized arrays
         obs, nxt, act, rwd, trm = self.loc_buff.serialize()
 
@@ -166,7 +171,6 @@ class ppo_agent:
         # Initialize
         gm  = self.gamma
         lbd = self.gae_lambda
-        #rwd /= 10.0
 
         # Handle mask from termination signals
         msk = np.zeros(len(trm))
@@ -198,7 +202,7 @@ class ppo_agent:
         tgt += val
 
         # Normalize
-        adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-7)
+        adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-5)
 
         # Clip if required
         if (self.adv_clip):
