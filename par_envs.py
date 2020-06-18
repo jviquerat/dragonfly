@@ -9,8 +9,6 @@ import multiprocessing as mp
 class par_envs:
     def __init__(self, env_name, n_cpu):
 
-        print(gym.__file__)
-
         # Init pipes and processes
         self.n_cpu        = n_cpu
         self.parent_pipes = []

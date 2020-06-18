@@ -69,7 +69,7 @@ class critic(Model):
                              activation= 'linear'))
 
         self.opt = tk.optimizers.Nadam(lr       = lr,
-                                       clipnorm = grd_clip,
+                                       #clipnorm = grd_clip,
                                        beta_1   = 0.9,
                                        beta_2   = 0.999,
                                        epsilon  = 1.0e-5)

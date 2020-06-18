@@ -1,6 +1,6 @@
 {
     "env_name": "LunarLander-v2",
-    "ep_end": 300,
+    "ep_end": 400,
     "n_ep": 500,
     "n_avg": 3,
     "n_cpu": 1,
