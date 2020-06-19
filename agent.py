@@ -10,7 +10,7 @@ import tensorflow.keras              as     tk
 import tensorflow_addons             as     tfa
 import tensorflow_probability        as     tfp
 from   tensorflow.keras              import Model
-from   tensorflow.keras.layers       import Dense
+from   tensorflow.keras.layers       import Dense, BatchNormalization
 from   tensorflow.keras.initializers import Orthogonal
 
 # Define alias
@@ -28,14 +28,15 @@ class actor(Model):
             self.ac.append(Dense(arch[layer],
                                  kernel_initializer=Orthogonal(gain=1.0),
                                  activation = 'tanh'))
+            self.ac.append(BatchNormalization())
         self.ac.append(Dense(act_dim,
-                             kernel_initializer=Orthogonal(gain=0.1),
+                             kernel_initializer=Orthogonal(gain=0.01),
                              activation = 'softmax'))
 
         self.opt = tk.optimizers.Nadam(lr       = lr,
                                        clipnorm = grd_clip,
                                        beta_1   = 0.9,
-                                       beta_2   = 0.99,
+                                       beta_2   = 0.999,
                                        epsilon  = 1.0e-5)
 
     # Network forward pass
@@ -62,14 +63,15 @@ class critic(Model):
             self.ct.append(Dense(arch[layer],
                                  kernel_initializer=Orthogonal(gain=1.0),
                                  activation = 'tanh'))
+            self.ct.append(BatchNormalization())
         self.ct.append(Dense(1,
-                             kernel_initializer=Orthogonal(gain=0.1),
+                             kernel_initializer=Orthogonal(gain=1.0),
                              activation= 'linear'))
 
         self.opt = tk.optimizers.Nadam(lr       = lr,
-                                       clipnorm = grd_clip,
+                                       #clipnorm = grd_clip,
                                        beta_1   = 0.9,
-                                       beta_2   = 0.99,
+                                       beta_2   = 0.999,
                                        epsilon  = 1.0e-5)
 
     # Network forward pass

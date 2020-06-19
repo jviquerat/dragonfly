@@ -2,7 +2,8 @@
     "env_name": "CartPole-v0",
     "ep_end": 200,
     "n_ep": 300,
-    "n_avg": 5,
+    "n_avg": 3,
+    "n_cpu": 16,
     "render_every": 500,
     "actor_lr": 1.0e-2,
     "critic_lr": 1.0e-2,
@@ -16,7 +17,7 @@
     "grd_clip": 0.5,
     "entropy": 0.01,
     "gamma": 0.99,
-    "gae_lambda": 0.97,
+    "gae_lambda": 0.99,
     "adv_clip": true,
     "bootstrap": true
 }

@@ -5,16 +5,12 @@ import numpy as np
 
 # Custom imports
 from agent import *
+from buff  import *
 
 ###############################################
 ### A discrete PPO agent
-class ppo_discrete:
+class ppo_agent:
     def __init__(self, act_dim, obs_dim, params):
-                 #act_dim, obs_dim, actor_lr, critic_lr,
-                 #buff_size, batch_frac, n_epochs, n_buff,
-                 #pol_clip, grd_clip, adv_clip, bootstrap,
-                 #entropy, gamma, gae_lambda, ep_end,
-                 #actor_arch, critic_arch):
 
         # Initialize from arguments
         self.act_dim      = act_dim
@@ -35,13 +31,8 @@ class ppo_discrete:
         self.gae_lambda   = params.gae_lambda
         self.actor_arch   = params.actor_arch
         self.critic_arch  = params.critic_arch
-        #self.update_style = params. update_style
         self.ep_end       = params.ep_end
-
-        ## Sanity check for update_style
-        #if (update_style not in ['ep', 'buff']):
-        #    print('Error: unkown update style')
-        #    exit()
+        self.n_cpu        = params.n_cpu
 
         # Build networks
         self.critic     = critic(self.critic_arch,
@@ -62,14 +53,9 @@ class ppo_discrete:
         dummy = self.old_actor(tf.ones([1,self.obs_dim]))
         self.old_actor.set_weights (self.actor.get_weights())
 
-        # Local buffers
-        self.reset_local_buffers()
-
-        # Global buffers for off-policy training
-        self.obs = np.empty((0,self.obs_dim))
-        self.adv = np.empty((0,1))
-        self.tgt = np.empty((0,1))
-        self.act = np.empty((0,self.act_dim))
+        # Init buffers
+        self.loc_buff = loc_buff(self.n_cpu, self.obs_dim, self.act_dim)
+        self.glb_buff = glb_buff(self.n_cpu, self.obs_dim, self.act_dim)
 
         # Arrays to store learning data
         self.ep      = np.array([], dtype=np.float32) # episode number
@@ -118,27 +104,23 @@ class ppo_discrete:
     # Train networks
     def train(self):
 
-        # Reshape buffers
-        self.reshape_local_buffers()
+        # Handle fixed-size buffer termination
+        for cpu in range(self.n_cpu):
+            if (self.loc_buff.trm.buff[cpu][-1] == 0):
+                self.loc_buff.trm.buff[cpu][-1] = 2
 
-        obs = self.buff_obs
-        nxt = self.buff_nxt
-        act = self.buff_act
-        rwd = self.buff_rwd
-        trm = self.buff_trm
+        # Retrieve serialized arrays
+        obs, nxt, act, rwd, trm = self.loc_buff.serialize()
 
-        # Get previous policy and values
-        val = np.array(self.critic(tf.cast(obs, dtype=tf.float32)))
-        nxt = np.array(self.critic(tf.cast(nxt, dtype=tf.float32)))
+        # Get current and next values
+        crt_val = np.array(self.critic(tf.cast(obs, dtype=tf.float32)))
+        nxt_val = np.array(self.critic(tf.cast(nxt, dtype=tf.float32)))
 
         # Compute advantages
-        tgt, adv = self.compute_adv(rwd, val, nxt, trm)
+        tgt, adv = self.compute_adv(rwd, crt_val, nxt_val, trm)
 
         # Store in global buffers
-        self.obs = np.append(self.obs, obs, axis=0)
-        self.adv = np.append(self.adv, adv, axis=0)
-        self.tgt = np.append(self.tgt, tgt, axis=0)
-        self.act = np.append(self.act, act, axis=0)
+        self.glb_buff.store(obs, adv, tgt, act)
 
         # Retrieve n_buff buffers from history
         lgt, obs, adv, tgt, act = self.get_buffers()
@@ -220,7 +202,7 @@ class ppo_discrete:
         tgt += val
 
         # Normalize
-        adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-7)
+        adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-5)
 
         # Clip if required
         if (self.adv_clip):
@@ -322,67 +304,26 @@ class ppo_discrete:
                                            self.nrm_act, self.nrm_crt,
                                            self.kl_div,  self.lr]))
 
-    # Reset local buffers
-    def reset_local_buffers(self):
-
-        self.buff_obs = np.array([])
-        self.buff_nxt = np.array([])
-        self.buff_act = np.array([])
-        self.buff_rwd = np.array([])
-        self.buff_trm = np.array([])
-
-    # Store transition in local buffers
-    def store_transition(self, obs, nxt, act, rwd, trm):
-
-        self.buff_obs = np.append(self.buff_obs, obs)
-        self.buff_nxt = np.append(self.buff_nxt, nxt)
-        self.buff_act = np.append(self.buff_act, act)
-        self.buff_rwd = np.append(self.buff_rwd, rwd)
-        self.buff_trm = np.append(self.buff_trm, trm)
-
-    # Reshape local buffers
-    def reshape_local_buffers(self):
-
-        self.buff_obs = np.reshape(self.buff_obs,(-1,self.obs_dim))
-        self.buff_nxt = np.reshape(self.buff_nxt,(-1,self.obs_dim))
-        self.buff_act = np.reshape(self.buff_act,(-1,self.act_dim))
-        self.buff_rwd = np.reshape(self.buff_rwd,(-1,1))
-        self.buff_trm = np.reshape(self.buff_trm,(-1,1))
-
     # Get buffers
     def get_buffers(self):
 
         # Handle insufficient history
         n_buff = self.n_buff
-        #if (self.update_style == 'ep'):
-        #    n_buff = int(min(n_buff, self.ep[-1]+1))
-        #    length = sum(self.length[-n_buff:])
-        #if (self.update_style == 'buff'):
-        n_buff = int(min(n_buff, len(self.obs)//self.buff_size))
+        n_buff = int(min(n_buff, len(self.glb_buff.obs)//self.buff_size))
         length = n_buff*self.buff_size
 
         # Retrieve buffers
-        obs    = self.obs[-length:]
-        adv    = self.adv[-length:]
-        tgt    = self.tgt[-length:]
-        act    = self.act[-length:]
+        obs    = self.glb_buff.obs[-length:]
+        adv    = self.glb_buff.adv[-length:]
+        tgt    = self.glb_buff.tgt[-length:]
+        act    = self.glb_buff.act[-length:]
 
         return length, obs, adv, tgt, act
 
     # Test looping criterion
-    def test_loop(self, done, bf_step):
+    def test_loop(self):
 
-        #if (self.update_style == 'ep'):
-        #    if (done):
-        #        return False
-        #    else:
-        #        return True
-
-        #if (self.update_style == 'buff'):
-        if (bf_step == self.buff_size-1):
-            return False
-        else:
-            return True
+        return (not (self.loc_buff.size >= self.buff_size-1))
 
     # Handle termination state
     def handle_termination(self, done, ep_step, ep_end):
@@ -391,19 +332,24 @@ class ppo_discrete:
             if (not done): term = 0
             if (    done): term = 1
         if (    self.bootstrap):
-            if (not done):                         term = 0
             if (    done and ep_step <  ep_end-1): term = 1
-            if (    done and ep_step == ep_end-1): term = 2
+            if (    done and ep_step >= ep_end-1): term = 2
+            if (not done and ep_step <  ep_end-1): term = 0
+            if (not done and ep_step >= ep_end-1):
+                term = 2
+                done = True
 
-        return term
+        return term, done
 
     # Printings at the end of an episode
     def print_episode(self, ep, n_ep):
 
+        if (ep == 0): return
+
         avg = np.mean(self.score[-25:])
         avg = f"{avg:.3f}"
 
-        if (ep < n_ep-1):
+        if (ep <  n_ep-1):
             print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\r')
         if (ep == n_ep-1):
             print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\n')

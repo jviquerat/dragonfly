@@ -2,6 +2,7 @@
 import os
 import sys
 import json
+import time
 import collections
 import numpy as np
 
@@ -39,7 +40,9 @@ stdm_data  = np.zeros((              params.n_ep,   n_data), dtype=float)
 
 for i in range(params.n_avg):
     print('### Avg run #'+str(i))
+    start_time = time.time()
     launch_training(params)
+    print("--- %s seconds ---" % (time.time() - start_time))
 
     f           = np.loadtxt('ppo.dat')
     ep          = f[:params.n_ep,0]
