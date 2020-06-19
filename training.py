@@ -1,6 +1,6 @@
 # Generic imports
 import time
-from PIL import Image
+from   PIL import Image
 
 # Custom imports
 from ppo      import *
@@ -14,10 +14,6 @@ def launch_training(params):
 
     # Declare environement and agent
     env = par_envs(params.env_name, params.n_cpu)
-    #video   = lambda ep: (ep%params.render_every==0 and ep != 0)
-    #env     = gym.wrappers.Monitor(env,
-    #                               './vids/'+str(time.time())+'/',
-    #                               video_callable=video)
     agent   = ppo_agent(env.act_dim, env.obs_dim, params)
 
     # Initialize parameters
@@ -92,7 +88,7 @@ def launch_training(params):
                                          loop=1)
                         rgb[cpu] = []
 
-                    if (ep%params.render_every == 0):
+                    if ((ep%params.render_every == 0) and (ep != 0)):
                         render[cpu] = True
 
                     # Reset
