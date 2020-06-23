@@ -1,6 +1,5 @@
 # Generic imports
 import gym
-import time
 import numpy           as np
 import multiprocessing as mp
 
@@ -113,9 +112,6 @@ class par_envs:
 # Target function for process
 def worker(env_name, name, pipe):
     env = gym.make(env_name)
-    #env = gym.wrappers.Monitor(env,
-    #                           './vids/'+str(time.time())+'/',
-    #                           video_callable=None)
     try:
         while True:
             # Receive command

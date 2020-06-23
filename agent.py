@@ -28,7 +28,6 @@ class actor(Model):
             self.ac.append(Dense(arch[layer],
                                  kernel_initializer=Orthogonal(gain=1.0),
                                  activation = 'tanh'))
-            self.ac.append(BatchNormalization())
         self.ac.append(Dense(act_dim,
                              kernel_initializer=Orthogonal(gain=0.01),
                              activation = 'softmax'))
@@ -63,7 +62,6 @@ class critic(Model):
             self.ct.append(Dense(arch[layer],
                                  kernel_initializer=Orthogonal(gain=1.0),
                                  activation = 'tanh'))
-            self.ct.append(BatchNormalization())
         self.ct.append(Dense(1,
                              kernel_initializer=Orthogonal(gain=1.0),
                              activation= 'linear'))
