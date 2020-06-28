@@ -21,5 +21,6 @@
     "gae_lambda": 0.99,
     "norm_adv": true,
     "adv_clip": true,
+    "tgt_mode": "adv",
     "bootstrap": true
 }

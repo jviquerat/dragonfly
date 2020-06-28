@@ -31,6 +31,7 @@ class ppo_agent:
         self.use_gae      = params.use_gae
         self.gae_lambda   = params.gae_lambda
         self.norm_adv     = params.norm_adv
+        self.tgt_mode     = params.tgt_mode
         self.actor_arch   = params.actor_arch
         self.critic_arch  = params.critic_arch
         self.ep_end       = params.ep_end
@@ -189,16 +190,16 @@ class ppo_agent:
             dlt  = np.stack(dlt)
 
             # Modify termination mask for GAE
-            msk = np.zeros(len(trm))
+            msk2 = np.zeros(len(trm))
             for i in range(len(trm)):
-                if (trm[i] == 0): msk[i] = 1.0
-                if (trm[i] == 1): msk[i] = 0.0
-                if (trm[i] == 2): msk[i] = 0.0
+                if (trm[i] == 0): msk2[i] = 1.0
+                if (trm[i] == 1): msk2[i] = 0.0
+                if (trm[i] == 2): msk2[i] = 0.0
 
             # Compute advantages
             adv = dlt.copy()
             for t in reversed(range(len(adv)-1)):
-                adv[t] += msk[t]*gm*lbd*adv[t+1]
+                adv[t] += msk2[t]*gm*lbd*adv[t+1]
 
         else:
             # Initialize return term==2
@@ -212,8 +213,22 @@ class ppo_agent:
             adv = ret - val
 
         # Compute targets
-        tgt = adv.copy()
-        tgt += val
+        if self.tgt_mode == 'adv':  # same as 'ret' for use_gae=False
+            tgt = adv.copy()
+            tgt += val
+
+        elif self.tgt_mode == '1step':
+            tgt = rwd + np.where(trm == 1, 0.0, gm * nxt)
+
+        elif self.tgt_mode == 'ret':  # same as 'adv' for use_gae=False
+            if self.use_gae:
+                # Initialize return term==2
+                tgt = np.where(trm == 2, rwd + gm * nxt, rwd)
+                # Return as discounted sum
+                for t in reversed(range(len(tgt)-1)):
+                    tgt[t] += msk[t]*gm*tgt[t+1]
+            else:
+                tgt = ret.copy()
 
         # Normalize
         if self.norm_adv:
