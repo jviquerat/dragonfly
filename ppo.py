@@ -214,7 +214,7 @@ class ppo_agent:
 
         # Compute targets
         if self.tgt_mode == 'adv':  # same as 'ret' for use_gae=False
-            tgt = adv.copy()
+            tgt  = adv.copy()
             tgt += val
 
         elif self.tgt_mode == '1step':
