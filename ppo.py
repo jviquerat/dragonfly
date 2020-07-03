@@ -28,7 +28,10 @@ class ppo_agent:
         self.bootstrap    = params.bootstrap
         self.entropy      = params.entropy
         self.gamma        = params.gamma
+        self.use_gae      = params.use_gae
         self.gae_lambda   = params.gae_lambda
+        self.norm_adv     = params.norm_adv
+        self.tgt_mode     = params.tgt_mode
         self.actor_arch   = params.actor_arch
         self.critic_arch  = params.critic_arch
         self.ep_end       = params.ep_end
@@ -179,30 +182,57 @@ class ppo_agent:
             if (trm[i] == 1): msk[i] = 0.0
             if (trm[i] == 2): msk[i] = 1.0
 
-        # Compute deltas
-        buff = zip(rwd, msk, nxt, val)
-        dlt  = [r + gm*m*nv - v for r, m, nv, v in buff]
-        dlt  = np.stack(dlt)
+        # Whether to use GAE
+        if self.use_gae:
+            # Compute deltas
+            buff = zip(rwd, msk, nxt, val)
+            dlt  = [r + gm*m*nv - v for r, m, nv, v in buff]
+            dlt  = np.stack(dlt)
 
-        # Compute advantages
-        adv = dlt.copy()
+            # Modify termination mask for GAE
+            msk2 = np.zeros(len(trm))
+            for i in range(len(trm)):
+                if (trm[i] == 0): msk2[i] = 1.0
+                if (trm[i] == 1): msk2[i] = 0.0
+                if (trm[i] == 2): msk2[i] = 0.0
 
-        # Handle mask from termination signals
-        msk = np.zeros(len(trm))
-        for i in range(len(trm)):
-            if (trm[i] == 0): msk[i] = 1.0
-            if (trm[i] == 1): msk[i] = 0.0
-            if (trm[i] == 2): msk[i] = 0.0
+            # Compute advantages
+            adv = dlt.copy()
+            for t in reversed(range(len(adv)-1)):
+                adv[t] += msk2[t]*gm*lbd*adv[t+1]
 
-        for t in reversed(range(len(dlt)-1)):
-            adv[t] += msk[t]*gm*lbd*adv[t+1]
+        else:
+            # Initialize return term==2
+            ret = np.where(trm == 2, rwd + gm * nxt, rwd)
+
+            # Return as discounted sum
+            for t in reversed(range(len(ret)-1)):
+                ret[t] += msk[t]*gm*ret[t+1]
+
+            # Advantage
+            adv = ret - val
 
         # Compute targets
-        tgt  = adv.copy()
-        tgt += val
+        if self.tgt_mode == 'adv':  # same as 'ret' for use_gae=False
+            tgt  = adv.copy()
+            tgt += val
+
+        elif self.tgt_mode == '1step':
+            tgt = rwd + np.where(trm == 1, 0.0, gm * nxt)
+
+        elif self.tgt_mode == 'ret':  # same as 'adv' for use_gae=False
+            if self.use_gae:
+                # Initialize return term==2
+                tgt = np.where(trm == 2, rwd + gm * nxt, rwd)
+                # Return as discounted sum
+                for t in reversed(range(len(tgt)-1)):
+                    tgt[t] += msk[t]*gm*tgt[t+1]
+            else:
+                tgt = ret.copy()
 
         # Normalize
-        adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-5)
+        if self.norm_adv:
+            adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-5)
 
         # Clip if required
         if (self.adv_clip):
