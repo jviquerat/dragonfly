@@ -32,11 +32,14 @@ class actor(Model):
                              kernel_initializer=Orthogonal(gain=0.01),
                              activation = 'softmax'))
 
-        self.opt = tk.optimizers.Nadam(lr       = lr,
-                                       clipnorm = grd_clip,
-                                       beta_1   = 0.9,
-                                       beta_2   = 0.999,
-                                       epsilon  = 1.0e-5)
+        #self.opt = tk.optimizers.Nadam(lr       = lr,
+        #                               clipnorm = grd_clip,
+        #                               beta_1   = 0.9,
+        #                               beta_2   = 0.999,
+        #                               epsilon  = 1.0e-5)
+
+        self.opt = tk.optimizers.Adam(lr       = lr,
+                                      clipnorm = grd_clip)
 
     # Network forward pass
     def call(self, state):
