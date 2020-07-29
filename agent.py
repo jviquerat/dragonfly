@@ -69,11 +69,14 @@ class critic(Model):
                              kernel_initializer=Orthogonal(gain=1.0),
                              activation= 'linear'))
 
-        self.opt = tk.optimizers.Nadam(lr       = lr,
-                                       #clipnorm = grd_clip,
-                                       beta_1   = 0.9,
-                                       beta_2   = 0.999,
-                                       epsilon  = 1.0e-5)
+
+        self.opt = tk.optimizers.Adam(lr       = lr)
+                                      #clipnorm = grd_clip)
+        #self.opt = tk.optimizers.Nadam(lr       = lr,
+        #                               #clipnorm = grd_clip,
+        #                               beta_1   = 0.9,
+        #                               beta_2   = 0.999,
+        #                               epsilon  = 1.0e-5)
 
     # Network forward pass
     def call(self, state):
