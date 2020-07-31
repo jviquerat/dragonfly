@@ -133,6 +133,7 @@ class ppo_agent:
 
         # Retrieve learning rate
         lr = self.actor.opt._decayed_lr(tf.float32)
+        #lr = self.actor.opt.lr
 
         # Save actor weights
         act_weights = self.actor.get_weights()
@@ -304,6 +305,8 @@ class ppo_agent:
 
     # Store for printing
     def store_learning_data(self, ep, length, score, outputs):
+
+        outputs = np.nan_to_num(outputs, nan=0.0)
 
         ls_act  = outputs[0]
         ent     = outputs[1]
