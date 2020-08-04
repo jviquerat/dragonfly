@@ -2,7 +2,7 @@
     "env_name": "gym_lorenz:lorenz-v0",
     "ep_end": 50000,
     "n_ep": 500,
-    "n_avg": 3,
+    "n_avg": 5,
     "n_cpu": 1,
     "render_every": 5000,
     "actor_lr": 1.0e-3,
@@ -19,7 +19,7 @@
     "gamma": 0.99,
     "use_gae": true,
     "gae_lambda": 0.99,
-    "norm_adv": true,
+    "norm_adv": false,
     "adv_clip": true,
     "tgt_mode": "adv",
     "bootstrap": false
