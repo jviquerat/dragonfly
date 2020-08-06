@@ -39,7 +39,7 @@ class actor(Model):
     # Network forward pass
     def call(self, state):
 
-        # Copy input
+        # Copy inputs
         var = state
 
         # Compute output
@@ -65,7 +65,7 @@ class critic(Model):
                              activation= 'linear'))
 
         # Define optimizer
-        self.opt = tk.optimizers.Adam(lr       = lr)
+        self.opt = tk.optimizers.Adam(lr = lr)
 
     # Network forward pass
     def call(self, state):
