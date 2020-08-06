@@ -32,6 +32,7 @@ class actor(Model):
                              kernel_initializer=Orthogonal(gain=0.01),
                              activation = 'softmax'))
 
+        # Define optimizer
         self.opt = tk.optimizers.Nadam(lr       = lr,
                                        clipnorm = grd_clip)
 
@@ -63,6 +64,7 @@ class critic(Model):
                              kernel_initializer=Orthogonal(gain=1.0),
                              activation= 'linear'))
 
+        # Define optimizer
         self.opt = tk.optimizers.Adam(lr       = lr)
 
     # Network forward pass
