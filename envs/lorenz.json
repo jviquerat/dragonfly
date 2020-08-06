@@ -13,7 +13,7 @@
     "n_buff": 16,
     "n_epochs": 64,
     "buff_size": 128,
-    "pol_clip": 0.3,
+    "pol_clip": 0.1,
     "grd_clip": 0.5,
     "entropy": 0.01,
     "gamma": 0.99,
