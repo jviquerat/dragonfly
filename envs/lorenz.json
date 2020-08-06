@@ -1,8 +1,8 @@
 {
     "env_name": "gym_lorenz:lorenz-v0",
     "ep_end": 50000,
-    "n_ep": 500,
-    "n_avg": 5,
+    "n_ep": 1000,
+    "n_avg": 3,
     "n_cpu": 1,
     "render_every": 5000,
     "actor_lr": 1.0e-3,

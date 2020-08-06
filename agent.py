@@ -10,7 +10,7 @@ import tensorflow.keras              as     tk
 import tensorflow_addons             as     tfa
 import tensorflow_probability        as     tfp
 from   tensorflow.keras              import Model
-from   tensorflow.keras.layers       import Dense, BatchNormalization
+from   tensorflow.keras.layers       import Dense
 from   tensorflow.keras.initializers import Orthogonal
 
 # Define alias
@@ -34,19 +34,6 @@ class actor(Model):
 
         self.opt = tk.optimizers.Nadam(lr       = lr,
                                        clipnorm = grd_clip)
-        #                               beta_1   = 0.9,
-        #                               beta_2   = 0.999,
-        #                               epsilon  = 1.0e-5)
-
-        #opt = tfa.optimizers.RectifiedAdam(
-        #    lr=1e-2,
-        #    total_steps=10000,
-        #    warmup_proportion=0.1,
-        #    min_lr=1e-5,
-        #)
-
-        #self.opt = tk.optimizers.Adam(lr       = lr,
-                                      #clipnorm = grd_clip)
 
     # Network forward pass
     def call(self, state):
@@ -76,14 +63,7 @@ class critic(Model):
                              kernel_initializer=Orthogonal(gain=1.0),
                              activation= 'linear'))
 
-
-        #self.opt = tk.optimizers.Adam(lr       = lr)
-                                      #clipnorm = grd_clip)
-        self.opt = tk.optimizers.Nadam(lr       = lr)
-        #                              #clipnorm = grd_clip,
-        #                              beta_1   = 0.9,
-        #                              beta_2   = 0.999,
-        #                              epsilon  = 1.0e-5)
+        self.opt = tk.optimizers.Adam(lr       = lr)
 
     # Network forward pass
     def call(self, state):
