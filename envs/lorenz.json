@@ -17,7 +17,7 @@
     "grd_clip": 0.5,
     "entropy": 0.01,
     "gamma": 0.99,
-    "use_gae": true,
+    "use_gae": false,
     "gae_lambda": 0.99,
     "norm_adv": false,
     "adv_clip": true,
