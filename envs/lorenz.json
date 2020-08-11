@@ -1,7 +1,7 @@
 {
     "env_name": "gym_lorenz:lorenz-v0",
     "ep_end": 50000,
-    "n_ep": 1000,
+    "n_ep": 500,
     "n_avg": 3,
     "n_cpu": 1,
     "render_every": 5000,
@@ -10,17 +10,17 @@
     "actor_arch": [16,16],
     "critic_arch": [16,16],
     "batch_frac": 0.5,
-    "n_buff": 16,
-    "n_epochs": 64,
+    "n_buff": 4,
+    "n_epochs": 32,
     "buff_size": 128,
-    "pol_clip": 0.1,
+    "pol_clip": 0.2,
     "grd_clip": 0.5,
     "entropy": 0.01,
     "gamma": 0.99,
-    "use_gae": false,
-    "gae_lambda": 0.99,
-    "norm_adv": false,
+    "use_gae": true,
+    "gae_lambda": 0.95,
+    "norm_adv": true,
     "adv_clip": true,
     "tgt_mode": "adv",
-    "bootstrap": false
+    "bootstrap": true
 }
