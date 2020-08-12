@@ -15,6 +15,7 @@ from   tensorflow.keras.initializers import Orthogonal
 
 # Define alias
 tfd = tfp.distributions
+tf.random.set_seed(1)
 
 ###############################################
 ### PPO actor
