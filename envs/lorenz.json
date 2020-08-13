@@ -12,7 +12,7 @@
     "batch_frac": 0.5,
     "n_buff": 4,
     "n_epochs": 4,
-    "buff_size": 256,
+    "buff_size": 128,
     "pol_clip": 0.2,
     "grd_clip": 0.5,
     "entropy": 0.02,
