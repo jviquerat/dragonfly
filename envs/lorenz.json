@@ -15,7 +15,7 @@
     "buff_size": 128,
     "pol_clip": 0.2,
     "grd_clip": 0.5,
-    "entropy": 0.02,
+    "entropy": 0.01,
     "gamma": 0.99,
     "use_gae": false,
     "gae_lambda": 0.99,
