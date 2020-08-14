@@ -16,7 +16,7 @@
     "pol_clip": 0.1,
     "grd_clip": 0.5,
     "entropy": 0.01,
-    "gamma": 0.999,
+    "gamma": 0.99,
     "use_gae": false,
     "gae_lambda": 0.99,
     "norm_adv": true,
