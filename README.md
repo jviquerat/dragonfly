@@ -41,3 +41,16 @@ This is a <a href="https://github.com/jviquerat/gym-lorenz">custom environment</
 <p align="center">
   <img width="800" alt="oscillator_2D" src="https://user-images.githubusercontent.com/44053700/90244347-de718700-de30-11ea-8cb1-a9e6b297b0fc.png">
 </p>
+
+## LunarLander-v2
+
+The agent learns to land on a landing pad using 4 discrete actions. The episode ends prematurely if the lander crashes. Maximal reward is obtained if the lander gets on the pad at zero speed. The graphs shown below are averaged over 5 runs.
+
+<p align="center">
+  <img width="410" alt="" src="https://user-images.githubusercontent.com/44053700/90507551-5bb13a80-e156-11ea-9037-4745e7c531d0.gif">
+  <img width="410" alt="" src="https://user-images.githubusercontent.com/44053700/90507558-5e139480-e156-11ea-83a2-7529d23daf17.gif">
+</p>
+
+<p align="center">
+  <img width="800" alt="" src="https://user-images.githubusercontent.com/44053700/90507545-58b64a00-e156-11ea-90cb-633a40f5dd09.png">
+</p>
