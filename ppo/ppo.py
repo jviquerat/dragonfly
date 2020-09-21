@@ -4,8 +4,8 @@ import math
 import numpy as np
 
 # Custom imports
-from agent import *
-from buff  import *
+from ppo.agent import *
+from ppo.buff  import *
 
 ###############################################
 ### A discrete PPO agent
@@ -133,7 +133,6 @@ class ppo_agent:
 
         # Retrieve learning rate
         lr = self.actor.opt._decayed_lr(tf.float32)
-        #lr = self.actor.opt.lr
 
         # Save actor weights
         act_weights = self.actor.get_weights()
@@ -328,14 +327,16 @@ class ppo_agent:
         self.length  = np.append(self.length,  length)
 
     # Write learning data
-    def write_learning_data(self):
+    def write_learning_data(self, path, run):
 
-        filename = 'ppo.dat'
-        np.savetxt(filename, np.transpose([self.ep,      self.score,
-                                           self.length,  self.ls_act,
-                                           self.ls_crt,  self.ent,
-                                           self.nrm_act, self.nrm_crt,
-                                           self.kl_div,  self.lr]))
+        filename = path+'/ppo.dat'
+        np.savetxt(filename,
+                   np.transpose([self.ep,      self.score,
+                                 self.length,  self.ls_act,
+                                 self.ls_crt,  self.ent,
+                                 self.nrm_act, self.nrm_crt,
+                                 self.kl_div,  self.lr]),
+                   fmt='%.5e')
 
     # Get buffers
     def get_buffers(self):
