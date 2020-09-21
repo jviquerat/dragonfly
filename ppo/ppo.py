@@ -105,7 +105,7 @@ class ppo_agent:
         return val
 
     # Train networks
-    def train(self):
+    def train_networks(self):
 
         # Handle fixed-size buffer termination
         for cpu in range(self.n_cpu):
@@ -124,6 +124,10 @@ class ppo_agent:
 
         # Store in global buffers
         self.glb_buff.store(obs, adv, tgt, act)
+
+
+
+
 
         # Retrieve n_buff buffers from history
         lgt, obs, adv, tgt, act = self.get_buffers()

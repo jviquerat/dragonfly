@@ -101,7 +101,7 @@ def launch_training(params, path, run):
             loop = agent.test_loop()
 
         # Train
-        outputs = agent.train()
+        outputs = agent.train_networks()
 
         # Write learning data on file
         agent.write_learning_data(path, run)
