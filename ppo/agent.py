@@ -15,7 +15,6 @@ from   tensorflow.keras.initializers import Orthogonal
 
 # Define alias
 tfd = tfp.distributions
-tf.random.set_seed(1)
 
 ###############################################
 ### PPO actor
@@ -28,16 +27,17 @@ class actor(Model):
         for layer in range(len(arch)):
             self.ac.append(Dense(arch[layer],
                                  kernel_initializer=Orthogonal(gain=1.0),
-                                 use_bias=False,
                                  activation = 'tanh'))
         self.ac.append(Dense(act_dim,
                              kernel_initializer=Orthogonal(gain=0.01),
-                             use_bias=False,
                              activation = 'softmax'))
 
         # Define optimizer
         self.opt = tk.optimizers.Nadam(lr       = lr,
-                                       clipnorm = grd_clip)
+                                       clipnorm = grd_clip,
+                                       beta_1   = 0.9,
+                                       beta_2   = 0.999,
+                                       epsilon  = 1.0e-5)
 
     # Network forward pass
     def call(self, state):
@@ -62,15 +62,16 @@ class critic(Model):
         for layer in range(len(arch)):
             self.ct.append(Dense(arch[layer],
                                  kernel_initializer=Orthogonal(gain=1.0),
-                                 use_bias=False,
                                  activation = 'tanh'))
         self.ct.append(Dense(1,
                              kernel_initializer=Orthogonal(gain=1.0),
-                             use_bias=False,
                              activation= 'linear'))
 
         # Define optimizer
-        self.opt = tk.optimizers.Adam(lr = lr)
+        self.opt = tk.optimizers.Nadam(lr       = lr,
+                                       beta_1   = 0.9,
+                                       beta_2   = 0.999,
+                                       epsilon  = 1.0e-5)
 
     # Network forward pass
     def call(self, state):

@@ -163,58 +163,6 @@ class ppo_agent:
 
         return act_out + crt_out + [lr]
 
-
-            # Handle insufficient history compared to batch_size
-            #batch_size = math.floor(self.batch_frac*lgt)
-
-
-
-
-
-
-        # Retrieve n_buff buffers from history
-        #lgt, obs, adv, tgt, act = self.get_buffers()
-
-        # Handle insufficient history compared to batch_size
-        #batch_size = math.floor(self.batch_frac*lgt)
-
-        # Retrieve learning rate
-        #lr = self.actor.opt._decayed_lr(tf.float32)
-
-        # Save actor weights
-        #act_weights = self.actor.get_weights()
-
-        # Train actor
-        #for epoch in range(self.n_epochs):
-
-            # Randomize batch
-            #sample = np.arange(lgt)
-            #np.random.shuffle(sample)
-            #sample = sample[:batch_size]
-
-            #btc_obs = [obs[i] for i in sample]
-            #btc_adv = [adv[i] for i in sample]
-            #btc_tgt = [tgt[i] for i in sample]
-            #btc_act = [act[i] for i in sample]
-
-            #btc_obs = tf.reshape(tf.cast(btc_obs, tf.float32),
-            #                     [batch_size,self.obs_dim])
-            #btc_adv = tf.reshape(tf.cast(btc_adv, tf.float32),
-            #                     [batch_size])
-            #btc_tgt = tf.reshape(tf.cast(btc_tgt, tf.float32),
-            #                     [batch_size])
-            #btc_act = tf.reshape(tf.cast(btc_act, tf.float32),
-            #                     [batch_size,self.act_dim])
-
-            # Train networks
-            #act_out = self.train_actor (btc_obs, btc_adv, btc_act)
-            #crt_out = self.train_critic(btc_obs, btc_tgt, batch_size)
-
-        # Update old networks
-        #self.old_actor.set_weights(act_weights)
-
-        #return act_out + crt_out + [lr]
-
     # Compute deltas and advantages
     def compute_adv(self, rwd, val, nxt, trm):
 
@@ -410,15 +358,6 @@ class ppo_agent:
         adv = tf.reshape(tf.cast(adv, tf.float32), [size])
         tgt = tf.reshape(tf.cast(tgt, tf.float32), [size])
 
-        #n_buff = int(min(n_buff, len(self.glb_buff.obs)//buff_size))
-        #length = n_buff*buff_size
-
-        # Retrieve buffers
-        #obs    = self.glb_buff.obs[-length:]
-        #adv    = self.glb_buff.adv[-length:]
-        #tgt    = self.glb_buff.tgt[-length:]
-        #act    = self.glb_buff.act[-length:]
-
         return obs, act, adv, tgt
 
     # Test looping criterion
@@ -428,6 +367,8 @@ class ppo_agent:
 
     # Handle termination state
     def handle_termination(self, done, ep_step, ep_end):
+
+        #print(ep_step, ep_end, done)
 
         if (not self.bootstrap):
             if (not done): term = 0
