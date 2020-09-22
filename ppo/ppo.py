@@ -137,17 +137,18 @@ class ppo_agent:
             # Retrieve data
             obs, act, adv, tgt = self.get_buffers(self.n_buff,
                                                   self.buff_size)
-            done = False
-            btc  = 0
+            lgt      = len(obs)
+            btc_size = math.floor(self.batch_frac*lgt)
+            done     = False
+            btc      = 0
 
             # Visit all available history
             while not done:
 
-                start    = btc*self.buff_size
-                end      = min((btc+1)*self.buff_size,len(obs))
-                btc_size = end - start
+                start    = btc*btc_size
+                end      = min((btc+1)*btc_size,len(obs))
                 btc     += 1
-                if (end  == len(obs)): done = True
+                if (end == lgt): done = True
 
                 btc_obs  = obs[start:end]
                 btc_act  = act[start:end]
@@ -306,7 +307,8 @@ class ppo_agent:
                                           1.0-self.pol_clip,
                                           1.0+self.pol_clip)
             p2         = tf.multiply(adv,p2)
-            loss_ppo   =-tf.reduce_mean(tf.minimum(p1,p2))
+            #n_srt      = tf.cast(tf.math.count_nonzero(adv), tf.float32)
+            loss_ppo   =-tf.reduce_sum(tf.minimum(p1,p2))#/n_srt
 
             # Compute entropy loss
             entropy      = tf.multiply(pol,tf.math.log(pol + 1.0e-5))
@@ -336,7 +338,7 @@ class ppo_agent:
 
             # Compute loss
             val  = tf.convert_to_tensor(self.critic(obs))
-            val  = tf.reshape(val, [btc])
+            #val  = tf.reshape(val, [btc])
             p1   = tf.square(tgt - val)
             loss = tf.reduce_mean(p1)
 
@@ -388,9 +390,8 @@ class ppo_agent:
     def get_buffers(self, n_buff, buff_size):
 
         # Handle insufficient history
-        idx    = len(self.glb_buff.obs)
-        start  = max(0,idx - n_buff*buff_size)
-        end    = idx
+        end    = len(self.glb_buff.obs)
+        start  = max(0,end - n_buff*buff_size)
         size   = end - start
 
         # Randomize batch
