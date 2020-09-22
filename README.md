@@ -39,7 +39,7 @@ This is a <a href="https://github.com/jviquerat/gym-lorenz">custom environment</
 </p>
 
 <p align="center">
-  <img width="800" alt="oscillator_2D" src="https://user-images.githubusercontent.com/44053700/90244347-de718700-de30-11ea-8cb1-a9e6b297b0fc.png">
+  <img width="800" alt="oscillator_2D" src="https://user-images.githubusercontent.com/44053700/93884737-907b5900-fce3-11ea-94b0-6868865dfbfc.png">
 </p>
 
 ## LunarLander-v2
