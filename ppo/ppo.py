@@ -280,6 +280,10 @@ class ppo_agent:
                                           1.0-self.pol_clip,
                                           1.0+self.pol_clip)
             p2         = tf.multiply(adv,p2)
+            #n_srt      = tf.math.count_nonzero(adv)
+            #n_srt      = tf.cast(n_srt, tf.float32)
+            #n_srt      = tf.maximum(1.0,n_srt)
+            #loss_ppo   =-tf.reduce_sum(tf.minimum(p1,p2))/n_srt
             loss_ppo   =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss
