@@ -51,6 +51,7 @@ for i in range(params.n_avg):
 
 # Write to file
 file_out  = 'ppo_avg.dat'
+path = '.'
 array     = np.vstack(ep)
 for j in range(n_data):
     avg   = np.mean(data[:,:,j], axis=0)
@@ -62,4 +63,4 @@ for j in range(n_data):
     array = np.hstack((array,np.vstack(m)))
 
 np.savetxt(file_out, array)
-os.system('gnuplot -c plot.gnu')
+os.system('gnuplot -c plot/plot.gnu '+path)
