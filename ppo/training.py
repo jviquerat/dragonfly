@@ -13,7 +13,7 @@ from ppo.par_envs import *
 def launch_training(params, path, run):
 
     # Declare environement and agent
-    env   = par_envs(params.env_name, params.n_cpu)
+    env   = par_envs(params.env_name, params.n_cpu, path)
     agent = ppo_agent(env.act_dim, env.obs_dim, params)
 
     # Initialize parameters

@@ -6,26 +6,28 @@ import multiprocessing as mp
 ###############################################
 ### A wrapper class for parallel environments
 class par_envs:
-    def __init__(self, env_name, n_cpu):
+    def __init__(self, env_name, n_cpu, path):
 
         # Init pipes and processes
-        self.n_cpu        = n_cpu
-        self.parent_pipes = []
-        self.processes    = []
+        self.n_cpu   = n_cpu
+        self.p_pipes = []
+        self.proc    = []
 
         # Start environments
         for cpu in range(n_cpu):
-            parent_pipe, child_pipe = mp.Pipe()
-            name                    = str(cpu)
-            process = mp.Process(target = worker,
-                                 name   = name,
-                                 args   = (env_name, name, child_pipe))
+            p_pipe, c_pipe = mp.Pipe()
+            name           = str(cpu)
+            process        = mp.Process(target = worker,
+                                        name   = name,
+                                        args   = (env_name, name,
+                                                  c_pipe, p_pipe, path))
 
-            self.parent_pipes.append(parent_pipe)
-            self.processes.append(process)
+            self.p_pipes.append(p_pipe)
+            self.proc.append(process)
 
             process.daemon = True
             process.start()
+            c_pipe.close()
 
         # Handle action and observation dimensions
         act_dim, obs_dim = self.get_dims()
@@ -36,12 +38,12 @@ class par_envs:
     def reset(self):
 
         # Send
-        for pipe in self.parent_pipes:
+        for pipe in self.p_pipes:
             pipe.send(('reset', None))
 
         # Receive
         results = np.array([])
-        for pipe in self.parent_pipes:
+        for pipe in self.p_pipes:
             results = np.append(results, pipe.recv())
 
         return np.reshape(results, (-1,self.obs_dim))
@@ -50,11 +52,11 @@ class par_envs:
     def reset_single(self, cpu):
 
         # Send
-        self.parent_pipes[cpu].send(('reset',None))
+        self.p_pipes[cpu].send(('reset',None))
 
         # Receive
         results = np.array([])
-        results = np.append(results, self.parent_pipes[cpu].recv())
+        results = np.append(results, self.p_pipes[cpu].recv())
 
         return np.reshape(results, (-1,self.obs_dim))
 
@@ -62,11 +64,11 @@ class par_envs:
     def get_dims(self):
 
         # Send
-        self.parent_pipes[0].send(('get_dims',None))
+        self.p_pipes[0].send(('get_dims',None))
 
         # Receive
         results = np.array([])
-        results = np.append(results, self.parent_pipes[0].recv())
+        results = np.append(results, self.p_pipes[0].recv())
 
         return results
 
@@ -74,17 +76,17 @@ class par_envs:
     def render_single(self, cpu):
 
         # Send
-        self.parent_pipes[cpu].send(('render', None))
+        self.p_pipes[cpu].send(('render', None))
 
         # Receive
-        rgb = self.parent_pipes[cpu].recv()
+        rgb = self.p_pipes[cpu].recv()
 
         return rgb
 
     # Close
     def close(self):
 
-        for p in self.processes:
+        for p in self.proc:
             p.terminate()
             p.join()
 
@@ -92,14 +94,14 @@ class par_envs:
     def step(self, actions):
 
         # Send
-        for pipe, action in zip(self.parent_pipes, actions):
+        for pipe, action in zip(self.p_pipes, actions):
             pipe.send(('step', action))
 
         # Receive
         nxt  = np.array([])
         rwd  = np.array([])
         done = np.array([], dtype=np.bool)
-        for pipe in self.parent_pipes:
+        for pipe in self.p_pipes:
             n, r, d = pipe.recv()
             nxt     = np.append(nxt, n)
             rwd     = np.append(rwd, r)
@@ -110,8 +112,9 @@ class par_envs:
         return nxt, rwd, done
 
 # Target function for process
-def worker(env_name, name, pipe):
+def worker(env_name, name, pipe, p_pipe, path):
     env = gym.make(env_name)
+    p_pipe.close()
     try:
         while True:
             # Receive command
