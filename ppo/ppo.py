@@ -104,7 +104,7 @@ class ppo_agent:
 
         return val
 
-    def get_buffers_new(self, n_buff, buff_size):
+    def get_buffers(self, n_buff, buff_size):
 
         end    = len(self.glb_buff.obs)
         start  = max(0,end - n_buff*buff_size)
@@ -159,8 +159,8 @@ class ppo_agent:
         for epoch in range(self.n_epochs):
 
             # Retrieve data
-            obs, act, adv, tgt = self.get_buffers_new(self.n_buff,
-                                                      self.buff_size)
+            obs, act, adv, tgt = self.get_buffers(self.n_buff,
+                                                  self.buff_size)
             lgt      = self.n_buff*self.buff_size
             btc_size = math.floor(self.batch_frac*lgt)
             done     = False
@@ -357,22 +357,6 @@ class ppo_agent:
                                  self.nrm_act, self.nrm_crt,
                                  self.kl_div,  self.lr]),
                    fmt='%.5e')
-
-    # Get buffers
-    def get_buffers(self):
-
-        # Handle insufficient history
-        n_buff = self.n_buff
-        n_buff = int(min(n_buff, len(self.glb_buff.obs)//self.buff_size))
-        length = n_buff*self.buff_size
-
-        # Retrieve buffers
-        obs    = self.glb_buff.obs[-length:]
-        adv    = self.glb_buff.adv[-length:]
-        tgt    = self.glb_buff.tgt[-length:]
-        act    = self.glb_buff.act[-length:]
-
-        return length, obs, adv, tgt, act
 
     # Test looping criterion
     def test_loop(self):
