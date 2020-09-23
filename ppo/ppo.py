@@ -106,9 +106,8 @@ class ppo_agent:
 
     def get_buffers_new(self, n_buff, buff_size):
 
-        idx    = len(self.glb_buff.obs)
-        start  = max(0,idx - n_buff*buff_size)
-        end    = idx
+        end    = len(self.glb_buff.obs)
+        start  = max(0,end - n_buff*buff_size)
         size   = end - start
 
         # Randomize batch
