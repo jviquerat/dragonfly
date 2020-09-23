@@ -161,15 +161,17 @@ class ppo_agent:
             # Retrieve data
             obs, act, adv, tgt = self.get_buffers_new(self.n_buff,
                                                       self.buff_size)
-            done = False
-            btc  = 0
+            lgt      = self.n_buff*self.buff_size
+            btc_size = math.floor(self.batch_frac*lgt)
+            done     = False
+            btc      = 0
 
             # Visit all available history
             while not done:
 
-                start    = btc*self.buff_size
-                end      = min((btc+1)*self.buff_size,len(obs))
-                btc_size = end - start
+                start    = btc*btc_size
+                end      = min((btc+1)*btc_size,len(obs))
+                size     = end - start
                 btc     += 1
                 if (end  == len(obs)): done = True
 
@@ -179,7 +181,7 @@ class ppo_agent:
                 btc_tgt  = tgt[start:end]
 
                 act_out  = self.train_actor (btc_obs, btc_adv, btc_act)
-                crt_out  = self.train_critic(btc_obs, btc_tgt, btc_size)
+                crt_out  = self.train_critic(btc_obs, btc_tgt, size)
 
         # Update old networks
         self.old_actor.set_weights(act_weights)
