@@ -4,8 +4,8 @@ import math
 import numpy as np
 
 # Custom imports
-from agent import *
-from buff  import *
+from ppo.agent import *
+from ppo.buff  import *
 
 ###############################################
 ### A discrete PPO agent

@@ -3,9 +3,9 @@ import time
 from   PIL import Image
 
 # Custom imports
-from ppo      import *
-from buff     import *
-from par_envs import *
+from ppo.ppo      import *
+from ppo.buff     import *
+from ppo.par_envs import *
 
 ########################
 # Process training

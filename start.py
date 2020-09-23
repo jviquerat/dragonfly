@@ -7,7 +7,7 @@ import collections
 import numpy as np
 
 # Custom imports
-from training import *
+from ppo.training import *
 
 ########################
 # Parameters decoder to collect json file
