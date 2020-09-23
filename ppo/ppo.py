@@ -161,7 +161,7 @@ class ppo_agent:
 
             # Retrieve data
             obs, act, adv, tgt = self.get_buffers_new(self.n_buff,
-                                                  self.buff_size)
+                                                      self.buff_size)
             done = False
             btc  = 0
 
@@ -186,43 +186,6 @@ class ppo_agent:
         self.old_actor.set_weights(act_weights)
 
         return act_out + crt_out + [lr]
-
-        # Retrieve n_buff buffers from history
-        #lgt, obs, adv, tgt, act = self.get_buffers()
-
-        # # Handle insufficient history compared to batch_size
-        # batch_size = math.floor(self.batch_frac*lgt)
-
-        # # Train actor
-        # for epoch in range(self.n_epochs):
-
-        #     # Randomize batch
-        #     sample = np.arange(lgt)
-        #     np.random.shuffle(sample)
-        #     sample = sample[:batch_size]
-
-        #     btc_obs = [obs[i] for i in sample]
-        #     btc_adv = [adv[i] for i in sample]
-        #     btc_tgt = [tgt[i] for i in sample]
-        #     btc_act = [act[i] for i in sample]
-
-        #     btc_obs = tf.reshape(tf.cast(btc_obs, tf.float32),
-        #                          [batch_size,self.obs_dim])
-        #     btc_adv = tf.reshape(tf.cast(btc_adv, tf.float32),
-        #                          [batch_size])
-        #     btc_tgt = tf.reshape(tf.cast(btc_tgt, tf.float32),
-        #                          [batch_size])
-        #     btc_act = tf.reshape(tf.cast(btc_act, tf.float32),
-        #                          [batch_size,self.act_dim])
-
-        #     # Train networks
-        #     act_out = self.train_actor (btc_obs, btc_adv, btc_act)
-        #     crt_out = self.train_critic(btc_obs, btc_tgt, batch_size)
-
-        # Update old networks
-        #self.old_actor.set_weights(act_weights)
-
-        #return act_out + crt_out + [lr]
 
     # Compute deltas and advantages
     def compute_adv(self, rwd, val, nxt, trm):
