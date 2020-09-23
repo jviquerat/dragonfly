@@ -10,7 +10,7 @@ from ppo.par_envs import *
 ########################
 # Process training
 ########################
-def launch_training(params):
+def launch_training(params, path, run):
 
     # Declare environement and agent
     env   = par_envs(params.env_name, params.n_cpu)
@@ -104,7 +104,7 @@ def launch_training(params):
         outputs = agent.train()
 
         # Write learning data on file
-        agent.write_learning_data()
+        agent.write_learning_data(path, run)
 
     # Last printing
     agent.print_episode(ep, params.n_ep)

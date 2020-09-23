@@ -31,6 +31,7 @@ with open(json_file, "r") as f:
     params = json.load(f, object_hook=params_decoder)
 
 # Storage arrays
+res_path   = 'results'
 n_data     = 9
 ep         = np.zeros((              params.n_ep),           dtype=int)
 data       = np.zeros((params.n_avg, params.n_ep,   n_data), dtype=float)
@@ -38,20 +39,29 @@ avg_data   = np.zeros((              params.n_ep,   n_data), dtype=float)
 stdp_data  = np.zeros((              params.n_ep,   n_data), dtype=float)
 stdm_data  = np.zeros((              params.n_ep,   n_data), dtype=float)
 
+# Open storage repositories
+if (not os.path.exists(res_path)):
+    os.makedirs(res_path)
+
+t         = time.localtime()
+path_time = time.strftime("%H-%M-%S", t)
+path      = res_path+'/'+params.env_name+'_'+str(path_time)
+if (not os.path.exists(path)):
+    os.makedirs(path)
+
 for i in range(params.n_avg):
     print('### Avg run #'+str(i))
     start_time = time.time()
-    launch_training(params)
+    launch_training(params, path, i)
     print("--- %s seconds ---" % (time.time() - start_time))
 
-    f           = np.loadtxt('ppo.dat')
+    f           = np.loadtxt(path+'/ppo.dat')
     ep          = f[:params.n_ep,0]
     for j in range(n_data):
         data[i,:,j] = f[:params.n_ep,j+1]
 
 # Write to file
-file_out  = 'ppo_avg.dat'
-path = '.'
+file_out  = path+'/ppo_avg.dat'
 array     = np.vstack(ep)
 for j in range(n_data):
     avg   = np.mean(data[:,:,j], axis=0)
@@ -62,5 +72,5 @@ for j in range(n_data):
     array = np.hstack((array,np.vstack(p)))
     array = np.hstack((array,np.vstack(m)))
 
-np.savetxt(file_out, array)
+np.savetxt(file_out, array, fmt='%.5e')
 os.system('gnuplot -c plot/plot.gnu '+path)
