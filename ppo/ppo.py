@@ -112,6 +112,12 @@ class ppo_agent:
             if (self.loc_buff.trm.buff[cpu][-1] == 0):
                 self.loc_buff.trm.buff[cpu][-1] = 2
 
+        # Retrieve learning rate
+        lr = self.actor.opt._decayed_lr(tf.float32)
+
+        # Save actor weights
+        act_weights = self.actor.get_weights()
+
         # Retrieve serialized arrays
         obs, nxt, act, rwd, trm = self.loc_buff.serialize()
 
@@ -130,12 +136,6 @@ class ppo_agent:
 
         # Handle insufficient history compared to batch_size
         batch_size = math.floor(self.batch_frac*lgt)
-
-        # Retrieve learning rate
-        lr = self.actor.opt._decayed_lr(tf.float32)
-
-        # Save actor weights
-        act_weights = self.actor.get_weights()
 
         # Train actor
         for epoch in range(self.n_epochs):
