@@ -100,8 +100,8 @@ def launch_training(params, path, run):
             # Test if loop is over
             loop = agent.test_loop()
 
-        # Train
-        outputs = agent.train()
+        # Train networks
+        outputs = agent.train_networks()
 
         # Write learning data on file
         agent.write_learning_data(path, run)

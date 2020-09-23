@@ -105,7 +105,7 @@ class ppo_agent:
         return val
 
     # Train networks
-    def train(self):
+    def train_networks(self):
 
         # Handle fixed-size buffer termination
         for cpu in range(self.n_cpu):
