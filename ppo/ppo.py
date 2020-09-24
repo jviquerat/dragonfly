@@ -83,7 +83,7 @@ class ppo_agent:
         policy  = self.actor(state)
 
         # Sanitize output
-        policy       = tf.cast(policy, dtype=tf.float64)
+        policy       = tf.cast(policy, tf.float64)
         policy, norm = tf.linalg.normalize(policy, ord=1)
 
         policy  = np.asarray(policy)[0]
@@ -146,8 +146,8 @@ class ppo_agent:
         obs, nxt, act, rwd, trm = self.loc_buff.serialize()
 
         # Get current and next values
-        crt_val = np.array(self.critic(tf.cast(obs, dtype=tf.float32)))
-        nxt_val = np.array(self.critic(tf.cast(nxt, dtype=tf.float32)))
+        crt_val = np.array(self.critic(tf.cast(obs, tf.float32)))
+        nxt_val = np.array(self.critic(tf.cast(nxt, tf.float32)))
 
         # Compute advantages
         tgt, adv = self.compute_adv(rwd, crt_val, nxt_val, trm)
@@ -280,10 +280,6 @@ class ppo_agent:
                                           1.0-self.pol_clip,
                                           1.0+self.pol_clip)
             p2         = tf.multiply(adv,p2)
-            #n_srt      = tf.math.count_nonzero(adv)
-            #n_srt      = tf.cast(n_srt, tf.float32)
-            #n_srt      = tf.maximum(1.0,n_srt)
-            #loss_ppo   =-tf.reduce_sum(tf.minimum(p1,p2))/n_srt
             loss_ppo   =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss
