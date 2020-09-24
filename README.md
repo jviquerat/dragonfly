@@ -52,5 +52,5 @@ The agent learns to land on a landing pad using 4 discrete actions. The episode 
 </p>
 
 <p align="center">
-  <img width="800" alt="" src="https://user-images.githubusercontent.com/44053700/90507545-58b64a00-e156-11ea-90cb-633a40f5dd09.png">
+  <img width="800" alt="" src="https://user-images.githubusercontent.com/44053700/94101304-df360980-fe2f-11ea-8975-9250801e18f0.png">
 </p>
