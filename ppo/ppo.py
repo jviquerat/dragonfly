@@ -4,8 +4,8 @@ import math
 import numpy as np
 
 # Custom imports
-from agent import *
-from buff  import *
+from ppo.agent import *
+from ppo.buff  import *
 
 ###############################################
 ### A discrete PPO agent
@@ -104,13 +104,43 @@ class ppo_agent:
 
         return val
 
+    def get_buffers(self, n_buff, buff_size):
+
+        end    = len(self.glb_buff.obs)
+        start  = max(0,end - n_buff*buff_size)
+        size   = end - start
+
+        # Randomize batch
+        sample = np.arange(start, end)
+        np.random.shuffle(sample)
+
+        # Retrieve buffers
+        obs = [self.glb_buff.obs[i] for i in sample]
+        act = [self.glb_buff.act[i] for i in sample]
+        adv = [self.glb_buff.adv[i] for i in sample]
+        tgt = [self.glb_buff.tgt[i] for i in sample]
+
+        # Reshape
+        obs = tf.reshape(tf.cast(obs, tf.float32), [size, self.obs_dim])
+        act = tf.reshape(tf.cast(act, tf.float32), [size, self.act_dim])
+        adv = tf.reshape(tf.cast(adv, tf.float32), [size])
+        tgt = tf.reshape(tf.cast(tgt, tf.float32), [size])
+
+        return obs, act, adv, tgt
+
     # Train networks
-    def train(self):
+    def train_networks(self):
 
         # Handle fixed-size buffer termination
         for cpu in range(self.n_cpu):
             if (self.loc_buff.trm.buff[cpu][-1] == 0):
                 self.loc_buff.trm.buff[cpu][-1] = 2
+
+        # Retrieve learning rate
+        lr = self.actor.opt._decayed_lr(tf.float32)
+
+        # Save actor weights
+        act_weights = self.actor.get_weights()
 
         # Retrieve serialized arrays
         obs, nxt, act, rwd, trm = self.loc_buff.serialize()
@@ -125,44 +155,33 @@ class ppo_agent:
         # Store in global buffers
         self.glb_buff.store(obs, adv, tgt, act)
 
-        # Retrieve n_buff buffers from history
-        lgt, obs, adv, tgt, act = self.get_buffers()
-
-        # Handle insufficient history compared to batch_size
-        batch_size = math.floor(self.batch_frac*lgt)
-
-        # Retrieve learning rate
-        lr = self.actor.opt._decayed_lr(tf.float32)
-        #lr = self.actor.opt.lr
-
-        # Save actor weights
-        act_weights = self.actor.get_weights()
-
         # Train actor
         for epoch in range(self.n_epochs):
 
-            # Randomize batch
-            sample = np.arange(lgt)
-            np.random.shuffle(sample)
-            sample = sample[:batch_size]
+            # Retrieve data
+            obs, act, adv, tgt = self.get_buffers(self.n_buff,
+                                                  self.buff_size)
+            lgt      = self.n_buff*self.buff_size
+            btc_size = math.floor(self.batch_frac*lgt)
+            done     = False
+            btc      = 0
 
-            btc_obs = [obs[i] for i in sample]
-            btc_adv = [adv[i] for i in sample]
-            btc_tgt = [tgt[i] for i in sample]
-            btc_act = [act[i] for i in sample]
+            # Visit all available history
+            while not done:
 
-            btc_obs = tf.reshape(tf.cast(btc_obs, tf.float32),
-                                 [batch_size,self.obs_dim])
-            btc_adv = tf.reshape(tf.cast(btc_adv, tf.float32),
-                                 [batch_size])
-            btc_tgt = tf.reshape(tf.cast(btc_tgt, tf.float32),
-                                 [batch_size])
-            btc_act = tf.reshape(tf.cast(btc_act, tf.float32),
-                                 [batch_size,self.act_dim])
+                start    = btc*btc_size
+                end      = min((btc+1)*btc_size,len(obs))
+                size     = end - start
+                btc     += 1
+                if (end  == len(obs)): done = True
 
-            # Train networks
-            act_out = self.train_actor (btc_obs, btc_adv, btc_act)
-            crt_out = self.train_critic(btc_obs, btc_tgt, batch_size)
+                btc_obs  = obs[start:end]
+                btc_act  = act[start:end]
+                btc_adv  = adv[start:end]
+                btc_tgt  = tgt[start:end]
+
+                act_out  = self.train_actor (btc_obs, btc_adv, btc_act)
+                crt_out  = self.train_critic(btc_obs, btc_tgt, size)
 
         # Update old networks
         self.old_actor.set_weights(act_weights)
@@ -261,6 +280,10 @@ class ppo_agent:
                                           1.0-self.pol_clip,
                                           1.0+self.pol_clip)
             p2         = tf.multiply(adv,p2)
+            #n_srt      = tf.math.count_nonzero(adv)
+            #n_srt      = tf.cast(n_srt, tf.float32)
+            #n_srt      = tf.maximum(1.0,n_srt)
+            #loss_ppo   =-tf.reduce_sum(tf.minimum(p1,p2))/n_srt
             loss_ppo   =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss
@@ -328,30 +351,16 @@ class ppo_agent:
         self.length  = np.append(self.length,  length)
 
     # Write learning data
-    def write_learning_data(self):
+    def write_learning_data(self, path, run):
 
-        filename = 'ppo.dat'
-        np.savetxt(filename, np.transpose([self.ep,      self.score,
-                                           self.length,  self.ls_act,
-                                           self.ls_crt,  self.ent,
-                                           self.nrm_act, self.nrm_crt,
-                                           self.kl_div,  self.lr]))
-
-    # Get buffers
-    def get_buffers(self):
-
-        # Handle insufficient history
-        n_buff = self.n_buff
-        n_buff = int(min(n_buff, len(self.glb_buff.obs)//self.buff_size))
-        length = n_buff*self.buff_size
-
-        # Retrieve buffers
-        obs    = self.glb_buff.obs[-length:]
-        adv    = self.glb_buff.adv[-length:]
-        tgt    = self.glb_buff.tgt[-length:]
-        act    = self.glb_buff.act[-length:]
-
-        return length, obs, adv, tgt, act
+        filename = path+'/ppo.dat'
+        np.savetxt(filename,
+                   np.transpose([self.ep,      self.score,
+                                 self.length,  self.ls_act,
+                                 self.ls_crt,  self.ent,
+                                 self.nrm_act, self.nrm_crt,
+                                 self.kl_div,  self.lr]),
+                   fmt='%.5e')
 
     # Test looping criterion
     def test_loop(self):
