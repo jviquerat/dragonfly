@@ -2,6 +2,7 @@
 import gym
 import numpy           as np
 import multiprocessing as mp
+import time
 
 ###############################################
 ### A wrapper class for parallel environments
@@ -28,11 +29,15 @@ class par_envs:
             process.daemon = True
             process.start()
             c_pipe.close()
+            time.sleep(0.1)
 
         # Handle action and observation dimensions
         act_dim, obs_dim = self.get_dims()
         self.act_dim = int(act_dim)
         self.obs_dim = int(obs_dim)
+
+        # Set cpu indices
+        self.set_cpus()
 
     # Reset all environments
     def reset(self):
@@ -72,6 +77,13 @@ class par_envs:
 
         return results
 
+    # Set cpu indices
+    def set_cpus(self):
+
+        # Send
+        for cpu in range(self.n_cpu):
+            self.p_pipes[cpu].send(('set_cpu', [cpu, self.n_cpu]))
+
     # Render environment
     def render_single(self, cpu):
 
@@ -86,6 +98,10 @@ class par_envs:
     # Close
     def close(self):
 
+        # Close all envs
+        for pipe in self.p_pipes :
+            pipe.send(('close',None))
+            time.sleep(0.2)
         for p in self.proc:
             p.terminate()
             p.join()
@@ -136,6 +152,11 @@ def worker(env_name, name, pipe, p_pipe, path):
                 act_dim = env.action_space.n
                 obs_dim = env.observation_space.shape[0]
                 pipe.send((act_dim, obs_dim))
+            if (command == 'set_cpu'):
+                if hasattr(env, 'cpu'):
+                    env.cpu   = data[0]
+                    env.idx   =-data[0]-1
+                    env.n_cpu = data[1]
             if command == 'close':
                 pipe.send(None)
                 break
