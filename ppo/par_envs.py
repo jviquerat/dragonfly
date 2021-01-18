@@ -29,7 +29,6 @@ class par_envs:
             process.daemon = True
             process.start()
             c_pipe.close()
-            time.sleep(0.1)
 
         # Handle action and observation dimensions
         act_dim, obs_dim = self.get_dims()
@@ -101,7 +100,6 @@ class par_envs:
         # Close all envs
         for pipe in self.p_pipes :
             pipe.send(('close',None))
-            time.sleep(0.2)
         for p in self.proc:
             p.terminate()
             p.join()
@@ -154,9 +152,7 @@ def worker(env_name, name, pipe, p_pipe, path):
                 pipe.send((act_dim, obs_dim))
             if (command == 'set_cpu'):
                 if hasattr(env, 'cpu'):
-                    env.cpu   = data[0]
-                    env.idx   =-data[0]-1
-                    env.n_cpu = data[1]
+                    env.set_cpu(data[0], data[1])
             if command == 'close':
                 pipe.send(None)
                 break
