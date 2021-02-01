@@ -77,7 +77,7 @@ class ppo_agent:
     def get_actions(self, state):
 
         # Reshape state
-        state = tf.convert_to_tensor([state], dtype=tf.float32)
+        state = tf.cast([state], tf.float32)
 
         # Forward pass to get policy
         policy  = self.actor(state)
