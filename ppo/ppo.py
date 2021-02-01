@@ -96,11 +96,10 @@ class ppo_agent:
     def get_value(self, state):
 
         # Reshape state
-        state = state.reshape(1,self.obs_dim)
+        state = tf.cast(state, tf.float32)
 
         # Predict value
-        val   = self.critic(state)
-        val   = float(val)
+        val   = np.array(self.critic(state))
 
         return val
 
@@ -146,8 +145,8 @@ class ppo_agent:
         obs, nxt, act, rwd, trm = self.loc_buff.serialize()
 
         # Get current and next values
-        crt_val = np.array(self.critic(tf.cast(obs, tf.float32)))
-        nxt_val = np.array(self.critic(tf.cast(nxt, tf.float32)))
+        crt_val = self.get_value(obs)
+        nxt_val = self.get_value(nxt)
 
         # Compute advantages
         tgt, adv = self.compute_adv(rwd, crt_val, nxt_val, trm)
