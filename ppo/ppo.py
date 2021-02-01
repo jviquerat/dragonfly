@@ -103,6 +103,7 @@ class ppo_agent:
 
         return val
 
+    # Retrieve data in buffers
     def get_buffers(self, n_buff, buff_size):
 
         end    = len(self.glb_buff.obs)
@@ -154,7 +155,7 @@ class ppo_agent:
         # Store in global buffers
         self.glb_buff.store(obs, adv, tgt, act)
 
-        # Train actor
+        # Train actor and critic
         for epoch in range(self.n_epochs):
 
             # Retrieve data
@@ -385,9 +386,7 @@ class ppo_agent:
 
         avg = np.mean(self.score[-25:])
         avg = f"{avg:.3f}"
-
-        if (ep <  n_ep-1):
-            print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\r')
-        if (ep == n_ep-1):
-            print('# Ep #'+str(ep)+', avg score = '+str(avg), end='\n')
-
+        end = '\n'
+        if (ep < n_ep): end = '\r'
+        print('# Ep #'+str(ep)+', avg score = '+str(avg)+'      ',
+              end=end)
