@@ -6,7 +6,7 @@ import warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '10'
 warnings.filterwarnings('ignore',category=FutureWarning)
 
-# Import tensorflow
+# Tensorflow imports
 import tensorflow                    as     tf
 import tensorflow.keras              as     tk
 from   tensorflow.keras              import Model

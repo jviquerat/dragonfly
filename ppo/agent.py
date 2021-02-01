@@ -1,8 +1,12 @@
 # Generic imports
+import numpy as np
+
+# Tensorflow imports
 from tensorflow.keras.optimizers import Nadam
 
 # Custom imports
 from ppo.network                 import *
+from ppo.policy                  import *
 
 ###############################################
 ### Actor class
@@ -15,9 +19,10 @@ from ppo.network                 import *
 ### hid_act  : hidden layer activation function
 ### fnl_act  : final  layer activation function
 ### loss     : loss function
+### policy   : output policy
 class actor():
     def __init__(self,
-                 dim,
+                 act_dim,
                  arch     = None,
                  lr       = None,
                  grd_clip = None,
@@ -25,7 +30,8 @@ class actor():
                  fnl_init = None,
                  hid_act  = None,
                  fnl_act  = None,
-                 loss     = None):
+                 loss     = None,
+                 pol_type = None):
 
         # Handle arguments
         if (arch     is None): arch     = [32,32]
@@ -36,11 +42,16 @@ class actor():
         if (hid_act  is None): hid_act  = "tanh"
         if (fnl_act  is None): fnl_act  = "softmax"
         if (loss     is None): loss     = "ppo"
+        if (pol_type is None): pol_type = "multinomial"
+
+        # Fill structure
+        self.loss    = loss
+        self.act_dim = act_dim
+        self.pol     = policy(pol_type, act_dim)
 
         # Define network
-        self.net = network(dim, arch, lr, grd_clip,
+        self.net = network(self.pol.dim, arch, lr, grd_clip,
                            hid_init, fnl_init, hid_act, fnl_act)
-        self.loss = loss
 
         # Define optimizer
         self.opt = Nadam(lr       = lr,
@@ -57,12 +68,17 @@ class actor():
 
         return var
 
-
-
     # Get actions
-    #def get_actions(self, state):
+    def get_actions(self, state):
 
+        # Reshape state
+        state = tf.cast([state], tf.float32)
 
+        # Forward pass to get policy parameters
+        policy_params = self.call(state)
+        actions       = self.pol.call(policy_params)
+
+        return actions
 
 ###############################################
 ### Critic class
@@ -117,5 +133,13 @@ class critic():
 
         return var
 
-    # Get value
-    #def get_value(self, state):
+    # Get value from network
+    def get_value(self, state):
+
+        # Reshape state
+        state = tf.cast(state, tf.float32)
+
+        # Predict value
+        val   = np.array(self.call(state))
+
+        return val

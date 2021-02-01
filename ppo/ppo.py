@@ -3,6 +3,7 @@ import gym
 import math
 import numpy as np
 
+# Tensorflow imports
 import tensorflow_addons             as     tfa
 import tensorflow_probability        as     tfp
 
@@ -44,28 +45,18 @@ class ppo_agent:
         self.n_cpu        = params.n_cpu
 
         # Build networks
-        self.actor      = actor (dim      = self.act_dim,
+        self.actor      = actor (act_dim  = self.act_dim,
                                  arch     = self.actor_arch,
                                  lr       = self.actor_lr,
-                                 grd_clip = self.grd_clip)
-        self.old_actor  = actor (dim      = self.act_dim,
+                                 grd_clip = self.grd_clip,
+                                 pol_type = "multinomial")
+        self.old_actor  = actor (act_dim  = self.act_dim,
                                  arch     = self.actor_arch,
                                  lr       = self.actor_lr,
-                                 grd_clip = self.grd_clip)
+                                 grd_clip = self.grd_clip,
+                                 pol_type = "multinomial")
         self.critic     = critic(arch     = self.critic_arch,
                                  lr       = self.critic_lr)
-
-        # self.critic     = critic(self.critic_arch,
-        #                          self.critic_lr,
-        #                          self.grd_clip)
-        # self.actor      = actor (self.actor_arch,
-        #                          self.act_dim,
-        #                          self.actor_lr,
-        #                          self.grd_clip)
-        # self.old_actor  = actor (self.actor_arch,
-        #                          self.act_dim,
-        #                          self.actor_lr,
-        #                          self.grd_clip)
 
         # Init parameters
         init_vector = tf.ones([1,self.obs_dim])
@@ -90,36 +81,6 @@ class ppo_agent:
         self.kl_div  = np.array([], dtype=np.float32) # approx. kl divergence
         self.lr      = np.array([], dtype=np.float32) # learning rate schedule
         self.length  = np.array([], dtype=np.uint16 ) # episode length
-
-    # Get actions from network
-    def get_actions(self, state):
-
-        # Reshape state
-        state = tf.cast([state], tf.float32)
-
-        # Forward pass to get policy
-        policy  = self.actor.call(state)
-
-        # Sanitize output
-        policy       = tf.cast(policy, tf.float64)
-        policy, norm = tf.linalg.normalize(policy, ord=1)
-
-        policy  = np.asarray(policy)[0]
-        actions = np.random.multinomial(1, policy)
-        actions = np.float32(actions)
-
-        return actions
-
-    # Get value from network
-    def get_value(self, state):
-
-        # Reshape state
-        state = tf.cast(state, tf.float32)
-
-        # Predict value
-        val   = np.array(self.critic.call(state))
-
-        return val
 
     # Retrieve data in buffers
     def get_buffers(self, n_buff, buff_size):
@@ -164,8 +125,8 @@ class ppo_agent:
         obs, nxt, act, rwd, trm = self.loc_buff.serialize()
 
         # Get current and next values
-        crt_val = self.get_value(obs)
-        nxt_val = self.get_value(nxt)
+        crt_val = self.critic.get_value(obs)
+        nxt_val = self.critic.get_value(nxt)
 
         # Compute advantages
         tgt, adv = self.compute_adv(rwd, crt_val, nxt_val, trm)
