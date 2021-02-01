@@ -16,7 +16,8 @@ from   tensorflow.keras.optimizers   import Nadam
 
 ###############################################
 ### Network class
-### dim      : dimension of output layer
+### inp_dim  : dimension of input  layer
+### out_dim  : dimension of output layer
 ### arch     : architecture of densely connected network
 ### lr       : learning rate
 ### grd_clip : gradient clipping value
@@ -25,7 +26,7 @@ from   tensorflow.keras.optimizers   import Nadam
 ### hid_act  : hidden layer activation function
 ### fnl_act  : final  layer activation function
 class network(Model):
-    def __init__(self, dim, arch, lr, grd_clip,
+    def __init__(self, inp_dim, out_dim, arch, lr, grd_clip,
                  hid_init, fnl_init, hid_act, fnl_act):
         super(network, self).__init__()
 
@@ -38,9 +39,12 @@ class network(Model):
                                   kernel_initializer = hid_init,
                                   activation         = hid_act))
         # Define last layer
-        self.net.append(Dense(dim,
+        self.net.append(Dense(out_dim,
                               kernel_initializer = fnl_init,
                               activation         = fnl_act))
+
+        # Initialize weights
+        dummy = self.call(tf.ones([1,inp_dim]))
 
         # Define optimizer
         self.opt = tk.optimizers.Nadam(lr       = lr,

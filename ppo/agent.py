@@ -50,15 +50,14 @@ class actor():
         self.pol     = policy(pol_type, act_dim)
 
         # Define and init network
-        self.net = network(self.pol.dim, arch, lr, grd_clip,
-                           hid_init, fnl_init, hid_act, fnl_act)
-        dummy    = self.net.call(tf.ones([1,self.obs_dim]))
+        self.net = network(obs_dim, self.pol.dim, arch, lr,
+                           grd_clip, hid_init, fnl_init,
+                           hid_act, fnl_act)
 
         # Define old network for PPO loss
         #if (loss == "ppo"):
         #    self.net = network(self.pol.dim, arch, lr, grd_clip,
         #                   hid_init, fnl_init, hid_act, fnl_act)
-        #    dummy    = self.net.call(tf.ones([1,self.obs_dim]))
 
         # Define optimizer
         self.opt = Nadam(lr       = lr,
@@ -127,9 +126,8 @@ class critic():
         self.obs_dim = obs_dim
 
         # Define network
-        self.net  = network(dim, arch, lr, grd_clip,
+        self.net  = network(obs_dim, dim, arch, lr, grd_clip,
                             hid_init, fnl_init, hid_act, fnl_act)
-        dummy     = self.net.call(tf.ones([1,self.obs_dim]))
 
         # Define optimizer
         self.opt = Nadam(lr       = lr,
