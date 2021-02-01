@@ -12,6 +12,7 @@ import tensorflow.keras              as     tk
 from   tensorflow.keras              import Model
 from   tensorflow.keras.layers       import Dense
 from   tensorflow.keras.initializers import Orthogonal
+from   tensorflow.keras.optimizers   import Nadam
 
 ###############################################
 ### Network class

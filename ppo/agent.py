@@ -1,16 +1,14 @@
 # Generic imports
 import numpy as np
 
-# Tensorflow imports
-from tensorflow.keras.optimizers import Nadam
-
 # Custom imports
-from ppo.network                 import *
-from ppo.policy                  import *
+from ppo.network import *
+from ppo.policy  import *
 
 ###############################################
 ### Actor class
-### dim      : dimension of output layer
+### act_dim  : dimension of output layer
+### obs_dim  : dimension of input  layer
 ### arch     : architecture of densely connected network
 ### lr       : learning rate
 ### grd_clip : gradient clipping value
@@ -23,6 +21,7 @@ from ppo.policy                  import *
 class actor():
     def __init__(self,
                  act_dim,
+                 obs_dim,
                  arch     = None,
                  lr       = None,
                  grd_clip = None,
@@ -47,11 +46,19 @@ class actor():
         # Fill structure
         self.loss    = loss
         self.act_dim = act_dim
+        self.obs_dim = obs_dim
         self.pol     = policy(pol_type, act_dim)
 
-        # Define network
+        # Define and init network
         self.net = network(self.pol.dim, arch, lr, grd_clip,
                            hid_init, fnl_init, hid_act, fnl_act)
+        dummy    = self.net.call(tf.ones([1,self.obs_dim]))
+
+        # Define old network for PPO loss
+        #if (loss == "ppo"):
+        #    self.net = network(self.pol.dim, arch, lr, grd_clip,
+        #                   hid_init, fnl_init, hid_act, fnl_act)
+        #    dummy    = self.net.call(tf.ones([1,self.obs_dim]))
 
         # Define optimizer
         self.opt = Nadam(lr       = lr,
@@ -82,6 +89,7 @@ class actor():
 
 ###############################################
 ### Critic class
+### obs_dim  : dimension of input  layer
 ### arch     : architecture of densely connected network
 ### lr       : learning rate
 ### grd_clip : gradient clipping value
@@ -92,6 +100,7 @@ class actor():
 ### loss     : loss function
 class critic():
     def __init__(self,
+                 obs_dim,
                  dim      = None,
                  arch     = None,
                  lr       = None,
@@ -113,10 +122,14 @@ class critic():
         if (fnl_act  is None): fnl_act  = "linear"
         if (loss     is None): loss     = "mse"
 
+        # Fill structure
+        self.loss    = loss
+        self.obs_dim = obs_dim
+
         # Define network
         self.net  = network(dim, arch, lr, grd_clip,
                             hid_init, fnl_init, hid_act, fnl_act)
-        self.loss = loss
+        dummy     = self.net.call(tf.ones([1,self.obs_dim]))
 
         # Define optimizer
         self.opt = Nadam(lr       = lr,

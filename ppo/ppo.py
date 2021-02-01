@@ -46,23 +46,26 @@ class ppo_agent:
 
         # Build networks
         self.actor      = actor (act_dim  = self.act_dim,
+                                 obs_dim  = self.obs_dim,
                                  arch     = self.actor_arch,
                                  lr       = self.actor_lr,
                                  grd_clip = self.grd_clip,
                                  pol_type = "multinomial")
         self.old_actor  = actor (act_dim  = self.act_dim,
+                                 obs_dim  = self.obs_dim,
                                  arch     = self.actor_arch,
                                  lr       = self.actor_lr,
                                  grd_clip = self.grd_clip,
                                  pol_type = "multinomial")
-        self.critic     = critic(arch     = self.critic_arch,
+        self.critic     = critic(obs_dim  = self.obs_dim,
+                                 arch     = self.critic_arch,
                                  lr       = self.critic_lr)
 
         # Init parameters
-        init_vector = tf.ones([1,self.obs_dim])
-        dummy = self.critic.call   (init_vector)
-        dummy = self.actor.call    (init_vector)
-        dummy = self.old_actor.call(init_vector)
+        #init_vector = tf.ones([1,self.obs_dim])
+        #dummy = self.critic.call   (init_vector)
+        #dummy = self.actor.call    (init_vector)
+        #dummy = self.old_actor.call(init_vector)
         self.old_actor.net.set_weights (self.actor.net.get_weights())
 
         # Init buffers
