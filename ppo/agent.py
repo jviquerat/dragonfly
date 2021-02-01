@@ -1,40 +1,50 @@
 # Generic imports
-import os
-import warnings
+from tensorflow.keras.optimizers import Nadam
 
-# Import tensorflow and filter warning messages
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '10'
-warnings.filterwarnings('ignore',category=FutureWarning)
-import tensorflow                    as     tf
-import tensorflow.keras              as     tk
-import tensorflow_addons             as     tfa
-import tensorflow_probability        as     tfp
-from   tensorflow.keras              import Model
-from   tensorflow.keras.layers       import Dense
-from   tensorflow.keras.initializers import Orthogonal
-
-# Define alias
-tfd = tfp.distributions
+# Custom imports
+from ppo.network                 import *
 
 ###############################################
-### PPO actor
-class actor(Model):
-    def __init__(self, arch, act_dim, lr, grd_clip):
-        super(actor, self).__init__()
+### Actor class
+### dim      : dimension of output layer
+### arch     : architecture of densely connected network
+### lr       : learning rate
+### grd_clip : gradient clipping value
+### hid_init : hidden layer kernel initializer
+### fnl_init : final  layer kernel initializer
+### hid_act  : hidden layer activation function
+### fnl_act  : final  layer activation function
+### loss     : loss function
+class actor():
+    def __init__(self,
+                 dim,
+                 arch     = None,
+                 lr       = None,
+                 grd_clip = None,
+                 hid_init = None,
+                 fnl_init = None,
+                 hid_act  = None,
+                 fnl_act  = None,
+                 loss     = None):
+
+        # Handle arguments
+        if (arch     is None): arch     = [32,32]
+        if (lr       is None): lr       = 1.0e-3
+        if (grd_clip is None): grd_clip = 0.1
+        if (hid_init is None): hid_init = Orthogonal(gain=1.0)
+        if (fnl_init is None): fnl_init = Orthogonal(gain=0.01)
+        if (hid_act  is None): hid_act  = "tanh"
+        if (fnl_act  is None): fnl_act  = "softmax"
+        if (loss     is None): loss     = "ppo"
 
         # Define network
-        self.ac = []
-        for layer in range(len(arch)):
-            self.ac.append(Dense(arch[layer],
-                                 kernel_initializer=Orthogonal(gain=1.0),
-                                 activation = 'tanh'))
-        self.ac.append(Dense(act_dim,
-                             kernel_initializer=Orthogonal(gain=0.01),
-                             activation = 'softmax'))
+        self.net = network(dim, arch, lr, grd_clip,
+                           hid_init, fnl_init, hid_act, fnl_act)
+        self.loss = loss
 
         # Define optimizer
-        self.opt = tk.optimizers.Nadam(lr       = lr,
-                                       clipnorm = grd_clip)
+        self.opt = Nadam(lr       = lr,
+                         clipnorm = grd_clip)
 
     # Network forward pass
     def call(self, state):
@@ -42,39 +52,70 @@ class actor(Model):
         # Copy inputs
         var = state
 
-        # Compute output
-        for layer in range(len(self.ac)):
-            var = self.ac[layer](var)
+        # Call network
+        var = self.net.call(var)
 
         return var
 
+
+
+    # Get actions
+    #def get_actions(self, state):
+
+
+
 ###############################################
-### PPO critic
-class critic(Model):
-    def __init__(self, arch, lr, grd_clip):
-        super(critic, self).__init__()
+### Critic class
+### arch     : architecture of densely connected network
+### lr       : learning rate
+### grd_clip : gradient clipping value
+### hid_init : hidden layer kernel initializer
+### fnl_init : final  layer kernel initializer
+### hid_act  : hidden layer activation function
+### fnl_act  : final  layer activation function
+### loss     : loss function
+class critic():
+    def __init__(self,
+                 dim      = None,
+                 arch     = None,
+                 lr       = None,
+                 grd_clip = None,
+                 hid_init = None,
+                 fnl_init = None,
+                 hid_act  = None,
+                 fnl_act  = None,
+                 loss     = None):
+
+        # Handle arguments
+        if (dim      is None): dim      = 1
+        if (arch     is None): arch     = [32,32]
+        if (lr       is None): lr       = 1.0e-3
+        if (grd_clip is None): grd_clip = 1.0e10
+        if (hid_init is None): hid_init = Orthogonal(gain=1.0)
+        if (fnl_init is None): fnl_init = Orthogonal(gain=1.0)
+        if (hid_act  is None): hid_act  = "tanh"
+        if (fnl_act  is None): fnl_act  = "linear"
+        if (loss     is None): loss     = "mse"
 
         # Define network
-        self.ct = []
-        for layer in range(len(arch)):
-            self.ct.append(Dense(arch[layer],
-                                 kernel_initializer=Orthogonal(gain=1.0),
-                                 activation = 'tanh'))
-        self.ct.append(Dense(1,
-                             kernel_initializer=Orthogonal(gain=1.0),
-                             activation= 'linear'))
+        self.net  = network(dim, arch, lr, grd_clip,
+                            hid_init, fnl_init, hid_act, fnl_act)
+        self.loss = loss
 
         # Define optimizer
-        self.opt = tk.optimizers.Nadam(lr       = lr)
+        self.opt = Nadam(lr       = lr,
+                         clipnorm = grd_clip)
 
     # Network forward pass
     def call(self, state):
 
-        # Copy input
+        # Copy inputs
         var = state
 
-        # Compute output
-        for layer in range(len(self.ct)):
-            var = self.ct[layer](var)
+        # Call network
+        var = self.net.call(var)
 
         return var
+
+    # Get value
+    #def get_value(self, state):

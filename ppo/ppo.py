@@ -3,9 +3,15 @@ import gym
 import math
 import numpy as np
 
+import tensorflow_addons             as     tfa
+import tensorflow_probability        as     tfp
+
 # Custom imports
 from ppo.agent import *
 from ppo.buff  import *
+
+# Define alias
+tfd = tfp.distributions
 
 ###############################################
 ### A discrete PPO agent
@@ -38,23 +44,35 @@ class ppo_agent:
         self.n_cpu        = params.n_cpu
 
         # Build networks
-        self.critic     = critic(self.critic_arch,
-                                 self.critic_lr,
-                                 self.grd_clip)
-        self.actor      = actor (self.actor_arch,
-                                 self.act_dim,
-                                 self.actor_lr,
-                                 self.grd_clip)
-        self.old_actor  = actor (self.actor_arch,
-                                 self.act_dim,
-                                 self.actor_lr,
-                                 self.grd_clip)
+        self.actor      = actor (dim      = self.act_dim,
+                                 arch     = self.actor_arch,
+                                 lr       = self.actor_lr,
+                                 grd_clip = self.grd_clip)
+        self.old_actor  = actor (dim      = self.act_dim,
+                                 arch     = self.actor_arch,
+                                 lr       = self.actor_lr,
+                                 grd_clip = self.grd_clip)
+        self.critic     = critic(arch     = self.critic_arch,
+                                 lr       = self.critic_lr)
+
+        # self.critic     = critic(self.critic_arch,
+        #                          self.critic_lr,
+        #                          self.grd_clip)
+        # self.actor      = actor (self.actor_arch,
+        #                          self.act_dim,
+        #                          self.actor_lr,
+        #                          self.grd_clip)
+        # self.old_actor  = actor (self.actor_arch,
+        #                          self.act_dim,
+        #                          self.actor_lr,
+        #                          self.grd_clip)
 
         # Init parameters
-        dummy = self.critic   (tf.ones([1,self.obs_dim]))
-        dummy = self.actor    (tf.ones([1,self.obs_dim]))
-        dummy = self.old_actor(tf.ones([1,self.obs_dim]))
-        self.old_actor.set_weights (self.actor.get_weights())
+        init_vector = tf.ones([1,self.obs_dim])
+        dummy = self.critic.call   (init_vector)
+        dummy = self.actor.call    (init_vector)
+        dummy = self.old_actor.call(init_vector)
+        self.old_actor.net.set_weights (self.actor.net.get_weights())
 
         # Init buffers
         self.loc_buff = loc_buff(self.n_cpu, self.obs_dim, self.act_dim)
@@ -80,7 +98,7 @@ class ppo_agent:
         state = tf.cast([state], tf.float32)
 
         # Forward pass to get policy
-        policy  = self.actor(state)
+        policy  = self.actor.call(state)
 
         # Sanitize output
         policy       = tf.cast(policy, tf.float64)
@@ -99,7 +117,7 @@ class ppo_agent:
         state = tf.cast(state, tf.float32)
 
         # Predict value
-        val   = np.array(self.critic(state))
+        val   = np.array(self.critic.call(state))
 
         return val
 
@@ -140,7 +158,7 @@ class ppo_agent:
         lr = self.actor.opt._decayed_lr(tf.float32)
 
         # Save actor weights
-        act_weights = self.actor.get_weights()
+        act_weights = self.actor.net.get_weights()
 
         # Retrieve serialized arrays
         obs, nxt, act, rwd, trm = self.loc_buff.serialize()
@@ -184,7 +202,7 @@ class ppo_agent:
                 crt_out  = self.train_critic(btc_obs, btc_tgt, size)
 
         # Update old networks
-        self.old_actor.set_weights(act_weights)
+        self.old_actor.net.set_weights(act_weights)
 
         return act_out + crt_out + [lr]
 
@@ -266,8 +284,8 @@ class ppo_agent:
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
-            prv_pol  = tf.convert_to_tensor(self.old_actor(obs))
-            pol      = tf.convert_to_tensor(self.actor(obs))
+            prv_pol  = tf.convert_to_tensor(self.old_actor.call(obs))
+            pol      = tf.convert_to_tensor(self.actor.call(obs))
             new_prob = tf.reduce_sum(act*pol,     axis=1)
             prv_prob = tf.reduce_sum(act*prv_pol, axis=1)
             new_log  = tf.math.log(new_prob + 1.0e-5)
@@ -296,7 +314,7 @@ class ppo_agent:
             kl = 0.5*tf.reduce_mean(tf.square(kl))
 
             # Apply gradients
-            act_var = self.actor.trainable_variables
+            act_var = self.actor.net.trainable_variables
             grads   = tape.gradient(loss, act_var)
             norm    = tf.linalg.global_norm(grads)
         self.actor.opt.apply_gradients(zip(grads,act_var))
@@ -309,13 +327,13 @@ class ppo_agent:
         with tf.GradientTape() as tape:
 
             # Compute loss
-            val  = tf.convert_to_tensor(self.critic(obs))
+            val  = tf.convert_to_tensor(self.critic.call(obs))
             val  = tf.reshape(val, [btc])
             p1   = tf.square(tgt - val)
             loss = tf.reduce_mean(p1)
 
             # Apply gradients
-            crt_var     = self.critic.trainable_variables
+            crt_var     = self.critic.net.trainable_variables
             grads       = tape.gradient(loss, crt_var)
             norm        = tf.linalg.global_norm(grads)
         self.critic.opt.apply_gradients(zip(grads,crt_var))
