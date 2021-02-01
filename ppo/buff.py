@@ -2,7 +2,8 @@
 import numpy as np
 
 ###############################################
-### Parallel buffer class
+### Parallel buffer class, used to temporarily
+### store data from parallel environments
 class par_buff:
     def __init__(self, n_cpu, dim):
         self.n_cpu = n_cpu
@@ -24,7 +25,8 @@ class par_buff:
         return np.reshape(arr, (-1,self.dim))
 
 ###############################################
-### Local parallel buffer class
+### Local parallel buffer class, used to store
+### data between two updates of the agent
 class loc_buff:
     def __init__(self, n_cpu, obs_dim, act_dim):
         self.n_cpu   = n_cpu
@@ -59,7 +61,8 @@ class loc_buff:
         return obs, nxt, act, rwd, trm
 
 ###############################################
-### Global parallel buffer class
+### Global parallel buffer class, use to store
+### all data since the beginning of learning
 class glb_buff:
     def __init__(self, n_cpu, obs_dim, act_dim):
         self.n_cpu   = n_cpu
