@@ -51,22 +51,9 @@ class ppo_agent:
                                  lr       = self.actor_lr,
                                  grd_clip = self.grd_clip,
                                  pol_type = "multinomial")
-        self.old_actor  = actor (act_dim  = self.act_dim,
-                                 obs_dim  = self.obs_dim,
-                                 arch     = self.actor_arch,
-                                 lr       = self.actor_lr,
-                                 grd_clip = self.grd_clip,
-                                 pol_type = "multinomial")
         self.critic     = critic(obs_dim  = self.obs_dim,
                                  arch     = self.critic_arch,
                                  lr       = self.critic_lr)
-
-        # Init parameters
-        #init_vector = tf.ones([1,self.obs_dim])
-        #dummy = self.critic.call   (init_vector)
-        #dummy = self.actor.call    (init_vector)
-        #dummy = self.old_actor.call(init_vector)
-        self.old_actor.net.set_weights (self.actor.net.get_weights())
 
         # Init buffers
         self.loc_buff = loc_buff(self.n_cpu, self.obs_dim, self.act_dim)
@@ -122,7 +109,8 @@ class ppo_agent:
         lr = self.actor.opt._decayed_lr(tf.float32)
 
         # Save actor weights
-        act_weights = self.actor.net.get_weights()
+        self.actor.save_weights()
+        #act_weights = self.actor.net.get_weights()
 
         # Retrieve serialized arrays
         obs, nxt, act, rwd, trm = self.loc_buff.serialize()
@@ -166,7 +154,7 @@ class ppo_agent:
                 crt_out  = self.train_critic(btc_obs, btc_tgt, size)
 
         # Update old networks
-        self.old_actor.net.set_weights(act_weights)
+        self.actor.set_weights()
 
         return act_out + crt_out + [lr]
 
@@ -248,7 +236,7 @@ class ppo_agent:
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
-            prv_pol  = tf.convert_to_tensor(self.old_actor.call(obs))
+            prv_pol  = tf.convert_to_tensor(self.actor.pnet.call(obs))
             pol      = tf.convert_to_tensor(self.actor.call(obs))
             new_prob = tf.reduce_sum(act*pol,     axis=1)
             prv_prob = tf.reduce_sum(act*prv_pol, axis=1)

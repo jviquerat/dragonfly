@@ -55,9 +55,13 @@ class actor():
                            hid_act, fnl_act)
 
         # Define old network for PPO loss
-        #if (loss == "ppo"):
-        #    self.net = network(self.pol.dim, arch, lr, grd_clip,
-        #                   hid_init, fnl_init, hid_act, fnl_act)
+        if (loss == "ppo"):
+            self.pnet = network(obs_dim, self.pol.dim, arch, lr,
+                                grd_clip, hid_init, fnl_init,
+                                hid_act, fnl_act)
+            self.save_weights()
+            self.set_weights()
+
 
         # Define optimizer
         self.opt = Nadam(lr       = lr,
@@ -85,6 +89,17 @@ class actor():
         actions       = self.pol.call(policy_params)
 
         return actions
+
+    # Save actor weights
+    def save_weights(self):
+
+        self.weights = self.net.get_weights()
+
+    # Set actor weights
+    def set_weights(self):
+
+        self.pnet.set_weights(self.weights)
+
 
 ###############################################
 ### Critic class
