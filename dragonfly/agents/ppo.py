@@ -10,6 +10,7 @@ import tensorflow_probability        as     tfp
 # Custom imports
 from dragonfly.agents.agent import *
 from dragonfly.core.buff    import *
+from dragonfly.core.report  import *
 
 # Define alias
 tfd = tfp.distributions
@@ -23,6 +24,7 @@ class ppo_agent:
         self.act_dim      = act_dim
         self.obs_dim      = obs_dim
 
+        self.name         = 'ppo'
         self.actor_lr     = params.actor_lr
         self.critic_lr    = params.critic_lr
         self.buff_size    = params.buff_size
@@ -55,22 +57,12 @@ class ppo_agent:
                                  arch     = self.critic_arch,
                                  lr       = self.critic_lr)
 
-        # Init buffers
+        # Initialize buffers
         self.loc_buff = loc_buff(self.n_cpu, self.obs_dim, self.act_dim)
         self.glb_buff = glb_buff(self.n_cpu, self.obs_dim, self.act_dim)
 
-        # Arrays to store learning data
-        self.ep      = np.array([], dtype=np.float32) # episode number
-        self.score   = np.array([], dtype=np.float32) # episode reward
-        self.stp     = np.array([], dtype=np.float32) # step    number
-        self.ls_act  = np.array([], dtype=np.float32) # actor   loss
-        self.ls_crt  = np.array([], dtype=np.float32) # critic  loss
-        self.ent     = np.array([], dtype=np.float32) # entropy
-        self.nrm_act = np.array([], dtype=np.float32) # actor  gradient norm
-        self.nrm_crt = np.array([], dtype=np.float32) # critic gradient norm
-        self.kl_div  = np.array([], dtype=np.float32) # approx. kl divergence
-        self.lr      = np.array([], dtype=np.float32) # learning rate schedule
-        self.length  = np.array([], dtype=np.uint16 ) # episode length
+        # Initialize learning data report
+        self.report = report()
 
     # Retrieve data in buffers
     def get_buffers(self, n_buff, buff_size):
@@ -292,41 +284,12 @@ class ppo_agent:
 
         return [loss, norm]
 
-    # Store for printing
-    def store_learning_data(self, ep, length, score, outputs):
+    # Write learning data report
+    def write_report(self, path, run):
 
-        outputs = np.nan_to_num(outputs, nan=0.0)
-
-        ls_act  = outputs[0]
-        ent     = outputs[1]
-        nrm_act = outputs[2]
-        kl_div  = outputs[3]
-        ls_crt  = outputs[4]
-        nrm_crt = outputs[5]
-        lr      = outputs[6]
-
-        self.ep      = np.append(self.ep,      ep)
-        self.score   = np.append(self.score,   score)
-        self.ls_act  = np.append(self.ls_act,  ls_act)
-        self.ls_crt  = np.append(self.ls_crt,  ls_crt)
-        self.ent     = np.append(self.ent,     ent)
-        self.nrm_act = np.append(self.nrm_act, nrm_act)
-        self.nrm_crt = np.append(self.nrm_crt, nrm_crt)
-        self.kl_div  = np.append(self.kl_div,  kl_div)
-        self.lr      = np.append(self.lr,      lr)
-        self.length  = np.append(self.length,  length)
-
-    # Write learning data
-    def write_learning_data(self, path, run):
-
-        filename = path+'/ppo.dat'
-        np.savetxt(filename,
-                   np.transpose([self.ep,      self.score,
-                                 self.length,  self.ls_act,
-                                 self.ls_crt,  self.ent,
-                                 self.nrm_act, self.nrm_crt,
-                                 self.kl_div,  self.lr]),
-                   fmt='%.5e')
+        # Set filename with method name and run number
+        filename = path+'/'+self.name+'_'+str(run)+'.dat'
+        self.report.write(filename)
 
     # Test looping criterion
     def test_loop(self):
@@ -354,7 +317,7 @@ class ppo_agent:
 
         if (ep == 0): return
 
-        avg = np.mean(self.score[-25:])
+        avg = np.mean(self.report.score[-25:])
         avg = f"{avg:.3f}"
         end = '\n'
         if (ep < n_ep): end = '\r'

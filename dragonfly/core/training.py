@@ -69,10 +69,16 @@ def launch_training(params, path, run):
                 if done[cpu]:
 
                     # Store for future file printing
-                    agent.store_learning_data(ep,
-                                              ep_step[cpu],
-                                              score[cpu],
-                                              outputs)
+                    agent.report.append(episode          = ep,
+                                        score            = score[cpu],
+                                        length           = ep_step[cpu],
+                                        actor_loss       = outputs[0],
+                                        critic_loss      = outputs[4],
+                                        entropy          = outputs[1],
+                                        actor_grad_norm  = outputs[2],
+                                        critic_grad_norm = outputs[5],
+                                        kl_divergence    = outputs[3],
+                                        actor_lr         = outputs[6])
 
                     # Print
                     agent.print_episode(ep, params.n_ep)
@@ -103,8 +109,8 @@ def launch_training(params, path, run):
         # Train networks
         outputs = agent.train_networks()
 
-        # Write learning data on file
-        agent.write_learning_data(path, run)
+        # Write report data to file
+        agent.write_report(path, run)
 
     # Last printing
     agent.print_episode(ep, params.n_ep)

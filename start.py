@@ -57,7 +57,7 @@ if __name__ == '__main__':
         launch_training(params, path, i)
         print("--- %s seconds ---" % (time.time() - start_time))
 
-        f           = np.loadtxt(path+'/ppo.dat')
+        f           = np.loadtxt(path+'/ppo_'+str(i)+'.dat')
         ep          = f[:params.n_ep,0]
         for j in range(n_data):
             data[i,:,j] = f[:params.n_ep,j+1]
