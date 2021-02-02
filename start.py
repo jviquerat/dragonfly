@@ -7,7 +7,7 @@ import collections
 import numpy as np
 
 # Custom imports
-from ppo.training import *
+from dragonfly.core.training import *
 
 ########################
 # Parameters decoder to collect json file
@@ -75,4 +75,4 @@ if __name__ == '__main__':
         array = np.hstack((array,np.vstack(m)))
 
     np.savetxt(file_out, array, fmt='%.5e')
-    os.system('gnuplot -c plot/plot.gnu '+path)
+    os.system('gnuplot -c dragonfly/plot/plot.gnu '+path)

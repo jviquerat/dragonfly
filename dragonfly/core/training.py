@@ -3,9 +3,9 @@ import time
 from   PIL import Image
 
 # Custom imports
-from ppo.ppo      import *
-from ppo.buff     import *
-from ppo.par_envs import *
+from dragonfly.agents.ppo    import *
+from dragonfly.core.buff     import *
+from dragonfly.envs.par_envs import *
 
 ########################
 # Process training

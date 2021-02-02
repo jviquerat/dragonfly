@@ -8,8 +8,8 @@ import tensorflow_addons             as     tfa
 import tensorflow_probability        as     tfp
 
 # Custom imports
-from ppo.agent import *
-from ppo.buff  import *
+from dragonfly.agents.agent import *
+from dragonfly.core.buff    import *
 
 # Define alias
 tfd = tfp.distributions

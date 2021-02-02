@@ -2,8 +2,8 @@
 import numpy as np
 
 # Custom imports
-from ppo.network import *
-from ppo.policy  import *
+from dragonfly.core.network import *
+from dragonfly.core.policy  import *
 
 ###############################################
 ### Actor class
@@ -61,7 +61,6 @@ class actor():
                                 hid_act, fnl_act)
             self.save_weights()
             self.set_weights()
-
 
         # Define optimizer
         self.opt = Nadam(lr       = lr,
