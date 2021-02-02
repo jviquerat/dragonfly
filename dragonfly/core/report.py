@@ -59,7 +59,6 @@ class report:
 
         # Generate array to save
         array = np.transpose([np.array(self.episode,          dtype=float),
-                              np.array(self.step,             dtype=float),
                               np.array(self.score,            dtype=float),
                               np.array(self.length,           dtype=float),
                               np.array(self.actor_loss,       dtype=float),
@@ -69,7 +68,8 @@ class report:
                               np.array(self.critic_grad_norm, dtype=float),
                               np.array(self.kl_divergence,    dtype=float),
                               np.array(self.actor_lr,         dtype=float),
-                              np.array(self.critic_lr,        dtype=float)])
+                              np.array(self.critic_lr,        dtype=float),
+                              np.array(self.step,             dtype=float)])
         array = np.nan_to_num(array, nan=0.0)
 
         # Save as a csv file
