@@ -8,18 +8,18 @@ import tensorflow_addons             as     tfa
 import tensorflow_probability        as     tfp
 
 # Custom imports
-from dragonfly.agents.actor  import *
-from dragonfly.agents.critic import *
-from dragonfly.core.buff     import *
-from dragonfly.core.report   import *
-from dragonfly.core.adv      import *
+from dragonfly.core.actor  import *
+from dragonfly.core.critic import *
+from dragonfly.core.buff   import *
+from dragonfly.core.report import *
+from dragonfly.core.adv    import *
 
 # Define alias
 tfd = tfp.distributions
 
 ###############################################
 ### A discrete PPO agent
-class ppo_agent:
+class ppo:
     def __init__(self, act_dim, obs_dim, params):
 
         # Initialize from arguments
