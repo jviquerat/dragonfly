@@ -12,6 +12,7 @@ from dragonfly.agents.actor  import *
 from dragonfly.agents.critic import *
 from dragonfly.core.buff     import *
 from dragonfly.core.report   import *
+from dragonfly.core.adv      import *
 
 # Define alias
 tfd = tfp.distributions
@@ -46,15 +47,15 @@ class ppo_agent:
         self.n_cpu        = params.n_cpu
 
         # Build networks
-        self.actor      = actor (act_dim  = self.act_dim,
-                                 obs_dim  = self.obs_dim,
-                                 arch     = self.actor_arch,
-                                 lr       = self.actor_lr,
-                                 grd_clip = self.grd_clip,
-                                 pol_type = "multinomial")
-        self.critic     = critic(obs_dim  = self.obs_dim,
-                                 arch     = self.critic_arch,
-                                 lr       = self.critic_lr)
+        self.actor  = actor (act_dim  = self.act_dim,
+                             obs_dim  = self.obs_dim,
+                             arch     = self.actor_arch,
+                             lr       = self.actor_lr,
+                             grd_clip = self.grd_clip,
+                             pol_type = "multinomial")
+        self.critic = critic(obs_dim  = self.obs_dim,
+                             arch     = self.critic_arch,
+                             lr       = self.critic_lr)
 
         # Initialize buffers
         self.loc_buff = loc_buff(self.n_cpu, self.obs_dim, self.act_dim)
@@ -110,7 +111,11 @@ class ppo_agent:
         nxt_val = self.critic.get_value(nxt)
 
         # Compute advantages
-        tgt, adv = self.compute_adv(rwd, crt_val, nxt_val, trm)
+        tgt, adv = compute_adv(rwd, crt_val, nxt_val, trm,
+                               gamma      = self.gamma,
+                               gae_lambda = self.gae_lambda,
+                               norm_adv   = self.norm_adv,
+                               adv_clip   = self.adv_clip)
 
         # Store in global buffers
         self.glb_buff.store(obs, adv, tgt, act)
@@ -147,51 +152,6 @@ class ppo_agent:
         self.actor.set_weights()
 
         return act_out + crt_out + [lr]
-
-    # Compute deltas and advantages
-    def compute_adv(self, rwd, val, nxt, trm):
-
-        # Initialize
-        gm  = self.gamma
-        lbd = self.gae_lambda
-
-        # Handle mask from termination signals
-        msk = np.zeros(len(trm))
-        for i in range(len(trm)):
-            if (trm[i] == 0): msk[i] = 1.0
-            if (trm[i] == 1): msk[i] = 0.0
-            if (trm[i] == 2): msk[i] = 1.0
-
-        # Compute deltas
-        buff = zip(rwd, msk, nxt, val)
-        dlt  = [r + gm*m*nv - v for r, m, nv, v in buff]
-        dlt  = np.stack(dlt)
-
-        # Modify termination mask for GAE
-        msk2 = np.zeros(len(trm))
-        for i in range(len(trm)):
-            if (trm[i] == 0): msk2[i] = 1.0
-            if (trm[i] == 1): msk2[i] = 0.0
-            if (trm[i] == 2): msk2[i] = 0.0
-
-        # Compute advantages
-        adv = dlt.copy()
-        for t in reversed(range(len(adv)-1)):
-            adv[t] += msk2[t]*gm*lbd*adv[t+1]
-
-        # Compute targets
-        tgt  = adv.copy()
-        tgt += val
-
-        # Normalize
-        if self.norm_adv:
-            adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-5)
-
-        # Clip if required
-        if (self.adv_clip):
-            adv = np.maximum(adv, 0.0)
-
-        return tgt, adv
 
     # Training function for actor
     @tf.function
