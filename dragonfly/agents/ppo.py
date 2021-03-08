@@ -1,5 +1,4 @@
 # Generic imports
-import gym
 import math
 import numpy as np
 
