@@ -17,10 +17,8 @@
     "grd_clip": 0.5,
     "entropy": 0.01,
     "gamma": 0.99,
-    "use_gae": true,
     "gae_lambda": 0.99,
     "norm_adv": true,
     "adv_clip": true,
-    "tgt_mode": "adv",
     "bootstrap": true
 }

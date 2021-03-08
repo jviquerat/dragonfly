@@ -8,9 +8,10 @@ import tensorflow_addons             as     tfa
 import tensorflow_probability        as     tfp
 
 # Custom imports
-from dragonfly.agents.agent import *
-from dragonfly.core.buff    import *
-from dragonfly.core.report  import *
+from dragonfly.agents.actor  import *
+from dragonfly.agents.critic import *
+from dragonfly.core.buff     import *
+from dragonfly.core.report   import *
 
 # Define alias
 tfd = tfp.distributions
@@ -37,10 +38,8 @@ class ppo_agent:
         self.bootstrap    = params.bootstrap
         self.entropy      = params.entropy
         self.gamma        = params.gamma
-        self.use_gae      = params.use_gae
         self.gae_lambda   = params.gae_lambda
         self.norm_adv     = params.norm_adv
-        self.tgt_mode     = params.tgt_mode
         self.actor_arch   = params.actor_arch
         self.critic_arch  = params.critic_arch
         self.ep_end       = params.ep_end
@@ -98,11 +97,10 @@ class ppo_agent:
                 self.loc_buff.trm.buff[cpu][-1] = 2
 
         # Retrieve learning rate
-        lr = self.actor.opt._decayed_lr(tf.float32)
+        lr = self.actor.save_lr()
 
         # Save actor weights
         self.actor.save_weights()
-        #act_weights = self.actor.net.get_weights()
 
         # Retrieve serialized arrays
         obs, nxt, act, rwd, trm = self.loc_buff.serialize()
@@ -164,53 +162,26 @@ class ppo_agent:
             if (trm[i] == 1): msk[i] = 0.0
             if (trm[i] == 2): msk[i] = 1.0
 
-        # Whether to use GAE
-        if self.use_gae:
-            # Compute deltas
-            buff = zip(rwd, msk, nxt, val)
-            dlt  = [r + gm*m*nv - v for r, m, nv, v in buff]
-            dlt  = np.stack(dlt)
+        # Compute deltas
+        buff = zip(rwd, msk, nxt, val)
+        dlt  = [r + gm*m*nv - v for r, m, nv, v in buff]
+        dlt  = np.stack(dlt)
 
-            # Modify termination mask for GAE
-            msk2 = np.zeros(len(trm))
-            for i in range(len(trm)):
-                if (trm[i] == 0): msk2[i] = 1.0
-                if (trm[i] == 1): msk2[i] = 0.0
-                if (trm[i] == 2): msk2[i] = 0.0
+        # Modify termination mask for GAE
+        msk2 = np.zeros(len(trm))
+        for i in range(len(trm)):
+            if (trm[i] == 0): msk2[i] = 1.0
+            if (trm[i] == 1): msk2[i] = 0.0
+            if (trm[i] == 2): msk2[i] = 0.0
 
-            # Compute advantages
-            adv = dlt.copy()
-            for t in reversed(range(len(adv)-1)):
-                adv[t] += msk2[t]*gm*lbd*adv[t+1]
-
-        else:
-            # Initialize return term==2
-            ret = np.where(trm == 2, rwd + gm * nxt, rwd)
-
-            # Return as discounted sum
-            for t in reversed(range(len(ret)-1)):
-                ret[t] += msk[t]*gm*ret[t+1]
-
-            # Advantage
-            adv = ret - val
+        # Compute advantages
+        adv = dlt.copy()
+        for t in reversed(range(len(adv)-1)):
+            adv[t] += msk2[t]*gm*lbd*adv[t+1]
 
         # Compute targets
-        if self.tgt_mode == 'adv':  # same as 'ret' for use_gae=False
-            tgt  = adv.copy()
-            tgt += val
-
-        elif self.tgt_mode == '1step':
-            tgt = rwd + np.where(trm == 1, 0.0, gm * nxt)
-
-        elif self.tgt_mode == 'ret':  # same as 'adv' for use_gae=False
-            if self.use_gae:
-                # Initialize return term==2
-                tgt = np.where(trm == 2, rwd + gm * nxt, rwd)
-                # Return as discounted sum
-                for t in reversed(range(len(tgt)-1)):
-                    tgt[t] += msk[t]*gm*tgt[t+1]
-            else:
-                tgt = ret.copy()
+        tgt  = adv.copy()
+        tgt += val
 
         # Normalize
         if self.norm_adv:
