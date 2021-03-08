@@ -3,19 +3,12 @@ import gym
 import math
 import numpy as np
 
-# Tensorflow imports
-import tensorflow_addons             as     tfa
-import tensorflow_probability        as     tfp
-
 # Custom imports
 from dragonfly.core.actor  import *
 from dragonfly.core.critic import *
 from dragonfly.core.buff   import *
 from dragonfly.core.report import *
 from dragonfly.core.adv    import *
-
-# Define alias
-tfd = tfp.distributions
 
 ###############################################
 ### A discrete PPO agent
