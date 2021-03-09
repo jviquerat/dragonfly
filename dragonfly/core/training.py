@@ -62,15 +62,15 @@ def launch_training(params, path, run):
                     # Store for future file printing
                     agent.store(episode      = ep,
                                 score        = score[cpu],
-                                length       = ep_step[cpu],
-                                actor_loss   = outputs[0],
-                                critic_loss  = outputs[4],
-                                entropy      = outputs[1],
-                                actor_gnorm  = outputs[2],
-                                critic_gnorm = outputs[5],
-                                kl_div       = outputs[3],
-                                actor_lr     = outputs[6],
-                                critic_lr    = outputs[7])
+                                length       = ep_step[cpu])
+                                # actor_loss   = outputs[0],
+                                # critic_loss  = outputs[4],
+                                # entropy      = outputs[1],
+                                # actor_gnorm  = outputs[2],
+                                # critic_gnorm = outputs[5],
+                                # kl_div       = outputs[3],
+                                # actor_lr     = outputs[6],
+                                # critic_lr    = outputs[7])
 
                     # Print
                     agent.print_episode(ep, params.n_ep)
@@ -99,7 +99,7 @@ def launch_training(params, path, run):
             loop = agent.test_loop()
 
         # Train networks
-        outputs = agent.train_networks()
+        agent.train_networks()
 
         # Write report data to file
         agent.write_report(path, run)

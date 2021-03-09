@@ -17,7 +17,6 @@ class ppo:
         # Initialize from arguments
         self.act_dim      = act_dim
         self.obs_dim      = obs_dim
-
         self.name         = 'ppo'
         self.buff_size    = params.buff_size
         self.batch_frac   = params.batch_frac
@@ -32,6 +31,14 @@ class ppo:
         self.norm_adv     = params.norm_adv
         self.ep_end       = params.ep_end
         self.n_cpu        = params.n_cpu
+
+        # Set inner data
+        self.actor_loss   = 0.0
+        self.entropy      = 0.0
+        self.actor_gnorm  = 0.0
+        self.kl_div       = 0.0
+        self.critic_loss  = 0.0
+        self.critic_gnorm = 0.0
 
         # Build networks
         self.actor  = actor (act_dim  = self.act_dim,
@@ -79,21 +86,22 @@ class ppo:
         self.loc_buff.store(obs, nxt, act, rwd, trm)
 
     # Store data
-    def store(self, episode, score, length, actor_loss, critic_loss,
-              entropy, actor_gnorm, critic_gnorm,
-              kl_div, actor_lr, critic_lr):
+    def store(self, episode, score, length):
+        #, actor_loss, critic_loss,
+#    entropy, actor_gnorm, critic_gnorm,
+#kl_div, actor_lr, critic_lr):
 
         self.report.append(episode      = episode,
                            score        = score,
                            length       = length,
-                           actor_loss   = actor_loss,
-                           critic_loss  = critic_loss,
-                           entropy      = entropy,
-                           actor_gnorm  = actor_gnorm,
-                           critic_gnorm = critic_gnorm,
-                           kl_div       = kl_div,
-                           actor_lr     = actor_lr,
-                           critic_lr    = critic_lr)
+                           actor_loss   = self.actor_loss,
+                           critic_loss  = self.critic_loss,
+                           entropy      = self.entropy,
+                           actor_gnorm  = self.actor_gnorm,
+                           critic_gnorm = self.critic_gnorm,
+                           kl_div       = self.kl_div,
+                           actor_lr     = self.actor.get_lr(),
+                           critic_lr    = self.critic.get_lr())
 
     # Handle termination
     def handle_term(self, done, ep_step, ep_end):
@@ -128,8 +136,8 @@ class ppo:
                 self.loc_buff.trm.buff[cpu][-1] = 2
 
         # Retrieve learning rate
-        act_lr  = self.actor.get_lr()
-        crit_lr = self.critic.get_lr()
+        #act_lr  = self.actor.get_lr()
+        #crit_lr = self.critic.get_lr()
 
         # Save actor weights
         self.actor.save_weights()
@@ -176,13 +184,23 @@ class ppo:
                 btc_adv  = adv[start:end]
                 btc_tgt  = tgt[start:end]
 
-                act_out  = self.train_actor (btc_obs, btc_adv, btc_act)
-                crt_out  = self.train_critic(btc_obs, btc_tgt, size)
+                self.train_act (btc_obs, btc_adv, btc_act)
+                self.train_critic(btc_obs, btc_tgt, size)
 
         # Update old networks
         self.actor.set_weights()
 
-        return act_out + crt_out + [act_lr] + [crit_lr]
+    # Training function for actor
+    def train_act(self, obs, adv, act):
+
+        self.actor_loss = self.train_actor(obs, adv, act)
+
+        # Store data
+        #print(loss.numpy())
+        #self.actor_loss  = np.array(loss)
+        #self.entropy     = entropy
+        #self.actor_gnorm = norm
+        #self.kl_div      = kl
 
     # Training function for actor
     @tf.function
@@ -223,9 +241,17 @@ class ppo:
             act_var = self.actor.net.trainable_variables
             grads   = tape.gradient(loss, act_var)
             norm    = tf.linalg.global_norm(grads)
+
         self.actor.opt.apply_gradients(zip(grads,act_var))
 
-        return [loss, entropy, norm, kl]
+        # Store data
+        #print(loss.numpy())
+        #self.actor_loss  = np.array(loss)
+        #self.entropy     = entropy
+        #self.actor_gnorm = norm
+        #self.kl_div      = kl
+
+        return loss
 
     # Training function for critic
     @tf.function
@@ -242,9 +268,12 @@ class ppo:
             crt_var     = self.critic.net.trainable_variables
             grads       = tape.gradient(loss, crt_var)
             norm        = tf.linalg.global_norm(grads)
-        self.critic.opt.apply_gradients(zip(grads,crt_var))
 
-        return [loss, norm]
+            # Store data
+            #self.critic_loss  = loss
+            #self.critic_gnorm = norm
+
+        self.critic.opt.apply_gradients(zip(grads,crt_var))
 
     # Write learning data report
     def write_report(self, path, run):
