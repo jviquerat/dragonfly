@@ -28,8 +28,8 @@ def launch_training(params, path, run):
     # Loop until max episode number is reached
     while (ep < params.n_ep):
 
-        # Reset local buffer
-        agent.loc_buff.reset()
+        # Reset buffer
+        agent.reset_buff()
         loop = True
 
         # Loop over buff size
@@ -48,7 +48,7 @@ def launch_training(params, path, run):
                 trm = np.append(trm, term)
 
             # Store transition
-            agent.loc_buff.store(obs, nxt, act, rwd, trm)
+            agent.store(obs, nxt, act, rwd, trm)
 
             # Update observation and buffer counter
             obs       = nxt

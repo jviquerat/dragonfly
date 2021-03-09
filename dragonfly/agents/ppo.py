@@ -72,6 +72,16 @@ class ppo:
 
         return actions
 
+    # Reset local buffer
+    def reset_buff(self):
+
+        self.loc_buff.reset()
+
+    # Store transition in local buffer
+    def store(self, obs, nxt, act, rwd, trm):
+
+        self.loc_buff.store(obs, nxt, act, rwd, trm)
+
     # Train networks
     def train_networks(self):
 
