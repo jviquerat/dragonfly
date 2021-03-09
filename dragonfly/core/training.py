@@ -56,9 +56,6 @@ def launch_training(params, path, run):
 
             # Handle rendering
             rgb = env.render(render, rgb)
-            #for cpu in range(params.n_cpu):
-            #    if (render[cpu]):
-            #        rgb[cpu].append(Image.fromarray(env.render_single(cpu)))
 
             # Reset if episode is done
             for cpu in range(params.n_cpu):

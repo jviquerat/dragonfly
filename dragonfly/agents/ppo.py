@@ -243,11 +243,12 @@ class ppo:
     # Printings at the end of an episode
     def print_episode(self, ep, n_ep):
 
+        # No initial printing
         if (ep == 0): return
 
+        # Average and print
         avg = np.mean(self.report.score[-25:])
         avg = f"{avg:.3f}"
         end = '\n'
         if (ep < n_ep): end = '\r'
-        print('# Ep #'+str(ep)+', avg score = '+str(avg)+'      ',
-              end=end)
+        print('# Ep #'+str(ep)+', avg score = '+str(avg)+'      ', end=end)
