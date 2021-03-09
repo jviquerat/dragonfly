@@ -103,3 +103,46 @@ class actor():
     def get_lr(self):
 
         return self.opt._decayed_lr(tf.float32)
+
+    # PPO loss function for actor
+    @tf.function
+    def train(self, obs, adv, act, pol_clip, entropy_coef):
+        with tf.GradientTape() as tape:
+
+            # Compute ratio of probabilities
+            prv_pol  = tf.convert_to_tensor(self.pnet.call(obs))
+            pol      = tf.convert_to_tensor(self.call(obs))
+            new_prob = tf.reduce_sum(act*pol,     axis=1)
+            prv_prob = tf.reduce_sum(act*prv_pol, axis=1)
+            new_log  = tf.math.log(new_prob + 1.0e-5)
+            old_log  = tf.math.log(prv_prob + 1.0e-5)
+            ratio    = tf.exp(new_log - old_log)
+
+            # Compute actor loss
+            p1         = tf.multiply(adv,ratio)
+            p2         = tf.clip_by_value(ratio,
+                                          1.0-pol_clip,
+                                          1.0+pol_clip)
+            p2         = tf.multiply(adv,p2)
+            loss_ppo   =-tf.reduce_mean(tf.minimum(p1,p2))
+
+            # Compute entropy loss
+            entropy      = tf.multiply(pol,tf.math.log(pol + 1.0e-5))
+            entropy      =-tf.reduce_sum(entropy, axis=1)
+            entropy      = tf.reduce_mean(entropy)
+            loss_entropy =-entropy
+
+            # Compute total loss
+            loss = loss_ppo + entropy_coef*loss_entropy
+
+            # Compute KL div
+            kl = tf.math.log(pol+1.0e-5) - tf.math.log(prv_pol+1.0e-5)
+            kl = 0.5*tf.reduce_mean(tf.square(kl))
+
+            # Apply gradients
+            act_var = self.net.trainable_variables
+            grads   = tape.gradient(loss, act_var)
+            norm    = tf.linalg.global_norm(grads)
+        self.opt.apply_gradients(zip(grads,act_var))
+
+        return loss, kl, norm, entropy

@@ -77,3 +77,22 @@ class critic():
     def get_lr(self):
 
         return self.opt._decayed_lr(tf.float32)
+
+    # MSE loss function for critic
+    @tf.function
+    def train(self, obs, tgt, btc):
+        with tf.GradientTape() as tape:
+
+            # Compute loss
+            val  = tf.convert_to_tensor(self.call(obs))
+            val  = tf.reshape(val, [btc])
+            p1   = tf.square(tgt - val)
+            loss = tf.reduce_mean(p1)
+
+            # Apply gradients
+            crt_var     = self.net.trainable_variables
+            grads       = tape.gradient(loss, crt_var)
+            norm        = tf.linalg.global_norm(grads)
+        self.opt.apply_gradients(zip(grads,crt_var))
+
+        return loss, norm

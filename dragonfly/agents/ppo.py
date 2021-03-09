@@ -186,7 +186,8 @@ class ppo:
     # Training function for actor
     def train_actor(self, obs, adv, act):
 
-        outputs          = self.train_ppo(obs, adv, act)
+        outputs          = self.actor.train(obs, adv, act,
+                                            self.pol_clip, self.entropy_coef)
         self.actor_loss  = outputs[0]
         self.kl_div      = outputs[1]
         self.actor_gnorm = outputs[2]
@@ -195,71 +196,9 @@ class ppo:
     # Training function for critic
     def train_critic(self, obs, tgt, size):
 
-        outputs           = self.train_mse(obs, tgt, size)
+        outputs           = self.critic.train(obs, tgt, size)
         self.critic_loss  = outputs[0]
         self.critic_gnorm = outputs[1]
-
-    # PPO training function for actor
-    @tf.function
-    def train_ppo(self, obs, adv, act):
-        with tf.GradientTape() as tape:
-
-            # Compute ratio of probabilities
-            prv_pol  = tf.convert_to_tensor(self.actor.pnet.call(obs))
-            pol      = tf.convert_to_tensor(self.actor.call(obs))
-            new_prob = tf.reduce_sum(act*pol,     axis=1)
-            prv_prob = tf.reduce_sum(act*prv_pol, axis=1)
-            new_log  = tf.math.log(new_prob + 1.0e-5)
-            old_log  = tf.math.log(prv_prob + 1.0e-5)
-            ratio    = tf.exp(new_log - old_log)
-
-            # Compute actor loss
-            p1         = tf.multiply(adv,ratio)
-            p2         = tf.clip_by_value(ratio,
-                                          1.0-self.pol_clip,
-                                          1.0+self.pol_clip)
-            p2         = tf.multiply(adv,p2)
-            loss_ppo   =-tf.reduce_mean(tf.minimum(p1,p2))
-
-            # Compute entropy loss
-            entropy      = tf.multiply(pol,tf.math.log(pol + 1.0e-5))
-            entropy      =-tf.reduce_sum(entropy, axis=1)
-            entropy      = tf.reduce_mean(entropy)
-            loss_entropy =-entropy
-
-            # Compute total loss
-            loss = loss_ppo + self.entropy_coef*loss_entropy
-
-            # Compute KL div
-            kl = tf.math.log(pol+1.0e-5) - tf.math.log(prv_pol+1.0e-5)
-            kl = 0.5*tf.reduce_mean(tf.square(kl))
-
-            # Apply gradients
-            act_var = self.actor.net.trainable_variables
-            grads   = tape.gradient(loss, act_var)
-            norm    = tf.linalg.global_norm(grads)
-        self.actor.opt.apply_gradients(zip(grads,act_var))
-
-        return loss, kl, norm, entropy
-
-    # MSE training function for critic
-    @tf.function
-    def train_mse(self, obs, tgt, btc):
-        with tf.GradientTape() as tape:
-
-            # Compute loss
-            val  = tf.convert_to_tensor(self.critic.call(obs))
-            val  = tf.reshape(val, [btc])
-            p1   = tf.square(tgt - val)
-            loss = tf.reduce_mean(p1)
-
-            # Apply gradients
-            crt_var     = self.critic.net.trainable_variables
-            grads       = tape.gradient(loss, crt_var)
-            norm        = tf.linalg.global_norm(grads)
-        self.critic.opt.apply_gradients(zip(grads,crt_var))
-
-        return loss, norm
 
     # Write learning data report
     def write_report(self, path, run):
