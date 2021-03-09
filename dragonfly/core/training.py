@@ -1,10 +1,8 @@
 # Generic imports
 import time
-from   PIL import Image
 
 # Custom imports
 from dragonfly.agents.ppo    import *
-from dragonfly.core.buff     import *
 from dragonfly.envs.par_envs import *
 #from dragonfly.core.renderer import *
 
@@ -72,7 +70,6 @@ def launch_training(params, path, run):
                                 critic_grad_norm = outputs[5],
                                 kl_divergence    = outputs[3],
                                 actor_lr         = outputs[6])
-                    #agent.report.append()
 
                     # Print
                     agent.print_episode(ep, params.n_ep)
