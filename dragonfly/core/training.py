@@ -51,7 +51,6 @@ def launch_training(params, path, run):
             ep_step   = [x+1 for x in ep_step]
 
             # Handle rendering
-            
             for cpu in range(params.n_cpu):
                 if (render[cpu]):
                     rgb[cpu].append(Image.fromarray(env.render_single(cpu)))
