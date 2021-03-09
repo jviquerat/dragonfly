@@ -4,6 +4,8 @@ import numpy           as np
 import multiprocessing as mp
 import time
 
+from   PIL import Image
+
 ###############################################
 ### A wrapper class for parallel environments
 class par_envs:
@@ -82,6 +84,25 @@ class par_envs:
         # Send
         for cpu in range(self.n_cpu):
             self.p_pipes[cpu].send(('set_cpu', [cpu, self.n_cpu]))
+
+    # Render environment
+    def render(self, render, rgb):
+
+        # Not all environments will render simultaneously
+        # We use a list to store those that render and those that don't
+
+        # Send
+        for cpu in range(self.n_cpu):
+            if (render[cpu]):
+                self.p_pipes[cpu].send(('render', None))
+
+        # Receive
+        for cpu in range(self.n_cpu):
+            if (render[cpu]):
+                img = self.p_pipes[cpu].recv()
+                rgb[cpu].append(Image.fromarray(img))
+
+        return rgb
 
     # Render environment
     def render_single(self, cpu):
