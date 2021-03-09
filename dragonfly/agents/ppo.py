@@ -78,6 +78,22 @@ class ppo:
 
         self.loc_buff.store(obs, nxt, act, rwd, trm)
 
+    # Store data
+    def store(self, episode, score, length, actor_loss, critic_loss,
+              entropy, actor_grad_norm, critic_grad_norm,
+              kl_divergence, actor_lr):
+
+        self.report.append(episode          = episode,
+                           score            = score,
+                           length           = length,
+                           actor_loss       = actor_loss,
+                           critic_loss      = critic_loss,
+                           entropy          = entropy,
+                           actor_grad_norm  = actor_grad_norm,
+                           critic_grad_norm = critic_grad_norm,
+                           kl_divergence    = kl_divergence,
+                           actor_lr         = actor_lr)
+
     # Handle termination
     def handle_term(self, done, ep_step, ep_end):
 
