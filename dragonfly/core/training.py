@@ -47,7 +47,7 @@ def launch_training(params, path, run):
             trm, done      = agent.handle_term(done, ep_step, params.ep_end)
 
             # Store transition
-            agent.store(obs, nxt, act, rwd, trm)
+            agent.store_transition(obs, nxt, act, rwd, trm)
 
             # Update observation and buffer counter
             obs       = nxt

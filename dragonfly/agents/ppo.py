@@ -74,7 +74,7 @@ class ppo:
         self.loc_buff.reset()
 
     # Store transition in local buffer
-    def store(self, obs, nxt, act, rwd, trm):
+    def store_transition(self, obs, nxt, act, rwd, trm):
 
         self.loc_buff.store(obs, nxt, act, rwd, trm)
 
