@@ -240,22 +240,6 @@ class ppo:
 
         return (not (self.loc_buff.size >= self.buff_size-1))
 
-    # # Handle termination state
-    # def handle_termination(self, done, ep_step, ep_end):
-
-    #     if (not self.bootstrap):
-    #         if (not done): term = 0
-    #         if (    done): term = 1
-    #     if (    self.bootstrap):
-    #         if (    done and ep_step <  ep_end-1): term = 1
-    #         if (    done and ep_step >= ep_end-1): term = 2
-    #         if (not done and ep_step <  ep_end-1): term = 0
-    #         if (not done and ep_step >= ep_end-1):
-    #             term = 2
-    #             done = True
-
-    #     return term, done
-
     # Printings at the end of an episode
     def print_episode(self, ep, n_ep):
 
