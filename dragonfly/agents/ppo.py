@@ -25,7 +25,7 @@ class ppo:
         self.pol_clip     = params.pol_clip
         self.adv_clip     = params.adv_clip
         self.bootstrap    = params.bootstrap
-        self.entropy      = params.entropy
+        self.entropy_coef = params.entropy
         self.gamma        = params.gamma
         self.gae_lambda   = params.gae_lambda
         self.norm_adv     = params.norm_adv
@@ -184,27 +184,31 @@ class ppo:
                 btc_adv  = adv[start:end]
                 btc_tgt  = tgt[start:end]
 
-                self.train_act (btc_obs, btc_adv, btc_act)
+                self.train_actor(btc_obs, btc_adv, btc_act)
                 self.train_critic(btc_obs, btc_tgt, size)
 
         # Update old networks
         self.actor.set_weights()
 
     # Training function for actor
-    def train_act(self, obs, adv, act):
-
-        self.actor_loss = self.train_actor(obs, adv, act)
-
-        # Store data
-        #print(loss.numpy())
-        #self.actor_loss  = np.array(loss)
-        #self.entropy     = entropy
-        #self.actor_gnorm = norm
-        #self.kl_div      = kl
-
-    # Training function for actor
-    @tf.function
     def train_actor(self, obs, adv, act):
+
+        outputs          = self.train_ppo(obs, adv, act)
+        self.actor_loss  = outputs[0]
+        self.kl_div      = outputs[1]
+        self.actor_gnorm = outputs[2]
+        self.entropy     = outputs[3]
+
+    # Training function for critic
+    def train_critic(self, obs, tgt, size):
+
+        outputs           = self.train_mse(obs, tgt, size)
+        self.critic_loss  = outputs[0]
+        self.critic_gnorm = outputs[1]
+
+    # PPO training function for actor
+    @tf.function
+    def train_ppo(self, obs, adv, act):
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
@@ -231,7 +235,7 @@ class ppo:
             loss_entropy =-entropy
 
             # Compute total loss
-            loss = loss_ppo + self.entropy*loss_entropy
+            loss = loss_ppo + self.entropy_coef*loss_entropy
 
             # Compute KL div
             kl = tf.math.log(pol+1.0e-5) - tf.math.log(prv_pol+1.0e-5)
@@ -241,21 +245,13 @@ class ppo:
             act_var = self.actor.net.trainable_variables
             grads   = tape.gradient(loss, act_var)
             norm    = tf.linalg.global_norm(grads)
-
         self.actor.opt.apply_gradients(zip(grads,act_var))
 
-        # Store data
-        #print(loss.numpy())
-        #self.actor_loss  = np.array(loss)
-        #self.entropy     = entropy
-        #self.actor_gnorm = norm
-        #self.kl_div      = kl
+        return loss, kl, norm, entropy
 
-        return loss
-
-    # Training function for critic
+    # MSE training function for critic
     @tf.function
-    def train_critic(self, obs, tgt, btc):
+    def train_mse(self, obs, tgt, btc):
         with tf.GradientTape() as tape:
 
             # Compute loss
@@ -268,12 +264,9 @@ class ppo:
             crt_var     = self.critic.net.trainable_variables
             grads       = tape.gradient(loss, crt_var)
             norm        = tf.linalg.global_norm(grads)
-
-            # Store data
-            #self.critic_loss  = loss
-            #self.critic_gnorm = norm
-
         self.critic.opt.apply_gradients(zip(grads,crt_var))
+
+        return loss, norm
 
     # Write learning data report
     def write_report(self, path, run):
