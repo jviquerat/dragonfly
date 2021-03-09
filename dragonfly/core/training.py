@@ -24,7 +24,6 @@ def launch_training(params, path, run):
     score   = [0.0   for _ in range(params.n_cpu)]
     render  = [False for _ in range(params.n_cpu)]
     rgb     = [[]    for _ in range(params.n_cpu)]
-    outputs = [0.0   for _ in range(8)]
     obs     = env.reset()
 
     # Loop until max episode number is reached
