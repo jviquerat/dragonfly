@@ -80,19 +80,20 @@ class ppo:
 
     # Store data
     def store(self, episode, score, length, actor_loss, critic_loss,
-              entropy, actor_grad_norm, critic_grad_norm,
-              kl_divergence, actor_lr):
+              entropy, actor_gnorm, critic_gnorm,
+              kl_div, actor_lr, critic_lr):
 
-        self.report.append(episode          = episode,
-                           score            = score,
-                           length           = length,
-                           actor_loss       = actor_loss,
-                           critic_loss      = critic_loss,
-                           entropy          = entropy,
-                           actor_grad_norm  = actor_grad_norm,
-                           critic_grad_norm = critic_grad_norm,
-                           kl_divergence    = kl_divergence,
-                           actor_lr         = actor_lr)
+        self.report.append(episode      = episode,
+                           score        = score,
+                           length       = length,
+                           actor_loss   = actor_loss,
+                           critic_loss  = critic_loss,
+                           entropy      = entropy,
+                           actor_gnorm  = actor_gnorm,
+                           critic_gnorm = critic_gnorm,
+                           kl_div       = kl_div,
+                           actor_lr     = actor_lr,
+                           critic_lr    = critic_lr)
 
     # Handle termination
     def handle_term(self, done, ep_step, ep_end):
@@ -127,7 +128,8 @@ class ppo:
                 self.loc_buff.trm.buff[cpu][-1] = 2
 
         # Retrieve learning rate
-        lr = self.actor.save_lr()
+        act_lr  = self.actor.get_lr()
+        crit_lr = self.critic.get_lr()
 
         # Save actor weights
         self.actor.save_weights()
@@ -180,7 +182,7 @@ class ppo:
         # Update old networks
         self.actor.set_weights()
 
-        return act_out + crt_out + [lr]
+        return act_out + crt_out + [act_lr] + [crit_lr]
 
     # Training function for actor
     @tf.function

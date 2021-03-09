@@ -60,16 +60,17 @@ def launch_training(params, path, run):
                 if done[cpu]:
 
                     # Store for future file printing
-                    agent.store(episode          = ep,
-                                score            = score[cpu],
-                                length           = ep_step[cpu],
-                                actor_loss       = outputs[0],
-                                critic_loss      = outputs[4],
-                                entropy          = outputs[1],
-                                actor_grad_norm  = outputs[2],
-                                critic_grad_norm = outputs[5],
-                                kl_divergence    = outputs[3],
-                                actor_lr         = outputs[6])
+                    agent.store(episode      = ep,
+                                score        = score[cpu],
+                                length       = ep_step[cpu],
+                                actor_loss   = outputs[0],
+                                critic_loss  = outputs[4],
+                                entropy      = outputs[1],
+                                actor_gnorm  = outputs[2],
+                                critic_gnorm = outputs[5],
+                                kl_div       = outputs[3],
+                                actor_lr     = outputs[6],
+                                critic_lr    = outputs[7])
 
                     # Print
                     agent.print_episode(ep, params.n_ep)

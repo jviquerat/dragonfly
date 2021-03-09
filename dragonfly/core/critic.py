@@ -72,3 +72,8 @@ class critic():
         val   = np.array(self.call(state))
 
         return val
+
+    # Get current learning rate
+    def get_lr(self):
+
+        return self.opt._decayed_lr(tf.float32)

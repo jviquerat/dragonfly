@@ -99,7 +99,7 @@ class actor():
 
         self.pnet.set_weights(self.weights)
 
-    # Save current learning rate
-    def save_lr(self):
+    # Get current learning rate
+    def get_lr(self):
 
         return self.opt._decayed_lr(tf.float32)
