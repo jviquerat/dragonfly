@@ -54,23 +54,19 @@ class ppo:
     # Get actions
     def get_actions(self, obs):
 
-        # Obs possibly contains observations from multiple parallel
+        # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
         n_obs = np.size(obs, 0)
-        act   = np.array([])
+        act   = np.zeros([n_obs,self.act_dim])
 
         # Loop over observations
         for i in range(n_obs):
 
             # Call actor.get_action
-            ob     = obs[i]
-            action = self.actor.get_action(ob)
-            act    = np.append(act, action)
+            ob       = obs[i]
+            act[i,:] = self.actor.get_action(ob)
 
-        # Reshape
-        actions = np.reshape(act, (-1,self.act_dim))
-
-        return actions
+        return act
 
     # Reset local buffer
     def reset_buff(self):
@@ -81,6 +77,30 @@ class ppo:
     def store(self, obs, nxt, act, rwd, trm):
 
         self.loc_buff.store(obs, nxt, act, rwd, trm)
+
+    # Handle termination
+    def handle_term(self, done, ep_step, ep_end):
+
+        # "done" possibly contains signals from multiple parallel
+        # environments. We assume it does and unroll it in a loop
+        n_done = np.size(done, 0)
+        trm    = np.array([n_done])
+
+        # Loop over environments
+        for i in range(n_done):
+
+            if (not self.bootstrap):
+                if (not done[i]): trm[i] = 0
+                if (    done[i]): trm[i] = 1
+            if (    self.bootstrap):
+                if (    done[i] and ep_step[i] <  ep_end-1): trm[i] = 1
+                if (    done[i] and ep_step[i] >= ep_end-1): trm[i] = 2
+                if (not done[i] and ep_step[i] <  ep_end-1): trm[i] = 0
+                if (not done[i] and ep_step[i] >= ep_end-1):
+                    trm[i]  = 2
+                    done[i] = True
+
+        return trm, done
 
     # Train networks
     def train_networks(self):
@@ -220,21 +240,21 @@ class ppo:
 
         return (not (self.loc_buff.size >= self.buff_size-1))
 
-    # Handle termination state
-    def handle_termination(self, done, ep_step, ep_end):
+    # # Handle termination state
+    # def handle_termination(self, done, ep_step, ep_end):
 
-        if (not self.bootstrap):
-            if (not done): term = 0
-            if (    done): term = 1
-        if (    self.bootstrap):
-            if (    done and ep_step <  ep_end-1): term = 1
-            if (    done and ep_step >= ep_end-1): term = 2
-            if (not done and ep_step <  ep_end-1): term = 0
-            if (not done and ep_step >= ep_end-1):
-                term = 2
-                done = True
+    #     if (not self.bootstrap):
+    #         if (not done): term = 0
+    #         if (    done): term = 1
+    #     if (    self.bootstrap):
+    #         if (    done and ep_step <  ep_end-1): term = 1
+    #         if (    done and ep_step >= ep_end-1): term = 2
+    #         if (not done and ep_step <  ep_end-1): term = 0
+    #         if (not done and ep_step >= ep_end-1):
+    #             term = 2
+    #             done = True
 
-        return term, done
+    #     return term, done
 
     # Printings at the end of an episode
     def print_episode(self, ep, n_ep):

@@ -40,12 +40,7 @@ def launch_training(params, path, run):
             nxt, rwd, done = env.step(np.argmax(act, axis=1))
 
             # Handle termination state
-            trm = np.array([])
-            for cpu in range(params.n_cpu):
-                term, done[cpu] = agent.handle_termination(done[cpu],
-                                                           ep_step[cpu],
-                                                           params.ep_end)
-                trm = np.append(trm, term)
+            trm, done      = agent.handle_term(done, ep_step, params.ep_end)
 
             # Store transition
             agent.store(obs, nxt, act, rwd, trm)
