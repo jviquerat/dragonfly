@@ -83,6 +83,13 @@ class par_envs:
         for cpu in range(self.n_cpu):
             self.p_pipes[cpu].send(('set_cpu', [cpu, self.n_cpu]))
 
+    # # Get actions
+    # def get_actions(self, obs):
+
+    #     # Send
+    #     for cpu in range(self.n_cpu):
+    #         self.p_pipes[cpu].send(('set_cpu', [cpu, self.n_cpu]))
+
     # Render environment
     def render_single(self, cpu):
 

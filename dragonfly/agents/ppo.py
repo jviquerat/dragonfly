@@ -19,35 +19,30 @@ class ppo:
         self.obs_dim      = obs_dim
 
         self.name         = 'ppo'
-        self.actor_lr     = params.actor_lr
-        self.critic_lr    = params.critic_lr
         self.buff_size    = params.buff_size
         self.batch_frac   = params.batch_frac
         self.n_epochs     = params.n_epochs
         self.n_buff       = params.n_buff
         self.pol_clip     = params.pol_clip
-        self.grd_clip     = params.grd_clip
         self.adv_clip     = params.adv_clip
         self.bootstrap    = params.bootstrap
         self.entropy      = params.entropy
         self.gamma        = params.gamma
         self.gae_lambda   = params.gae_lambda
         self.norm_adv     = params.norm_adv
-        self.actor_arch   = params.actor_arch
-        self.critic_arch  = params.critic_arch
         self.ep_end       = params.ep_end
         self.n_cpu        = params.n_cpu
 
         # Build networks
         self.actor  = actor (act_dim  = self.act_dim,
                              obs_dim  = self.obs_dim,
-                             arch     = self.actor_arch,
-                             lr       = self.actor_lr,
-                             grd_clip = self.grd_clip,
+                             arch     = params.actor_arch,
+                             lr       = params.actor_lr,
+                             grd_clip = params.grd_clip,
                              pol_type = "multinomial")
         self.critic = critic(obs_dim  = self.obs_dim,
-                             arch     = self.critic_arch,
-                             lr       = self.critic_lr)
+                             arch     = params.critic_arch,
+                             lr       = params.critic_lr)
 
         # Initialize buffers
         self.loc_buff = loc_buff(self.n_cpu, self.obs_dim, self.act_dim)
@@ -55,31 +50,6 @@ class ppo:
 
         # Initialize learning data report
         self.report = report()
-
-    # Retrieve data in buffers
-    def get_buffers(self, n_buff, buff_size):
-
-        end    = len(self.glb_buff.obs)
-        start  = max(0,end - n_buff*buff_size)
-        size   = end - start
-
-        # Randomize batch
-        sample = np.arange(start, end)
-        np.random.shuffle(sample)
-
-        # Retrieve buffers
-        obs = [self.glb_buff.obs[i] for i in sample]
-        act = [self.glb_buff.act[i] for i in sample]
-        adv = [self.glb_buff.adv[i] for i in sample]
-        tgt = [self.glb_buff.tgt[i] for i in sample]
-
-        # Reshape
-        obs = tf.reshape(tf.cast(obs, tf.float32), [size, self.obs_dim])
-        act = tf.reshape(tf.cast(act, tf.float32), [size, self.act_dim])
-        adv = tf.reshape(tf.cast(adv, tf.float32), [size])
-        tgt = tf.reshape(tf.cast(tgt, tf.float32), [size])
-
-        return obs, act, adv, tgt
 
     # Train networks
     def train_networks(self):
@@ -116,8 +86,8 @@ class ppo:
         for epoch in range(self.n_epochs):
 
             # Retrieve data
-            obs, act, adv, tgt = self.get_buffers(self.n_buff,
-                                                  self.buff_size)
+            obs, act, adv, tgt = self.glb_buff.get(self.n_buff,
+                                                   self.buff_size)
             lgt      = self.n_buff*self.buff_size
             btc_size = math.floor(self.batch_frac*lgt)
             done     = False

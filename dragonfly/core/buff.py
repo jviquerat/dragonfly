@@ -1,5 +1,6 @@
 # Generic imports
-import numpy as np
+import numpy      as np
+import tensorflow as tf
 
 ###############################################
 ### Parallel buffer class, used to temporarily
@@ -83,3 +84,27 @@ class glb_buff:
         self.adv = np.append(self.adv, adv, axis=0)
         self.tgt = np.append(self.tgt, tgt, axis=0)
         self.act = np.append(self.act, act, axis=0)
+
+    def get(self, n_buff, buff_size):
+        # Start/end indices
+        end    = len(self.obs)
+        start  = max(0,end - n_buff*buff_size)
+        size   = end - start
+
+        # Randomize batch
+        sample = np.arange(start, end)
+        np.random.shuffle(sample)
+
+        # Get shuffled buffer
+        obs = [self.obs[i] for i in sample]
+        act = [self.act[i] for i in sample]
+        adv = [self.adv[i] for i in sample]
+        tgt = [self.tgt[i] for i in sample]
+
+        # Reshape
+        obs = tf.reshape(tf.cast(obs, tf.float32), [size, self.obs_dim])
+        act = tf.reshape(tf.cast(act, tf.float32), [size, self.act_dim])
+        adv = tf.reshape(tf.cast(adv, tf.float32), [size])
+        tgt = tf.reshape(tf.cast(tgt, tf.float32), [size])
+
+        return obs, act, adv, tgt
