@@ -78,16 +78,16 @@ class actor():
         return var
 
     # Get actions
-    def get_actions(self, state):
+    def get_action(self, obs):
 
-        # Reshape state
-        state = tf.cast([state], tf.float32)
+        # Cast
+        obs = tf.cast([obs], tf.float32)
 
         # Forward pass to get policy parameters
-        policy_params = self.call(state)
-        actions       = self.pol.call(policy_params)
+        policy_params = self.call(obs)
+        action        = self.pol.call(policy_params)
 
-        return actions
+        return action
 
     # Save actor weights
     def save_weights(self):

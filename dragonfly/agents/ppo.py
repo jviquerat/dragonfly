@@ -51,6 +51,27 @@ class ppo:
         # Initialize learning data report
         self.report = report()
 
+    # Get actions
+    def get_actions(self, obs):
+
+        # Obs possibly contains observations from multiple parallel
+        # environments. We assume it does and unroll it in a loop
+        n_obs = np.size(obs, 0)
+        act   = np.array([])
+
+        # Loop over observations
+        for i in range(n_obs):
+
+            # Call actor.get_action
+            ob     = obs[i]
+            action = self.actor.get_action(ob)
+            act    = np.append(act, action)
+
+        # Reshape
+        actions = np.reshape(act, (-1,self.act_dim))
+
+        return actions
+
     # Train networks
     def train_networks(self):
 

@@ -36,11 +36,7 @@ def launch_training(params, path, run):
         while (loop):
 
             # Make one iteration
-            act = np.array([])
-            for cpu in range(params.n_cpu):
-                out = agent.actor.get_actions(obs[cpu])
-                act = np.append(act,out)
-            act = np.reshape(act, (-1,agent.act_dim))
+            act            = agent.get_actions(obs)
             nxt, rwd, done = env.step(np.argmax(act, axis=1))
 
             # Handle termination state
