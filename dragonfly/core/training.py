@@ -60,9 +60,9 @@ def launch_training(params, path, run):
                 if done[cpu]:
 
                     # Store for future file printing
-                    agent.store(episode      = ep,
-                                score        = score[cpu],
-                                length       = ep_step[cpu])
+                    agent.store(episode = ep,
+                                score   = score[cpu],
+                                length  = ep_step[cpu])
 
                     # Print
                     agent.print_episode(ep, params.n_ep)

@@ -87,9 +87,6 @@ class ppo:
 
     # Store data
     def store(self, episode, score, length):
-        #, actor_loss, critic_loss,
-#    entropy, actor_gnorm, critic_gnorm,
-#kl_div, actor_lr, critic_lr):
 
         self.report.append(episode      = episode,
                            score        = score,
@@ -134,10 +131,6 @@ class ppo:
         for cpu in range(self.n_cpu):
             if (self.loc_buff.trm.buff[cpu][-1] == 0):
                 self.loc_buff.trm.buff[cpu][-1] = 2
-
-        # Retrieve learning rate
-        #act_lr  = self.actor.get_lr()
-        #crit_lr = self.critic.get_lr()
 
         # Save actor weights
         self.actor.save_weights()
