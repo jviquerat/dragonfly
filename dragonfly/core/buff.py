@@ -70,11 +70,13 @@ class loc_buff:
 ### Global parallel buffer class, use to store
 ### all data since the beginning of learning
 class glb_buff:
-    def __init__(self, n_cpu, obs_dim, act_dim):
-        self.n_cpu   = n_cpu
-        self.obs_dim = obs_dim
-        self.act_dim = act_dim
-        self.size    = 0
+    def __init__(self, n_cpu, obs_dim, act_dim, n_buff, buff_size):
+        self.n_cpu     = n_cpu
+        self.obs_dim   = obs_dim
+        self.act_dim   = act_dim
+        self.n_buff    = n_buff
+        self.buff_size = buff_size
+        self.size      = 0
         self.reset()
 
     def reset(self):
@@ -90,10 +92,10 @@ class glb_buff:
         self.tgt = np.append(self.tgt, tgt, axis=0)
         self.act = np.append(self.act, act, axis=0)
 
-    def get(self, n_buff, buff_size):
+    def get(self):
         # Start/end indices
         end    = len(self.obs)
-        start  = max(0,end - n_buff*buff_size)
+        start  = max(0,end - self.n_buff*self.buff_size)
         size   = end - start
 
         # Randomize batch

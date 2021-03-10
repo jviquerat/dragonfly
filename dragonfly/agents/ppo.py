@@ -48,8 +48,9 @@ class ppo:
                              lr       = params.critic_lr)
 
         # Initialize buffers
-        self.loc_buff = loc_buff(self.n_cpu, self.obs_dim, self.act_dim)
-        self.glb_buff = glb_buff(self.n_cpu, self.obs_dim, self.act_dim)
+        self.loc_buff = loc_buff(self.n_cpu,  self.obs_dim, self.act_dim)
+        self.glb_buff = glb_buff(self.n_cpu,  self.obs_dim, self.act_dim,
+                                 self.n_buff, self.buff_size)
 
         # Initialize learning data report
         self.report   = report()
@@ -107,8 +108,7 @@ class ppo:
         for epoch in range(self.n_epochs):
 
             # Retrieve data
-            obs, act, adv, tgt = self.glb_buff.get(self.n_buff,
-                                                   self.buff_size)
+            obs, act, adv, tgt = self.glb_buff.get()
             lgt      = self.n_buff*self.buff_size
             btc_size = math.floor(self.batch_frac*lgt)
             done     = False
