@@ -25,7 +25,7 @@ class ppo:
 
         self.n_buff       = params.n_buff
         self.buff_size    = params.buff_size
-        self.batch_frac   = params.batch_frac
+        self.btc_frac     = params.batch_frac
         self.n_epochs     = params.n_epochs
 
         self.pol_clip     = params.pol_clip
@@ -48,9 +48,11 @@ class ppo:
                              lr       = params.critic_lr)
 
         # Initialize buffers
-        self.loc_buff = loc_buff(self.n_cpu,  self.obs_dim,   self.act_dim)
-        self.glb_buff = glb_buff(self.n_cpu,  self.obs_dim,   self.act_dim,
-                                 self.n_buff, self.buff_size, self.btc_frac)
+        self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
+                                 self.act_dim,   self.buff_size)
+        self.glb_buff = glb_buff(self.n_cpu,     self.obs_dim,
+                                 self.act_dim,   self.n_buff,
+                                 self.buff_size, self.btc_frac)
 
         # Initialize learning data report
         self.report   = report()
@@ -111,27 +113,19 @@ class ppo:
         for epoch in range(self.n_epochs):
 
             # Retrieve data
-            obs, act, adv, tgt = self.glb_buff.get()
-            lgt      = self.n_buff*self.buff_size
-            btc_size = math.floor(self.batch_frac*lgt)
-            done     = False
-            btc      = 0
+            obs, act, adv, tgt = self.glb_buff.get_buff()
+            done               = False
 
             # Visit all available history
             while not done:
-                start    = btc*btc_size
-                end      = min((btc+1)*btc_size,len(obs))
-                size     = end - start
-                btc     += 1
-                if (end  == len(obs)): done = True
+                start, end, done = self.glb_buff.get_indices()
+                btc_obs          = obs[start:end]
+                btc_act          = act[start:end]
+                btc_adv          = adv[start:end]
+                btc_tgt          = tgt[start:end]
 
-                btc_obs  = obs[start:end]
-                btc_act  = act[start:end]
-                btc_adv  = adv[start:end]
-                btc_tgt  = tgt[start:end]
-
-                self.train_actor(btc_obs, btc_adv, btc_act)
-                self.train_critic(btc_obs, btc_tgt, size)
+                self.train_actor (btc_obs, btc_adv, btc_act)
+                self.train_critic(btc_obs, btc_tgt, end - start)
 
         # Update old networks
         self.actor.set_weights()
@@ -229,7 +223,7 @@ class ppo:
     # Test buffer loop criterion
     def test_buff_loop(self):
 
-        return (self.loc_buff.size < self.buff_size-1)
+        return self.loc_buff.test_buff_loop()
 
     # Store transition in local buffer
     def store_transition(self, obs, nxt, act, rwd, trm):

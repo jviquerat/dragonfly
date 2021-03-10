@@ -1,4 +1,5 @@
 # Generic imports
+import math
 import numpy      as np
 import tensorflow as tf
 
@@ -29,10 +30,11 @@ class par_buff:
 ### Local parallel buffer class, used to store
 ### data between two updates of the agent
 class loc_buff:
-    def __init__(self, n_cpu, obs_dim, act_dim):
+    def __init__(self, n_cpu, obs_dim, act_dim, buff_size):
         self.n_cpu   = n_cpu
         self.obs_dim = obs_dim
         self.act_dim = act_dim
+        self.buff_size = buff_size
         self.reset()
 
     def reset(self):
@@ -56,6 +58,9 @@ class loc_buff:
             if (self.trm.buff[cpu][-1] == 0):
                 self.trm.buff[cpu][-1] = 2
 
+    def test_buff_loop(self):
+        return (self.size < self.buff_size - 1)
+
     def serialize(self):
         obs = self.obs.serialize()
         nxt = self.nxt.serialize()
@@ -66,8 +71,10 @@ class loc_buff:
         return obs, nxt, act, rwd, trm
 
 ###############################################
-### Global parallel buffer class, use to store
+### Global parallel buffer class, used to store
 ### all data since the beginning of learning
+### It is also responsible for providing buffer
+### indices during training procedure
 class glb_buff:
     def __init__(self, n_cpu, obs_dim, act_dim, n_buff, buff_size, btc_frac):
         self.n_cpu     = n_cpu
@@ -76,6 +83,8 @@ class glb_buff:
         self.n_buff    = n_buff
         self.buff_size = buff_size
         self.btc_frac  = btc_frac
+        self.lgt       = n_buff*buff_size
+        self.btc_size  = math.floor(self.lgt*btc_frac)
         self.reset()
 
     def reset(self):
@@ -91,7 +100,7 @@ class glb_buff:
         self.tgt = np.append(self.tgt, tgt, axis=0)
         self.act = np.append(self.act, act, axis=0)
 
-    def get(self):
+    def get_buff(self):
         # Start/end indices
         end    = len(self.obs)
         start  = max(0,end - self.n_buff*self.buff_size)
@@ -113,4 +122,25 @@ class glb_buff:
         adv = tf.reshape(tf.cast(adv, tf.float32), [size])
         tgt = tf.reshape(tf.cast(tgt, tf.float32), [size])
 
+        # Prepare looping stuff to account for incomplete buffers
+        self.btc      = 0
+        self.true_lgt = len(obs)
+
         return obs, act, adv, tgt
+
+    # Get indices to roll through buffer during training
+    def get_indices(self):
+
+        # Start and end indices for current buffer
+        start = self.btc*self.btc_size
+        end   = min((self.btc+1)*self.btc_size, self.true_lgt)
+
+        # Increment batch index
+        self.btc += 1
+
+        # Check if buffer is done
+        done = False
+        if (end == self.true_lgt): done = True
+
+        return start, end, done
+
