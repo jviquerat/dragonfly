@@ -17,13 +17,17 @@ class ppo:
     def __init__(self, act_dim, obs_dim, params):
 
         # Initialize from arguments
+        self.name         = 'ppo'
         self.act_dim      = act_dim
         self.obs_dim      = obs_dim
-        self.name         = 'ppo'
+        self.n_cpu        = params.n_cpu
+        self.ep_end       = params.ep_end
+
+        self.n_buff       = params.n_buff
         self.buff_size    = params.buff_size
         self.batch_frac   = params.batch_frac
         self.n_epochs     = params.n_epochs
-        self.n_buff       = params.n_buff
+
         self.pol_clip     = params.pol_clip
         self.adv_clip     = params.adv_clip
         self.bootstrap    = params.bootstrap
@@ -31,16 +35,6 @@ class ppo:
         self.gamma        = params.gamma
         self.gae_lambda   = params.gae_lambda
         self.norm_adv     = params.norm_adv
-        self.ep_end       = params.ep_end
-        self.n_cpu        = params.n_cpu
-
-        # Set inner data
-        self.actor_loss   = 0.0
-        self.entropy      = 0.0
-        self.actor_gnorm  = 0.0
-        self.kl_div       = 0.0
-        self.critic_loss  = 0.0
-        self.critic_gnorm = 0.0
 
         # Build networks
         self.actor  = actor (act_dim  = self.act_dim,
@@ -65,6 +59,9 @@ class ppo:
 
         # Initialize counter
         self.counter  = counter(self.n_cpu, params.n_ep)
+
+        # Initialize inner temporary buffer
+        self.init_tmp_data()
 
     # Get actions
     def get_actions(self, observations):
@@ -186,6 +183,17 @@ class ppo:
         end = '\n'
         if (self.counter.ep < self.counter.n_ep): end = '\r'
         print('# Ep #'+str(self.counter.ep)+', avg score = '+str(avg)+'      ', end=end)
+
+    # Init temporary data
+    def init_tmp_data(self):
+
+        # These values are temporary storage for report struct
+        self.actor_loss   = 0.0
+        self.entropy      = 0.0
+        self.actor_gnorm  = 0.0
+        self.kl_div       = 0.0
+        self.critic_loss  = 0.0
+        self.critic_gnorm = 0.0
 
     ################################
     ### Actor/critic wrappings
