@@ -44,13 +44,13 @@ class par_envs:
     def reset(self):
 
         # Send
-        for pipe in self.p_pipes:
-            pipe.send(('reset', None))
+        for cpu in range(self.n_cpu):
+            self.p_pipes[cpu].send(('reset', None))
 
         # Receive
         results = np.array([])
-        for pipe in self.p_pipes:
-            results = np.append(results, pipe.recv())
+        for cpu in range(self.n_cpu):
+            results = np.append(results, self.p_pipes[cpu].recv())
 
         return np.reshape(results, (-1,self.obs_dim))
 
@@ -119,8 +119,8 @@ class par_envs:
     def close(self):
 
         # Close all envs
-        for pipe in self.p_pipes :
-            pipe.send(('close',None))
+        for cpu in range(self.n_cpu):
+            self.p_pipes[cpu].send(('close',None))
         for p in self.proc:
             p.terminate()
             p.join()
@@ -129,15 +129,15 @@ class par_envs:
     def step(self, actions):
 
         # Send
-        for pipe, action in zip(self.p_pipes, actions):
-            pipe.send(('step', action))
+        for cpu in range(self.n_cpu):
+            self.p_pipes[cpu].send(('step', actions[cpu]))
 
         # Receive
         nxt  = np.array([])
         rwd  = np.array([])
         done = np.array([], dtype=np.bool)
-        for pipe in self.p_pipes:
-            n, r, d = pipe.recv()
+        for cpu in range(self.n_cpu):
+            n, r, d = self.p_pipes[cpu].recv()
             nxt     = np.append(nxt, n)
             rwd     = np.append(rwd, r)
             done    = np.append(done, bool(d))
