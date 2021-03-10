@@ -1,24 +1,16 @@
 # Generic imports
 import os
 import sys
-import json
 import time
-import collections
 import numpy as np
 
 # Custom imports
 from dragonfly.core.training import *
-
-########################
-# Parameters decoder to collect json file
-########################
-def params_decoder(p_dict):
-    return collections.namedtuple('X', p_dict.keys())(*p_dict.values())
+from dragonfly.core.utils    import *
 
 ########################
 # Average training over multiple runs
 ########################
-
 if __name__ == '__main__':
 
     # Check command-line input for json file
@@ -28,39 +20,37 @@ if __name__ == '__main__':
         print('Command line error, please use as follows:')
         print('python3 start.py my_file.json')
 
-    # Read json parameter file
-    with open(json_file, "r") as f:
-        params = json.load(f, object_hook=params_decoder)
+    # Initialize json parser and read parameters
+    parser = json_parser()
+    pms    = parser.read(json_file)
 
     # Storage arrays
-    res_path   = 'results'
-    n_data     = 9
-    ep         = np.zeros((              params.n_ep),           dtype=int)
-    data       = np.zeros((params.n_avg, params.n_ep,   n_data), dtype=float)
-    avg_data   = np.zeros((              params.n_ep,   n_data), dtype=float)
-    stdp_data  = np.zeros((              params.n_ep,   n_data), dtype=float)
-    stdm_data  = np.zeros((              params.n_ep,   n_data), dtype=float)
+    averager = data_avg(9, pms.n_ep, pms.n_avg)
 
-    # Open storage repositories
-    if (not os.path.exists(res_path)):
-        os.makedirs(res_path)
-
+    # Create paths for results and open repositories
+    res_path = 'results'
     t         = time.localtime()
     path_time = time.strftime("%H-%M-%S", t)
-    path      = res_path+'/'+params.env_name+'_'+str(path_time)
+    path      = res_path+'/'+pms.env_name+'_'+str(path_time)
+
+    # Open repositories
+    if (not os.path.exists(res_path)):
+        os.makedirs(res_path)
     if (not os.path.exists(path)):
         os.makedirs(path)
 
-    for i in range(params.n_avg):
-        print('### Avg run #'+str(i))
+    for run in range(pms.n_avg):
+        print('### Avg run #'+str(run))
         start_time = time.time()
-        launch_training(params, path, i)
+        launch_training(pms, path, run)
         print("--- %s seconds ---" % (time.time() - start_time))
+        filename = path+'/ppo_'+str(run)+'.dat'
+        averager.store(filename, run)
 
-        f           = np.loadtxt(path+'/ppo_'+str(i)+'.dat')
-        ep          = f[:params.n_ep,0]
-        for j in range(n_data):
-            data[i,:,j] = f[:params.n_ep,j+1]
+        #f           = np.loadtxt(path+'/ppo_'+str(i)+'.dat')
+        #ep          = f[:pms.n_ep,0]
+        #for j in range(n_data):
+        #    data[i,:,j] = f[:pms.n_ep,j+1]
 
     # Write to file
     file_out  = path+'/ppo_avg.dat'
