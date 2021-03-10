@@ -67,7 +67,6 @@ class ppo:
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
-        #n_obs = np.size(obs, 0)
         act   = np.zeros([self.n_cpu, self.act_dim])
 
         # Loop over observations
@@ -109,8 +108,7 @@ class ppo:
 
         # "done" possibly contains signals from multiple parallel
         # environments. We assume it does and unroll it in a loop
-        #n_done = np.size(done, 0)
-        trm    = np.array([self.n_cpu])
+        trm = np.array([self.n_cpu])
 
         # Loop over environments
         for i in range(self.n_cpu):

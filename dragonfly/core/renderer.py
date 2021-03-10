@@ -26,6 +26,7 @@ class renderer:
     # Finish rendering process, saving to gif
     def finish(self, path, ep, cpu):
 
+        # Render if necessary
         if (self.render[cpu]):
             self.render[cpu] = False
             self.rgb[cpu][0].save(path+'/'+str(ep)+'.gif',
