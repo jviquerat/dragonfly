@@ -60,7 +60,7 @@ class ppo:
         self.report = report()
 
         # Initialize renderer
-        self.renderer = renderer(self.n_cpu)
+        self.renderer = renderer(self.n_cpu, params.render_every)
 
     # Get actions
     def get_actions(self, obs):
@@ -211,6 +211,21 @@ class ppo:
         # Set filename with method name and run number
         filename = path+'/'+self.name+'_'+str(run)+'.dat'
         self.report.write(filename)
+
+    # Return rendering selection array
+    def get_render_cpu(self):
+
+        return self.renderer.render
+
+    # Store one rendering step for all cpus
+    def store_rendering(self, rnd):
+
+        self.renderer.store(rnd)
+
+    # Finish rendering process
+    def finish_rendering(self, path, ep, cpu):
+
+        self.renderer.finish(path, ep, cpu)
 
     # Test looping criterion
     def test_loop(self):

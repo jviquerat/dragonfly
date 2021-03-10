@@ -4,7 +4,7 @@
     "n_ep": 300,
     "n_avg": 2,
     "n_cpu": 1,
-    "render_every": 500,
+    "render_every": 20,
     "actor_lr": 1.0e-2,
     "critic_lr": 1.0e-2,
     "actor_arch": [16,16],
