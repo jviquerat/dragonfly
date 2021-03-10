@@ -81,9 +81,7 @@ class ppo:
     def train(self):
 
         # Handle fixed-size buffer termination
-        for cpu in range(self.n_cpu):
-            if (self.loc_buff.trm.buff[cpu][-1] == 0):
-                self.loc_buff.trm.buff[cpu][-1] = 2
+        self.loc_buff.finalize_buffers()
 
         # Save actor weights
         self.actor.save_weights()

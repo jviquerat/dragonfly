@@ -52,6 +52,11 @@ class loc_buff:
         self.trm.append(trm)
         self.size += self.n_cpu
 
+    def finalize_buffers(self):
+        for cpu in range(self.n_cpu):
+            if (self.trm.buff[cpu][-1] == 0):
+                self.trm.buff[cpu][-1] = 2
+
     def serialize(self):
         obs = self.obs.serialize()
         nxt = self.nxt.serialize()
