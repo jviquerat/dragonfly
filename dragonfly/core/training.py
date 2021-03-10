@@ -51,10 +51,6 @@ def launch_training(params, path, run):
             # Reset only finished environments
             env.reset(done, obs)
 
-            #for cpu in range(params.n_cpu):
-             #   if done[cpu]:
-              #      obs[cpu] = env.reset_single(cpu)
-
         # Train networks
         agent.train_networks()
 

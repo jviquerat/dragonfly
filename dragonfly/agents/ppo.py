@@ -169,8 +169,8 @@ class ppo:
 
         self.loc_buff.store(obs, nxt, act, rwd, trm)
 
-    # Store data
-    def store(self, cpu):
+    # Store data in report
+    def store_report(self, cpu):
 
         self.report.append(episode      = self.counter.ep,
                            score        = self.counter.score[cpu],
@@ -255,7 +255,7 @@ class ppo:
         # Loop over environments and finalize/reset
         for cpu in range(self.n_cpu):
             if (done[cpu]):
-                self.store(cpu)
+                self.store_report(cpu)
                 self.print_episode()
                 self.finish_rendering(path, cpu)
                 self.counter.reset_ep(cpu)
