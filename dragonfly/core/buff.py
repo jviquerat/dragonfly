@@ -33,7 +33,6 @@ class loc_buff:
         self.n_cpu   = n_cpu
         self.obs_dim = obs_dim
         self.act_dim = act_dim
-        self.size    = 0
         self.reset()
 
     def reset(self):
@@ -77,7 +76,6 @@ class glb_buff:
         self.n_buff    = n_buff
         self.buff_size = buff_size
         self.btc_frac  = btc_frac
-        self.size      = 0
         self.reset()
 
     def reset(self):

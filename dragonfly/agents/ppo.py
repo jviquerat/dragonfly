@@ -119,7 +119,6 @@ class ppo:
 
             # Visit all available history
             while not done:
-
                 start    = btc*btc_size
                 end      = min((btc+1)*btc_size,len(obs))
                 size     = end - start
