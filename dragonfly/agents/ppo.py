@@ -3,11 +3,12 @@ import math
 import numpy as np
 
 # Custom imports
-from dragonfly.core.actor  import *
-from dragonfly.core.critic import *
-from dragonfly.core.buff   import *
-from dragonfly.core.report import *
-from dragonfly.core.adv    import *
+from dragonfly.core.actor    import *
+from dragonfly.core.critic   import *
+from dragonfly.core.buff     import *
+from dragonfly.core.report   import *
+from dragonfly.core.adv      import *
+from dragonfly.core.renderer import *
 
 ###############################################
 ### A discrete PPO agent
@@ -58,16 +59,19 @@ class ppo:
         # Initialize learning data report
         self.report = report()
 
+        # Initialize renderer
+        self.renderer = renderer(self.n_cpu)
+
     # Get actions
     def get_actions(self, obs):
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
-        n_obs = np.size(obs, 0)
-        act   = np.zeros([n_obs,self.act_dim])
+        #n_obs = np.size(obs, 0)
+        act   = np.zeros([self.n_cpu, self.act_dim])
 
         # Loop over observations
-        for i in range(n_obs):
+        for i in range(self.n_cpu):
 
             # Call actor.get_action
             ob       = obs[i]
@@ -105,11 +109,11 @@ class ppo:
 
         # "done" possibly contains signals from multiple parallel
         # environments. We assume it does and unroll it in a loop
-        n_done = np.size(done, 0)
-        trm    = np.array([n_done])
+        #n_done = np.size(done, 0)
+        trm    = np.array([self.n_cpu])
 
         # Loop over environments
-        for i in range(n_done):
+        for i in range(self.n_cpu):
 
             if (not self.bootstrap):
                 if (not done[i]): trm[i] = 0
@@ -187,7 +191,8 @@ class ppo:
     def train_actor(self, obs, adv, act):
 
         outputs          = self.actor.train(obs, adv, act,
-                                            self.pol_clip, self.entropy_coef)
+                                            self.pol_clip,
+                                            self.entropy_coef)
         self.actor_loss  = outputs[0]
         self.kl_div      = outputs[1]
         self.actor_gnorm = outputs[2]

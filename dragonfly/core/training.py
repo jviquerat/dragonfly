@@ -4,7 +4,6 @@ import time
 # Custom imports
 from dragonfly.agents.ppo    import *
 from dragonfly.envs.par_envs import *
-#from dragonfly.core.renderer import *
 
 ########################
 # Process training
