@@ -67,23 +67,21 @@ class ppo:
         self.counter  = counter(self.n_cpu, params.n_ep)
 
     # Get actions
-    def get_actions(self, obs):
+    def get_actions(self, observations):
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
         act   = np.zeros([self.n_cpu, self.act_dim])
 
-        # Loop over observations
+        # Loop over cpus
         for i in range(self.n_cpu):
-
-            # Call actor.get_action
-            ob       = obs[i]
-            act[i,:] = self.actor.get_action(ob)
+            obs      = observations[i]
+            act[i,:] = self.actor.get_action(obs)
 
         return act
 
-    # Train networks
-    def train_networks(self):
+    # Training
+    def train(self):
 
         # Handle fixed-size buffer termination
         for cpu in range(self.n_cpu):
@@ -165,11 +163,6 @@ class ppo:
 
         return trm, done
 
-    # Test buffer loop criterion
-    def test_buff_loop(self):
-
-        return (self.loc_buff.size < self.buff_size-1)
-
     # Finish if some episodes are done
     def finish_episodes(self, path, done):
 
@@ -224,6 +217,11 @@ class ppo:
     def reset_buff(self):
 
         self.loc_buff.reset()
+
+    # Test buffer loop criterion
+    def test_buff_loop(self):
+
+        return (self.loc_buff.size < self.buff_size-1)
 
     # Store transition in local buffer
     def store_transition(self, obs, nxt, act, rwd, trm):

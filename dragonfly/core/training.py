@@ -52,7 +52,7 @@ def launch_training(params, path, run):
             env.reset(done, obs)
 
         # Train networks
-        agent.train_networks()
+        agent.train()
 
         # Write report data to file
         agent.write_report(path, run)
