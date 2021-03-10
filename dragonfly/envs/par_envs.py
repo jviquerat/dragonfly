@@ -58,7 +58,7 @@ class par_envs:
         # Send
         for cpu in range(self.n_cpu):
             if (done[cpu]):
-                self.p_pipes[cpu].send(('reset',None))
+                self.p_pipes[cpu].send(('reset', None))
 
         # Receive
         for cpu in range(self.n_cpu):
@@ -71,7 +71,7 @@ class par_envs:
     def get_dims(self):
 
         # Send
-        self.p_pipes[0].send(('get_dims',None))
+        self.p_pipes[0].send(('get_dims', None))
 
         # Receive
         results = np.array([])
@@ -121,7 +121,7 @@ class par_envs:
 
         # Close all envs
         for cpu in range(self.n_cpu):
-            self.p_pipes[cpu].send(('close',None))
+            self.p_pipes[cpu].send(('close', None))
         for p in self.proc:
             p.terminate()
             p.join()
