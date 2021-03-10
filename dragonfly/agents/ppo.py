@@ -9,6 +9,7 @@ from dragonfly.core.buff     import *
 from dragonfly.core.report   import *
 from dragonfly.core.adv      import *
 from dragonfly.core.renderer import *
+from dragonfly.core.counter  import *
 
 ###############################################
 ### A discrete PPO agent
@@ -57,10 +58,13 @@ class ppo:
         self.glb_buff = glb_buff(self.n_cpu, self.obs_dim, self.act_dim)
 
         # Initialize learning data report
-        self.report = report()
+        self.report   = report()
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu, params.render_every)
+
+        # Initialize counter
+        self.counter  = counter(self.n_cpu, params.n_ep)
 
     # Get actions
     def get_actions(self, obs):
@@ -77,54 +81,6 @@ class ppo:
             act[i,:] = self.actor.get_action(ob)
 
         return act
-
-    # Reset local buffer
-    def reset_buff(self):
-
-        self.loc_buff.reset()
-
-    # Store transition in local buffer
-    def store_transition(self, obs, nxt, act, rwd, trm):
-
-        self.loc_buff.store(obs, nxt, act, rwd, trm)
-
-    # Store data
-    def store(self, episode, score, length):
-
-        self.report.append(episode      = episode,
-                           score        = score,
-                           length       = length,
-                           actor_loss   = self.actor_loss,
-                           critic_loss  = self.critic_loss,
-                           entropy      = self.entropy,
-                           actor_gnorm  = self.actor_gnorm,
-                           critic_gnorm = self.critic_gnorm,
-                           kl_div       = self.kl_div,
-                           actor_lr     = self.actor.get_lr(),
-                           critic_lr    = self.critic.get_lr())
-
-    # Handle termination
-    def handle_term(self, done, ep_step, ep_end):
-
-        # "done" possibly contains signals from multiple parallel
-        # environments. We assume it does and unroll it in a loop
-        trm = np.array([self.n_cpu])
-
-        # Loop over environments
-        for i in range(self.n_cpu):
-
-            if (not self.bootstrap):
-                if (not done[i]): trm[i] = 0
-                if (    done[i]): trm[i] = 1
-            if (    self.bootstrap):
-                if (    done[i] and ep_step[i] <  ep_end-1): trm[i] = 1
-                if (    done[i] and ep_step[i] >= ep_end-1): trm[i] = 2
-                if (not done[i] and ep_step[i] <  ep_end-1): trm[i] = 0
-                if (not done[i] and ep_step[i] >= ep_end-1):
-                    trm[i]  = 2
-                    done[i] = True
-
-        return trm, done
 
     # Train networks
     def train_networks(self):
@@ -203,6 +159,55 @@ class ppo:
         self.critic_loss  = outputs[0]
         self.critic_gnorm = outputs[1]
 
+    # Reset local buffer
+    def reset_buff(self):
+
+        self.loc_buff.reset()
+
+    # Store transition in local buffer
+    def store_transition(self, obs, nxt, act, rwd, trm):
+
+        self.loc_buff.store(obs, nxt, act, rwd, trm)
+
+    # Store data
+    def store(self, cpu):
+
+        self.report.append(episode      = self.counter.ep,
+                           score        = self.counter.score[cpu],
+                           length       = self.counter.ep_step[cpu],
+                           actor_loss   = self.actor_loss,
+                           critic_loss  = self.critic_loss,
+                           entropy      = self.entropy,
+                           actor_gnorm  = self.actor_gnorm,
+                           critic_gnorm = self.critic_gnorm,
+                           kl_div       = self.kl_div,
+                           actor_lr     = self.actor.get_lr(),
+                           critic_lr    = self.critic.get_lr())
+
+    # Handle termination
+    def handle_term(self, done, ep_end):
+
+        # "done" possibly contains signals from multiple parallel
+        # environments. We assume it does and unroll it in a loop
+        trm = np.array([self.n_cpu])
+
+        # Loop over environments
+        for i in range(self.n_cpu):
+            ep_step = self.counter.ep_step[i]
+            
+            if (not self.bootstrap):
+                if (not done[i]): trm[i] = 0
+                if (    done[i]): trm[i] = 1
+            if (    self.bootstrap):
+                if (    done[i] and ep_step <  ep_end-1): trm[i] = 1
+                if (    done[i] and ep_step >= ep_end-1): trm[i] = 2
+                if (not done[i] and ep_step <  ep_end-1): trm[i] = 0
+                if (not done[i] and ep_step >= ep_end-1):
+                    trm[i]  = 2
+                    done[i] = True
+
+        return trm, done
+
     # Write learning data report
     def write_report(self, path, run):
 
@@ -221,24 +226,43 @@ class ppo:
         self.renderer.store(rnd)
 
     # Finish rendering process
-    def finish_rendering(self, path, ep, cpu):
+    def finish_rendering(self, path, cpu):
 
-        self.renderer.finish(path, ep, cpu)
+        self.renderer.finish(path, self.counter.ep, cpu)
 
-    # Test looping criterion
-    def test_loop(self):
+    # Test buffer loop criterion
+    def test_buff_loop(self):
 
-        return (not (self.loc_buff.size >= self.buff_size-1))
+        return (self.loc_buff.size < self.buff_size-1)
+
+    # Test episode loop criterion
+    def test_ep_loop(self):
+
+        return self.counter.test_ep_loop()
+
+    # Update score
+    def update_score(self, rwd):
+
+        return self.counter.update_score(rwd)
+
+    # Update step
+    def update_step(self):
+
+        return self.counter.update_step()
+
+    def reset_ep(self, cpu):
+
+        return self.counter.reset_ep(cpu)
 
     # Printings at the end of an episode
-    def print_episode(self, ep, n_ep):
+    def print_episode(self):#, ep, n_ep):
 
         # No initial printing
-        if (ep == 0): return
+        if (self.counter.ep == 0): return
 
         # Average and print
         avg = np.mean(self.report.score[-25:])
         avg = f"{avg:.3f}"
         end = '\n'
-        if (ep < n_ep): end = '\r'
-        print('# Ep #'+str(ep)+', avg score = '+str(avg)+'      ', end=end)
+        if (self.counter.ep < self.counter.n_ep): end = '\r'
+        print('# Ep #'+str(self.counter.ep)+', avg score = '+str(avg)+'      ', end=end)
