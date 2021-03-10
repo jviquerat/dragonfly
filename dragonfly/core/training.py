@@ -15,7 +15,7 @@ def launch_training(params, path, run):
     agent = ppo(env.act_dim, env.obs_dim, params)
 
     # Reset environment
-    obs = env.reset()
+    obs = env.reset_all()
 
     # Loop until max episode number is reached
     while (agent.test_ep_loop()):
@@ -46,21 +46,14 @@ def launch_training(params, path, run):
             agent.store_rendering(rnd)
 
             # Reset if episode is done
-            for cpu in range(params.n_cpu):
-                if done[cpu]:
+            agent.reset_eps(path, done)
 
-                    # Store for future file printing
-                    agent.store(cpu)
+            # Reset only finished environments
+            env.reset(done, obs)
 
-                    # Print
-                    agent.print_episode()
-
-                    # Handle rendering
-                    agent.finish_rendering(path, cpu)
-
-                    # Reset environment and counters
-                    obs[cpu] = env.reset_single(cpu)
-                    agent.reset_ep(cpu)
+            #for cpu in range(params.n_cpu):
+             #   if done[cpu]:
+              #      obs[cpu] = env.reset_single(cpu)
 
         # Train networks
         agent.train_networks()

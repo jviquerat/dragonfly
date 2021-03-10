@@ -39,7 +39,7 @@ class par_envs:
         self.set_cpus()
 
     # Reset all environments
-    def reset(self):
+    def reset_all(self):
 
         # Send
         for cpu in range(self.n_cpu):
@@ -52,17 +52,20 @@ class par_envs:
 
         return np.reshape(results, (-1,self.obs_dim))
 
-    # Reset a single environment
-    def reset_single(self, cpu):
+    # Reset based on a done array
+    def reset(self, done, obs):
 
         # Send
-        self.p_pipes[cpu].send(('reset',None))
+        for cpu in range(self.n_cpu):
+            if (done[cpu]):
+                self.p_pipes[cpu].send(('reset',None))
 
         # Receive
-        results = np.array([])
-        results = np.append(results, self.p_pipes[cpu].recv())
-
-        return np.reshape(results, (-1,self.obs_dim))
+        for cpu in range(self.n_cpu):
+            if (done[cpu]):
+                results  = np.array([])
+                results  = np.append(results, self.p_pipes[cpu].recv())
+                obs[cpu] = np.reshape(results, (-1,self.obs_dim))
 
     # Get environment dimensions
     def get_dims(self):

@@ -194,7 +194,7 @@ class ppo:
         # Loop over environments
         for i in range(self.n_cpu):
             ep_step = self.counter.ep_step[i]
-            
+
             if (not self.bootstrap):
                 if (not done[i]): trm[i] = 0
                 if (    done[i]): trm[i] = 1
@@ -250,12 +250,18 @@ class ppo:
 
         return self.counter.update_step()
 
-    def reset_ep(self, cpu):
+    def reset_eps(self, path, done):
 
-        return self.counter.reset_ep(cpu)
+        # Loop over environments and finalize/reset
+        for cpu in range(self.n_cpu):
+            if (done[cpu]):
+                self.store(cpu)
+                self.print_episode()
+                self.finish_rendering(path, cpu)
+                self.counter.reset_ep(cpu)
 
     # Printings at the end of an episode
-    def print_episode(self):#, ep, n_ep):
+    def print_episode(self):
 
         # No initial printing
         if (self.counter.ep == 0): return
