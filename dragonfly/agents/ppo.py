@@ -141,49 +141,6 @@ class ppo:
         # Update old networks
         self.actor.set_weights()
 
-    # Training function for actor
-    def train_actor(self, obs, adv, act):
-
-        outputs          = self.actor.train(obs, adv, act,
-                                            self.pol_clip,
-                                            self.entropy_coef)
-        self.actor_loss  = outputs[0]
-        self.kl_div      = outputs[1]
-        self.actor_gnorm = outputs[2]
-        self.entropy     = outputs[3]
-
-    # Training function for critic
-    def train_critic(self, obs, tgt, size):
-
-        outputs           = self.critic.train(obs, tgt, size)
-        self.critic_loss  = outputs[0]
-        self.critic_gnorm = outputs[1]
-
-    # Reset local buffer
-    def reset_buff(self):
-
-        self.loc_buff.reset()
-
-    # Store transition in local buffer
-    def store_transition(self, obs, nxt, act, rwd, trm):
-
-        self.loc_buff.store(obs, nxt, act, rwd, trm)
-
-    # Store data in report
-    def store_report(self, cpu):
-
-        self.report.append(episode      = self.counter.ep,
-                           score        = self.counter.score[cpu],
-                           length       = self.counter.ep_step[cpu],
-                           actor_loss   = self.actor_loss,
-                           critic_loss  = self.critic_loss,
-                           entropy      = self.entropy,
-                           actor_gnorm  = self.actor_gnorm,
-                           critic_gnorm = self.critic_gnorm,
-                           kl_div       = self.kl_div,
-                           actor_lr     = self.actor.get_lr(),
-                           critic_lr    = self.critic.get_lr())
-
     # Handle termination
     def handle_term(self, done, ep_end):
 
@@ -208,49 +165,13 @@ class ppo:
 
         return trm, done
 
-    # Write learning data report
-    def write_report(self, path, run):
-
-        # Set filename with method name and run number
-        filename = path+'/'+self.name+'_'+str(run)+'.dat'
-        self.report.write(filename)
-
-    # Return rendering selection array
-    def get_render_cpu(self):
-
-        return self.renderer.render
-
-    # Store one rendering step for all cpus
-    def store_rendering(self, rnd):
-
-        self.renderer.store(rnd)
-
-    # Finish rendering process
-    def finish_rendering(self, path, cpu):
-
-        self.renderer.finish(path, self.counter.ep, cpu)
-
     # Test buffer loop criterion
     def test_buff_loop(self):
 
         return (self.loc_buff.size < self.buff_size-1)
 
-    # Test episode loop criterion
-    def test_ep_loop(self):
-
-        return self.counter.test_ep_loop()
-
-    # Update score
-    def update_score(self, rwd):
-
-        return self.counter.update_score(rwd)
-
-    # Update step
-    def update_step(self):
-
-        return self.counter.update_step()
-
-    def reset_eps(self, path, done):
+    # Finish if some episodes are done
+    def finish_episodes(self, path, done):
 
         # Loop over environments and finalize/reset
         for cpu in range(self.n_cpu):
@@ -272,3 +193,103 @@ class ppo:
         end = '\n'
         if (self.counter.ep < self.counter.n_ep): end = '\r'
         print('# Ep #'+str(self.counter.ep)+', avg score = '+str(avg)+'      ', end=end)
+
+    ################################
+    ### Actor/critic wrappings
+    ################################
+
+    # Training function for actor
+    def train_actor(self, obs, adv, act):
+
+        outputs          = self.actor.train(obs, adv, act,
+                                            self.pol_clip,
+                                            self.entropy_coef)
+        self.actor_loss  = outputs[0]
+        self.kl_div      = outputs[1]
+        self.actor_gnorm = outputs[2]
+        self.entropy     = outputs[3]
+
+    # Training function for critic
+    def train_critic(self, obs, tgt, size):
+
+        outputs           = self.critic.train(obs, tgt, size)
+        self.critic_loss  = outputs[0]
+        self.critic_gnorm = outputs[1]
+
+    ################################
+    ### Local buffer wrappings
+    ################################
+
+    # Reset local buffer
+    def reset_buff(self):
+
+        self.loc_buff.reset()
+
+    # Store transition in local buffer
+    def store_transition(self, obs, nxt, act, rwd, trm):
+
+        self.loc_buff.store(obs, nxt, act, rwd, trm)
+
+    ################################
+    ### Report wrappings
+    ################################
+
+    # Store data in report
+    def store_report(self, cpu):
+
+        self.report.append(episode      = self.counter.ep,
+                           score        = self.counter.score[cpu],
+                           length       = self.counter.ep_step[cpu],
+                           actor_loss   = self.actor_loss,
+                           critic_loss  = self.critic_loss,
+                           entropy      = self.entropy,
+                           actor_gnorm  = self.actor_gnorm,
+                           critic_gnorm = self.critic_gnorm,
+                           kl_div       = self.kl_div,
+                           actor_lr     = self.actor.get_lr(),
+                           critic_lr    = self.critic.get_lr())
+
+    # Write learning data report
+    def write_report(self, path, run):
+
+        # Set filename with method name and run number
+        filename = path+'/'+self.name+'_'+str(run)+'.dat'
+        self.report.write(filename)
+
+    ################################
+    ### Renderer wrappings
+    ################################
+
+    # Return rendering selection array
+    def get_render_cpu(self):
+
+        return self.renderer.render
+
+    # Store one rendering step for all cpus
+    def store_rendering(self, rnd):
+
+        self.renderer.store(rnd)
+
+    # Finish rendering process
+    def finish_rendering(self, path, cpu):
+
+        self.renderer.finish(path, self.counter.ep, cpu)
+
+    ################################
+    ### Counter wrappings
+    ################################
+
+    # Test episode loop criterion
+    def test_ep_loop(self):
+
+        return self.counter.test_ep_loop()
+
+    # Update score
+    def update_score(self, rwd):
+
+        return self.counter.update_score(rwd)
+
+    # Update step
+    def update_step(self):
+
+        return self.counter.update_step()

@@ -45,8 +45,8 @@ def launch_training(params, path, run):
             rnd = env.render(agent.get_render_cpu())
             agent.store_rendering(rnd)
 
-            # Reset if episode is done
-            agent.reset_eps(path, done)
+            # Finish if some episodes are done
+            agent.finish_episodes(path, done)
 
             # Reset only finished environments
             env.reset(done, obs)
