@@ -51,7 +51,8 @@ def launch_training(params, path, run):
             # Reset only finished environments
             env.reset(done, obs)
 
-        # Train agent
+        # Prepare training and train agent
+        agent.finalize_buffers()
         agent.train()
 
         # Write report data to file

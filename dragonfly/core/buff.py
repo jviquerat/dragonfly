@@ -52,7 +52,7 @@ class loc_buff:
         self.trm.append(trm)
         self.size += self.n_cpu
 
-    def finalize_buffers(self):
+    def fix_trm_buffer(self):
         for cpu in range(self.n_cpu):
             if (self.trm.buff[cpu][-1] == 0):
                 self.trm.buff[cpu][-1] = 2
@@ -70,12 +70,13 @@ class loc_buff:
 ### Global parallel buffer class, use to store
 ### all data since the beginning of learning
 class glb_buff:
-    def __init__(self, n_cpu, obs_dim, act_dim, n_buff, buff_size):
+    def __init__(self, n_cpu, obs_dim, act_dim, n_buff, buff_size, btc_frac):
         self.n_cpu     = n_cpu
         self.obs_dim   = obs_dim
         self.act_dim   = act_dim
         self.n_buff    = n_buff
         self.buff_size = buff_size
+        self.btc_frac  = btc_frac
         self.size      = 0
         self.reset()
 

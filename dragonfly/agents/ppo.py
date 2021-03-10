@@ -48,9 +48,9 @@ class ppo:
                              lr       = params.critic_lr)
 
         # Initialize buffers
-        self.loc_buff = loc_buff(self.n_cpu,  self.obs_dim, self.act_dim)
-        self.glb_buff = glb_buff(self.n_cpu,  self.obs_dim, self.act_dim,
-                                 self.n_buff, self.buff_size)
+        self.loc_buff = loc_buff(self.n_cpu,  self.obs_dim,   self.act_dim)
+        self.glb_buff = glb_buff(self.n_cpu,  self.obs_dim,   self.act_dim,
+                                 self.n_buff, self.buff_size, self.btc_frac)
 
         # Initialize learning data report
         self.report   = report()
@@ -78,14 +78,11 @@ class ppo:
 
         return act
 
-    # Training
-    def train(self):
+    # Finalize buffers before training
+    def finalize_buffers(self):
 
         # Handle fixed-size buffer termination
-        self.loc_buff.finalize_buffers()
-
-        # Save actor weights
-        self.actor.save_weights()
+        self.loc_buff.fix_trm_buffer()
 
         # Retrieve serialized arrays
         obs, nxt, act, rwd, trm = self.loc_buff.serialize()
@@ -103,6 +100,12 @@ class ppo:
 
         # Store in global buffers
         self.glb_buff.store(obs, adv, tgt, act)
+
+    # Training
+    def train(self):
+
+        # Save actor weights
+        self.actor.save_weights()
 
         # Train actor and critic
         for epoch in range(self.n_epochs):
