@@ -1,18 +1,11 @@
 # Generic imports
 import time
-
-# Custom imports
-from dragonfly.agents.ppo    import *
-from dragonfly.envs.par_envs import *
+import numpy as np
 
 ########################
 # Process training
 ########################
-def launch_training(params, path, run):
-
-    # Declare environement and agent
-    env   = par_envs(params.env_name, params.n_cpu, path)
-    agent = ppo(env.act_dim, env.obs_dim, params)
+def launch_training(params, path, run, env, agent):
 
     # Reset environment
     obs = env.reset_all()
