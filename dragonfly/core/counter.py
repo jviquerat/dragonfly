@@ -11,9 +11,13 @@ class counter:
         # Initialize
         self.n_cpu   = n_cpu
         self.n_ep    = n_ep
+        self.reset()
+
+    # Reset
+    def reset(self):
         self.ep      =  0
-        self.ep_step = [0     for _ in range(n_cpu)]
-        self.score   = [0.0   for _ in range(n_cpu)]
+        self.ep_step = [0     for _ in range(self.n_cpu)]
+        self.score   = [0.0   for _ in range(self.n_cpu)]
 
     # Test episode loop
     def test_ep_loop(self):

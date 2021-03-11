@@ -12,8 +12,12 @@ class renderer:
         # Initialize
         self.n_cpu        = n_cpu
         self.render_every = render_every
-        self.rgb          = [[]    for _ in range(n_cpu)]
-        self.render       = [False for _ in range(n_cpu)]
+        self.reset()
+
+    # Reset
+    def reset(self):
+        self.rgb          = [[]    for _ in range(self.n_cpu)]
+        self.render       = [False for _ in range(self.n_cpu)]
 
     # Store one rendering step for all cpus
     def store(self, rnd):

@@ -6,6 +6,11 @@ import numpy as np
 class report:
     def __init__(self):
 
+        self.reset()
+
+    # Reset
+    def reset(self):
+
         # Initialize empty arrays
         self.episode      = []
         self.step         = []
