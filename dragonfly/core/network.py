@@ -58,4 +58,4 @@ class network(Model):
     # Reset weights
     def reset(self):
 
-        self.net.set_weights(self.init_weights)
+        self.set_weights(self.init_weights)

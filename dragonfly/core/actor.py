@@ -150,4 +150,4 @@ class actor():
 
         self.net.reset()
         self.opt.reset()
-        if (self.pol_type == "ppo"): self.pnet.reset()
+        if (self.loss == "ppo"): self.pnet.reset()

@@ -33,4 +33,5 @@ class optimizer():
     # Reset weights
     def reset(self):
 
-        self.opt.set_weights(self.init_weights)
+        pass
+        #self.opt.set_weights(self.init_weights)

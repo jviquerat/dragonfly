@@ -53,6 +53,3 @@ def launch_training(params, path, run, env, agent):
 
     # Last printing
     agent.print_episode()
-
-    # Close environments
-    #env.close()

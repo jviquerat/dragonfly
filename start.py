@@ -44,12 +44,14 @@ if __name__ == '__main__':
 
     # Declare environements and agent
     env = par_envs(pms.env_name, pms.n_cpu, path)
+    agent = ppo(env.act_dim, env.obs_dim, pms)
 
     # Run
     for run in range(pms.n_avg):
         print('### Avg run #'+str(run))
         start_time = time.time()
-        agent = ppo(env.act_dim, env.obs_dim, pms)
+        #agent = ppo(env.act_dim, env.obs_dim, pms)
+        agent.reset()
         launch_training(pms, path, run, env, agent)
         print("--- %s seconds ---" % (time.time() - start_time))
         filename = path+'/ppo_'+str(run)+'.dat'
