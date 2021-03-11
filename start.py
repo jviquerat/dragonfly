@@ -42,19 +42,21 @@ if __name__ == '__main__':
     n_fields = 9
     averager = data_avg(n_fields, pms.n_ep, pms.n_avg)
 
-    # Declare environement and agent
-
+    # Declare environements and agent
+    env = par_envs(pms.env_name, pms.n_cpu, path)
 
     # Run
     for run in range(pms.n_avg):
         print('### Avg run #'+str(run))
         start_time = time.time()
-        env   = par_envs(pms.env_name, pms.n_cpu, path)
         agent = ppo(env.act_dim, env.obs_dim, pms)
         launch_training(pms, path, run, env, agent)
         print("--- %s seconds ---" % (time.time() - start_time))
         filename = path+'/ppo_'+str(run)+'.dat'
         averager.store(filename, run)
+
+    # Close environments
+    env.close()
 
     # Write to file
     filename  = path+'/ppo_avg.dat'

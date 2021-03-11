@@ -55,4 +55,4 @@ def launch_training(params, path, run, env, agent):
     agent.print_episode()
 
     # Close environments
-    env.close()
+    #env.close()
