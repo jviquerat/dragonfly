@@ -24,9 +24,6 @@ if __name__ == '__main__':
     parser = json_parser()
     pms    = parser.read(json_file)
 
-    # Storage arrays
-    averager = data_avg(9, pms.n_ep, pms.n_avg)
-
     # Create paths for results and open repositories
     res_path = 'results'
     t         = time.localtime()
@@ -39,6 +36,11 @@ if __name__ == '__main__':
     if (not os.path.exists(path)):
         os.makedirs(path)
 
+    # Intialize averager
+    n_fields = 9
+    averager = data_avg(n_fields, pms.n_ep, pms.n_avg)
+
+    # Run
     for run in range(pms.n_avg):
         print('### Avg run #'+str(run))
         start_time = time.time()
@@ -47,22 +49,9 @@ if __name__ == '__main__':
         filename = path+'/ppo_'+str(run)+'.dat'
         averager.store(filename, run)
 
-        #f           = np.loadtxt(path+'/ppo_'+str(i)+'.dat')
-        #ep          = f[:pms.n_ep,0]
-        #for j in range(n_data):
-        #    data[i,:,j] = f[:pms.n_ep,j+1]
-
     # Write to file
-    file_out  = path+'/ppo_avg.dat'
-    array     = np.vstack(ep)
-    for j in range(n_data):
-        avg   = np.mean(data[:,:,j], axis=0)
-        std   = np.std (data[:,:,j], axis=0)
-        p     = avg + std
-        m     = avg - std
-        array = np.hstack((array,np.vstack(avg)))
-        array = np.hstack((array,np.vstack(p)))
-        array = np.hstack((array,np.vstack(m)))
+    filename  = path+'/ppo_avg.dat'
+    averager.average(filename)
 
-    np.savetxt(file_out, array, fmt='%.5e')
+    # Plot
     os.system('gnuplot -c dragonfly/plot/plot.gnu '+path)

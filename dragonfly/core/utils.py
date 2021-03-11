@@ -34,6 +34,19 @@ class data_avg():
 
     def store(self, filename, run):
         f  = np.loadtxt(filename)
-        ep = f[:self.n_ep, 0]
+        self.ep = f[:self.n_ep, 0]
         for field in range(self.n_fields):
             self.data[run,:,field] = f[:self.n_ep,field+1]
+
+    def average(self, filename):
+        array     = np.vstack(self.ep)
+        for field in range(self.n_fields):
+            avg   = np.mean(self.data[:,:,field], axis=0)
+            std   = np.std (self.data[:,:,field], axis=0)
+            p     = avg + std
+            m     = avg - std
+            array = np.hstack((array,np.vstack(avg)))
+            array = np.hstack((array,np.vstack(p)))
+            array = np.hstack((array,np.vstack(m)))
+
+        np.savetxt(filename, array, fmt='%.5e')
