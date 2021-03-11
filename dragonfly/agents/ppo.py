@@ -3,6 +3,7 @@ import math
 import numpy as np
 
 # Custom imports
+from dragonfly.agents.agent  import *
 from dragonfly.core.actor    import *
 from dragonfly.core.critic   import *
 from dragonfly.core.buff     import *
@@ -13,8 +14,9 @@ from dragonfly.core.counter  import *
 
 ###############################################
 ### A discrete PPO agent
-class ppo:
+class ppo(agent):
     def __init__(self, act_dim, obs_dim, params):
+        super().__init__()
 
         # Initialize from arguments
         self.name         = 'ppo'
@@ -34,7 +36,7 @@ class ppo:
         self.entropy_coef = params.entropy
         self.gamma        = params.gamma
         self.gae_lambda   = params.gae_lambda
-        self.norm_adv     = params.norm_adv
+        self.adv_norm     = params.adv_norm
 
         # Build networks
         self.actor  = actor (act_dim  = self.act_dim,
@@ -97,7 +99,7 @@ class ppo:
         tgt, adv = compute_adv(rwd, crt_val, nxt_val, trm,
                                gamma      = self.gamma,
                                gae_lambda = self.gae_lambda,
-                               norm_adv   = self.norm_adv,
+                               adv_norm   = self.adv_norm,
                                adv_clip   = self.adv_clip)
 
         # Store in global buffers

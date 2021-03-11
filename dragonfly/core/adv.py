@@ -9,18 +9,18 @@ import numpy as np
 ### trm        : array of terminal values
 ### gamma      : discount factor
 ### gae_lambda : discount for GAE computation
-### norm_adv   : whiten advantage array if true
+### adv_norm   : whiten advantage array if true
 ### adv_clip   : clip   advantage array if true
 def compute_adv(rwd, val, nxt, trm,
                 gamma      = None,
                 gae_lambda = None,
-                norm_adv   = None,
-                clip_adv   = None):
+                adv_norm   = None,
+                adv_clip   = None):
 
     # Handle arguments
     if (gamma      is None): gamma      = 0.99
     if (gae_lambda is None): gae_lambda = 0.99
-    if (norm_adv   is None): norm_adv   = True
+    if (adv_norm   is None): adv_norm   = True
     if (adv_clip   is None): adv_clip   = True
 
     # Handle mask from termination signals
@@ -52,9 +52,9 @@ def compute_adv(rwd, val, nxt, trm,
     tgt += val
 
     # Normalize
-    if norm_adv: adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-5)
+    if adv_norm: adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-5)
 
     # Clip if required
-    if clip_adv: adv = np.maximum(adv, 0.0)
+    if adv_norm: adv = np.maximum(adv, 0.0)
 
     return tgt, adv

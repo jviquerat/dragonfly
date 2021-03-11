@@ -18,7 +18,7 @@
     "entropy": 0.01,
     "gamma": 0.99,
     "gae_lambda": 0.99,
-    "norm_adv": true,
+    "adv_norm": true,
     "adv_clip": true,
     "bootstrap": true
 }
