@@ -4,6 +4,8 @@ import numpy as np
 
 ###############################################
 ### Renderer, used to store rendering returns from gym envs
+### n_cpu        : nb of parallel environments
+### renver_every : rendering frequency (in timesteps)
 class renderer:
     def __init__(self, n_cpu, render_every):
 

@@ -3,6 +3,8 @@ import numpy as np
 
 ###############################################
 ### Counter, a small util to count episode steps and scores
+### n_cpu : nb of parallel environements
+### n_ep  : max nb of episodes in a run
 class counter:
     def __init__(self, n_cpu, n_ep):
 

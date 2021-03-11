@@ -3,11 +3,19 @@ import numpy as np
 
 ###############################################
 ### Generic routine for advantage computation
+### rwd        : reward array
+### val        : value array
+### nxt        : value array shifted by one timestep
+### trm        : array of terminal values
+### gamma      : discount factor
+### gae_lambda : discount for GAE computation
+### norm_adv   : whiten advantage array if true
+### adv_clip   : clip   advantage array if true
 def compute_adv(rwd, val, nxt, trm,
                 gamma      = None,
                 gae_lambda = None,
                 norm_adv   = None,
-                adv_clip   = None):
+                clip_adv   = None):
 
     # Handle arguments
     if (gamma      is None): gamma      = 0.99
@@ -47,6 +55,6 @@ def compute_adv(rwd, val, nxt, trm,
     if norm_adv: adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-5)
 
     # Clip if required
-    if adv_clip: adv = np.maximum(adv, 0.0)
+    if clip_adv: adv = np.maximum(adv, 0.0)
 
     return tgt, adv

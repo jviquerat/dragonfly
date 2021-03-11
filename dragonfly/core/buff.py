@@ -6,6 +6,8 @@ import tensorflow as tf
 ###############################################
 ### Parallel buffer class, used to temporarily
 ### store data from parallel environments
+### n_cpu : nb of parallel environments
+### dim   : dimension of array
 class par_buff:
     def __init__(self, n_cpu, dim):
         self.n_cpu = n_cpu
@@ -29,6 +31,10 @@ class par_buff:
 ###############################################
 ### Local parallel buffer class, used to store
 ### data between two updates of the agent
+### n_cpu     : nb of parallel environments
+### obs_dim   : dimension of observations
+### act_dim   : dimension of actions
+### buff_size : max buffer size
 class loc_buff:
     def __init__(self, n_cpu, obs_dim, act_dim, buff_size):
         self.n_cpu   = n_cpu
@@ -75,6 +81,12 @@ class loc_buff:
 ### all data since the beginning of learning
 ### It is also responsible for providing buffer
 ### indices during training procedure
+### n_cpu     : nb of parallel environments
+### obs_dim   : dimension of observations
+### act_dim   : dimension of actions
+### n_buff    : nb of buffers from history to return
+### buff_size : max buffer size
+### btc_frac  : relative size of a batch compared to buffer (in [0,1])
 class glb_buff:
     def __init__(self, n_cpu, obs_dim, act_dim, n_buff, buff_size, btc_frac):
         self.n_cpu     = n_cpu

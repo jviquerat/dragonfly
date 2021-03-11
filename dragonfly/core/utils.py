@@ -22,6 +22,9 @@ class json_parser():
 ###############################################
 ### Data averager class
 ### Used to compute avg+/-std of drl-related fields
+### n_fields : nb of fields to store/average
+### n_ep     : nb of episodes per run
+### n_avg    : nb of runs to average
 class data_avg():
     def __init__(self, n_fields, n_ep, n_avg):
         self.n_ep = n_ep
