@@ -12,21 +12,18 @@ import tensorflow.keras              as     tk
 from   tensorflow.keras              import Model
 from   tensorflow.keras.layers       import Dense
 from   tensorflow.keras.initializers import Orthogonal
-from   tensorflow.keras.optimizers   import Nadam
 
 ###############################################
 ### Network class
 ### inp_dim  : dimension of input  layer
 ### out_dim  : dimension of output layer
 ### arch     : architecture of densely connected network
-### lr       : learning rate
-### grd_clip : gradient clipping value
 ### hid_init : hidden layer kernel initializer
 ### fnl_init : final  layer kernel initializer
 ### hid_act  : hidden layer activation function
 ### fnl_act  : final  layer activation function
 class network(Model):
-    def __init__(self, inp_dim, out_dim, arch, lr, grd_clip,
+    def __init__(self, inp_dim, out_dim, arch,
                  hid_init, fnl_init, hid_act, fnl_act):
         super(network, self).__init__()
 
@@ -46,9 +43,8 @@ class network(Model):
         # Initialize weights
         dummy = self.call(tf.ones([1,inp_dim]))
 
-        # Define optimizer
-        self.opt = tk.optimizers.Nadam(lr       = lr,
-                                       clipnorm = grd_clip)
+        # Save initial weights
+        self.init_weights = self.get_weights()
 
     # Network forward pass
     def call(self, var):
@@ -58,3 +54,8 @@ class network(Model):
             var = self.net[layer](var)
 
         return var
+
+    # Reset weights
+    def reset(self):
+
+        self.net.set_weights(self.init_weights)

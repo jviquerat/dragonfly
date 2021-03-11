@@ -2,7 +2,8 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.core.network import *
+from dragonfly.core.network   import *
+from dragonfly.core.optimizer import *
 
 ###############################################
 ### Critic class
@@ -44,12 +45,11 @@ class critic():
         self.obs_dim = obs_dim
 
         # Define network
-        self.net  = network(obs_dim, dim, arch, lr, grd_clip,
+        self.net  = network(obs_dim, dim, arch,
                             hid_init, fnl_init, hid_act, fnl_act)
 
         # Define optimizer
-        self.opt = Nadam(lr       = lr,
-                         clipnorm = grd_clip)
+        self.opt = optimizer(lr, grd_clip)
 
     # Network forward pass
     def call(self, state):
@@ -76,7 +76,7 @@ class critic():
     # Get current learning rate
     def get_lr(self):
 
-        return self.opt._decayed_lr(tf.float32)
+        return self.opt.get_lr()
 
     # MSE loss function for critic
     @tf.function
@@ -93,6 +93,12 @@ class critic():
             crt_var     = self.net.trainable_variables
             grads       = tape.gradient(loss, crt_var)
             norm        = tf.linalg.global_norm(grads)
-        self.opt.apply_gradients(zip(grads,crt_var))
+        self.opt.apply_grads(zip(grads,crt_var))
 
         return loss, norm
+
+    # Reset
+    def reset(self):
+
+        self.net.reset()
+        self.opt.reset()

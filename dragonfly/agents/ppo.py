@@ -68,6 +68,16 @@ class ppo(agent):
         # Initialize inner temporary buffer
         self.init_tmp_data()
 
+    # # Reset
+    # def reset(self):
+    #     self.actor.reset()
+    #     self.critic.reset()
+    #     self.loc_buff.reset()
+    #     self.glb_buff.reset()
+    #     self.report.reset()
+    #     self.renderer.reset()
+    #     self.counter.reset()
+
     # Get actions
     def get_actions(self, observations):
 

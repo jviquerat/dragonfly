@@ -2,8 +2,9 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.core.network import *
-from dragonfly.core.policy  import *
+from dragonfly.core.network   import *
+from dragonfly.core.optimizer import *
+from dragonfly.core.policy    import *
 
 ###############################################
 ### Actor class
@@ -50,21 +51,18 @@ class actor():
         self.pol     = policy(pol_type, act_dim)
 
         # Define and init network
-        self.net = network(obs_dim, self.pol.dim, arch, lr,
-                           grd_clip, hid_init, fnl_init,
-                           hid_act, fnl_act)
+        self.net = network(obs_dim, self.pol.dim, arch,
+                           hid_init, fnl_init, hid_act, fnl_act)
+
+        # Define optimizer
+        self.opt = optimizer(lr, grd_clip)
 
         # Define old network for PPO loss
         if (loss == "ppo"):
-            self.pnet = network(obs_dim, self.pol.dim, arch, lr,
-                                grd_clip, hid_init, fnl_init,
-                                hid_act, fnl_act)
+            self.pnet = network(obs_dim, self.pol.dim, arch,
+                                hid_init, fnl_init, hid_act, fnl_act)
             self.save_weights()
             self.set_weights()
-
-        # Define optimizer
-        self.opt = Nadam(lr       = lr,
-                         clipnorm = grd_clip)
 
     # Network forward pass
     def call(self, state):
@@ -102,7 +100,7 @@ class actor():
     # Get current learning rate
     def get_lr(self):
 
-        return self.opt._decayed_lr(tf.float32)
+        return self.opt.get_lr()
 
     # PPO loss function for actor
     @tf.function
@@ -143,6 +141,13 @@ class actor():
             act_var = self.net.trainable_variables
             grads   = tape.gradient(loss, act_var)
             norm    = tf.linalg.global_norm(grads)
-        self.opt.apply_gradients(zip(grads,act_var))
+        self.opt.apply_grads(zip(grads,act_var))
 
         return loss, kl, norm, entropy
+
+    # Reset
+    def reset(self):
+
+        self.net.reset()
+        self.opt.reset()
+        if (self.pol_type == "ppo"): self.pnet.reset()
