@@ -1,16 +1,5 @@
-# Generic imports
-import math
-import numpy as np
-
 # Custom imports
 from dragonfly.agents.agent   import *
-#from dragonfly.core.actor     import *
-#from dragonfly.core.critic    import *
-#from dragonfly.core.advantage import *
-#from dragonfly.utils.buff     import *
-#from dragonfly.utils.report   import *
-#from dragonfly.utils.renderer import *
-#from dragonfly.utils.counter  import *
 
 ###############################################
 ### PPO agent
