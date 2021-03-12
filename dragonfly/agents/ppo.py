@@ -4,13 +4,13 @@ import numpy as np
 
 # Custom imports
 #from dragonfly.agents.agent  import *
-from dragonfly.core.actor    import *
-from dragonfly.core.critic   import *
-from dragonfly.core.buff     import *
-from dragonfly.core.report   import *
-from dragonfly.core.adv      import *
-from dragonfly.core.renderer import *
-from dragonfly.core.counter  import *
+from dragonfly.core.actor     import *
+from dragonfly.core.critic    import *
+from dragonfly.core.advantage import *
+from dragonfly.utils.buff     import *
+from dragonfly.utils.report   import *
+from dragonfly.utils.renderer import *
+from dragonfly.utils.counter  import *
 
 ###############################################
 ### A discrete PPO agent
@@ -107,11 +107,11 @@ class ppo():
         nxt_val = self.critic.get_value(nxt)
 
         # Compute advantages
-        tgt, adv = compute_adv(rwd, crt_val, nxt_val, trm,
-                               gamma      = self.gamma,
-                               gae_lambda = self.gae_lambda,
-                               adv_norm   = self.adv_norm,
-                               adv_clip   = self.adv_clip)
+        tgt, adv = advantage(rwd, crt_val, nxt_val, trm,
+                             gamma      = self.gamma,
+                             gae_lambda = self.gae_lambda,
+                             adv_norm   = self.adv_norm,
+                             adv_clip   = self.adv_clip)
 
         # Store in global buffers
         self.glb_buff.store(obs, adv, tgt, act)

@@ -11,11 +11,11 @@ import numpy as np
 ### gae_lambda : discount for GAE computation
 ### adv_norm   : whiten advantage array if true
 ### adv_clip   : clip   advantage array if true
-def compute_adv(rwd, val, nxt, trm,
-                gamma      = None,
-                gae_lambda = None,
-                adv_norm   = None,
-                adv_clip   = None):
+def advantage(rwd, val, nxt, trm,
+              gamma      = None,
+              gae_lambda = None,
+              adv_norm   = None,
+              adv_clip   = None):
 
     # Handle arguments
     if (gamma      is None): gamma      = 0.99

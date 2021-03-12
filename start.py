@@ -6,7 +6,8 @@ import numpy as np
 
 # Custom imports
 from dragonfly.core.training  import *
-from dragonfly.core.utils     import *
+from dragonfly.utils.json     import *
+from dragonfly.utils.data     import *
 from dragonfly.agents.factory import *
 from dragonfly.envs.par_envs  import *
 
