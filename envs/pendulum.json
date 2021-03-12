@@ -1,7 +1,7 @@
 {
-    "env_name": "CartPole-v0",
+    "env_name": "Pendulum-v0",
     "agent": "ppo",
-    "pol_type": "multinomial",
+    "pol_type": "normal",
     "ep_end": 200,
     "n_ep": 300,
     "n_avg": 2,

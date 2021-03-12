@@ -1,5 +1,7 @@
 {
     "env_name": "gym_lorenz:lorenz-stabilizer-easy-v0",
+    "agent": "ppo",
+    "pol_type": "multinomial",
     "ep_end": 25,
     "n_ep": 1000,
     "n_avg": 5,

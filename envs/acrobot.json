@@ -1,5 +1,7 @@
 {
     "env_name": "Acrobot-v1",
+    "agent": "ppo",
+    "pol_type": "multinomial",
     "ep_end": 200,
     "n_ep": 500,
     "n_avg": 3,
