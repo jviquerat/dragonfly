@@ -5,10 +5,10 @@ import time
 import numpy as np
 
 # Custom imports
-from dragonfly.core.training import *
-from dragonfly.core.utils    import *
-from dragonfly.agents.ppo    import *
-from dragonfly.envs.par_envs import *
+from dragonfly.core.training  import *
+from dragonfly.core.utils     import *
+from dragonfly.agents.factory import *
+from dragonfly.envs.par_envs  import *
 
 ########################
 # Average training over multiple runs
@@ -40,7 +40,10 @@ if __name__ == '__main__':
 
     # Declare environement
     env   = par_envs(pms.env_name, pms.n_cpu, path)
-    agent = ppo(env.act_dim, env.obs_dim, pms)
+    agent = agent_factory.create(pms.agent,
+                                 act_dim = env.act_dim,
+                                 obs_dim = env.obs_dim,
+                                 pms     = pms)
 
     # Intialize averager
     averager = data_avg(agent.n_vars, pms.n_ep, pms.n_avg)
@@ -52,14 +55,14 @@ if __name__ == '__main__':
         agent.reset()
         launch_training(pms, path, run, env, agent)
         print("--- %s seconds ---" % (time.time() - start_time))
-        filename = path+'/ppo_'+str(run)+'.dat'
+        filename = path+'/'+pms.agent+'_'+str(run)+'.dat'
         averager.store(filename, run)
 
     # Close environments
     env.close()
 
     # Write to file
-    filename  = path+'/ppo_avg.dat'
+    filename = path+'/'+pms.agent+'_avg.dat'
     averager.average(filename)
 
     # Plot

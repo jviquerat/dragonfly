@@ -2,9 +2,9 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.core.network   import *
-from dragonfly.core.optimizer import *
-from dragonfly.core.policy    import *
+from dragonfly.core.network    import *
+from dragonfly.core.optimizer  import *
+from dragonfly.policies.policy import *
 
 ###############################################
 ### Actor class

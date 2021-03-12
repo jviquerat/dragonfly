@@ -1,6 +1,8 @@
 # Generic imports
-import math
-import numpy as np
+#import math
+#import numpy as np
+
+
 
 # Custom imports
 # from dragonfly.core.actor    import *
@@ -13,11 +15,11 @@ import numpy as np
 
 ###############################################
 ### A generic agent
-class agent:
-    def __init__(self):
+# class agent:
+#     def __init__(self):
 
-        # Initialize from arguments
-        self.name         = 'agent'
+#         # Initialize from arguments
+#         self.name         = 'agent'
     #     self.act_dim      = act_dim
     #     self.obs_dim      = obs_dim
     #     self.n_cpu        = params.n_cpu

@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 # Custom imports
-from dragonfly.agents.agent  import *
+#from dragonfly.agents.agent  import *
 from dragonfly.core.actor    import *
 from dragonfly.core.critic   import *
 from dragonfly.core.buff     import *
@@ -14,41 +14,41 @@ from dragonfly.core.counter  import *
 
 ###############################################
 ### A discrete PPO agent
-class ppo(agent):
-    def __init__(self, act_dim, obs_dim, params):
-        super().__init__()
+class ppo():
+    def __init__(self, act_dim, obs_dim, pms):
+        #super().__init__()
 
         # Initialize from arguments
         self.name         = 'ppo'
         self.n_vars       = 9
         self.act_dim      = act_dim
         self.obs_dim      = obs_dim
-        self.n_cpu        = params.n_cpu
-        self.ep_end       = params.ep_end
+        self.n_cpu        = pms.n_cpu
+        self.ep_end       = pms.ep_end
 
-        self.n_buff       = params.n_buff
-        self.buff_size    = params.buff_size
-        self.btc_frac     = params.batch_frac
-        self.n_epochs     = params.n_epochs
+        self.n_buff       = pms.n_buff
+        self.buff_size    = pms.buff_size
+        self.btc_frac     = pms.batch_frac
+        self.n_epochs     = pms.n_epochs
 
-        self.pol_clip     = params.pol_clip
-        self.adv_clip     = params.adv_clip
-        self.bootstrap    = params.bootstrap
-        self.entropy_coef = params.entropy
-        self.gamma        = params.gamma
-        self.gae_lambda   = params.gae_lambda
-        self.adv_norm     = params.adv_norm
+        self.pol_clip     = pms.pol_clip
+        self.adv_clip     = pms.adv_clip
+        self.bootstrap    = pms.bootstrap
+        self.entropy_coef = pms.entropy
+        self.gamma        = pms.gamma
+        self.gae_lambda   = pms.gae_lambda
+        self.adv_norm     = pms.adv_norm
 
         # Build networks
         self.actor  = actor (act_dim  = self.act_dim,
                              obs_dim  = self.obs_dim,
-                             arch     = params.actor_arch,
-                             lr       = params.actor_lr,
-                             grd_clip = params.grd_clip,
-                             pol_type = "multinomial")
+                             arch     = pms.actor_arch,
+                             lr       = pms.actor_lr,
+                             grd_clip = pms.grd_clip,
+                             pol_type = pms.pol_type)
         self.critic = critic(obs_dim  = self.obs_dim,
-                             arch     = params.critic_arch,
-                             lr       = params.critic_lr)
+                             arch     = pms.critic_arch,
+                             lr       = pms.critic_lr)
 
         # Initialize buffers
         self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
@@ -61,10 +61,10 @@ class ppo(agent):
         self.report   = report()
 
         # Initialize renderer
-        self.renderer = renderer(self.n_cpu, params.render_every)
+        self.renderer = renderer(self.n_cpu, pms.render_every)
 
         # Initialize counter
-        self.counter  = counter(self.n_cpu, params.n_ep)
+        self.counter  = counter(self.n_cpu, pms.n_ep)
 
         # Initialize inner temporary buffer
         self.init_tmp_data()

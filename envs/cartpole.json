@@ -1,4 +1,6 @@
 {
+    "agent": "ppo",
+    "pol_type": "multinomial",
     "env_name": "CartPole-v0",
     "ep_end": 200,
     "n_ep": 300,
