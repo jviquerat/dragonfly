@@ -1,6 +1,6 @@
-# ppo_discrete
+# dragonfly
 
-This repository contains a PPO implementation for discrete environments.   
+Dragonfly is a buffer-based DRL research code. It follows a basic level of modularity to make new developments quick and easy.
 It does **not** strictly follows the original implementation from Schulman *et al.* (see https://arxiv.org/abs/1707.06347).  
 
 The current implementation contains several variations compared to the original paper, such as:
