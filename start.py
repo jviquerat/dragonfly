@@ -38,13 +38,12 @@ if __name__ == '__main__':
     if (not os.path.exists(path)):
         os.makedirs(path)
 
-    # Intialize averager
-    n_fields = 9
-    averager = data_avg(n_fields, pms.n_ep, pms.n_avg)
-
     # Declare environement
     env   = par_envs(pms.env_name, pms.n_cpu, path)
     agent = ppo(env.act_dim, env.obs_dim, pms)
+
+    # Intialize averager
+    averager = data_avg(agent.n_vars, pms.n_ep, pms.n_avg)
 
     # Run
     for run in range(pms.n_avg):
