@@ -49,7 +49,7 @@ class critic():
                             hid_init, fnl_init, hid_act, fnl_act)
 
         # Define optimizer
-        self.opt = optimizer(lr, grd_clip)
+        self.opt = optimizer(lr, grd_clip, self.net.trainable_weights)
 
     # Network forward pass
     def call(self, state):
@@ -101,4 +101,6 @@ class critic():
     def reset(self):
 
         self.net.reset()
-        self.opt.reset()
+        grad_vars = self.net.trainable_weights
+        self.opt.reset(grad_vars)
+        

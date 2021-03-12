@@ -7,18 +7,23 @@ from   tensorflow.keras.optimizers   import Nadam
 ### lr       : learning rate
 ### grd_clip : gradient clipping value
 class optimizer():
-    def __init__(self, lr, grd_clip):
+    def __init__(self, lr, grd_clip, grad_vars):
 
         # Handle arguments
         self.lr       = lr
         self.grd_clip = grd_clip
 
+        #self.reset(lr, grd_clip, grd_vars)
+
         # Initialize optimizer
         self.opt = Nadam(lr       = lr,
                          clipnorm = grd_clip)
+        zero_grads = [tf.zeros_like(w) for w in grad_vars]
+        self.opt.apply_gradients(zip(zero_grads, grad_vars))
 
         # Save initial weights
         self.init_weights = self.opt.get_weights()
+        self.config       = self.opt.get_config()
 
     # Get current learning rate
     def get_lr(self):
@@ -31,7 +36,15 @@ class optimizer():
         self.opt.apply_gradients(grds)
 
     # Reset weights
-    def reset(self):
+    def reset(self, grad_vars):
 
-        pass
+        # Initialize optimizer
+        #self.opt = Nadam(lr       = self.lr,
+        #                 clipnorm = self.grd_clip)
+        zero_grads = [tf.zeros_like(w) for w in grad_vars]
+        self.opt.apply_gradients(zip(zero_grads, grad_vars))
+        self.opt.set_weights(self.init_weights)
+        self.opt.from_config(self.config)
+
+
         #self.opt.set_weights(self.init_weights)
