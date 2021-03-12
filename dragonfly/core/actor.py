@@ -150,7 +150,4 @@ class actor():
 
         if (self.loss == "ppo"): self.pnet.reset()
         self.net.reset()
-
-        grad_vars = self.net.trainable_weights
-        self.opt.reset(grad_vars)
-        
+        self.opt.reset()

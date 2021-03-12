@@ -43,9 +43,6 @@ if __name__ == '__main__':
     averager = data_avg(n_fields, pms.n_ep, pms.n_avg)
 
     # Declare environement
-    # For now, agent is re-declared at every step of the loop
-    # because of a tf tracing problem : it is very hard to reset
-    # a tf optimizer, and
     env   = par_envs(pms.env_name, pms.n_cpu, path)
     agent = ppo(env.act_dim, env.obs_dim, pms)
 
@@ -53,12 +50,11 @@ if __name__ == '__main__':
     for run in range(pms.n_avg):
         print('### Avg run #'+str(run))
         start_time = time.time()
-        #agent = ppo(env.act_dim, env.obs_dim, pms)
+        agent.reset()
         launch_training(pms, path, run, env, agent)
         print("--- %s seconds ---" % (time.time() - start_time))
         filename = path+'/ppo_'+str(run)+'.dat'
         averager.store(filename, run)
-        agent.reset()
 
     # Close environments
     env.close()

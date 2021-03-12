@@ -101,6 +101,4 @@ class critic():
     def reset(self):
 
         self.net.reset()
-        grad_vars = self.net.trainable_weights
-        self.opt.reset(grad_vars)
-        
+        self.opt.reset()
