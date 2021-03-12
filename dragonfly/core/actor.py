@@ -2,9 +2,9 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.core.network    import *
-from dragonfly.core.optimizer  import *
-from dragonfly.policies.policy import *
+from dragonfly.core.network     import *
+from dragonfly.core.optimizer   import *
+from dragonfly.policies.factory import *
 
 ###############################################
 ### Actor class
@@ -48,7 +48,8 @@ class actor():
         self.loss    = loss
         self.act_dim = act_dim
         self.obs_dim = obs_dim
-        self.pol     = policy(pol_type, act_dim)
+        self.pol     = policy_factory.create(pol_type,
+                                             act_dim = act_dim)
 
         # Define and init network
         self.net = network(obs_dim, self.pol.dim, arch,

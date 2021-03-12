@@ -11,5 +11,5 @@ class agent_factory:
         if (key not in self.agents): raise ValueError(key)
         if (key == "ppo"): return ppo(**kwargs)
 
-# Declare factory and register agents
+# Declare factory
 agent_factory = agent_factory()
