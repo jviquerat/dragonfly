@@ -13,14 +13,6 @@ class critic():
     def __init__(self, obs_dim, pms):
 
         # Handle arguments
-        #if (dim      is None): dim      = 1
-        #if (arch     is None): arch     = [32,32]
-        #if (lr       is None): lr       = 1.0e-3
-        #if (grd_clip is None): grd_clip = 1.0e10
-        #if (hid_init is None): hid_init = Orthogonal(gain=1.0)
-        #if (fnl_init is None): fnl_init = Orthogonal(gain=1.0)
-        #if (hid_act  is None): hid_act  = "tanh"
-        #if (fnl_act  is None): fnl_act  = "linear"
         loss     = "mse"
 
         # Fill structure

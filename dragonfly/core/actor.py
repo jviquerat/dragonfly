@@ -15,17 +15,7 @@ class actor():
     def __init__(self, obs_dim, act_dim, pms):
 
         # Handle arguments
-        #if (pms      is None):
-
-        #if (arch     is None): arch     = [32,32]
-        #if (lr       is None): lr       = 1.0e-3
-        #if (grd_clip is None): grd_clip = 0.1
-        #if (hid_init is None): hid_init = Orthogonal(gain=1.0)
-        #if (fnl_init is None): fnl_init = Orthogonal(gain=0.01)
-        #if (hid_act  is None): hid_act  = "tanh"
-        #if (fnl_act  is None): fnl_act  = "softmax"
         loss     = "ppo"
-        #if (pol_type is None): pol_type = "multinomial"
 
         # Fill structure
         self.loss    = loss
