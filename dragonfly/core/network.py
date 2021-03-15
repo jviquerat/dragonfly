@@ -23,9 +23,24 @@ from   tensorflow.keras.initializers import Orthogonal
 ### hid_act  : hidden layer activation function
 ### fnl_act  : final  layer activation function
 class network(Model):
-    def __init__(self, inp_dim, out_dim, arch,
-                 hid_init, fnl_init, hid_act, fnl_act):
+    def __init__(self, inp_dim, out_dim, pms):
         super(network, self).__init__()
+
+        # Set default values
+        arch     = [32,32]
+        lr       = 1.0e-3
+        hid_init = Orthogonal(gain=1.0)
+        fnl_init = Orthogonal(gain=0.01)
+        hid_actv = "tanh"
+        fnl_actv = "linear"
+
+        # Check inputs
+        if hasattr(pms, "arch"):     arch     = pms.arch
+        if hasattr(pms, "lr"):       lr       = pms.lr
+        if hasattr(pms, "hid_init"): hid_init = pms.hid_init
+        if hasattr(pms, "fnl_init"): fnl_init = pms.fnl_init
+        if hasattr(pms, "hid_actv"): hid_actv = pms.hid_actv
+        if hasattr(pms, "fnl_actv"): fnl_actv = pms.fnl_actv
 
         # Initialize network
         self.net = []
@@ -34,11 +49,11 @@ class network(Model):
         for layer in range(len(arch)):
             self.net.append(Dense(arch[layer],
                                   kernel_initializer = hid_init,
-                                  activation         = hid_act))
+                                  activation         = hid_actv))
         # Define last layer
         self.net.append(Dense(out_dim,
                               kernel_initializer = fnl_init,
-                              activation         = fnl_act))
+                              activation         = fnl_actv))
 
         # Initialize weights
         dummy = self.call(tf.ones([1,inp_dim]))

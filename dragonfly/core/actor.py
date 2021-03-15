@@ -8,62 +8,44 @@ from dragonfly.policies.factory import *
 
 ###############################################
 ### Actor class
-### act_dim  : dimension of output layer
-### obs_dim  : dimension of input  layer
-### arch     : architecture of densely connected network
-### lr       : learning rate
-### grd_clip : gradient clipping value
-### hid_init : hidden layer kernel initializer
-### fnl_init : final  layer kernel initializer
-### hid_act  : hidden layer activation function
-### fnl_act  : final  layer activation function
-### loss     : loss function
-### policy   : output policy
+### act_dim : output dimension
+### obs_dim : input  dimension
+### pms     : parameters
 class actor():
-    def __init__(self,
-                 act_dim,
-                 obs_dim,
-                 arch     = None,
-                 lr       = None,
-                 grd_clip = None,
-                 hid_init = None,
-                 fnl_init = None,
-                 hid_act  = None,
-                 fnl_act  = None,
-                 loss     = None,
-                 pol_type = None):
+    def __init__(self, obs_dim, act_dim, pms):
 
         # Handle arguments
-        if (arch     is None): arch     = [32,32]
-        if (lr       is None): lr       = 1.0e-3
-        if (grd_clip is None): grd_clip = 0.1
-        if (hid_init is None): hid_init = Orthogonal(gain=1.0)
-        if (fnl_init is None): fnl_init = Orthogonal(gain=0.01)
-        if (hid_act  is None): hid_act  = "tanh"
-        if (fnl_act  is None): fnl_act  = "softmax"
-        if (loss     is None): loss     = "ppo"
-        if (pol_type is None): pol_type = "multinomial"
+        #if (pms      is None):
+
+        #if (arch     is None): arch     = [32,32]
+        #if (lr       is None): lr       = 1.0e-3
+        #if (grd_clip is None): grd_clip = 0.1
+        #if (hid_init is None): hid_init = Orthogonal(gain=1.0)
+        #if (fnl_init is None): fnl_init = Orthogonal(gain=0.01)
+        #if (hid_act  is None): hid_act  = "tanh"
+        #if (fnl_act  is None): fnl_act  = "softmax"
+        loss     = "ppo"
+        #if (pol_type is None): pol_type = "multinomial"
 
         # Fill structure
         self.loss    = loss
         self.act_dim = act_dim
         self.obs_dim = obs_dim
-        self.pol     = policy_factory.create(pol_type,
+        self.pol     = policy_factory.create(pms.pol_type,
                                              act_dim = act_dim)
 
         # Define and init network
-        self.net = network(obs_dim, self.pol.dim, arch,
-                           hid_init, fnl_init, hid_act, fnl_act)
+        self.net = network(obs_dim, self.pol.dim, pms)
 
         # Define old network for PPO loss
         if (loss == "ppo"):
-            self.pnet = network(obs_dim, self.pol.dim, arch,
-                                hid_init, fnl_init, hid_act, fnl_act)
+            self.pnet = network(obs_dim, self.pol.dim, pms)
             self.save_weights()
             self.set_weights()
 
         # Define optimizer
-        self.opt = optimizer(lr, grd_clip, self.net.trainable_weights)
+        self.opt = optimizer(pms.lr, pms.grd_clip,
+                             self.net.trainable_weights)
 
     # Network forward pass
     def call(self, state):

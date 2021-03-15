@@ -39,15 +39,8 @@ class ppo():
         self.adv_norm     = pms.adv_norm
 
         # Build networks
-        self.actor  = actor (act_dim  = self.act_dim,
-                             obs_dim  = self.obs_dim,
-                             arch     = pms.actor_arch,
-                             lr       = pms.actor_lr,
-                             grd_clip = pms.grd_clip,
-                             pol_type = pms.pol_type)
-        self.critic = critic(obs_dim  = self.obs_dim,
-                             arch     = pms.critic_arch,
-                             lr       = pms.critic_lr)
+        self.actor  = actor (self.obs_dim, self.act_dim, pms.actor)
+        self.critic = critic(self.obs_dim, pms.critic)
 
         # Initialize buffers
         self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
