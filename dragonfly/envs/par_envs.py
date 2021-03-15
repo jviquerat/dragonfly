@@ -39,36 +39,39 @@ class par_envs:
         self.set_cpus()
 
     # Reset all environments
-    def reset(self):
+    def reset_all(self):
 
         # Send
-        for pipe in self.p_pipes:
-            pipe.send(('reset', None))
+        for cpu in range(self.n_cpu):
+            self.p_pipes[cpu].send(('reset', None))
 
         # Receive
         results = np.array([])
-        for pipe in self.p_pipes:
-            results = np.append(results, pipe.recv())
+        for cpu in range(self.n_cpu):
+            results = np.append(results, self.p_pipes[cpu].recv())
 
         return np.reshape(results, (-1,self.obs_dim))
 
-    # Reset a single environment
-    def reset_single(self, cpu):
+    # Reset based on a done array
+    def reset(self, done, obs):
 
         # Send
-        self.p_pipes[cpu].send(('reset',None))
+        for cpu in range(self.n_cpu):
+            if (done[cpu]):
+                self.p_pipes[cpu].send(('reset', None))
 
         # Receive
-        results = np.array([])
-        results = np.append(results, self.p_pipes[cpu].recv())
-
-        return np.reshape(results, (-1,self.obs_dim))
+        for cpu in range(self.n_cpu):
+            if (done[cpu]):
+                results  = np.array([])
+                results  = np.append(results, self.p_pipes[cpu].recv())
+                obs[cpu] = np.reshape(results, (-1,self.obs_dim))
 
     # Get environment dimensions
     def get_dims(self):
 
         # Send
-        self.p_pipes[0].send(('get_dims',None))
+        self.p_pipes[0].send(('get_dims', None))
 
         # Receive
         results = np.array([])
@@ -82,6 +85,25 @@ class par_envs:
         # Send
         for cpu in range(self.n_cpu):
             self.p_pipes[cpu].send(('set_cpu', [cpu, self.n_cpu]))
+
+    # Render environment
+    def render(self, render):
+
+        # Not all environments will render simultaneously
+        # We use a list to store those that render and those that don't
+        rnd = [[] for _ in range(self.n_cpu)]
+
+        # Send
+        for cpu in range(self.n_cpu):
+            if (render[cpu]):
+                self.p_pipes[cpu].send(('render', None))
+
+        # Receive
+        for cpu in range(self.n_cpu):
+            if (render[cpu]):
+                rnd[cpu] = self.p_pipes[cpu].recv()
+
+        return rnd
 
     # Render environment
     def render_single(self, cpu):
@@ -98,8 +120,8 @@ class par_envs:
     def close(self):
 
         # Close all envs
-        for pipe in self.p_pipes :
-            pipe.send(('close',None))
+        for cpu in range(self.n_cpu):
+            self.p_pipes[cpu].send(('close', None))
         for p in self.proc:
             p.terminate()
             p.join()
@@ -108,15 +130,15 @@ class par_envs:
     def step(self, actions):
 
         # Send
-        for pipe, action in zip(self.p_pipes, actions):
-            pipe.send(('step', action))
+        for cpu in range(self.n_cpu):
+            self.p_pipes[cpu].send(('step', actions[cpu]))
 
         # Receive
         nxt  = np.array([])
         rwd  = np.array([])
         done = np.array([], dtype=np.bool)
-        for pipe in self.p_pipes:
-            n, r, d = pipe.recv()
+        for cpu in range(self.n_cpu):
+            n, r, d = self.p_pipes[cpu].recv()
             nxt     = np.append(nxt, n)
             rwd     = np.append(rwd, r)
             done    = np.append(done, bool(d))

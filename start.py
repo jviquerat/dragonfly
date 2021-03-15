@@ -1,24 +1,19 @@
 # Generic imports
 import os
 import sys
-import json
 import time
-import collections
 import numpy as np
 
 # Custom imports
-from ppo.training import *
-
-########################
-# Parameters decoder to collect json file
-########################
-def params_decoder(p_dict):
-    return collections.namedtuple('X', p_dict.keys())(*p_dict.values())
+from dragonfly.core.training  import *
+from dragonfly.utils.json     import *
+from dragonfly.utils.data     import *
+from dragonfly.agents.factory import *
+from dragonfly.envs.par_envs  import *
 
 ########################
 # Average training over multiple runs
 ########################
-
 if __name__ == '__main__':
 
     # Check command-line input for json file
@@ -28,51 +23,48 @@ if __name__ == '__main__':
         print('Command line error, please use as follows:')
         print('python3 start.py my_file.json')
 
-    # Read json parameter file
-    with open(json_file, "r") as f:
-        params = json.load(f, object_hook=params_decoder)
+    # Initialize json parser and read parameters
+    parser = json_parser()
+    pms    = parser.read(json_file)
 
-    # Storage arrays
-    res_path   = 'results'
-    n_data     = 9
-    ep         = np.zeros((              params.n_ep),           dtype=int)
-    data       = np.zeros((params.n_avg, params.n_ep,   n_data), dtype=float)
-    avg_data   = np.zeros((              params.n_ep,   n_data), dtype=float)
-    stdp_data  = np.zeros((              params.n_ep,   n_data), dtype=float)
-    stdm_data  = np.zeros((              params.n_ep,   n_data), dtype=float)
-
-    # Open storage repositories
-    if (not os.path.exists(res_path)):
-        os.makedirs(res_path)
-
+    # Create paths for results and open repositories
+    res_path = 'results'
     t         = time.localtime()
     path_time = time.strftime("%H-%M-%S", t)
-    path      = res_path+'/'+params.env_name+'_'+str(path_time)
+    path      = res_path+'/'+pms.env_name+'_'+str(path_time)
+
+    # Open repositories
+    if (not os.path.exists(res_path)):
+        os.makedirs(res_path)
     if (not os.path.exists(path)):
         os.makedirs(path)
 
-    for i in range(params.n_avg):
-        print('### Avg run #'+str(i))
-        start_time = time.time()
-        launch_training(params, path, i)
-        print("--- %s seconds ---" % (time.time() - start_time))
+    # Declare environement
+    env   = par_envs(pms.env_name, pms.n_cpu, path)
+    agent = agent_factory.create(pms.agent,
+                                 act_dim = env.act_dim,
+                                 obs_dim = env.obs_dim,
+                                 pms     = pms)
 
-        f           = np.loadtxt(path+'/ppo.dat')
-        ep          = f[:params.n_ep,0]
-        for j in range(n_data):
-            data[i,:,j] = f[:params.n_ep,j+1]
+    # Intialize averager
+    averager = data_avg(agent.n_vars, pms.n_ep, pms.n_avg)
+
+    # Run
+    for run in range(pms.n_avg):
+        print('### Avg run #'+str(run))
+        start_time = time.time()
+        agent.reset()
+        launch_training(pms, path, run, env, agent)
+        print("--- %s seconds ---" % (time.time() - start_time))
+        filename = path+'/'+pms.agent+'_'+str(run)+'.dat'
+        averager.store(filename, run)
+
+    # Close environments
+    env.close()
 
     # Write to file
-    file_out  = path+'/ppo_avg.dat'
-    array     = np.vstack(ep)
-    for j in range(n_data):
-        avg   = np.mean(data[:,:,j], axis=0)
-        std   = np.std (data[:,:,j], axis=0)
-        p     = avg + std
-        m     = avg - std
-        array = np.hstack((array,np.vstack(avg)))
-        array = np.hstack((array,np.vstack(p)))
-        array = np.hstack((array,np.vstack(m)))
+    filename = path+'/'+pms.agent+'_avg.dat'
+    averager.average(filename)
 
-    np.savetxt(file_out, array, fmt='%.5e')
-    os.system('gnuplot -c plot/plot.gnu '+path)
+    # Plot
+    os.system('gnuplot -c dragonfly/plot/plot.gnu '+path)
