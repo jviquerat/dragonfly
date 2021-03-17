@@ -1,5 +1,6 @@
 # Generic imports
 import math
+import copy
 import numpy as np
 
 # Custom imports
@@ -40,6 +41,7 @@ class ppo():
 
         # Build networks
         self.actor  = actor (self.obs_dim, self.act_dim, pms.actor)
+        self.pactor = copy.deepcopy(self.actor)
         self.critic = critic(self.obs_dim, pms.critic)
 
         # Initialize buffers
@@ -70,6 +72,16 @@ class ppo():
         self.report.reset()
         self.renderer.reset()
         self.counter.reset()
+
+    # Save actor weights
+    def save_actor_weights(self):
+
+        self.actor.save_weights()
+
+    # Set old actor weights
+    def set_actor_weights(self):
+
+        self.pactor.set_weights(self.actor.weights)
 
     # Get actions
     def get_actions(self, observations):
@@ -171,7 +183,7 @@ class ppo():
     def train(self):
 
         # Save actor weights
-        self.actor.save_weights()
+        self.save_actor_weights()
 
         # Train actor and critic
         for epoch in range(self.n_epochs):
@@ -192,7 +204,7 @@ class ppo():
                 self.train_critic(btc_obs, btc_tgt, end - start)
 
         # Update old networks
-        self.actor.set_weights()
+        self.set_actor_weights()
 
     ################################
     ### Actor/critic wrappings
@@ -201,9 +213,9 @@ class ppo():
     # Training function for actor
     def train_actor(self, obs, adv, act):
 
-        outputs          = self.actor.train(obs, adv, act,
-                                            self.pol_clip,
-                                            self.entropy_coef)
+        outputs          = self.train_ppo(obs, adv, act,
+                                      self.pol_clip,
+                                      self.entropy_coef)
         self.actor_loss  = outputs[0]
         self.kl_div      = outputs[1]
         self.actor_gnorm = outputs[2]
@@ -298,3 +310,46 @@ class ppo():
     def update_step(self):
 
         return self.counter.update_step()
+
+    # PPO loss function for actor
+    @tf.function
+    def train_ppo(self, obs, adv, act, pol_clip, entropy_coef):
+        with tf.GradientTape() as tape:
+
+            # Compute ratio of probabilities
+            prv_pol  = tf.convert_to_tensor(self.pactor.call(obs))
+            pol      = tf.convert_to_tensor(self.actor.call(obs))
+            new_prob = tf.reduce_sum(act*pol,     axis=1)
+            prv_prob = tf.reduce_sum(act*prv_pol, axis=1)
+            new_log  = tf.math.log(new_prob + 1.0e-5)
+            old_log  = tf.math.log(prv_prob + 1.0e-5)
+            ratio    = tf.exp(new_log - old_log)
+
+            # Compute actor loss
+            p1         = tf.multiply(adv,ratio)
+            p2         = tf.clip_by_value(ratio,
+                                          1.0-pol_clip,
+                                          1.0+pol_clip)
+            p2         = tf.multiply(adv,p2)
+            loss_ppo   =-tf.reduce_mean(tf.minimum(p1,p2))
+
+            # Compute entropy loss
+            entropy      = tf.multiply(pol,tf.math.log(pol + 1.0e-5))
+            entropy      =-tf.reduce_sum(entropy, axis=1)
+            entropy      = tf.reduce_mean(entropy)
+            loss_entropy =-entropy
+
+            # Compute total loss
+            loss = loss_ppo + entropy_coef*loss_entropy
+
+            # Compute KL div
+            kl = tf.math.log(pol + 1.0e-5) - tf.math.log(prv_pol + 1.0e-5)
+            kl = 0.5*tf.reduce_mean(tf.square(kl))
+
+            # Apply gradients
+            act_var = self.actor.net.trainable_variables
+            grads   = tape.gradient(loss, act_var)
+            norm    = tf.linalg.global_norm(grads)
+        self.actor.opt.apply_grads(zip(grads,act_var))
+
+        return loss, kl, norm, entropy

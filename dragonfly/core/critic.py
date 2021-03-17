@@ -30,13 +30,7 @@ class critic():
     # Network forward pass
     def call(self, state):
 
-        # Copy inputs
-        var = state
-
-        # Call network
-        var = self.net.call(var)
-
-        return var
+        return self.net.call(state)
 
     # Get value from network
     def get_value(self, state):
