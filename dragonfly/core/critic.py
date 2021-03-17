@@ -21,10 +21,10 @@ class critic():
         self.obs_dim = obs_dim
 
         # Define network
-        self.net  = network(obs_dim, self.dim, pms)
+        self.net  = network(obs_dim, self.dim, pms.network)
 
         # Define optimizer
-        self.opt = optimizer(pms.lr, pms.grd_clip,
+        self.opt = optimizer(pms.optimizer,
                              self.net.trainable_weights)
 
     # Network forward pass

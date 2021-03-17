@@ -4,13 +4,15 @@ import copy
 import numpy as np
 
 # Custom imports
-from dragonfly.core.actor     import *
+#from dragonfly.core.actor     import *
 from dragonfly.core.critic    import *
 from dragonfly.core.advantage import *
 from dragonfly.utils.buff     import *
 from dragonfly.utils.report   import *
 from dragonfly.utils.renderer import *
 from dragonfly.utils.counter  import *
+
+from dragonfly.policies.factory import *
 
 ###############################################
 ### PPO agent
@@ -40,8 +42,14 @@ class ppo():
         self.adv_norm     = pms.adv_norm
 
         # Build networks
-        self.actor  = actor (self.obs_dim, self.act_dim, pms.actor)
-        self.pactor = copy.deepcopy(self.actor)
+        #self.actor  = actor (self.obs_dim, self.act_dim, pms.actor)
+        #self.pactor = copy.deepcopy(self.actor)
+        self.policy  = policy_factory.create(pms.policy.type,
+                                             obs_dim = obs_dim,
+                                             act_dim = act_dim,
+                                             pms     = pms.policy)
+        self.p_policy = copy.deepcopy(self.policy)
+
         self.critic = critic(self.obs_dim, pms.critic)
 
         # Initialize buffers
@@ -65,23 +73,14 @@ class ppo():
 
     # Reset
     def reset(self):
-        self.actor.reset()
+        self.policy.reset()
+        self.p_policy.reset()
         self.critic.reset()
         self.loc_buff.reset()
         self.glb_buff.reset()
         self.report.reset()
         self.renderer.reset()
         self.counter.reset()
-
-    # Save actor weights
-    def save_actor_weights(self):
-
-        self.actor.save_weights()
-
-    # Set old actor weights
-    def set_actor_weights(self):
-
-        self.pactor.set_weights(self.actor.weights)
 
     # Get actions
     def get_actions(self, observations):
@@ -93,7 +92,7 @@ class ppo():
         # Loop over cpus
         for i in range(self.n_cpu):
             obs      = observations[i]
-            act[i,:] = self.actor.get_action(obs)
+            act[i,:] = self.policy.get_action(obs)
 
         return act
 
@@ -172,9 +171,9 @@ class ppo():
     def init_tmp_data(self):
 
         # These values are temporary storage for report struct
-        self.actor_loss   = 0.0
+        self.policy_loss  = 0.0
         self.entropy      = 0.0
-        self.actor_gnorm  = 0.0
+        self.policy_gnorm  = 0.0
         self.kl_div       = 0.0
         self.critic_loss  = 0.0
         self.critic_gnorm = 0.0
@@ -182,8 +181,8 @@ class ppo():
     # Training
     def train(self):
 
-        # Save actor weights
-        self.save_actor_weights()
+        # Save policy weights
+        self.policy.save_weights()
 
         # Train actor and critic
         for epoch in range(self.n_epochs):
@@ -200,25 +199,25 @@ class ppo():
                 btc_adv          = adv[start:end]
                 btc_tgt          = tgt[start:end]
 
-                self.train_actor (btc_obs, btc_adv, btc_act)
+                self.train_policy(btc_obs, btc_adv, btc_act)
                 self.train_critic(btc_obs, btc_tgt, end - start)
 
-        # Update old networks
-        self.set_actor_weights()
+        # Update old policy
+        self.p_policy.set_weights(self.policy.weights)
 
     ################################
-    ### Actor/critic wrappings
+    ### Policy/critic wrappings
     ################################
 
-    # Training function for actor
-    def train_actor(self, obs, adv, act):
+    # Training function for policy
+    def train_policy(self, obs, adv, act):
 
         outputs          = self.train_ppo(obs, adv, act,
                                       self.pol_clip,
                                       self.entropy_coef)
-        self.actor_loss  = outputs[0]
+        self.policy_loss  = outputs[0]
         self.kl_div      = outputs[1]
-        self.actor_gnorm = outputs[2]
+        self.policy_gnorm = outputs[2]
         self.entropy     = outputs[3]
 
     # Training function for critic
@@ -257,13 +256,13 @@ class ppo():
         self.report.append(episode      = self.counter.ep,
                            score        = self.counter.score[cpu],
                            length       = self.counter.ep_step[cpu],
-                           actor_loss   = self.actor_loss,
+                           policy_loss   = self.policy_loss,
                            critic_loss  = self.critic_loss,
                            entropy      = self.entropy,
-                           actor_gnorm  = self.actor_gnorm,
+                           policy_gnorm  = self.policy_gnorm,
                            critic_gnorm = self.critic_gnorm,
                            kl_div       = self.kl_div,
-                           actor_lr     = self.actor.get_lr(),
+                           policy_lr     = self.policy.get_lr(),
                            critic_lr    = self.critic.get_lr())
 
     # Write learning data report
@@ -317,8 +316,8 @@ class ppo():
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
-            prv_pol  = tf.convert_to_tensor(self.pactor.call(obs))
-            pol      = tf.convert_to_tensor(self.actor.call(obs))
+            prv_pol  = tf.convert_to_tensor(self.p_policy.call(obs))
+            pol      = tf.convert_to_tensor(self.policy.call(obs))
             new_prob = tf.reduce_sum(act*pol,     axis=1)
             prv_prob = tf.reduce_sum(act*prv_pol, axis=1)
             new_log  = tf.math.log(new_prob + 1.0e-5)
@@ -347,9 +346,9 @@ class ppo():
             kl = 0.5*tf.reduce_mean(tf.square(kl))
 
             # Apply gradients
-            act_var = self.actor.net.trainable_variables
-            grads   = tape.gradient(loss, act_var)
+            pol_var = self.policy.net.trainable_variables
+            grads   = tape.gradient(loss, pol_var)
             norm    = tf.linalg.global_norm(grads)
-        self.actor.opt.apply_grads(zip(grads,act_var))
+        self.policy.opt.apply_grads(zip(grads, pol_var))
 
         return loss, kl, norm, entropy

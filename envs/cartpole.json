@@ -6,18 +6,27 @@
     "n_avg": 2,
     "n_cpu": 1,
     "render_every": 500,
-    "actor": {
-        "lr": 1.0e-2,
-        "arch": [16,16],
-        "grd_clip": 0.5,
-        "pol_type": "multinomial",
-        "fnl_actv": "softmax"
+    "policy": {
+        "type": "multinomial",
+        "network": {
+            "arch": [16,16],
+            "fnl_actv": "softmax"
+        },
+        "optimizer": {
+            "lr": 1.0e-2,
+            "grd_clip": 0.5
+        }
     },
     "critic": {
-        "lr": 1.0e-2,
-        "arch": [16,16],
-        "grd_clip": 0.5,
-        "fnl_actv": "linear"
+        "type": "v-value",
+        "network": {
+            "arch": [16,16],
+            "fnl_actv": "linear"
+        },
+        "optimizer": {
+            "lr": 1.0e-2,
+            "grd_clip": 0.5
+        }
     },
     "batch_frac": 0.5,
     "n_buff": 8,
