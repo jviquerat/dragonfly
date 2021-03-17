@@ -4,45 +4,51 @@ import numpy as np
 # Custom imports
 from dragonfly.core.network     import *
 from dragonfly.core.optimizer   import *
-from dragonfly.policies.factory import *
 
 ###############################################
-### Actor class
-### act_dim : output dimension
+### Multinomial policy class (discrete)
 ### obs_dim : input  dimension
+### act_dim : output dimension
 ### pms     : parameters
-class actor():
+class multinomial():
     def __init__(self, obs_dim, act_dim, pms):
 
         # Fill structure
         self.act_dim = act_dim
         self.obs_dim = obs_dim
-        self.policy  = policy_factory.create(pms.pol_type,
-                                             act_dim = act_dim)
+        self.dim     = self.act_dim
 
         # Define and init network
-        self.net = network(obs_dim, self.policy.dim, pms)
+        self.net = network(obs_dim, self.dim, pms.network)
 
         # Define optimizer
-        self.opt = optimizer(pms.lr, pms.grd_clip,
+        self.opt = optimizer(pms.optimizer,
                              self.net.trainable_weights)
 
-    # Network forward pass
-    def call(self, state):
-
-        return self.net.call(state)
-
     # Get actions
-    def get_action(self, obs):
+    def get_actions(self, obs):
 
         # Cast
         obs = tf.cast([obs], tf.float32)
 
         # Forward pass to get policy parameters
         policy_params = self.call(obs)
-        action        = self.policy.call(policy_params)
 
-        return action
+        # Sanitize output
+        policy       = tf.cast(policy_params, tf.float64)
+        policy, norm = tf.linalg.normalize(policy, ord=1)
+
+        # Get actions
+        policy       = np.asarray(policy)[0]
+        actions      = np.random.multinomial(1, policy)
+        actions      = np.float32(actions)
+
+        return actions
+
+    # Network forward pass
+    def call(self, state):
+
+        return self.net.call(state)
 
     # Save network weights
     def save_weights(self):

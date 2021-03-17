@@ -4,7 +4,7 @@ import copy
 import numpy as np
 
 # Custom imports
-from dragonfly.core.critic    import *
+#from dragonfly.core.critic    import *
 from dragonfly.core.advantage import *
 from dragonfly.utils.buff     import *
 from dragonfly.utils.report   import *
@@ -12,6 +12,7 @@ from dragonfly.utils.renderer import *
 from dragonfly.utils.counter  import *
 
 from dragonfly.policy.factory import *
+from dragonfly.value.factory  import *
 
 ###############################################
 ### PPO agent
@@ -48,7 +49,10 @@ class ppo():
         self.p_policy = copy.deepcopy(self.policy)
 
         # Build values
-        self.critic = critic(self.obs_dim, pms.critic)
+        self.v_value = value_factory.create("v_value",
+                                            obs_dim = obs_dim,
+                                            pms     = pms.value)
+        #self.critic = critic(self.obs_dim, pms.critic)
 
         # Initialize buffers
         self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
@@ -73,7 +77,7 @@ class ppo():
     def reset(self):
         self.policy.reset()
         self.p_policy.reset()
-        self.critic.reset()
+        self.v_value.reset()
         self.loc_buff.reset()
         self.glb_buff.reset()
         self.report.reset()
@@ -104,8 +108,8 @@ class ppo():
         obs, nxt, act, rwd, trm = self.loc_buff.serialize()
 
         # Get current and next values
-        crt_val = self.critic.get_value(obs)
-        nxt_val = self.critic.get_value(nxt)
+        crt_val = self.v_value.get_values(obs)
+        nxt_val = self.v_value.get_values(nxt)
 
         # Compute advantages
         tgt, adv = advantage(rwd, crt_val, nxt_val, trm,
@@ -173,8 +177,8 @@ class ppo():
         self.entropy      = 0.0
         self.policy_gnorm  = 0.0
         self.kl_div       = 0.0
-        self.critic_loss  = 0.0
-        self.critic_gnorm = 0.0
+        self.v_value_loss  = 0.0
+        self.v_value_gnorm = 0.0
 
     # Training
     def train(self):
@@ -182,7 +186,7 @@ class ppo():
         # Save policy weights
         self.policy.save_weights()
 
-        # Train actor and critic
+        # Train policy and v_value
         for epoch in range(self.n_epochs):
 
             # Retrieve data
@@ -198,13 +202,13 @@ class ppo():
                 btc_tgt          = tgt[start:end]
 
                 self.train_policy(btc_obs, btc_adv, btc_act)
-                self.train_critic(btc_obs, btc_tgt, end - start)
+                self.train_v_value(btc_obs, btc_tgt, end - start)
 
         # Update old policy
         self.p_policy.set_weights(self.policy.weights)
 
     ################################
-    ### Policy/critic wrappings
+    ### Policy/value wrappings
     ################################
 
     # Training function for policy
@@ -219,11 +223,11 @@ class ppo():
         self.entropy     = outputs[3]
 
     # Training function for critic
-    def train_critic(self, obs, tgt, size):
+    def train_v_value(self, obs, tgt, size):
 
-        outputs           = self.critic.train(obs, tgt, size)
-        self.critic_loss  = outputs[0]
-        self.critic_gnorm = outputs[1]
+        outputs           = self.train_mse(obs, tgt, size)
+        self.v_value_loss  = outputs[0]
+        self.v_value_gnorm = outputs[1]
 
     ################################
     ### Local buffer wrappings
@@ -255,13 +259,13 @@ class ppo():
                            score        = self.counter.score[cpu],
                            length       = self.counter.ep_step[cpu],
                            policy_loss   = self.policy_loss,
-                           critic_loss  = self.critic_loss,
+                           v_value_loss  = self.v_value_loss,
                            entropy      = self.entropy,
                            policy_gnorm  = self.policy_gnorm,
-                           critic_gnorm = self.critic_gnorm,
+                           v_value_gnorm = self.v_value_gnorm,
                            kl_div       = self.kl_div,
                            policy_lr     = self.policy.get_lr(),
-                           critic_lr    = self.critic.get_lr())
+                           v_value_lr    = self.v_value.get_lr())
 
     # Write learning data report
     def write_report(self, path, run):
@@ -308,7 +312,7 @@ class ppo():
 
         return self.counter.update_step()
 
-    # PPO loss function for actor
+    # PPO loss function for policy
     @tf.function
     def train_ppo(self, obs, adv, act, pol_clip, entropy_coef):
         with tf.GradientTape() as tape:
@@ -350,3 +354,22 @@ class ppo():
         self.policy.opt.apply_grads(zip(grads, pol_var))
 
         return loss, kl, norm, entropy
+
+    # MSE loss function for value
+    @tf.function
+    def train_mse(self, obs, tgt, btc):
+        with tf.GradientTape() as tape:
+
+            # Compute loss
+            val  = tf.convert_to_tensor(self.v_value.call(obs))
+            val  = tf.reshape(val, [btc])
+            p1   = tf.square(tgt - val)
+            loss = tf.reduce_mean(p1)
+
+            # Apply gradients
+            val_var     = self.v_value.net.trainable_variables
+            grads       = tape.gradient(loss, val_var)
+            norm        = tf.linalg.global_norm(grads)
+        self.v_value.opt.apply_grads(zip(grads, val_var))
+
+        return loss, norm

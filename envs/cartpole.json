@@ -17,8 +17,8 @@
             "grd_clip": 0.5
         }
     },
-    "critic": {
-        "type": "v-value",
+    "value": {
+        "type": "v_value",
         "network": {
             "arch": [16,16],
             "fnl_actv": "linear"
