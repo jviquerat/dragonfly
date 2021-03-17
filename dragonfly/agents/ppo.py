@@ -4,7 +4,6 @@ import copy
 import numpy as np
 
 # Custom imports
-#from dragonfly.core.actor     import *
 from dragonfly.core.critic    import *
 from dragonfly.core.advantage import *
 from dragonfly.utils.buff     import *
@@ -12,7 +11,7 @@ from dragonfly.utils.report   import *
 from dragonfly.utils.renderer import *
 from dragonfly.utils.counter  import *
 
-from dragonfly.policies.factory import *
+from dragonfly.policy.factory import *
 
 ###############################################
 ### PPO agent
@@ -41,15 +40,14 @@ class ppo():
         self.gae_lambda   = pms.gae_lambda
         self.adv_norm     = pms.adv_norm
 
-        # Build networks
-        #self.actor  = actor (self.obs_dim, self.act_dim, pms.actor)
-        #self.pactor = copy.deepcopy(self.actor)
-        self.policy  = policy_factory.create(pms.policy.type,
-                                             obs_dim = obs_dim,
-                                             act_dim = act_dim,
-                                             pms     = pms.policy)
+        # Build policies
+        self.policy   = policy_factory.create(pms.policy.type,
+                                              obs_dim = obs_dim,
+                                              act_dim = act_dim,
+                                              pms     = pms.policy)
         self.p_policy = copy.deepcopy(self.policy)
 
+        # Build values
         self.critic = critic(self.obs_dim, pms.critic)
 
         # Initialize buffers
