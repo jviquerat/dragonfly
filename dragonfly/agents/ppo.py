@@ -92,7 +92,7 @@ class ppo():
         # Loop over cpus
         for i in range(self.n_cpu):
             obs      = observations[i]
-            act[i,:] = self.policy.get_action(obs)
+            act[i,:] = self.policy.get_actions(obs)
 
         return act
 

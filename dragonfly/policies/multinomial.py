@@ -25,8 +25,8 @@ class multinomial():
         self.opt = optimizer(pms.optimizer,
                              self.net.trainable_weights)
 
-    # Get action
-    def get_action(self, obs):
+    # Get actions
+    def get_actions(self, obs):
 
         # Cast
         obs = tf.cast([obs], tf.float32)
@@ -39,10 +39,10 @@ class multinomial():
         policy, norm = tf.linalg.normalize(policy, ord=1)
 
         policy       = np.asarray(policy)[0]
-        action       = np.random.multinomial(1, policy)
-        action       = np.float32(action)
+        actions      = np.random.multinomial(1, policy)
+        actions      = np.float32(actions)
 
-        return action
+        return actions
 
     # Network forward pass
     def call(self, state):
