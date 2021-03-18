@@ -6,7 +6,7 @@ from dragonfly.core.network     import *
 from dragonfly.core.optimizer   import *
 
 ###############################################
-### V-value class
+### v_value class
 ### obs_dim : input  dimension
 ### pms     : parameters
 class v_value():

@@ -4,13 +4,13 @@ import copy
 import numpy as np
 
 # Custom imports
-from dragonfly.policy.factory    import *
-from dragonfly.value.factory     import *
-from dragonfly.advantage.factory import *
-from dragonfly.utils.buff        import *
-from dragonfly.utils.report      import *
-from dragonfly.utils.renderer    import *
-from dragonfly.utils.counter     import *
+from dragonfly.policy.policy       import *
+from dragonfly.value.value         import *
+from dragonfly.advantage.advantage import *
+from dragonfly.utils.buff          import *
+from dragonfly.utils.report        import *
+from dragonfly.utils.renderer      import *
+from dragonfly.utils.counter       import *
 
 ###############################################
 ### PPO agent
