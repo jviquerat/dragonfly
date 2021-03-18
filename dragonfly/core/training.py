@@ -5,7 +5,7 @@ import numpy as np
 ########################
 # Process training
 ########################
-def launch_training(params, path, run, env, agent):
+def launch_training(path, run, env, agent):
 
     # Reset environment
     obs = env.reset_all()
@@ -24,7 +24,7 @@ def launch_training(params, path, run, env, agent):
             nxt, rwd, done = env.step(np.argmax(act, axis=1))
 
             # Handle termination state
-            trm, done      = agent.handle_term(done, params.ep_end)
+            trm, done      = agent.handle_term(done)
 
             # Store transition
             agent.store_transition(obs, nxt, act, rwd, trm)

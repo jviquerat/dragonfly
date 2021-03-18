@@ -54,7 +54,7 @@ if __name__ == '__main__':
         print('### Avg run #'+str(run))
         start_time = time.time()
         agent.reset()
-        launch_training(pms, path, run, env, agent)
+        launch_training(path, run, env, agent)
         dt = time.time() - start_time
         dt = f"{dt:.3f}"
         print("# Elapsed time: "+str(dt)+" seconds")

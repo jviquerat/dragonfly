@@ -116,7 +116,7 @@ class ppo():
         self.glb_buff.store(obs, adv, tgt, act)
 
     # Handle termination
-    def handle_term(self, done, ep_end):
+    def handle_term(self, done):
 
         # "done" possibly contains signals from multiple parallel
         # environments. We assume it does and unroll it in a loop
@@ -130,10 +130,10 @@ class ppo():
                 if (not done[i]): trm[i] = 0
                 if (    done[i]): trm[i] = 1
             if (    self.bootstrap):
-                if (    done[i] and ep_step <  ep_end-1): trm[i] = 1
-                if (    done[i] and ep_step >= ep_end-1): trm[i] = 2
-                if (not done[i] and ep_step <  ep_end-1): trm[i] = 0
-                if (not done[i] and ep_step >= ep_end-1):
+                if (    done[i] and ep_step <  self.ep_end-1): trm[i] = 1
+                if (    done[i] and ep_step >= self.ep_end-1): trm[i] = 2
+                if (not done[i] and ep_step <  self.ep_end-1): trm[i] = 0
+                if (not done[i] and ep_step >= self.ep_end-1):
                     trm[i]  = 2
                     done[i] = True
 
@@ -209,17 +209,17 @@ class ppo():
     def train_policy(self, obs, adv, act):
 
         outputs          = self.train_ppo(obs, adv, act,
-                                      self.pol_clip,
-                                      self.entropy_coef)
+                                          self.pol_clip,
+                                          self.entropy_coef)
         self.policy_loss  = outputs[0]
-        self.kl_div      = outputs[1]
+        self.kl_div       = outputs[1]
         self.policy_gnorm = outputs[2]
-        self.entropy     = outputs[3]
+        self.entropy      = outputs[3]
 
     # Training function for critic
     def train_v_value(self, obs, tgt, size):
 
-        outputs           = self.train_mse(obs, tgt, size)
+        outputs            = self.train_mse(obs, tgt, size)
         self.v_value_loss  = outputs[0]
         self.v_value_gnorm = outputs[1]
 
