@@ -16,6 +16,11 @@
             "type": "nadam",
             "lr": 1.0e-2,
             "grd_clip": 0.5
+        },
+        "loss": {
+            "type": "ppo",
+            "pol_clip": 0.1,
+            "ent_coef": 0.01
         }
     },
     "value": {
@@ -28,6 +33,9 @@
             "type": "nadam",
             "lr": 1.0e-2,
             "grd_clip": 0.5
+        },
+        "loss": {
+            "type": "mse"
         }
     },
     "retrn": {
@@ -41,7 +49,5 @@
     "n_buff": 8,
     "n_epochs": 8,
     "buff_size": 128,
-    "pol_clip": 0.1,
-    "entropy": 0.01,
     "bootstrap": true
 }

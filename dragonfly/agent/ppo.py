@@ -7,6 +7,7 @@ import numpy as np
 from dragonfly.policy.policy  import *
 from dragonfly.value.value    import *
 from dragonfly.retrn.retrn    import *
+from dragonfly.loss.loss      import *
 from dragonfly.utils.buff     import *
 from dragonfly.utils.report   import *
 from dragonfly.utils.renderer import *
@@ -31,22 +32,25 @@ class ppo():
         self.btc_frac     = pms.batch_frac
         self.n_epochs     = pms.n_epochs
 
-        self.pol_clip     = pms.pol_clip
         self.bootstrap    = pms.bootstrap
-        self.entropy_coef = pms.entropy
 
         # Build policies
-        self.policy   = pol_factory.create(pms.policy.type,
-                                           obs_dim = obs_dim,
-                                           act_dim = act_dim,
-                                           pms     = pms.policy)
-        self.p_policy = copy.deepcopy(self.policy)
+        self.policy          = pol_factory.create(pms.policy.type,
+                                                  obs_dim = obs_dim,
+                                                  act_dim = act_dim,
+                                                  pms     = pms.policy)
+        self.p_policy        = copy.deepcopy(self.policy)
+        pms.policy.loss.type = "ppo"
+        self.policy_loss     = loss_factory.create(pms.policy.loss.type,
+                                                   pms = pms.policy.loss)
 
         # Build values
-        # v-value type is mandatory for PPO agent
-        self.v_value = val_factory.create("v_value",
-                                          obs_dim = obs_dim,
-                                          pms     = pms.value)
+        pms.value.type    = "v_value"
+        self.v_value      = val_factory.create(pms.value.type,
+                                               obs_dim = obs_dim,
+                                               pms     = pms.value)
+        self.v_value_loss = loss_factory.create(pms.value.loss.type,
+                                              pms = pms.value.loss)
 
         # Build advantage
         self.retrn = retrn_factory.create(pms.retrn.type,
@@ -167,12 +171,12 @@ class ppo():
     def init_tmp_data(self):
 
         # These values are temporary storage for report struct
-        self.policy_loss  = 0.0
-        self.entropy      = 0.0
-        self.policy_gnorm  = 0.0
-        self.kl_div       = 0.0
-        self.v_value_loss  = 0.0
-        self.v_value_gnorm = 0.0
+        self.p_loss  = 0.0
+        self.entropy = 0.0
+        self.p_gnorm = 0.0
+        self.kl_div  = 0.0
+        self.v_loss  = 0.0
+        self.v_gnorm = 0.0
 
     # Training
     def train(self):
@@ -195,7 +199,7 @@ class ppo():
                 btc_adv          = adv[start:end]
                 btc_tgt          = tgt[start:end]
 
-                self.train_policy(btc_obs, btc_adv, btc_act)
+                self.train_policy (btc_obs, btc_adv, btc_act)
                 self.train_v_value(btc_obs, btc_tgt, end - start)
 
         # Update old policy
@@ -208,20 +212,21 @@ class ppo():
     # Training function for policy
     def train_policy(self, obs, adv, act):
 
-        outputs          = self.train_ppo(obs, adv, act,
-                                          self.pol_clip,
-                                          self.entropy_coef)
-        self.policy_loss  = outputs[0]
-        self.kl_div       = outputs[1]
-        self.policy_gnorm = outputs[2]
-        self.entropy      = outputs[3]
+        outputs      = self.policy_loss.train(obs, adv, act,
+                                              self.policy,
+                                              self.p_policy)
+        self.p_loss  = outputs[0]
+        self.kl_div  = outputs[1]
+        self.p_gnorm = outputs[2]
+        self.entropy = outputs[3]
 
     # Training function for critic
     def train_v_value(self, obs, tgt, size):
 
-        outputs            = self.train_mse(obs, tgt, size)
-        self.v_value_loss  = outputs[0]
-        self.v_value_gnorm = outputs[1]
+        outputs      = self.v_value_loss.train(obs, tgt, size,
+                                               self.v_value)
+        self.v_loss  = outputs[0]
+        self.v_gnorm = outputs[1]
 
     ################################
     ### Local buffer wrappings
@@ -252,11 +257,11 @@ class ppo():
         self.report.append(episode      = self.counter.ep,
                            score        = self.counter.score[cpu],
                            length       = self.counter.ep_step[cpu],
-                           policy_loss   = self.policy_loss,
-                           v_value_loss  = self.v_value_loss,
+                           policy_loss   = self.p_loss,
+                           v_value_loss  = self.v_loss,
                            entropy      = self.entropy,
-                           policy_gnorm  = self.policy_gnorm,
-                           v_value_gnorm = self.v_value_gnorm,
+                           policy_gnorm  = self.p_gnorm,
+                           v_value_gnorm = self.v_gnorm,
                            kl_div       = self.kl_div,
                            policy_lr     = self.policy.get_lr(),
                            v_value_lr    = self.v_value.get_lr())
@@ -305,65 +310,3 @@ class ppo():
     def update_step(self):
 
         return self.counter.update_step()
-
-    # PPO loss function for policy
-    @tf.function
-    def train_ppo(self, obs, adv, act, pol_clip, entropy_coef):
-        with tf.GradientTape() as tape:
-
-            # Compute ratio of probabilities
-            prv_pol  = tf.convert_to_tensor(self.p_policy.call(obs))
-            pol      = tf.convert_to_tensor(self.policy.call(obs))
-            new_prob = tf.reduce_sum(act*pol,     axis=1)
-            prv_prob = tf.reduce_sum(act*prv_pol, axis=1)
-            new_log  = tf.math.log(new_prob + 1.0e-8)
-            old_log  = tf.math.log(prv_prob + 1.0e-8)
-            ratio    = tf.exp(new_log - old_log)
-
-            # Compute actor loss
-            p1         = tf.multiply(adv,ratio)
-            p2         = tf.clip_by_value(ratio,
-                                          1.0-pol_clip,
-                                          1.0+pol_clip)
-            p2         = tf.multiply(adv,p2)
-            loss_ppo   =-tf.reduce_mean(tf.minimum(p1,p2))
-
-            # Compute entropy loss
-            entropy      = tf.multiply(pol,tf.math.log(pol + 1.0e-8))
-            entropy      =-tf.reduce_sum(entropy, axis=1)
-            entropy      = tf.reduce_mean(entropy)
-            loss_entropy =-entropy
-
-            # Compute total loss
-            loss = loss_ppo + entropy_coef*loss_entropy
-
-            # Compute KL div
-            kl = tf.math.log(pol + 1.0e-8) - tf.math.log(prv_pol + 1.0e-8)
-            kl = 0.5*tf.reduce_mean(tf.square(kl))
-
-            # Apply gradients
-            pol_var = self.policy.net.trainable_variables
-            grads   = tape.gradient(loss, pol_var)
-            norm    = tf.linalg.global_norm(grads)
-        self.policy.opt.apply_grads(zip(grads, pol_var))
-
-        return loss, kl, norm, entropy
-
-    # MSE loss function for value
-    @tf.function
-    def train_mse(self, obs, tgt, btc):
-        with tf.GradientTape() as tape:
-
-            # Compute loss
-            val  = tf.convert_to_tensor(self.v_value.call(obs))
-            val  = tf.reshape(val, [btc])
-            p1   = tf.square(tgt - val)
-            loss = tf.reduce_mean(p1)
-
-            # Apply gradients
-            val_var     = self.v_value.net.trainable_variables
-            grads       = tape.gradient(loss, val_var)
-            norm        = tf.linalg.global_norm(grads)
-        self.v_value.opt.apply_grads(zip(grads, val_var))
-
-        return loss, norm

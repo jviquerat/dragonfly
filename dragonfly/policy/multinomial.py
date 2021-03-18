@@ -1,5 +1,6 @@
 # Generic imports
-import numpy as np
+import numpy         as np
+from   copy import deepcopy as cp
 
 # Custom imports
 from dragonfly.network.network     import *
@@ -17,6 +18,7 @@ class multinomial():
         self.act_dim = act_dim
         self.obs_dim = obs_dim
         self.dim     = self.act_dim
+        self.pms     = pms
 
         # Define and init network
         # Force softmax activation, as this is multinomial policy
@@ -30,6 +32,9 @@ class multinomial():
         self.opt = opt_factory.create(pms.optimizer.type,
                                       pms       = pms.optimizer,
                                       grad_vars = self.net.trainable_weights)
+
+        # Optional previous version
+        self.prv = None
 
     # Get actions
     def get_actions(self, obs):
@@ -56,9 +61,18 @@ class multinomial():
 
         return self.net.call(state)
 
+    # Network forward pass
+    def copy(self):
+
+        self.prv = None
+        self.prv = multinomial(self.obs_dim, self.act_dim, self.pms)
+        self.prv.net = cp(self.net)
+        self.prv.opt = cp(self.opt)
+
     # Save network weights
     def save_weights(self):
 
+        #self.prv = cp.deepcopy(self)
         self.weights = self.net.get_weights()
 
     # Set network weights
