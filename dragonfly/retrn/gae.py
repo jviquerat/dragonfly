@@ -3,23 +3,21 @@ import numpy as np
 
 ###############################################
 ### Class for generalized advantage estimate
-### obs_dim : input  dimension
-### act_dim : output dimension
-### pms     : parameters
+### pms : parameters
 class gae():
     def __init__(self, pms):
 
         # Set default values
         self.gamma      = 0.99
         self.gae_lambda = 0.99
-        self.adv_norm   = True
-        self.adv_clip   = True
+        self.ret_norm   = True
+        self.ret_clip   = True
 
         # Check inputs
         if hasattr(pms, "gamma"):      self.gamma      = pms.gamma
         if hasattr(pms, "gae_lambda"): self.gae_lambda = pms.gae_lambda
-        if hasattr(pms, "adv_norm"):   self.adv_norm   = pms.adv_norm
-        if hasattr(pms, "adv_clip"):   self.adv_clip   = pms.adv_clip
+        if hasattr(pms, "ret_norm"):   self.ret_norm   = pms.ret_norm
+        if hasattr(pms, "ret_clip"):   self.ret_clip   = pms.ret_clip
 
     # Compute GAE
     # rwd : reward array
@@ -61,9 +59,9 @@ class gae():
         tgt += val
 
         # Normalize
-        if self.adv_norm: adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-5)
+        if self.ret_norm: adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-5)
 
         # Clip if required
-        if self.adv_clip: adv = np.maximum(adv, 0.0)
+        if self.ret_clip: adv = np.maximum(adv, 0.0)
 
         return tgt, adv

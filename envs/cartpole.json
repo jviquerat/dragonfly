@@ -30,12 +30,12 @@
             "grd_clip": 0.5
         }
     },
-    "advantage": {
+    "retrn": {
         "type": "gae",
         "gamma": 0.99,
         "gae_lambda": 0.99,
-        "adv_norm": true,
-        "adv_clip": true
+        "ret_norm": true,
+        "ret_clip": true
     },
     "batch_frac": 0.5,
     "n_buff": 8,

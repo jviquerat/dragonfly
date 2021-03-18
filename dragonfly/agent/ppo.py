@@ -4,13 +4,13 @@ import copy
 import numpy as np
 
 # Custom imports
-from dragonfly.policy.policy       import *
-from dragonfly.value.value         import *
-from dragonfly.advantage.advantage import *
-from dragonfly.utils.buff          import *
-from dragonfly.utils.report        import *
-from dragonfly.utils.renderer      import *
-from dragonfly.utils.counter       import *
+from dragonfly.policy.policy  import *
+from dragonfly.value.value    import *
+from dragonfly.retrn.retrn    import *
+from dragonfly.utils.buff     import *
+from dragonfly.utils.report   import *
+from dragonfly.utils.renderer import *
+from dragonfly.utils.counter  import *
 
 ###############################################
 ### PPO agent
@@ -49,8 +49,8 @@ class ppo():
                                           pms     = pms.value)
 
         # Build advantage
-        self.advantage = adv_factory.create(pms.advantage.type,
-                                            pms = pms.advantage)
+        self.retrn = retrn_factory.create(pms.retrn.type,
+                                          pms = pms.retrn)
 
         # Initialize buffers
         self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
@@ -87,7 +87,7 @@ class ppo():
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
-        act   = np.zeros([self.n_cpu, self.act_dim])
+        act = np.zeros([self.n_cpu, self.act_dim])
 
         # Loop over cpus
         for i in range(self.n_cpu):
@@ -110,7 +110,7 @@ class ppo():
         nxt_val = self.v_value.get_values(nxt)
 
         # Compute advantages
-        tgt, adv = self.advantage.compute(rwd, crt_val, nxt_val, trm)
+        tgt, adv = self.retrn.compute(rwd, crt_val, nxt_val, trm)
 
         # Store in global buffers
         self.glb_buff.store(obs, adv, tgt, act)
