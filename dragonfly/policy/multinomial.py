@@ -2,8 +2,8 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.core.network     import *
-from dragonfly.core.optimizer   import *
+from dragonfly.network.network     import *
+from dragonfly.optimizer.optimizer import *
 
 ###############################################
 ### Multinomial policy class (discrete)
@@ -21,11 +21,15 @@ class multinomial():
         # Define and init network
         # Force softmax activation, as this is multinomial policy
         pms.network.fnl_actv = "softmax"
-        self.net = network(obs_dim, self.dim, pms.network)
+        self.net = net_factory.create(pms.network.type,
+                                      inp_dim = obs_dim,
+                                      out_dim = self.dim,
+                                      pms     = pms.network)
 
         # Define optimizer
-        self.opt = optimizer(pms.optimizer,
-                             self.net.trainable_weights)
+        self.opt = opt_factory.create(pms.optimizer.type,
+                                      pms       = pms.optimizer,
+                                      grad_vars = self.net.trainable_weights)
 
     # Get actions
     def get_actions(self, obs):

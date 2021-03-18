@@ -15,7 +15,7 @@ from dragonfly.utils.counter       import *
 ###############################################
 ### PPO agent
 class ppo():
-    def __init__(self, act_dim, obs_dim, pms):
+    def __init__(self, obs_dim, act_dim, pms):
 
         # Initialize from arguments
         self.name         = 'ppo'
@@ -36,21 +36,21 @@ class ppo():
         self.entropy_coef = pms.entropy
 
         # Build policies
-        self.policy   = policy_factory.create(pms.policy.type,
-                                              obs_dim = obs_dim,
-                                              act_dim = act_dim,
-                                              pms     = pms.policy)
+        self.policy   = pol_factory.create(pms.policy.type,
+                                           obs_dim = obs_dim,
+                                           act_dim = act_dim,
+                                           pms     = pms.policy)
         self.p_policy = copy.deepcopy(self.policy)
 
         # Build values
         # v-value type is mandatory for PPO agent
-        self.v_value = value_factory.create("v_value",
-                                            obs_dim = obs_dim,
-                                            pms     = pms.value)
+        self.v_value = val_factory.create("v_value",
+                                          obs_dim = obs_dim,
+                                          pms     = pms.value)
 
         # Build advantage
-        self.advantage = advantage_factory.create(pms.advantage.type,
-                                                  pms = pms.advantage)
+        self.advantage = adv_factory.create(pms.advantage.type,
+                                            pms = pms.advantage)
 
         # Initialize buffers
         self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,

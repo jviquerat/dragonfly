@@ -2,8 +2,8 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.core.network     import *
-from dragonfly.core.optimizer   import *
+from dragonfly.network.network     import *
+from dragonfly.optimizer.optimizer import *
 
 ###############################################
 ### Normal policy class (continuous)

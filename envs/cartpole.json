@@ -9,9 +9,11 @@
     "policy": {
         "type": "multinomial",
         "network": {
+            "type": "fc",
             "arch": [16,16]
         },
         "optimizer": {
+            "type": "nadam",
             "lr": 1.0e-2,
             "grd_clip": 0.5
         }
@@ -19,9 +21,11 @@
     "value": {
         "type": "v_value",
         "network": {
+            "type": "fc",
             "arch": [16,16]
         },
         "optimizer": {
+            "type": "nadam",
             "lr": 1.0e-2,
             "grd_clip": 0.5
         }

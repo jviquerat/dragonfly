@@ -14,7 +14,7 @@ from   tensorflow.keras.layers       import Dense
 from   tensorflow.keras.initializers import Orthogonal
 
 ###############################################
-### Network class
+### Fully-connected network class
 ### inp_dim  : dimension of input  layer
 ### out_dim  : dimension of output layer
 ### arch     : architecture of densely connected network
@@ -22,9 +22,9 @@ from   tensorflow.keras.initializers import Orthogonal
 ### fnl_init : final  layer kernel initializer
 ### hid_act  : hidden layer activation function
 ### fnl_act  : final  layer activation function
-class network(Model):
+class fc(Model):
     def __init__(self, inp_dim, out_dim, pms):
-        super(network, self).__init__()
+        super().__init__()
 
         # Set inputs
         self.inp_dim = inp_dim

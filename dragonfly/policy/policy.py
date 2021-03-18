@@ -4,9 +4,9 @@ from dragonfly.policy.multinomial import *
 from dragonfly.policy.normal      import *
 
 # Declare factory
-policy_factory = factory()
+pol_factory = factory()
 
 # Register policies
-policy_factory.register("multinomial", multinomial)
-policy_factory.register("normal",      normal)
+pol_factory.register("multinomial", multinomial)
+pol_factory.register("normal",      normal)
 

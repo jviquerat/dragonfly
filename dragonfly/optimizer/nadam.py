@@ -3,11 +3,11 @@ import tensorflow                    as     tf
 from   tensorflow.keras.optimizers   import Nadam
 
 ###############################################
-### Optimizer class
+### Nadam optimizer class
 ### lr        : learning rate
 ### grd_clip  : gradient clipping value
 ### grad_vars : trainable variables from the associated network
-class optimizer():
+class nadam():
     def __init__(self, pms, grad_vars):
 
         # Set default values
