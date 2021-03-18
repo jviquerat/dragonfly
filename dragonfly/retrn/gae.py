@@ -59,7 +59,7 @@ class gae():
         tgt += val
 
         # Normalize
-        if self.ret_norm: adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-5)
+        if self.ret_norm: adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-8)
 
         # Clip if required
         if self.ret_clip: adv = np.maximum(adv, 0.0)

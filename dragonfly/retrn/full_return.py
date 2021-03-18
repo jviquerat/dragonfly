@@ -45,7 +45,7 @@ class full_return():
         tgt = ret.copy()
 
         # Normalize
-        if self.ret_norm: ret = (ret-np.mean(ret))/(np.std(ret) + 1.0e-5)
+        if self.ret_norm: ret = (ret-np.mean(ret))/(np.std(ret) + 1.0e-8)
 
         # Clip if required
         if self.ret_clip: ret = np.maximum(ret, 0.0)

@@ -316,8 +316,8 @@ class ppo():
             pol      = tf.convert_to_tensor(self.policy.call(obs))
             new_prob = tf.reduce_sum(act*pol,     axis=1)
             prv_prob = tf.reduce_sum(act*prv_pol, axis=1)
-            new_log  = tf.math.log(new_prob + 1.0e-5)
-            old_log  = tf.math.log(prv_prob + 1.0e-5)
+            new_log  = tf.math.log(new_prob + 1.0e-8)
+            old_log  = tf.math.log(prv_prob + 1.0e-8)
             ratio    = tf.exp(new_log - old_log)
 
             # Compute actor loss
@@ -329,7 +329,7 @@ class ppo():
             loss_ppo   =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss
-            entropy      = tf.multiply(pol,tf.math.log(pol + 1.0e-5))
+            entropy      = tf.multiply(pol,tf.math.log(pol + 1.0e-8))
             entropy      =-tf.reduce_sum(entropy, axis=1)
             entropy      = tf.reduce_mean(entropy)
             loss_entropy =-entropy
@@ -338,7 +338,7 @@ class ppo():
             loss = loss_ppo + entropy_coef*loss_entropy
 
             # Compute KL div
-            kl = tf.math.log(pol + 1.0e-5) - tf.math.log(prv_pol + 1.0e-5)
+            kl = tf.math.log(pol + 1.0e-8) - tf.math.log(prv_pol + 1.0e-8)
             kl = 0.5*tf.reduce_mean(tf.square(kl))
 
             # Apply gradients

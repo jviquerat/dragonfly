@@ -3,7 +3,7 @@
     "agent": "ppo",
     "ep_end": 200,
     "n_ep": 300,
-    "n_avg": 2,
+    "n_avg": 5,
     "n_cpu": 1,
     "render_every": 500,
     "policy": {
