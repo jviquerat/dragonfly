@@ -2,7 +2,7 @@
 from dragonfly.agents.ppo import *
 
 ###############################################
-### A very basic agent factory
+### A very basic factory
 class agent_factory:
     def __init__(self):
         self.agents = ["ppo"]

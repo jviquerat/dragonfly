@@ -17,6 +17,8 @@ class v_value():
         self.obs_dim = obs_dim
 
         # Define and init network
+        # Force linear activation, as this is v-value network
+        pms.network.fnl_actv = "linear"
         self.net = network(obs_dim, self.dim, pms.network)
 
         # Define optimizer

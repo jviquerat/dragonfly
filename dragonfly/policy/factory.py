@@ -3,7 +3,7 @@ from dragonfly.policy.multinomial import *
 from dragonfly.policy.normal      import *
 
 ###############################################
-### A very basic policy factory
+### A very basic factory
 class policy_factory:
     def __init__(self):
         self.policies = ["multinomial", "normal"]

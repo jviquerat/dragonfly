@@ -19,6 +19,8 @@ class multinomial():
         self.dim     = self.act_dim
 
         # Define and init network
+        # Force softmax activation, as this is multinomial policy
+        pms.network.fnl_actv = "softmax"
         self.net = network(obs_dim, self.dim, pms.network)
 
         # Define optimizer

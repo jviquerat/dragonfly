@@ -9,8 +9,7 @@
     "policy": {
         "type": "multinomial",
         "network": {
-            "arch": [16,16],
-            "fnl_actv": "softmax"
+            "arch": [16,16]
         },
         "optimizer": {
             "lr": 1.0e-2,
@@ -20,13 +19,19 @@
     "value": {
         "type": "v_value",
         "network": {
-            "arch": [16,16],
-            "fnl_actv": "linear"
+            "arch": [16,16]
         },
         "optimizer": {
             "lr": 1.0e-2,
             "grd_clip": 0.5
         }
+    },
+    "advantage": {
+        "type": "gae",
+        "gamma": 0.99,
+        "gae_lambda": 0.99,
+        "adv_norm": true,
+        "adv_clip": true
     },
     "batch_frac": 0.5,
     "n_buff": 8,
@@ -34,9 +39,5 @@
     "buff_size": 128,
     "pol_clip": 0.1,
     "entropy": 0.01,
-    "gamma": 0.99,
-    "gae_lambda": 0.99,
-    "adv_norm": true,
-    "adv_clip": true,
     "bootstrap": true
 }

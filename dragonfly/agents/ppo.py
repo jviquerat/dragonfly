@@ -4,15 +4,13 @@ import copy
 import numpy as np
 
 # Custom imports
-#from dragonfly.core.critic    import *
-from dragonfly.core.advantage import *
-from dragonfly.utils.buff     import *
-from dragonfly.utils.report   import *
-from dragonfly.utils.renderer import *
-from dragonfly.utils.counter  import *
-
-from dragonfly.policy.factory import *
-from dragonfly.value.factory  import *
+from dragonfly.policy.factory    import *
+from dragonfly.value.factory     import *
+from dragonfly.advantage.factory import *
+from dragonfly.utils.buff        import *
+from dragonfly.utils.report      import *
+from dragonfly.utils.renderer    import *
+from dragonfly.utils.counter     import *
 
 ###############################################
 ### PPO agent
@@ -34,12 +32,8 @@ class ppo():
         self.n_epochs     = pms.n_epochs
 
         self.pol_clip     = pms.pol_clip
-        self.adv_clip     = pms.adv_clip
         self.bootstrap    = pms.bootstrap
         self.entropy_coef = pms.entropy
-        self.gamma        = pms.gamma
-        self.gae_lambda   = pms.gae_lambda
-        self.adv_norm     = pms.adv_norm
 
         # Build policies
         self.policy   = policy_factory.create(pms.policy.type,
@@ -49,10 +43,14 @@ class ppo():
         self.p_policy = copy.deepcopy(self.policy)
 
         # Build values
+        # v-value type is mandatory for PPO agent
         self.v_value = value_factory.create("v_value",
                                             obs_dim = obs_dim,
                                             pms     = pms.value)
-        #self.critic = critic(self.obs_dim, pms.critic)
+
+        # Build advantage
+        self.advantage = advantage_factory.create(pms.advantage.type,
+                                                  pms = pms.advantage)
 
         # Initialize buffers
         self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
@@ -112,11 +110,7 @@ class ppo():
         nxt_val = self.v_value.get_values(nxt)
 
         # Compute advantages
-        tgt, adv = advantage(rwd, crt_val, nxt_val, trm,
-                             gamma      = self.gamma,
-                             gae_lambda = self.gae_lambda,
-                             adv_norm   = self.adv_norm,
-                             adv_clip   = self.adv_clip)
+        tgt, adv = self.advantage.compute(rwd, crt_val, nxt_val, trm)
 
         # Store in global buffers
         self.glb_buff.store(obs, adv, tgt, act)

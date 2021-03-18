@@ -10,9 +10,13 @@ from   tensorflow.keras.optimizers   import Nadam
 class optimizer():
     def __init__(self, pms, grad_vars):
 
-        # Handle arguments
-        self.lr       = pms.lr
-        self.grd_clip = pms.grd_clip
+        # Set default values
+        self.lr       = 1.0e-3
+        self.grd_clip = 0.5
+
+        # Check inputs
+        if hasattr(pms, "lr"):       self.lr       = pms.lr
+        if hasattr(pms, "grd_clip"): self.grd_clip = pms.grd_clip
 
         # Initialize optimizer
         # A fake optimization step is applied so the saved

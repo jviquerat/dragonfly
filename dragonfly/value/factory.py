@@ -2,7 +2,7 @@
 from dragonfly.value.v_value import *
 
 ###############################################
-### A very basic value factory
+### A very basic factory
 class value_factory:
     def __init__(self):
         self.values = ["v_value"]
