@@ -4,6 +4,7 @@ import numpy as np
 # Custom imports
 from dragonfly.network.network     import *
 from dragonfly.optimizer.optimizer import *
+from dragonfly.loss.loss           import *
 
 ###############################################
 ### v_value class
@@ -29,6 +30,10 @@ class v_value():
                                       pms       = pms.optimizer,
                                       grad_vars = self.net.trainable_weights)
 
+        # Define loss
+        self.loss = loss_factory.create(pms.loss.type,
+                                        pms = pms.loss)
+
     # Get values
     def get_values(self, obs):
 
@@ -39,6 +44,11 @@ class v_value():
         values = np.array(self.call(obs))
 
         return values
+
+    # Call loss for training
+    def train(self, obs, tgt, size):
+
+        return self.loss.train(obs, tgt, size, self)
 
     # Network forward pass
     def call(self, state):

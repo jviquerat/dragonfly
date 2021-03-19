@@ -16,11 +16,11 @@ class ppo():
 
     # Train
     @tf.function
-    def train(self, obs, adv, act, policy, p_policy):
+    def train(self, obs, adv, act, policy):
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
-            prv_pol  = tf.convert_to_tensor(p_policy.call(obs))
+            prv_pol  = tf.convert_to_tensor(policy.call_prv(obs))
             pol      = tf.convert_to_tensor(policy.call(obs))
             new_prob = tf.reduce_sum(act*pol,     axis=1)
             prv_prob = tf.reduce_sum(act*prv_pol, axis=1)

@@ -5,6 +5,7 @@ from   copy import deepcopy as cp
 # Custom imports
 from dragonfly.network.network     import *
 from dragonfly.optimizer.optimizer import *
+from dragonfly.loss.loss           import *
 
 ###############################################
 ### Multinomial policy class (discrete)
@@ -14,11 +15,16 @@ from dragonfly.optimizer.optimizer import *
 class multinomial():
     def __init__(self, obs_dim, act_dim, pms):
 
+        # Set default values
+        self.save = False
+
+        # Check inputs
+        if hasattr(pms, "save"): self.save = pms.save
+
         # Fill structure
         self.act_dim = act_dim
         self.obs_dim = obs_dim
         self.dim     = self.act_dim
-        self.pms     = pms
 
         # Define and init network
         # Force softmax activation, as this is multinomial policy
@@ -33,8 +39,12 @@ class multinomial():
                                       pms       = pms.optimizer,
                                       grad_vars = self.net.trainable_weights)
 
-        # Optional previous version
-        self.prv = None
+        # Define loss
+        self.loss = loss_factory.create(pms.loss.type,
+                                        pms = pms.loss)
+
+        # Optional previous version of network
+        if (self.save): self.prv = cp(self.net)
 
     # Get actions
     def get_actions(self, obs):
@@ -56,29 +66,30 @@ class multinomial():
 
         return actions
 
+    # Call loss for training
+    def train(self, obs, adv, act):
+
+        return self.loss.train(obs, adv, act, self)
+
     # Network forward pass
     def call(self, state):
 
         return self.net.call(state)
 
-    # Network forward pass
-    def copy(self):
+    # Previous network forward pass
+    def call_prv(self, state):
 
-        self.prv = None
-        self.prv = multinomial(self.obs_dim, self.act_dim, self.pms)
-        self.prv.net = cp(self.net)
-        self.prv.opt = cp(self.opt)
+        return self.prv.call(state)
 
     # Save network weights
     def save_weights(self):
 
-        #self.prv = cp.deepcopy(self)
         self.weights = self.net.get_weights()
 
-    # Set network weights
-    def set_weights(self, weights):
+    # Set previous network weights
+    def set_prv_weights(self):
 
-        self.net.set_weights(weights)
+        self.prv.set_weights(self.weights)
 
     # Get current learning rate
     def get_lr(self):
@@ -90,3 +101,4 @@ class multinomial():
 
         self.net.reset()
         self.opt.reset()
+        if (self.save): self.prv.reset()

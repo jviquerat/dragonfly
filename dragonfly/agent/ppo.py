@@ -7,7 +7,6 @@ import numpy as np
 from dragonfly.policy.policy  import *
 from dragonfly.value.value    import *
 from dragonfly.retrn.retrn    import *
-from dragonfly.loss.loss      import *
 from dragonfly.utils.buff     import *
 from dragonfly.utils.report   import *
 from dragonfly.utils.renderer import *
@@ -35,22 +34,18 @@ class ppo():
         self.bootstrap    = pms.bootstrap
 
         # Build policies
+        pms.policy.save      = True
+        pms.policy.loss.type = "ppo"
         self.policy          = pol_factory.create(pms.policy.type,
                                                   obs_dim = obs_dim,
                                                   act_dim = act_dim,
                                                   pms     = pms.policy)
-        self.p_policy        = copy.deepcopy(self.policy)
-        pms.policy.loss.type = "ppo"
-        self.policy_loss     = loss_factory.create(pms.policy.loss.type,
-                                                   pms = pms.policy.loss)
 
         # Build values
-        pms.value.type    = "v_value"
-        self.v_value      = val_factory.create(pms.value.type,
-                                               obs_dim = obs_dim,
-                                               pms     = pms.value)
-        self.v_value_loss = loss_factory.create(pms.value.loss.type,
-                                              pms = pms.value.loss)
+        pms.value.type = "v_value"
+        self.v_value   = val_factory.create(pms.value.type,
+                                            obs_dim = obs_dim,
+                                            pms     = pms.value)
 
         # Build advantage
         self.retrn = retrn_factory.create(pms.retrn.type,
@@ -78,7 +73,6 @@ class ppo():
     # Reset
     def reset(self):
         self.policy.reset()
-        self.p_policy.reset()
         self.v_value.reset()
         self.loc_buff.reset()
         self.glb_buff.reset()
@@ -203,7 +197,7 @@ class ppo():
                 self.train_v_value(btc_obs, btc_tgt, end - start)
 
         # Update old policy
-        self.p_policy.set_weights(self.policy.weights)
+        self.policy.set_prv_weights()
 
     ################################
     ### Policy/value wrappings
@@ -212,9 +206,7 @@ class ppo():
     # Training function for policy
     def train_policy(self, obs, adv, act):
 
-        outputs      = self.policy_loss.train(obs, adv, act,
-                                              self.policy,
-                                              self.p_policy)
+        outputs      = self.policy.train(obs, adv, act)
         self.p_loss  = outputs[0]
         self.kl_div  = outputs[1]
         self.p_gnorm = outputs[2]
@@ -223,8 +215,7 @@ class ppo():
     # Training function for critic
     def train_v_value(self, obs, tgt, size):
 
-        outputs      = self.v_value_loss.train(obs, tgt, size,
-                                               self.v_value)
+        outputs      = self.v_value.train(obs, tgt, size)
         self.v_loss  = outputs[0]
         self.v_gnorm = outputs[1]
 
