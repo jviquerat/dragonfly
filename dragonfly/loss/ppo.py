@@ -1,6 +1,9 @@
 # Tensorflow imports
 import tensorflow as tf
 
+# Custom imports
+from dragonfly.core.constants import *
+
 ###############################################
 ### PPO loss class
 class ppo():
@@ -24,8 +27,8 @@ class ppo():
             pol      = tf.convert_to_tensor(policy.call(obs))
             new_prob = tf.reduce_sum(act*pol,     axis=1)
             prv_prob = tf.reduce_sum(act*prv_pol, axis=1)
-            new_log  = tf.math.log(new_prob + 1.0e-8)
-            old_log  = tf.math.log(prv_prob + 1.0e-8)
+            new_log  = tf.math.log(new_prob + ppo_eps)
+            old_log  = tf.math.log(prv_prob + ppo_eps)
             ratio    = tf.exp(new_log - old_log)
 
             # Compute actor loss
@@ -37,7 +40,7 @@ class ppo():
             loss_ppo   =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss
-            entropy      = tf.multiply(pol,tf.math.log(pol + 1.0e-8))
+            entropy      = tf.multiply(pol,tf.math.log(pol + ppo_eps))
             entropy      =-tf.reduce_sum(entropy, axis=1)
             entropy      = tf.reduce_mean(entropy)
             loss_entropy =-entropy
@@ -46,7 +49,7 @@ class ppo():
             loss = loss_ppo + self.ent_coef*loss_entropy
 
             # Compute KL div
-            kl = tf.math.log(pol + 1.0e-8) - tf.math.log(prv_pol + 1.0e-8)
+            kl = tf.math.log(pol + ppo_eps) - tf.math.log(prv_pol + ppo_eps)
             kl = 0.5*tf.reduce_mean(tf.square(kl))
 
             # Apply gradients

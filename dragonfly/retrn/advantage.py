@@ -1,6 +1,9 @@
 # Generic imports
 import numpy as np
 
+# Custom imports
+from dragonfly.core.constants import *
+
 ###############################################
 ### Class for advantage
 ### pms : parameters
@@ -8,14 +11,14 @@ class advantage():
     def __init__(self, pms):
 
         # Set default values
-        self.gamma      = 0.99
-        self.ret_norm   = True
-        self.ret_clip   = True
+        self.gamma    = 0.99
+        self.ret_norm = True
+        self.ret_clip = True
 
         # Check inputs
-        if hasattr(pms, "gamma"):      self.gamma      = pms.gamma
-        if hasattr(pms, "ret_norm"):   self.ret_norm   = pms.ret_norm
-        if hasattr(pms, "ret_clip"):   self.ret_clip   = pms.ret_clip
+        if hasattr(pms, "gamma"):    self.gamma    = pms.gamma
+        if hasattr(pms, "ret_norm"): self.ret_norm = pms.ret_norm
+        if hasattr(pms, "ret_clip"): self.ret_clip = pms.ret_clip
 
     # Compute advantage
     # rwd : reward array
@@ -25,7 +28,7 @@ class advantage():
     def compute(self, rwd, val, nxt, trm):
 
         # Shortcuts
-        gm  = self.gamma
+        gm = self.gamma
 
         # Handle mask from termination signals
         msk = np.zeros(len(trm))
@@ -48,7 +51,7 @@ class advantage():
         tgt = ret.copy()
 
         # Normalize
-        if self.ret_norm: adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-8)
+        if self.ret_norm: adv = (adv-np.mean(adv))/(np.std(adv) + ret_eps)
 
         # Clip if required
         if self.ret_clip: adv = np.maximum(adv, 0.0)

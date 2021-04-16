@@ -1,6 +1,9 @@
 # Generic imports
 import numpy as np
 
+# Custom imports
+from dragonfly.core.constants import *
+
 ###############################################
 ### Class for generalized advantage estimate
 ### pms : parameters
@@ -59,7 +62,7 @@ class gae():
         tgt += val
 
         # Normalize
-        if self.ret_norm: adv = (adv-np.mean(adv))/(np.std(adv) + 1.0e-8)
+        if self.ret_norm: adv = (adv-np.mean(adv))/(np.std(adv) + ret_eps)
 
         # Clip if required
         if self.ret_clip: adv = np.maximum(adv, 0.0)

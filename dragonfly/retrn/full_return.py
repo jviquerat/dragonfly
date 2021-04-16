@@ -1,6 +1,9 @@
 # Generic imports
 import numpy as np
 
+# Custom imports
+from dragonfly.core.constants import *
+
 ###############################################
 ### Class for full return
 ### pms : parameters
@@ -45,7 +48,7 @@ class full_return():
         tgt = ret.copy()
 
         # Normalize
-        if self.ret_norm: ret = (ret-np.mean(ret))/(np.std(ret) + 1.0e-8)
+        if self.ret_norm: ret = (ret-np.mean(ret))/(np.std(ret) + ret_eps)
 
         # Clip if required
         if self.ret_clip: ret = np.maximum(ret, 0.0)
