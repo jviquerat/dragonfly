@@ -59,7 +59,12 @@ class ppo():
                                  self.buff_size, self.btc_frac)
 
         # Initialize learning data report
-        self.report   = report()
+        self.report_fields = ["episode", "score", "length",
+                              "policy_loss", "v_value_loss",
+                              "entropy", "policy_gnorm",
+                              "v_value_gnorm", "kl_div",
+                              "policy_lr", "v_value_lr", "step"]
+        self.report   = report(self.report_fields)
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu, pms.render_every)
@@ -76,7 +81,7 @@ class ppo():
         self.v_value.reset()
         self.loc_buff.reset()
         self.glb_buff.reset()
-        self.report.reset()
+        self.report.reset(self.report_fields)
         self.renderer.reset()
         self.counter.reset()
 
@@ -155,7 +160,7 @@ class ppo():
         if (self.counter.ep == 0): return
 
         # Average and print
-        avg = np.mean(self.report.score[-25:])
+        avg = np.mean(self.report.data["score"][-25:])
         avg = f"{avg:.3f}"
         end = '\n'
         if (self.counter.ep < self.counter.n_ep): end = '\r'
@@ -245,24 +250,26 @@ class ppo():
     # Store data in report
     def store_report(self, cpu):
 
-        self.report.append(episode      = self.counter.ep,
-                           score        = self.counter.score[cpu],
-                           length       = self.counter.ep_step[cpu],
-                           policy_loss   = self.p_loss,
-                           v_value_loss  = self.v_loss,
-                           entropy      = self.entropy,
-                           policy_gnorm  = self.p_gnorm,
-                           v_value_gnorm = self.v_gnorm,
-                           kl_div       = self.kl_div,
-                           policy_lr     = self.policy.get_lr(),
-                           v_value_lr    = self.v_value.get_lr())
+        self.report.append("episode",       self.counter.ep)
+        self.report.append("score",         self.counter.score[cpu])
+        self.report.append("length",        self.counter.ep_step[cpu])
+        self.report.append("policy_loss",   self.p_loss)
+        self.report.append("v_value_loss",  self.v_loss)
+        self.report.append("entropy",       self.entropy)
+        self.report.append("policy_gnorm",  self.p_gnorm)
+        self.report.append("v_value_gnorm", self.v_gnorm)
+        self.report.append("kl_div",        self.kl_div)
+        self.report.append("policy_lr",     self.policy.get_lr())
+        self.report.append("v_value_lr",    self.v_value.get_lr())
+
+        self.report.step(self.counter.ep_step[cpu])
 
     # Write learning data report
     def write_report(self, path, run):
 
         # Set filename with method name and run number
         filename = path+'/'+self.name+'_'+str(run)+'.dat'
-        self.report.write(filename)
+        self.report.write(filename, self.report_fields)
 
     ################################
     ### Renderer wrappings
