@@ -1,9 +1,11 @@
 # Generic imports
-import numpy as np
+import numpy                as np
+from   copy import deepcopy as cp
 
 # Custom imports
 from dragonfly.network.network     import *
 from dragonfly.optimizer.optimizer import *
+from dragonfly.loss.loss           import *
 
 ###############################################
 ### Normal policy class (continuous)

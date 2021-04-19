@@ -1,5 +1,5 @@
 # Generic imports
-import numpy         as np
+import numpy                as np
 from   copy import deepcopy as cp
 
 # Custom imports
