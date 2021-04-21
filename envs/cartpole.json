@@ -4,7 +4,7 @@
     "ep_end": 200,
     "n_ep": 300,
     "n_avg": 2,
-    "n_cpu": 1,
+    "n_cpu": 2,
     "render_every": 500,
     "policy": {
         "type": "multinomial",

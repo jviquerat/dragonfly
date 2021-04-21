@@ -123,7 +123,7 @@ class ppo():
 
         # "done" possibly contains signals from multiple parallel
         # environments. We assume it does and unroll it in a loop
-        trm = np.array([self.n_cpu])
+        trm = np.zeros([self.n_cpu])
 
         # Loop over environments
         for i in range(self.n_cpu):
@@ -160,11 +160,12 @@ class ppo():
         if (self.counter.ep == 0): return
 
         # Average and print
-        avg = np.mean(self.report.data["score"][-25:])
-        avg = f"{avg:.3f}"
-        end = '\n'
-        if (self.counter.ep < self.counter.n_ep): end = '\r'
-        print('# Ep #'+str(self.counter.ep)+', avg score = '+str(avg)+'      ', end=end)
+        if (self.counter.ep <= self.counter.n_ep):
+            avg = np.mean(self.report.data["score"][-25:])
+            avg = f"{avg:.3f}"
+            end = '\n'
+            if (self.counter.ep < self.counter.n_ep): end = '\r'
+            print('# Ep #'+str(self.counter.ep)+', avg score = '+str(avg)+'      ', end=end)
 
     # Init temporary data
     def init_tmp_data(self):

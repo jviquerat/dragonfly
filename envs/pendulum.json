@@ -1,5 +1,5 @@
 {
-    "env_name": "CartPole-v0",
+    "env_name": "Pendulum-v0",
     "agent": "ppo",
     "ep_end": 200,
     "n_ep": 300,

@@ -61,9 +61,8 @@ class multinomial():
         policy, norm = tf.linalg.normalize(policy, ord=1)
 
         # Get actions
-        policy       = np.asarray(policy)[0]
-        actions      = np.random.multinomial(1, policy)
-        actions      = np.float32(actions)
+        pdf     = tfd.Multinomial(1, probs=policy)
+        actions = pdf.sample(1)
 
         return actions
 
