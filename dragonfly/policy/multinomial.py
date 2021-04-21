@@ -47,8 +47,10 @@ class multinomial():
         self.loss = loss_factory.create(pms.loss.type,
                                         pms = pms.loss)
 
-        # Optional previous version of network
-        if (self.save): self.prv = cp(self.net)
+        # Optional previous version of network and pdf
+        if (self.save):
+            self.prn = cp(self.net)
+            self.prp = None
 
     # Get actions
     def get_actions(self, obs):
@@ -83,7 +85,7 @@ class multinomial():
         policy = self.call(obs)
 
         # Sanitize
-        policy, norm  = tf.linalg.normalize(policy, ord=1)
+        policy, norm = tf.linalg.normalize(policy, ord=1)
 
         # Get pdf
         #self.pdf = tfd.Categorical(probs=policy)
@@ -100,19 +102,21 @@ class multinomial():
         return self.net.call(state)
 
     # Previous network forward pass
-    def call_prv(self, state):
+    def call_prn(self, state):
 
-        return self.prv.call(state)
+        return self.prn.call(state)
 
-    # Save network weights
-    def save_weights(self):
+    # Save previous policy
+    def save_prv(self):
 
-        self.weights = self.net.get_weights()
+        self.weights  = self.net.get_weights()
+        self.save_pdf = cp(self.pdf)
 
-    # Set previous network weights
-    def set_prv_weights(self):
+    # Set previous policy
+    def set_prv(self):
 
-        self.prv.set_weights(self.weights)
+        self.prn.set_weights(self.weights)
+        self.prp = cp(self.save_pdf)
 
     # Get current learning rate
     def get_lr(self):
@@ -124,4 +128,8 @@ class multinomial():
 
         self.net.reset()
         self.opt.reset()
-        if (self.save): self.prv.reset()
+        self.pdf = None
+
+        if (self.save):
+            self.prn.reset()
+            self.prp = None

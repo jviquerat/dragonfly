@@ -186,8 +186,8 @@ class ppo():
     # Training
     def train(self):
 
-        # Save policy weights
-        self.policy.save_weights()
+        # Save previous policy
+        self.policy.save_prv()
 
         # Train policy and v_value
         for epoch in range(self.n_epochs):
@@ -208,7 +208,7 @@ class ppo():
                 self.train_v_value(btc_obs, btc_tgt, end - start)
 
         # Update old policy
-        self.policy.set_prv_weights()
+        self.policy.set_prv()
 
     ################################
     ### Policy/value wrappings
