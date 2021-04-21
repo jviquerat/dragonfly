@@ -55,23 +55,11 @@ class multinomial():
     # Get actions
     def get_actions(self, obs):
 
-        # # Cast
-        # obs = tf.cast([obs], tf.float32)
-
-        # # Forward pass to get policy parameters
-        # policy_params = self.call(obs)
-
-        # # Sanitize output
-        # policy       = tf.cast(policy_params, tf.float64)
-        # policy, norm = tf.linalg.normalize(policy, ord=1)
-
         # Generate pdf
         self.compute_pdf(obs)
 
         # Sample actions
         actions = self.pdf.sample(1)
-        #actions       = actions.numpy()
-        #actions       = np.reshape(actions, (self.store_dim))
 
         return actions
 
