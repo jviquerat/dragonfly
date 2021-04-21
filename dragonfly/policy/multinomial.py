@@ -26,6 +26,7 @@ class multinomial():
         self.act_dim = act_dim
         self.obs_dim = obs_dim
         self.dim     = self.act_dim
+        self.pdf     = None
 
         # Define and init network
         # Force softmax activation, as this is multinomial policy
@@ -61,8 +62,8 @@ class multinomial():
         policy, norm = tf.linalg.normalize(policy, ord=1)
 
         # Get actions
-        pdf     = tfd.Multinomial(1, probs=policy)
-        actions = pdf.sample(1)
+        self.pdf = tfd.Multinomial(1, probs=policy)
+        actions  = self.pdf.sample(1)
 
         return actions
 
