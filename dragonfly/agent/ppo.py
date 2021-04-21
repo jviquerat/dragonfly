@@ -41,6 +41,10 @@ class ppo():
                                                   act_dim = act_dim,
                                                   pms     = pms.policy)
 
+        # act_dim is overwritten with policy.store_dim
+        # This allows compatibility between continuous and discrete envs
+        #self.act_dim = self.policy.store_dim
+
         # Build values
         pms.value.type = "v_value"
         self.v_value   = val_factory.create(pms.value.type,
@@ -90,7 +94,8 @@ class ppo():
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
-        act = np.zeros([self.n_cpu, self.act_dim])
+        act = np.zeros([self.n_cpu, self.act_dim],
+                       dtype=self.policy.store_type)
 
         # Loop over cpus
         for i in range(self.n_cpu):

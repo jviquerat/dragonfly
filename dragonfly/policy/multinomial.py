@@ -23,10 +23,12 @@ class multinomial():
         if hasattr(pms, "save"): self.save = pms.save
 
         # Fill structure
-        self.act_dim = act_dim
-        self.obs_dim = obs_dim
-        self.dim     = self.act_dim
-        self.pdf     = None
+        self.act_dim    = act_dim
+        self.obs_dim    = obs_dim
+        self.dim        = self.act_dim
+        self.store_dim  = 1
+        self.store_type = int
+        self.pdf        = None
 
         # Define and init network
         # Force softmax activation, as this is multinomial policy
