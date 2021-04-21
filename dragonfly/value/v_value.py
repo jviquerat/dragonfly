@@ -41,7 +41,7 @@ class v_value():
         obs = tf.cast(obs, tf.float32)
 
         # Predict values
-        values = np.array(self.call(obs))
+        values = np.array(self.call_net(obs))
 
         return values
 
@@ -51,7 +51,7 @@ class v_value():
         return self.loss.train(obs, tgt, size, self)
 
     # Network forward pass
-    def call(self, state):
+    def call_net(self, state):
 
         return self.net.call(state)
 

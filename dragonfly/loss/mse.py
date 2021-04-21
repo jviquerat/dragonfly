@@ -13,7 +13,7 @@ class mse():
         with tf.GradientTape() as tape:
 
             # Compute loss
-            val  = tf.convert_to_tensor(value.call(obs))
+            val  = tf.convert_to_tensor(value.call_net(obs))
             val  = tf.reshape(val, [btc])
             p1   = tf.square(tgt - val)
             loss = tf.reduce_mean(p1)

@@ -24,7 +24,7 @@ class ppo():
 
             # Compute ratio of probabilities
             prv_pol  = tf.convert_to_tensor(policy.call_prn(obs))
-            pol      = tf.convert_to_tensor(policy.call(obs))
+            pol      = tf.convert_to_tensor(policy.call_net(obs))
             new_prob = tf.reduce_sum(act*pol,     axis=1)
             prv_prob = tf.reduce_sum(act*prv_pol, axis=1)
             new_log  = tf.math.log(new_prob + ppo_eps)

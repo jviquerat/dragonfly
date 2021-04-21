@@ -82,7 +82,7 @@ class multinomial():
         obs = tf.cast([obs], tf.float32)
 
         # Forward pass to get policy parameters
-        policy = self.call(obs)
+        policy = self.call_net(obs)
 
         # Sanitize
         policy, norm = tf.linalg.normalize(policy, ord=1)
@@ -97,7 +97,7 @@ class multinomial():
         return self.loss.train(obs, adv, act, self)
 
     # Network forward pass
-    def call(self, state):
+    def call_net(self, state):
 
         return self.net.call(state)
 
