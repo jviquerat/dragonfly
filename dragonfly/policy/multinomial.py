@@ -100,11 +100,39 @@ class multinomial():
         self.weights  = self.net.get_weights()
         self.save_pdf = cp(self.pdf)
 
+        # On first call, prp is not initialized yet
+        if (self.prp) is None:
+            self.prp = cp(self.pdf)
+
     # Set previous policy
     def set_prv(self):
 
         self.prn.set_weights(self.weights)
         self.prp = cp(self.save_pdf)
+
+    # Get logprob
+    def logprob(self, act):
+
+        return self.pdf.log_prob(tf.cast(act, tf.float32))
+
+    # Get old logprob
+    def prv_logprob(self, act):
+
+        # On first call, prp is not initialized yet
+        #if (self.prp) is None:
+        #    self.prp = cp(self.pdf)
+
+        return self.prp.log_prob(tf.cast(act, tf.float32))
+
+    # Get entropy
+    def entropy(self):
+
+        return self.pdf.entropy()
+
+    # Get kl-div with prv policy
+    def kl_div(self):
+
+        return self.pdf.kl_divergence(self.prp)
 
     # Get current learning rate
     def get_lr(self):
