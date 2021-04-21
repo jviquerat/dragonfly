@@ -53,21 +53,41 @@ class multinomial():
     # Get actions
     def get_actions(self, obs):
 
+        # # Cast
+        # obs = tf.cast([obs], tf.float32)
+
+        # # Forward pass to get policy parameters
+        # policy_params = self.call(obs)
+
+        # # Sanitize output
+        # policy       = tf.cast(policy_params, tf.float64)
+        # policy, norm = tf.linalg.normalize(policy, ord=1)
+
+        # Generate pdf
+        self.compute_pdf(obs)
+
+        # Sample actions
+        actions = self.pdf.sample(1)
+        #actions       = actions.numpy()
+        #actions       = np.reshape(actions, (self.store_dim))
+
+        return actions
+
+    # Compute pdf
+    def compute_pdf(self, obs):
+
         # Cast
         obs = tf.cast([obs], tf.float32)
 
         # Forward pass to get policy parameters
-        policy_params = self.call(obs)
+        policy = self.call(obs)
 
-        # Sanitize output
-        policy       = tf.cast(policy_params, tf.float64)
-        policy, norm = tf.linalg.normalize(policy, ord=1)
+        # Sanitize
+        policy, norm  = tf.linalg.normalize(policy, ord=1)
 
-        # Get actions
+        # Get pdf
+        #self.pdf = tfd.Categorical(probs=policy)
         self.pdf = tfd.Multinomial(1, probs=policy)
-        actions  = self.pdf.sample(1)
-
-        return actions
 
     # Call loss for training
     def train(self, obs, adv, act):
