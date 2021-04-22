@@ -169,7 +169,11 @@ def worker(env_name, name, pipe, p_pipe, path):
             if command == 'render':
                 pipe.send(env.render(mode='rgb_array'))
             if (command == 'get_dims'):
-                act_dim = env.action_space.n
+                # Discrete or continuous action space
+                if hasattr(env.action_space, "n"):
+                    act_dim = env.action_space.n
+                else:
+                    act_dim = env.action_space.shape[0]
                 obs_dim = env.observation_space.shape[0]
                 pipe.send((act_dim, obs_dim))
             if (command == 'set_cpu'):
