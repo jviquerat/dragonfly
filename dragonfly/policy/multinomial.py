@@ -72,15 +72,15 @@ class multinomial():
         obs = tf.cast([obs], tf.float32)
 
         # Get pdf
-        policy       = self.call_net(obs)
-        policy, norm = tf.linalg.normalize(policy, ord=1)
-        pdf          = tfd.Categorical(probs=policy)
+        probs       = self.call_net(obs)
+        probs, norm = tf.linalg.normalize(probs, ord=1)
+        pdf         = tfd.Categorical(probs=probs)
 
         # If previous pdf is needed
         if previous:
-            policy       = self.call_prn(obs)
-            policy, norm = tf.linalg.normalize(policy, ord=1)
-            prp          = tfd.Categorical(probs=policy)
+            probs       = self.call_prn(obs)
+            probs, norm = tf.linalg.normalize(probs, ord=1)
+            prp         = tfd.Categorical(probs=probs)
 
             return pdf, prp
         else:

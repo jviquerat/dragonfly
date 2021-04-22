@@ -18,25 +18,15 @@ class ppo():
         if hasattr(pms, "ent_coef"): self.ent_coef = pms.ent_coef
 
     # Train
-    #@tf.function
+    @tf.function
     def train(self, obs, adv, act, policy):
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
             pdf, prp = policy.compute_pdf(obs, True)
-            #print(pdf)
-            act = tf.cast(act, tf.int32)
+            act      = tf.reshape(act, [-1])
             lgp      = pdf.log_prob(act)
             prv_lgp  = prp.log_prob(act)
-
-            print(act)
-            #print(len(act))
-            print(lgp)
-
-            #lgp      = pdf.log_prob(act)
-            #prv_lgp  = prp.log_prob(act)
-
-            #print(lgp)
             ratio    = tf.exp(lgp - prv_lgp)
 
             # Compute actor loss
@@ -48,24 +38,17 @@ class ppo():
             loss_ppo =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss
-            #entropy      = tf.multiply(pol,tf.math.log(pol + ppo_eps))
-            #entropy      =-tf.reduce_sum(entropy, axis=1)
-
-            #entropy      = pdf.entropy()
-            #entropy      = tf.reduce_mean(entropy)
-            #loss_entropy =-entropy
-
-            entropy=0.0
+            entropy      = pdf.entropy()
+            entropy      = tf.reshape(entropy, [-1])
+            entropy      = tf.reduce_mean(entropy, axis=0)
+            loss_entropy =-entropy
 
             # Compute total loss
-            loss = loss_ppo# + self.ent_coef*loss_entropy
+            loss = loss_ppo + self.ent_coef*loss_entropy
 
             # Compute KL div
-            #kl = pdf.kl_divergence(prp)
-            #kl = tf.math.log(pol + ppo_eps) - tf.math.log(prv_pol + ppo_eps)
-            #kl = 0.5*tf.reduce_mean(tf.square(kl))
-
-            kl = 0.0
+            kl = pdf.kl_divergence(prp)
+            kl = tf.reduce_mean(kl)
 
             # Apply gradients
             pol_var = policy.net.trainable_variables
