@@ -56,7 +56,7 @@ class multinomial():
     def get_actions(self, obs):
 
         # Generate pdf
-        self.compute_pdf(obs)
+        self.pdf = self.compute_pdf(obs, False)
 
         # Sample actions
         actions = self.pdf.sample(1)
@@ -64,20 +64,28 @@ class multinomial():
         return actions
 
     # Compute pdf
-    def compute_pdf(self, obs):
+    def compute_pdf(self, obs, previous=False):
 
         # Cast
         obs = tf.cast([obs], tf.float32)
 
-        # Forward pass to get policy parameters
-        policy = self.call_net(obs)
-
-        # Sanitize
+        # Get pdf
+        policy       = self.call_net(obs)
         policy, norm = tf.linalg.normalize(policy, ord=1)
+        pdf          = tfd.Multinomial(1, probs=policy)
+
+        # If previous pdf is needed
+        if previous:
+            policy       = self.call_prn(obs)
+            policy, norm = tf.linalg.normalize(policy, ord=1)
+            prp          = tfd.Multinomial(1, probs=policy)
+
+            return pdf, prp
+        else:
+            return pdf
 
         # Get pdf
         #self.pdf = tfd.Categorical(probs=policy)
-        self.pdf = tfd.Multinomial(1, probs=policy)
 
     # Call loss for training
     def train(self, obs, adv, act):
@@ -110,21 +118,6 @@ class multinomial():
         self.prn.set_weights(self.weights)
         self.prp = cp(self.save_pdf)
 
-    # Get logprob
-    def logprob(self, act):
-
-        return self.pdf.log_prob(tf.cast(act, tf.float32))
-
-    # Get old logprob
-    def prv_logprob(self, act):
-
-        # On first call, prp is not initialized yet
-        #if (self.prp) is None:
-        #    self.prp = cp(self.pdf)
-
-        return self.prp.log_prob(tf.cast(act, tf.float32))
-
-    # Get entropy
     def entropy(self):
 
         return self.pdf.entropy()

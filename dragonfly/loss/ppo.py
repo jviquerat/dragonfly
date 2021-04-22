@@ -23,34 +23,38 @@ class ppo():
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
-            prv_pol  = tf.convert_to_tensor(policy.call_prn(obs))
-            pol      = tf.convert_to_tensor(policy.call_net(obs))
-            new_prob = tf.reduce_sum(act*pol,     axis=1)
-            prv_prob = tf.reduce_sum(act*prv_pol, axis=1)
-            new_log  = tf.math.log(new_prob + ppo_eps)
-            old_log  = tf.math.log(prv_prob + ppo_eps)
-            ratio    = tf.exp(new_log - old_log)
+            pdf, prp = policy.compute_pdf(obs, True)
+            lgp      = pdf.log_prob(act)
+            prv_lgp  = prp.log_prob(act)
+            ratio    = tf.exp(lgp - prv_lgp)
 
             # Compute actor loss
-            p1         = tf.multiply(adv,ratio)
-            p2         = tf.clip_by_value(ratio,
-                                          1.0-self.pol_clip,
-                                          1.0+self.pol_clip)
-            p2         = tf.multiply(adv,p2)
-            loss_ppo   =-tf.reduce_mean(tf.minimum(p1,p2))
+            p1       = tf.multiply(adv,ratio)
+            p2       = tf.clip_by_value(ratio,
+                                        1.0-self.pol_clip,
+                                        1.0+self.pol_clip)
+            p2       = tf.multiply(adv,p2)
+            loss_ppo =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss
-            entropy      = tf.multiply(pol,tf.math.log(pol + ppo_eps))
-            entropy      =-tf.reduce_sum(entropy, axis=1)
-            entropy      = tf.reduce_mean(entropy)
-            loss_entropy =-entropy
+            #entropy      = tf.multiply(pol,tf.math.log(pol + ppo_eps))
+            #entropy      =-tf.reduce_sum(entropy, axis=1)
+
+            #entropy      = pdf.entropy()
+            #entropy      = tf.reduce_mean(entropy)
+            #loss_entropy =-entropy
+
+            entropy=0.0
 
             # Compute total loss
-            loss = loss_ppo + self.ent_coef*loss_entropy
+            loss = loss_ppo# + self.ent_coef*loss_entropy
 
             # Compute KL div
-            kl = tf.math.log(pol + ppo_eps) - tf.math.log(prv_pol + ppo_eps)
-            kl = 0.5*tf.reduce_mean(tf.square(kl))
+            #kl = pdf.kl_divergence(prp)
+            #kl = tf.math.log(pol + ppo_eps) - tf.math.log(prv_pol + ppo_eps)
+            #kl = 0.5*tf.reduce_mean(tf.square(kl))
+
+            kl = 0.0
 
             # Apply gradients
             pol_var = policy.net.trainable_variables
