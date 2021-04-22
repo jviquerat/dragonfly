@@ -7,7 +7,7 @@
     "n_cpu": 1,
     "render_every": 500,
     "policy": {
-        "type": "multinomial",
+        "type": "categorical",
         "network": {
             "type": "fc",
             "arch": [16,16]

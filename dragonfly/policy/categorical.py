@@ -9,11 +9,11 @@ from dragonfly.optimizer.optimizer import *
 from dragonfly.loss.loss           import *
 
 ###############################################
-### Multinomial policy class (discrete)
+### Categorical policy class (discrete)
 ### obs_dim : input  dimension
 ### act_dim : output dimension
 ### pms     : parameters
-class multinomial():
+class categorical():
     def __init__(self, obs_dim, act_dim, pms):
 
         # Set default values
