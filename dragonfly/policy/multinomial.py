@@ -60,8 +60,8 @@ class multinomial():
 
         # Sample actions
         actions = self.pdf.sample(1)
-        actions       = actions.numpy()
-        actions       = np.reshape(actions, (self.store_dim))
+        actions = actions.numpy()
+        actions = np.reshape(actions, (self.store_dim))
 
         return actions
 

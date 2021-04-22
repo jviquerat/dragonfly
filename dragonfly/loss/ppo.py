@@ -18,14 +18,20 @@ class ppo():
         if hasattr(pms, "ent_coef"): self.ent_coef = pms.ent_coef
 
     # Train
-    @tf.function
+    #@tf.function
     def train(self, obs, adv, act, policy):
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
             pdf, prp = policy.compute_pdf(obs, True)
-            lgp      = tf.reduce_sum(pdf.log_prob(act),     axis=1)
-            prv_lgp  = tf.reduce_sum(prp.log_prob(act),     axis=1)
+            #print(pdf)
+            act = tf.cast(act, tf.int32)
+            lgp      = pdf.log_prob(act)
+            prv_lgp  = prp.log_prob(act)
+
+            print(act)
+            #print(len(act))
+            print(lgp)
 
             #lgp      = pdf.log_prob(act)
             #prv_lgp  = prp.log_prob(act)
