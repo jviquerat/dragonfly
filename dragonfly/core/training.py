@@ -21,7 +21,7 @@ def launch_training(path, run, env, agent):
 
             # Make one iteration
             act            = agent.get_actions(obs)
-            nxt, rwd, done = env.step(np.argmax(act, axis=1))
+            nxt, rwd, done = env.step(act)
 
             # Handle termination state
             trm, done      = agent.handle_term(done)

@@ -18,7 +18,7 @@ class ppo():
         if hasattr(pms, "ent_coef"): self.ent_coef = pms.ent_coef
 
     # Train
-    @tf.function
+    #@tf.function
     def train(self, obs, adv, act, policy):
         with tf.GradientTape() as tape:
 
@@ -26,6 +26,8 @@ class ppo():
             pdf, prp = policy.compute_pdf(obs, True)
             lgp      = pdf.log_prob(act)
             prv_lgp  = prp.log_prob(act)
+
+            print(lgp, prv_lgp)
             ratio    = tf.exp(lgp - prv_lgp)
 
             # Compute actor loss

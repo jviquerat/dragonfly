@@ -60,6 +60,8 @@ class multinomial():
 
         # Sample actions
         actions = self.pdf.sample(1)
+        actions       = actions.numpy()
+        actions       = np.reshape(actions, (self.store_dim))
 
         return actions
 
@@ -72,20 +74,17 @@ class multinomial():
         # Get pdf
         policy       = self.call_net(obs)
         policy, norm = tf.linalg.normalize(policy, ord=1)
-        pdf          = tfd.Multinomial(1, probs=policy)
+        pdf          = tfd.Categorical(probs=policy)
 
         # If previous pdf is needed
         if previous:
             policy       = self.call_prn(obs)
             policy, norm = tf.linalg.normalize(policy, ord=1)
-            prp          = tfd.Multinomial(1, probs=policy)
+            prp          = tfd.Categorical(probs=policy)
 
             return pdf, prp
         else:
             return pdf
-
-        # Get pdf
-        #self.pdf = tfd.Categorical(probs=policy)
 
     # Call loss for training
     def train(self, obs, adv, act):

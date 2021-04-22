@@ -43,7 +43,7 @@ class ppo():
 
         # act_dim is overwritten with policy.store_dim
         # This allows compatibility between continuous and discrete envs
-        #self.act_dim = self.policy.store_dim
+        self.act_dim = self.policy.store_dim
 
         # Build values
         pms.value.type = "v_value"
@@ -101,6 +101,10 @@ class ppo():
         for i in range(self.n_cpu):
             obs      = observations[i]
             act[i,:] = self.policy.get_actions(obs)
+
+        # If there is a single cpu, remove external brackets
+        if (self.n_cpu == 1):
+            act = np.reshape(act, (self.act_dim))
 
         return act
 
