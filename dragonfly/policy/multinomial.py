@@ -117,15 +117,6 @@ class multinomial():
         self.prn.set_weights(self.weights)
         self.prp = cp(self.save_pdf)
 
-    def entropy(self):
-
-        return self.pdf.entropy()
-
-    # Get kl-div with prv policy
-    def kl_div(self):
-
-        return self.pdf.kl_divergence(self.prp)
-
     # Get current learning rate
     def get_lr(self):
 
