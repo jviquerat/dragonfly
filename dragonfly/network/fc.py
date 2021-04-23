@@ -17,11 +17,7 @@ from   tensorflow.keras.initializers import Orthogonal
 ### Fully-connected network class
 ### inp_dim  : dimension of input  layer
 ### out_dim  : dimension of output layer
-### arch     : architecture of densely connected network
-### hid_init : hidden layer kernel initializer
-### fnl_init : final  layer kernel initializer
-### hid_act  : hidden layer activation function
-### fnl_act  : final  layer activation function
+### pms      : network parameters
 class fc(Model):
     def __init__(self, inp_dim, out_dim, pms):
         super().__init__()
@@ -31,31 +27,49 @@ class fc(Model):
         self.out_dim = out_dim
 
         # Set default values
-        self.arch     = [32,32]
-        self.hid_init = Orthogonal(gain=1.0)
-        self.fnl_init = Orthogonal(gain=0.01)
-        self.hid_actv = "tanh"
-        self.fnl_actv = "linear"
+        self.trunk.arch     = [32,32]
+        self.trunk.actv     = "tanh"
+        self.heads.nb       = 1
+        self.heads.arch     = [[4]]
+        self.heads.actv     = ["tanh"]
+        self.heads.final    = ["linear"]
+        self.hid_init       = Orthogonal(gain=1.0)
+        self.fnl_init       = Orthogonal(gain=0.01)
 
         # Check inputs
-        if hasattr(pms, "arch"):     self.arch     = pms.arch
-        if hasattr(pms, "hid_init"): self.hid_init = pms.hid_init
-        if hasattr(pms, "fnl_init"): self.fnl_init = pms.fnl_init
-        if hasattr(pms, "hid_actv"): self.hid_actv = pms.hid_actv
-        if hasattr(pms, "fnl_actv"): self.fnl_actv = pms.fnl_actv
+        if hasattr(pms,       "trunk"): self.trunk       = pms.trunk
+        if hasattr(pms.trunk, "arch"):  self.trunk.arch  = pms.trunk.arch
+        if hasattr(pms.trunk, "actv"):  self.trunk.actv  = pms.trunk.actv
+        if hasattr(pms,       "heads"): self.heads       = pms.heads
+        if hasattr(pms.heads, "nb"):    self.heads.nb    = pms.heads.nb
+        if hasattr(pms.heads, "arch"):  self.heads.arch  = pms.heads.arch
+        if hasattr(pms.heads, "actv"):  self.heads.actv  = pms.heads.actv
+        if hasattr(pms.heads, "final"): self.heads.final = pms.heads.final
+
+        # Check that out_dim and heads have same dimension
+        if (len(self.out_dim) /= self.pms.heads.nb):
+            print("Input error in fc network")
+            print("Out_dim and heads should have same dimension")
+            exit()
 
         # Initialize network
         self.net = []
 
-        # Define hidden layers
-        for layer in range(len(self.arch)):
-            self.net.append(Dense(self.arch[layer],
+        # Define trunk
+        for l in range(len(self.trunk.arch)):
+            self.net.append(Dense(self.trunk.arch[l],
                                   kernel_initializer = self.hid_init,
-                                  activation         = self.hid_actv))
-        # Define last layer
-        self.net.append(Dense(self.out_dim,
-                              kernel_initializer = self.fnl_init,
-                              activation         = self.fnl_actv))
+                                  activation         = self.trunk.actv))
+
+        # Define heads
+        for h in range(self.heads.nb):
+            for l in range(len(self.heads.arch[h])):
+                self.net.append(Dense(self.heads.arch[h][l],
+                                      kernel_initializer = self.hid_init,
+                                      activation         = self.heads.actv[h]))
+            self.net.append(Dense(self.out_dim[h],
+                                  kernel_initializer = self.fnl_init,
+                                  activation         = self.heads.final[h]))
 
         # Initialize weights
         dummy = self.call(tf.ones([1,self.inp_dim]))
@@ -66,11 +80,21 @@ class fc(Model):
     # Network forward pass
     def call(self, var):
 
-        # Compute output
-        for layer in range(len(self.net)):
-            var = self.net[layer](var)
+        # Compute trunk
+        for l in range(len(self.trunk.arch)):
+            var = self.net[l](var)
 
-        return var
+        # Compute heads
+        cl  = len(self.trunk.arch)
+        out = []
+        for h in range(self.heads.nb):
+            hvar = var
+            for l in range(len(self.heads.arch[h])):
+                hvar = self.net[cl+l](hvar)
+            cl  += len(self.heads.arch[h])
+            out += hvar
+
+        return out
 
     # Reset weights
     def reset(self):

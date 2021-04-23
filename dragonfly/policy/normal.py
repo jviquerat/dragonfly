@@ -47,23 +47,12 @@ class normal():
                                          pms     = pms.sg_network)
 
         # Define trainable variables
-        self.trainable = tf.concat([self.mu_net.trainable_variables,
-                                    self.sg_net.trainable_variables], 0)
-
-        print(self.trainable)
+        self.trainable = self.mu_net.trainable_variables+self.sg_net.trainable_variables
 
         # Define optimizers
-        #self.mu_opt = opt_factory.create(pms.optimizer.type,
-        #                                 pms       = pms.optimizer,
-        #                                 grad_vars = self.mu_net.trainable_weights)
-
         self.opt = opt_factory.create(pms.optimizer.type,
                                       pms       = pms.optimizer,
                                       grad_vars = self.trainable)
-
-        #self.sg_opt = opt_factory.create(pms.optimizer.type,
-        #                                 pms       = pms.optimizer,
-        #                                 grad_vars = self.sg_net.trainable_weights)
 
         # Define loss
         self.loss = loss_factory.create(pms.loss.type,
@@ -82,7 +71,7 @@ class normal():
         self.pdf = self.compute_pdf(obs, False)
 
         # Sample actions
-        actions = self.pdf.sample(self.act_dim)
+        actions = 2.0*self.pdf.sample(self.act_dim)
         #actions = actions.numpy()
         #actions = np.reshape(actions, (self.store_dim))
 
@@ -158,8 +147,9 @@ class normal():
 
         self.mu_net.reset()
         self.sg_net.reset()
-        self.mu_opt.reset()
-        self.sg_opt.reset()
+        #self.mu_opt.reset()
+        #self.sg_opt.reset()
+        self.opt.reset()
         self.pdf = None
 
         if (self.save):

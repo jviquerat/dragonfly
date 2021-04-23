@@ -35,7 +35,7 @@ class categorical():
         pms.network.fnl_actv = "softmax"
         self.net = net_factory.create(pms.network.type,
                                       inp_dim = obs_dim,
-                                      out_dim = self.dim,
+                                      out_dim = [self.dim],
                                       pms     = pms.network)
 
         # Define optimizer

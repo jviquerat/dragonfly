@@ -10,7 +10,16 @@
         "type": "categorical",
         "network": {
             "type": "fc",
-            "arch": [16,16]
+            "trunk": {
+                "arch": [16,16],
+                "actv": "tanh"
+            }
+            "heads": {
+                "nb": 1,
+                "arch": [[4]],
+                "actv": ["tanh"],
+                "final": ["softmax"]
+            }
         },
         "optimizer": {
             "type": "nadam",
@@ -27,7 +36,16 @@
         "type": "v_value",
         "network": {
             "type": "fc",
-            "arch": [16,16]
+            "trunk": {
+                "arch": [16,16],
+                "actv": "tanh"
+            }
+            "heads": {
+                "nb": 1,
+                "arch": [[4]],
+                "actv": ["tanh"],
+                "final": ["linear"]
+            }
         },
         "optimizer": {
             "type": "nadam",
