@@ -13,6 +13,9 @@ from   tensorflow.keras              import Model
 from   tensorflow.keras.layers       import Dense
 from   tensorflow.keras.initializers import Orthogonal
 
+# Custom imports
+from   dragonfly.network.tree        import *
+
 ###############################################
 ### Fully-connected network class
 ### inp_dim  : dimension of input  layer
@@ -27,8 +30,10 @@ class fc(Model):
         self.out_dim = out_dim
 
         # Set default values
+        self.trunk          = trunk()
         self.trunk.arch     = [32,32]
         self.trunk.actv     = "tanh"
+        self.heads          = heads()
         self.heads.nb       = 1
         self.heads.arch     = [[4]]
         self.heads.actv     = ["tanh"]
@@ -47,7 +52,7 @@ class fc(Model):
         if hasattr(pms.heads, "final"): self.heads.final = pms.heads.final
 
         # Check that out_dim and heads have same dimension
-        if (len(self.out_dim) /= self.pms.heads.nb):
+        if (len(self.out_dim) != pms.heads.nb):
             print("Input error in fc network")
             print("Out_dim and heads should have same dimension")
             exit()
@@ -80,19 +85,24 @@ class fc(Model):
     # Network forward pass
     def call(self, var):
 
+        # Initialize
+        i   = 0
+        out = []
+
         # Compute trunk
         for l in range(len(self.trunk.arch)):
             var = self.net[l](var)
+            i  += 1
 
         # Compute heads
-        cl  = len(self.trunk.arch)
-        out = []
         for h in range(self.heads.nb):
             hvar = var
             for l in range(len(self.heads.arch[h])):
-                hvar = self.net[cl+l](hvar)
-            cl  += len(self.heads.arch[h])
-            out += hvar
+                hvar = self.net[i](hvar)
+                i   += 1
+            hvar = self.net[i](hvar)
+            i   += 1
+            out.append(hvar)
 
         return out
 

@@ -37,9 +37,9 @@ class par_buff:
 ### buff_size : max buffer size
 class loc_buff:
     def __init__(self, n_cpu, obs_dim, act_dim, buff_size):
-        self.n_cpu   = n_cpu
-        self.obs_dim = obs_dim
-        self.act_dim = act_dim
+        self.n_cpu     = n_cpu
+        self.obs_dim   = obs_dim
+        self.act_dim   = act_dim
         self.buff_size = buff_size
         self.reset()
 

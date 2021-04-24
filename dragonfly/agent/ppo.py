@@ -103,8 +103,8 @@ class ppo():
             act[i,:] = self.policy.get_actions(obs)
 
         # If there is a single cpu, remove external brackets
-        #if (self.n_cpu == 1):
-        #    act = np.reshape(act, (self.act_dim))
+        if (self.n_cpu == 1):
+            act = np.reshape(act, (self.act_dim))
 
         return act
 

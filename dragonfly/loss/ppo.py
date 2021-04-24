@@ -24,7 +24,7 @@ class ppo():
 
             # Compute ratio of probabilities
             pdf, prp = policy.compute_pdf(obs, True)
-            #act      = tf.reshape(act, [-1])
+            act      = tf.reshape(act, [-1])
             lgp      = pdf.log_prob(act)
             prv_lgp  = prp.log_prob(act)
             ratio    = tf.exp(lgp - prv_lgp)

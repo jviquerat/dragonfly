@@ -13,7 +13,7 @@
             "trunk": {
                 "arch": [16,16],
                 "actv": "tanh"
-            }
+            },
             "heads": {
                 "nb": 1,
                 "arch": [[4]],
@@ -39,7 +39,7 @@
             "trunk": {
                 "arch": [16,16],
                 "actv": "tanh"
-            }
+            },
             "heads": {
                 "nb": 1,
                 "arch": [[4]],
