@@ -3,7 +3,7 @@
     "agent": "ppo",
     "ep_end": 200,
     "n_ep": 300,
-    "n_avg": 2,
+    "n_avg": 5,
     "n_cpu": 1,
     "render_every": 500,
     "policy": {
@@ -16,7 +16,7 @@
             },
             "heads": {
                 "nb": 1,
-                "arch": [[4]],
+                "arch": [[]],
                 "actv": ["tanh"],
                 "final": ["softmax"]
             }
@@ -29,7 +29,7 @@
         "loss": {
             "type": "ppo",
             "pol_clip": 0.1,
-            "ent_coef": 0.01
+            "ent_coef": 0.2
         }
     },
     "value": {
@@ -42,7 +42,7 @@
             },
             "heads": {
                 "nb": 1,
-                "arch": [[4]],
+                "arch": [[]],
                 "actv": ["tanh"],
                 "final": ["linear"]
             }

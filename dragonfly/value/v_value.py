@@ -42,6 +42,7 @@ class v_value():
 
         # Predict values
         values = np.array(self.call_net(obs))
+        values = np.reshape(values, (-1,1))
 
         return values
 

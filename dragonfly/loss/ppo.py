@@ -18,7 +18,7 @@ class ppo():
         if hasattr(pms, "ent_coef"): self.ent_coef = pms.ent_coef
 
     # Train
-    #@tf.function
+    @tf.function
     def train(self, obs, adv, act, policy):
         with tf.GradientTape() as tape:
 
@@ -51,7 +51,7 @@ class ppo():
             kl = tf.reduce_mean(kl)
 
             # Apply gradients
-            pol_var = policy.trainable
+            pol_var = policy.net.trainable_variables
             grads   = tape.gradient(loss, pol_var)
             norm    = tf.linalg.global_norm(grads)
         policy.opt.apply_grads(zip(grads, pol_var))

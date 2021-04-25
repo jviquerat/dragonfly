@@ -101,9 +101,9 @@ class glb_buff:
 
     def reset(self):
         self.obs  = np.empty([0,self.obs_dim])
+        self.act  = np.empty([0,self.act_dim])
         self.adv  = np.empty([0,1])
         self.tgt  = np.empty([0,1])
-        self.act  = np.empty([0,self.act_dim])
         self.size = 0
 
     def store(self, obs, adv, tgt, act):
