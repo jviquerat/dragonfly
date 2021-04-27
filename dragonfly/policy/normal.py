@@ -29,30 +29,20 @@ class normal():
         self.store_dim  = self.act_dim
         self.store_type = float
         self.pdf        = None
+        self.kind       = "continuous"
 
-        # Define and init mu network
+        # Define and init network
         # Force tanh activation, as this is normal policy
-        pms.mu_network.fnl_actv = "tanh"
-        self.mu_net = net_factory.create(pms.mu_network.type,
-                                         inp_dim = obs_dim,
-                                         out_dim = self.dim,
-                                         pms     = pms.mu_network)
-
-        # Define and init sg network
-        # Force sigmoid activation, as this is normal policy
-        pms.sg_network.fnl_actv = "softplus"
-        self.sg_net = net_factory.create(pms.sg_network.type,
-                                         inp_dim = obs_dim,
-                                         out_dim = self.dim,
-                                         pms     = pms.sg_network)
-
-        # Define trainable variables
-        self.trainable = self.mu_net.trainable_variables+self.sg_net.trainable_variables
+        pms.network.heads.final = ["tanh","sigmoid"]
+        self.net = net_factory.create(pms.network.type,
+                                      inp_dim = obs_dim,
+                                      out_dim = [self.dim,self.dim],
+                                      pms     = pms.network)
 
         # Define optimizers
         self.opt = opt_factory.create(pms.optimizer.type,
                                       pms       = pms.optimizer,
-                                      grad_vars = self.trainable)
+                                      grad_vars = self.net.trainable_weights)
 
         # Define loss
         self.loss = loss_factory.create(pms.loss.type,
@@ -60,8 +50,7 @@ class normal():
 
         # Optional previous version of networks
         if (self.save):
-            self.mu_prn = cp(self.mu_net)
-            self.sg_prn = cp(self.sg_net)
+            self.prn = cp(self.net)
             self.prp = None
 
     # Get actions
@@ -71,9 +60,10 @@ class normal():
         self.pdf = self.compute_pdf(obs, False)
 
         # Sample actions
-        actions = 2.0*self.pdf.sample(self.act_dim)
-        #actions = actions.numpy()
-        #actions = np.reshape(actions, (self.store_dim))
+        actions = self.pdf.sample(self.act_dim)
+        actions = actions.numpy()
+        actions = np.clip(actions, -1.0, 1.0)
+        actions = np.reshape(actions, (self.store_dim))
 
         return actions
 
@@ -84,15 +74,15 @@ class normal():
         obs = tf.cast([obs], tf.float32)
 
         # Get pdf
-        mu, sg = self.call_nets(obs)
+        mu, sg = self.call_net(obs)
         pdf    = tfd.MultivariateNormalDiag(loc        = mu,
                                             scale_diag = sg)
 
         # If previous pdf is needed
         if previous:
-            pmu, psg = self.call_prns(obs)
-            prp      = tfd.MultivariateNormalDiag(loc        = mu,
-                                                  scale_diag = sg)
+            pmu, psg = self.call_prn(obs)
+            prp      = tfd.MultivariateNormalDiag(loc        = pmu,
+                                                  scale_diag = psg)
 
             return pdf, prp
         else:
@@ -104,27 +94,28 @@ class normal():
         return self.loss.train(obs, adv, act, self)
 
     # Networks forward pass
-    def call_nets(self, state):
+    def call_net(self, state):
 
-        mu  = self.mu_net.call(state)
-        sg  = self.sg_net.call(state)
+        out = self.net.call(state)
+        mu  = out[:self.act_dim]
+        sg  = out[self.act_dim:]
 
         return mu, sg
 
     # Previous networks forward pass
-    def call_prns(self, state):
+    def call_prn(self, state):
 
-        pmu = self.mu_prn.call(state)
-        psg = self.sg_prn.call(state)
+        out = self.prn.call(state)
+        pmu = out[:self.act_dim]
+        psg = out[self.act_dim:]
 
         return pmu, psg
 
     # Save previous policy
     def save_prv(self):
 
-        self.mu_weights = self.mu_net.get_weights()
-        self.sg_weights = self.sg_net.get_weights()
-        self.save_pdf   = cp(self.pdf)
+        self.weights  = self.net.get_weights()
+        self.save_pdf = cp(self.pdf)
 
         # On first call, prp is not initialized yet
         if (self.prp) is None:
@@ -133,8 +124,7 @@ class normal():
     # Set previous policy
     def set_prv(self):
 
-        self.mu_prn.set_weights(self.mu_weights)
-        self.sg_prn.set_weights(self.sg_weights)
+        self.prn.set_weights(self.weights)
         self.prp = cp(self.save_pdf)
 
     # Get current learning rate
@@ -145,15 +135,11 @@ class normal():
     # Reset
     def reset(self):
 
-        self.mu_net.reset()
-        self.sg_net.reset()
-        #self.mu_opt.reset()
-        #self.sg_opt.reset()
+        self.net.reset()
         self.opt.reset()
         self.pdf = None
 
         if (self.save):
-            self.mu_prn.reset()
-            self.sg_prn.reset()
+            self.prn.reset()
             self.prp = None
 

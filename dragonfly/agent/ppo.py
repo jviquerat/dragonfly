@@ -102,9 +102,11 @@ class ppo():
             obs      = observations[i]
             act[i,:] = self.policy.get_actions(obs)
 
-        # If there is a single cpu, remove external brackets
-        if (self.n_cpu == 1):
-            act = np.reshape(act, (self.act_dim))
+        # Reshape actions depending on policy type
+        if (self.policy.kind == "discrete"):
+            act = np.reshape(act, (-1))
+        if (self.policy.kind == "continuous"):
+            act = np.reshape(act, (-1,self.act_dim))
 
         return act
 

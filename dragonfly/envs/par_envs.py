@@ -34,6 +34,8 @@ class par_envs:
         act_dim, obs_dim = self.get_dims()
         self.act_dim = int(act_dim)
         self.obs_dim = int(obs_dim)
+        self.obs_min, self.obs_max = self.get_obs_bounds()
+        self.act_min, self.act_max = self.get_act_bounds()
 
         # Set cpu indices
         self.set_cpus()
@@ -45,27 +47,33 @@ class par_envs:
         for cpu in range(self.n_cpu):
             self.p_pipes[cpu].send(('reset', None))
 
-        # Receive
+        # Receive and normalize
         results = np.array([])
         for cpu in range(self.n_cpu):
-            results = np.append(results, self.p_pipes[cpu].recv())
+            obs = self.p_pipes[cpu].recv()
+            for i in range(len(obs)):
+                if (obs[i] >= 0.0): obs[i] /= self.obs_max[i]
+                if (obs[i] <  0.0): obs[i] /= self.obs_min[i]
+            results = np.append(results, obs)
 
         return np.reshape(results, (-1,self.obs_dim))
 
     # Reset based on a done array
-    def reset(self, done, obs):
+    def reset(self, done, obs_array):
 
         # Send
         for cpu in range(self.n_cpu):
             if (done[cpu]):
                 self.p_pipes[cpu].send(('reset', None))
 
-        # Receive
+        # Receive and normalize
         for cpu in range(self.n_cpu):
             if (done[cpu]):
-                results  = np.array([])
-                results  = np.append(results, self.p_pipes[cpu].recv())
-                obs[cpu] = np.reshape(results, (-1,self.obs_dim))
+                obs = self.p_pipes[cpu].recv()
+                for i in range(len(obs)):
+                    if (obs[i] >= 0.0): obs[i] /= self.obs_max[i]
+                    if (obs[i] <  0.0): obs[i] /= self.obs_min[i]
+                obs_array[cpu] = obs
 
     # Get environment dimensions
     def get_dims(self):
@@ -78,6 +86,28 @@ class par_envs:
         results = np.append(results, self.p_pipes[0].recv())
 
         return results
+
+    # Get observations boundaries
+    def get_obs_bounds(self):
+
+        # Send
+        self.p_pipes[0].send(('get_obs_bounds', None))
+
+        # Receive
+        obs_min, obs_max = self.p_pipes[0].recv()
+
+        return obs_min, obs_max
+
+    # Get action boundaries
+    def get_act_bounds(self):
+
+        # Send
+        self.p_pipes[0].send(('get_act_bounds', None))
+
+        # Receive
+        act_min, act_max = self.p_pipes[0].recv()
+
+        return act_min, act_max
 
     # Set cpu indices
     def set_cpus(self):
@@ -131,7 +161,11 @@ class par_envs:
 
         # Send
         for cpu in range(self.n_cpu):
-            self.p_pipes[cpu].send(('step', actions[cpu]))
+            act = actions[cpu]
+            for i in range(len(act)):
+                if (act[i] >= 0.0): act[i] *= self.act_max[i]
+                if (act[i] <  0.0): act[i] *= self.act_min[i]
+            self.p_pipes[cpu].send(('step', act))
 
         # Receive
         nxt  = np.array([])
@@ -176,6 +210,14 @@ def worker(env_name, name, pipe, p_pipe, path):
                     act_dim = env.action_space.shape[0]
                 obs_dim = env.observation_space.shape[0]
                 pipe.send((act_dim, obs_dim))
+            if (command == 'get_obs_bounds'):
+                obs_min = env.observation_space.low
+                obs_max = env.observation_space.high
+                pipe.send((obs_min, obs_max))
+            if (command == 'get_act_bounds'):
+                act_min = env.action_space.low
+                act_max = env.action_space.high
+                pipe.send((act_min, act_max))
             if (command == 'set_cpu'):
                 if hasattr(env, 'cpu'):
                     env.set_cpu(data[0], data[1])

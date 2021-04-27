@@ -3,18 +3,23 @@
     "agent": "ppo",
     "ep_end": 200,
     "n_ep": 300,
-    "n_avg": 4,
+    "n_avg": 2,
     "n_cpu": 1,
-    "render_every": 50,
+    "render_every": 500,
     "policy": {
         "type": "normal",
-        "mu_network": {
+        "network": {
             "type": "fc",
-            "arch": [32,32]
-        },
-        "sg_network": {
-            "type": "fc",
-            "arch": [32,32]
+            "trunk": {
+                "arch": [32],
+                "actv": "tanh"
+            },
+            "heads": {
+                "nb": 2,
+                "arch": [[32],[32]],
+                "actv": ["tanh","tanh"],
+                "final": ["tanh","sigmoid"]
+            }
         },
         "optimizer": {
             "type": "nadam",
@@ -23,15 +28,24 @@
         },
         "loss": {
             "type": "ppo",
-            "pol_clip": 0.2,
-            "ent_coef": 0.05
+            "pol_clip": 0.1,
+            "ent_coef": 0.1
         }
     },
     "value": {
         "type": "v_value",
         "network": {
             "type": "fc",
-            "arch": [32,32]
+            "trunk": {
+                "arch": [32,32],
+                "actv": "tanh"
+            },
+            "heads": {
+                "nb": 1,
+                "arch": [[]],
+                "actv": ["tanh"],
+                "final": ["linear"]
+            }
         },
         "optimizer": {
             "type": "nadam",
@@ -52,6 +66,6 @@
     "batch_frac": 0.5,
     "n_buff": 8,
     "n_epochs": 8,
-    "buff_size": 128,
+    "buff_size": 1024,
     "bootstrap": true
 }

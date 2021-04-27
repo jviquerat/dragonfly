@@ -29,6 +29,7 @@ class categorical():
         self.store_dim  = 1
         self.store_type = int
         self.pdf        = None
+        self.kind       = "discrete"
 
         # Define and init network
         # Force softmax activation, as this is multinomial policy
