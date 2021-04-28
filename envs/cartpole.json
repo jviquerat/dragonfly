@@ -12,12 +12,12 @@
             "type": "fc",
             "trunk": {
                 "arch": [16,16],
-                "actv": "tanh"
+                "actv": "swish"
             },
             "heads": {
                 "nb": 1,
                 "arch": [[]],
-                "actv": ["tanh"],
+                "actv": ["swish"],
                 "final": ["softmax"]
             }
         },
@@ -29,7 +29,7 @@
         "loss": {
             "type": "ppo",
             "pol_clip": 0.1,
-            "ent_coef": 0.2
+            "ent_coef": 0.02
         }
     },
     "value": {
@@ -38,12 +38,12 @@
             "type": "fc",
             "trunk": {
                 "arch": [16,16],
-                "actv": "tanh"
+                "actv": "swish"
             },
             "heads": {
                 "nb": 1,
                 "arch": [[]],
-                "actv": ["tanh"],
+                "actv": ["swish"],
                 "final": ["linear"]
             }
         },

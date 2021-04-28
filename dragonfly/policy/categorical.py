@@ -61,6 +61,7 @@ class categorical():
 
         # Sample actions
         actions = self.pdf.sample(1)
+        #print(actions)
         actions = actions.numpy()
         actions = np.reshape(actions, (self.store_dim))
 
@@ -73,15 +74,13 @@ class categorical():
         obs = tf.cast([obs], tf.float32)
 
         # Get pdf
-        probs       = self.call_net(obs)
-        probs, norm = tf.linalg.normalize(probs, ord=1)
-        pdf         = tfd.Categorical(probs=probs)
+        probs = self.call_net(obs)
+        pdf   = tfd.Categorical(probs=probs, validate_args=True)
 
         # If previous pdf is needed
         if previous:
-            probs       = self.call_prn(obs)
-            probs, norm = tf.linalg.normalize(probs, ord=1)
-            prp         = tfd.Categorical(probs=probs)
+            probs = self.call_prn(obs)
+            prp   = tfd.Categorical(probs=probs)
 
             return pdf, prp
         else:
