@@ -4,15 +4,15 @@
     "ep_end": 200,
     "n_ep": 400,
     "n_avg": 2,
-    "n_cpu": 2,
+    "n_cpu": 1,
     "render_every": 50,
     "policy": {
         "type": "normal",
         "network": {
             "type": "fc",
             "trunk": {
-                "arch": [64],
-                "actv": "tanh"
+                "arch": [64,64],
+                "actv": "relu"
             },
             "heads": {
                 "nb": 2,
@@ -23,13 +23,13 @@
         },
         "optimizer": {
             "type": "nadam",
-            "lr": 1.0e-3,
+            "lr": 5.0e-3,
             "grd_clip": 0.5
         },
         "loss": {
             "type": "ppo",
             "pol_clip": 0.1,
-            "ent_coef": 0.0
+            "ent_coef": 0.5
         }
     },
     "value": {
@@ -37,19 +37,19 @@
         "network": {
             "type": "fc",
             "trunk": {
-                "arch": [64,32],
+                "arch": [64,64,64],
                 "actv": "tanh"
             },
             "heads": {
                 "nb": 1,
                 "arch": [[]],
-                "actv": ["tanh"],
+                "actv": ["relu"],
                 "final": ["linear"]
             }
         },
         "optimizer": {
             "type": "nadam",
-            "lr": 1.0e-3,
+            "lr": 5.0e-3,
             "grd_clip": 0.5
         },
         "loss": {
@@ -63,9 +63,9 @@
         "ret_norm": true,
         "ret_clip": true
     },
-    "batch_frac": 0.5,
-    "n_buff": 4,
+    "batch_frac": 0.25,
+    "n_buff": 2,
     "n_epochs": 8,
-    "buff_size": 128,
+    "buff_size": 512,
     "bootstrap": true
 }
