@@ -61,7 +61,6 @@ class categorical():
 
         # Sample actions
         actions = self.pdf.sample(1)
-        #print(actions)
         actions = actions.numpy()
         actions = np.reshape(actions, (self.store_dim))
 
