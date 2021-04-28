@@ -12,7 +12,7 @@
             "type": "fc",
             "trunk": {
                 "arch": [64,64],
-                "actv": "relu"
+                "actv": "swish"
             },
             "heads": {
                 "nb": 2,
@@ -38,12 +38,12 @@
             "type": "fc",
             "trunk": {
                 "arch": [64,64,64],
-                "actv": "tanh"
+                "actv": "swish"
             },
             "heads": {
                 "nb": 1,
                 "arch": [[]],
-                "actv": ["relu"],
+                "actv": ["tanh"],
                 "final": ["linear"]
             }
         },
