@@ -2,8 +2,8 @@
     "env_name": "Pendulum-v0",
     "agent": "ppo",
     "ep_end": 200,
-    "n_ep": 400,
-    "n_avg": 2,
+    "n_ep": 600,
+    "n_avg": 3,
     "n_cpu": 1,
     "render_every": 50,
     "policy": {
@@ -23,7 +23,7 @@
         },
         "optimizer": {
             "type": "nadam",
-            "lr": 1.0e-3,
+            "lr": 2.0e-3,
             "grd_clip": 0.5
         },
         "loss": {
@@ -37,7 +37,7 @@
         "network": {
             "type": "fc",
             "trunk": {
-                "arch": [64,64,64],
+                "arch": [64,64],
                 "actv": "swish"
             },
             "heads": {
@@ -64,7 +64,7 @@
         "ret_clip": true
     },
     "batch_frac": 0.25,
-    "n_buff": 4,
+    "n_buff": 16,
     "n_epochs": 8,
     "buff_size": 512,
     "bootstrap": true
