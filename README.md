@@ -2,7 +2,7 @@
 
 Dragonfly is a buffer-based DRL research code. It follows a basic level of modularity to make new developments quick and easy. Below are a few tests made on several ```gym``` environments, using discrete and continuous PPO:
 
-## CartPole-v0
+## CartPole-v0 (discrete)
 
 The agent learns to balance a pole fixed to a moving cart. The episode ends when the cart gets out of screen, or when the pole exceeds a certain angle. The goal is to balance the pole for 200 timesteps. The graphs shown below are averaged over 5 runs. The agent usually learns to balance the pole perfectly within 50 to 100 episodes.
 
@@ -15,7 +15,7 @@ The agent learns to balance a pole fixed to a moving cart. The episode ends when
   <img width="800" alt="" src="https://user-images.githubusercontent.com/44053700/84269522-9b8ded00-ab29-11ea-8095-1fdd42daddb2.png">
 </p>
 
-## Pendulum-v0
+## Pendulum-v0 (continuous)
 
 The agent learns to balance a 1-bar pendulum vertically, using limited torque force.
 
@@ -28,7 +28,7 @@ The agent learns to balance a 1-bar pendulum vertically, using limited torque fo
   <img width="800" alt="" src="https://user-images.githubusercontent.com/44053700/116778701-cd76ad80-aa73-11eb-850a-32b9e0961156.png">
 </p>
 
-## LunarLander-v2
+## LunarLander-v2 (discrete)
 
 The agent learns to land on a landing pad using 4 discrete actions. The episode ends prematurely if the lander crashes. Maximal reward is obtained if the lander gets on the pad at zero speed. The graphs shown below are averaged over 5 runs.
 
