@@ -97,8 +97,8 @@ class normal():
     def call_net(self, state):
 
         out = self.net.call(state)
-        mu  = out[:self.act_dim]
-        sg  = out[self.act_dim:]
+        mu  = out[:self.act_dim][0]
+        sg  = out[self.act_dim:][0]
 
         return mu, sg
 
@@ -106,8 +106,8 @@ class normal():
     def call_prn(self, state):
 
         out = self.prn.call(state)
-        pmu = out[:self.act_dim]
-        psg = out[self.act_dim:]
+        pmu = out[:self.act_dim][0]
+        psg = out[self.act_dim:][0]
 
         return pmu, psg
 
