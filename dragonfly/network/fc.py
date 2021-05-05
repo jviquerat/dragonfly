@@ -95,6 +95,8 @@ class fc(Model):
             i  += 1
 
         # Compute heads
+        # Each head output is stored in a tf.tensor, and
+        # is appended to the global output
         for h in range(self.heads.nb):
             hvar = var
             for l in range(len(self.heads.arch[h])):
