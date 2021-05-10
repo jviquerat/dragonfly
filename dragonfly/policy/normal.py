@@ -98,7 +98,7 @@ class normal():
 
         out = self.net.call(state)
         mu  = out[0]
-        sg  = out[1]
+        sg  = tf.square(out[1])
 
         return mu, sg
 
@@ -107,7 +107,7 @@ class normal():
 
         out = self.prn.call(state)
         pmu  = out[0]
-        psg  = out[1]
+        psg  = tf.square(out[1])
 
         return pmu, psg
 
