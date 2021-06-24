@@ -65,7 +65,7 @@ class loc_buff:
                 self.trm.buff[cpu][-1] = 2
 
     def test_buff_loop(self):
-        return (self.size < self.buff_size - 1)
+        return (self.size < self.buff_size)
 
     def serialize(self):
         obs = self.obs.serialize()
