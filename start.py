@@ -54,6 +54,7 @@ if __name__ == '__main__':
         print('### Avg run #'+str(run))
         start_time = time.time()
         agent.reset()
+        env.set_cpus()
         launch_training(path, run, env, agent)
         dt = time.time() - start_time
         dt = f"{dt:.3f}"

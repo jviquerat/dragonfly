@@ -22,7 +22,10 @@ class pg():
 
             # Compute loss
             pdf     = policy.compute_pdf(obs)
-            act     = tf.reshape(act, [-1])
+            if (policy.kind == "discrete"):
+                act = tf.reshape(act, [-1])
+            if (policy.kind == "continuous"):
+                act = tf.reshape(act, [-1,policy.act_dim])
             lgp     = pdf.log_prob(act)
             loss_pg = -tf.reduce_mean(lgp)
 

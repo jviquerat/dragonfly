@@ -33,6 +33,10 @@ class ppo():
 
         self.bootstrap    = pms.bootstrap
 
+        # Variables for terminal printings
+        self.bst_ep       = 0
+        self.bst_score    =-1.0e8
+
         # Build policies
         pms.policy.save      = True
         pms.policy.loss.type = "ppo"
@@ -172,11 +176,14 @@ class ppo():
 
         # Average and print
         if (self.counter.ep <= self.counter.n_ep):
-            avg = np.mean(self.report.data["score"][-25:])
-            avg = f"{avg:.3f}"
-            end = '\n'
+            avg    = np.mean(self.report.data["score"][-25:])
+            avg    = f"{avg:.3f}"
+            bst    = self.counter.best_score
+            bst    = f"{bst:.3f}"
+            bst_ep = self.counter.best_ep
+            end    = '\n'
             if (self.counter.ep < self.counter.n_ep): end = '\r'
-            print('# Ep #'+str(self.counter.ep)+', avg score = '+str(avg)+'      ', end=end)
+            print('# Ep #'+str(self.counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
 
     # Init temporary data
     def init_tmp_data(self):

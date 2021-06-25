@@ -53,9 +53,6 @@ class par_envs:
         self.act_p   =      self.act_max - self.act_avg
         self.act_m   =      self.act_avg - self.act_min
 
-        # Set cpu indices
-        self.set_cpus()
-
     # Reset all environments
     def reset_all(self):
 
