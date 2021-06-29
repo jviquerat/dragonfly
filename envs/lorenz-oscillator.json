@@ -11,18 +11,18 @@
         "network": {
             "type": "fc",
             "trunk": {
-                "arch": [16,16],
-                "actv": "softsign"
+                "arch": [64,32],
+                "actv": "tanh"
             },
             "heads": {
                 "nb": 1,
                 "arch": [[]],
-                "actv": ["softsign"],
+                "actv": ["tanh"],
                 "final": ["softmax"]
             }
         },
         "optimizer": {
-            "type": "nadam",
+            "type": "adam",
             "lr": 1.0e-3,
             "grd_clip": 0.1
         },
@@ -37,18 +37,18 @@
         "network": {
             "type": "fc",
             "trunk": {
-                "arch": [16,16],
-                "actv": "swish"
+                "arch": [64,32],
+                "actv": "tanh"
             },
             "heads": {
                 "nb": 1,
                 "arch": [[]],
-                "actv": ["swish"],
+                "actv": ["tanh"],
                 "final": ["linear"]
             }
         },
         "optimizer": {
-            "type": "nadam",
+            "type": "adam",
             "lr": 5.0e-3,
             "grd_clip": 0.1
         },
