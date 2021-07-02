@@ -25,10 +25,13 @@ class v_value():
                                       out_dim = [self.dim],
                                       pms     = pms.network)
 
+        # Define trainables
+        self.trainables = self.net.trainable_weights
+
         # Define optimizer
         self.opt = opt_factory.create(pms.optimizer.type,
                                       pms       = pms.optimizer,
-                                      grad_vars = self.net.trainable_weights)
+                                      grad_vars = self.trainables)
 
         # Define loss
         self.loss = loss_factory.create(pms.loss.type,

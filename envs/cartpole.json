@@ -3,7 +3,7 @@
     "agent": "ppo",
     "ep_end": 200,
     "n_ep": 300,
-    "n_avg": 5,
+    "n_avg": 3,
     "n_cpu": 1,
     "render_every": 500,
     "policy": {
@@ -12,24 +12,24 @@
             "type": "fc",
             "trunk": {
                 "arch": [16,16],
-                "actv": "swish"
+                "actv": "tanh"
             },
             "heads": {
                 "nb": 1,
                 "arch": [[]],
-                "actv": ["swish"],
+                "actv": ["tanh"],
                 "final": ["softmax"]
             }
         },
         "optimizer": {
             "type": "nadam",
-            "lr": 1.0e-3,
-            "grd_clip": 0.5
+            "lr": 2.0e-3,
+            "grd_clip": 0.1
         },
         "loss": {
             "type": "ppo",
             "pol_clip": 0.1,
-            "ent_coef": 0.02
+            "ent_coef": 0.01
         }
     },
     "value": {
@@ -50,7 +50,7 @@
         "optimizer": {
             "type": "nadam",
             "lr": 1.0e-2,
-            "grd_clip": 0.5
+            "grd_clip": 0.1
         },
         "loss": {
             "type": "mse"

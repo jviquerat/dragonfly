@@ -19,7 +19,7 @@ class mse():
             loss = tf.reduce_mean(p1)
 
             # Apply gradients
-            val_var     = value.net.trainable_variables
+            val_var     = value.trainables
             grads       = tape.gradient(loss, val_var)
             norm        = tf.linalg.global_norm(grads)
         value.opt.apply_grads(zip(grads, val_var))

@@ -39,6 +39,9 @@ class categorical():
                                       out_dim = [self.dim],
                                       pms     = pms.network)
 
+        # Define trainables
+        self.trainables = self.net.trainable_weights
+
         # Define optimizer
         self.opt = opt_factory.create(pms.optimizer.type,
                                       pms       = pms.optimizer,

@@ -54,7 +54,7 @@ class ppo():
             kl = tf.reduce_mean(kl)
 
             # Apply gradients
-            pol_var = policy.net.trainable_variables
+            pol_var = policy.trainables
             grads   = tape.gradient(loss, pol_var)
             norm    = tf.linalg.global_norm(grads)
         policy.opt.apply_grads(zip(grads, pol_var))

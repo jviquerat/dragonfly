@@ -71,7 +71,7 @@ class fc(Model):
             for l in range(len(self.heads.arch[h])):
                 self.net.append(Dense(self.heads.arch[h][l],
                                       kernel_initializer = self.hid_init,
-                                      activation        = self.heads.actv[h]))
+                                      activation     = self.heads.actv[h]))
             self.net.append(Dense(self.out_dim[h],
                                   kernel_initializer = self.fnl_init,
                                   activation         = self.heads.final[h]))
