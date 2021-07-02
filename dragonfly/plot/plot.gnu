@@ -26,36 +26,36 @@ set multiplot layout 3,3
 
 # Plot score
 plot file u 1:3:4 w filledc lt 1 notitle, \
-     file u 1:2  smooth csplines w l ls 1 t "score"
+     file u 1:2   w l ls 1 t "score"
 
 # Plot episode length
 plot file u 1:6:7 w filledc lt 2 notitle, \
-     file u 1:5  smooth csplines w l ls 2 t "ep length"
+     file u 1:5   w l ls 2 t "ep length"
 
 # Plot actor loss
 plot file u 1:9:10 w filledc lt 3 notitle, \
-     file u 1:8  smooth csplines w l ls 3 t "actor loss"
+     file u 1:8    w l ls 3 t "actor loss"
 
 # Plot critic loss
 plot file u 1:12:13 w filledc lt 4 notitle, \
-     file u 1:11  smooth csplines w l ls 4 t "critic loss"
+     file u 1:11    w l ls 4 t "critic loss"
 
 # Plot entropy
 plot file u 1:15:16 w filledc lt 5 notitle, \
-     file u 1:14  smooth csplines w l ls 5 t "entropy"
+     file u 1:14    w l ls 5 t "entropy"
 
 # Plot actor gradient norm
 plot file u 1:18:19 w filledc lt 6 notitle, \
-     file u 1:17  smooth csplines w l ls 6 t "actor grad norm"
+     file u 1:17    w l ls 6 t "actor grad norm"
 
 # Plot critic gradient norm
 plot file u 1:21:22 w filledc lt 7 notitle, \
-     file u 1:20  smooth csplines w l ls 7 t "critic grad norm"
+     file u 1:20    w l ls 7 t "critic grad norm"
 
 # Plot kl divergence
 plot file u 1:24:25 w filledc lt 8 notitle, \
-     file u 1:23  smooth csplines w l ls 8 t "kl divergence"
+     file u 1:23    w l ls 8 t "kl divergence"
 
 # Plot lr
 plot file u 1:27:28 w filledc lt 9 notitle, \
-     file u 1:26  smooth csplines w l ls 9 t "learning rate" 
+     file u 1:26    w l ls 9 t "learning rate" 

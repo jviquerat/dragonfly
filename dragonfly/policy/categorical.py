@@ -57,7 +57,7 @@ class categorical():
     def get_actions(self, obs):
 
         # Generate pdf
-        self.pdf = self.compute_pdf(obs, False)
+        self.pdf = self.compute_pdf([obs], False)
 
         # Sample actions
         actions = self.pdf.sample(1)
@@ -70,7 +70,7 @@ class categorical():
     def compute_pdf(self, obs, previous=False):
 
         # Cast
-        obs = tf.cast([obs], tf.float32)
+        obs = tf.cast(obs, tf.float32)
 
         # Get pdf
         probs = self.call_net(obs)

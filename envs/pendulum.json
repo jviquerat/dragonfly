@@ -3,7 +3,7 @@
     "agent": "ppo",
     "ep_end": 200,
     "n_ep": 600,
-    "n_avg": 3,
+    "n_avg": 2,
     "n_cpu": 1,
     "render_every": 50,
     "policy": {
@@ -18,18 +18,18 @@
                 "nb": 2,
                 "arch": [[16],[16]],
                 "actv": ["swish","swish"],
-                "final": ["tanh","sigmoid"]
+                "final": ["tanh","linear"]
             }
         },
         "optimizer": {
             "type": "nadam",
-            "lr": 2.0e-3,
-            "grd_clip": 0.5
+            "lr": 1.0e-3,
+            "grd_clip": 0.1
         },
         "loss": {
             "type": "ppo",
             "pol_clip": 0.1,
-            "ent_coef": 0.02
+            "ent_coef": 0.01
         }
     },
     "value": {
@@ -50,7 +50,7 @@
         "optimizer": {
             "type": "nadam",
             "lr": 5.0e-3,
-            "grd_clip": 0.5
+            "grd_clip": 0.1
         },
         "loss": {
             "type": "mse"

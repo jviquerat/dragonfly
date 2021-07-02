@@ -29,11 +29,12 @@ class normal():
         self.store_dim  = self.act_dim
         self.store_type = float
         self.pdf        = None
+        self.softclip   = True
         self.kind       = "continuous"
 
         # Define and init network
         # Force tanh activation, as this is normal policy
-        pms.network.heads.final = ["tanh","sigmoid"]
+        #pms.network.heads.final = ["tanh","sigmoid"]
         self.net = net_factory.create(pms.network.type,
                                       inp_dim = obs_dim,
                                       out_dim = [self.dim,self.dim],
@@ -57,7 +58,7 @@ class normal():
     def get_actions(self, obs):
 
         # Generate pdf
-        self.pdf = self.compute_pdf(obs, False)
+        self.pdf = self.compute_pdf([obs], False)
 
         # Sample actions
         actions = self.pdf.sample(self.act_dim)
@@ -71,16 +72,18 @@ class normal():
     def compute_pdf(self, obs, previous=False):
 
         # Cast
-        obs = tf.cast([obs], tf.float32)
+        obs = tf.cast(obs, tf.float32)
 
         # Get pdf
         mu, sg = self.call_net(obs)
+        #sg     = 1.0/(1.0+tf.exp(-0.5*sg))
         pdf    = tfd.MultivariateNormalDiag(loc        = mu,
                                             scale_diag = sg)
 
         # If previous pdf is needed
         if previous:
             pmu, psg = self.call_prn(obs)
+            #psg      = 1.0/(1.0+tf.exp(-0.5*psg))
             prp      = tfd.MultivariateNormalDiag(loc        = pmu,
                                                   scale_diag = psg)
 
