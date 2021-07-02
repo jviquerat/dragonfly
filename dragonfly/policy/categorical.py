@@ -77,7 +77,7 @@ class categorical():
 
         # Get pdf
         probs = self.call_net(obs)
-        pdf   = tfd.Categorical(probs=probs, validate_args=True)
+        pdf   = tfd.Categorical(probs=probs)
 
         # If previous pdf is needed
         if previous:
@@ -87,6 +87,11 @@ class categorical():
             return pdf, prp
         else:
             return pdf
+
+    # Reshape actions for training
+    def reshape_actions(self, act):
+
+        return tf.reshape(act, [-1])
 
     # Call loss for training
     def train(self, obs, adv, act):

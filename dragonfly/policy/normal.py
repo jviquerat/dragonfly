@@ -92,6 +92,11 @@ class normal():
         else:
             return pdf
 
+    # Reshape actions for training
+    def reshape_actions(self, act):
+
+        return tf.reshape(act, [-1, self.act_dim])
+
     # Call loss for training
     def train(self, obs, adv, act):
 
