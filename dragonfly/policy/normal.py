@@ -76,14 +76,12 @@ class normal():
 
         # Get pdf
         mu, sg = self.call_net(obs)
-        #sg     = 1.0/(1.0+tf.exp(-0.5*sg))
         pdf    = tfd.MultivariateNormalDiag(loc        = mu,
                                             scale_diag = sg)
 
         # If previous pdf is needed
         if previous:
             pmu, psg = self.call_prn(obs)
-            #psg      = 1.0/(1.0+tf.exp(-0.5*psg))
             prp      = tfd.MultivariateNormalDiag(loc        = pmu,
                                                   scale_diag = psg)
 

@@ -18,7 +18,7 @@
                 "nb": 2,
                 "arch": [[16],[16]],
                 "actv": ["swish","swish"],
-                "final": ["tanh","linear"]
+                "final": ["tanh","sigmoid"]
             }
         },
         "optimizer": {
