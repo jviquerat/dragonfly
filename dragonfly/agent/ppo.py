@@ -220,9 +220,6 @@ class ppo():
                 self.train_policy (btc_obs, btc_adv, btc_act)
                 self.train_v_value(btc_obs, btc_tgt, end - start)
 
-        # Update old policy
-        self.policy.set_prv()
-
     ################################
     ### Policy/value wrappings
     ################################

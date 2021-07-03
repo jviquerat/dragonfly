@@ -23,7 +23,8 @@ class ppo():
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
-            pdf, prp = policy.compute_pdf(obs, True)
+            pdf      = policy.compute_pdf(obs)
+            prp      = policy.compute_prp(obs)
             act      = policy.reshape_actions(act)
             lgp      = pdf.log_prob(act)
             prv_lgp  = prp.log_prob(act)

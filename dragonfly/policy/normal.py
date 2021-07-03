@@ -29,7 +29,6 @@ class normal():
         self.store_dim  = self.act_dim
         self.store_type = float
         self.pdf        = None
-        self.softclip   = True
         self.kind       = "continuous"
 
         # Define and init network
@@ -61,7 +60,7 @@ class normal():
     def get_actions(self, obs):
 
         # Generate pdf
-        self.pdf = self.compute_pdf([obs], False)
+        self.pdf = self.compute_pdf([obs])
 
         # Sample actions
         actions = self.pdf.sample(self.act_dim)
@@ -72,7 +71,7 @@ class normal():
         return actions
 
     # Compute pdf
-    def compute_pdf(self, obs, previous=False):
+    def compute_pdf(self, obs):
 
         # Cast
         obs = tf.cast(obs, tf.float32)
@@ -82,15 +81,20 @@ class normal():
         pdf    = tfd.MultivariateNormalDiag(loc        = mu,
                                             scale_diag = sg)
 
-        # If previous pdf is needed
-        if previous:
-            pmu, psg = self.call_prn(obs)
-            prp      = tfd.MultivariateNormalDiag(loc        = pmu,
-                                                  scale_diag = psg)
+        return pdf
 
-            return pdf, prp
-        else:
-            return pdf
+    # Compute previous pdf
+    def compute_prp(self, obs):
+
+        # Cast
+        obs = tf.cast(obs, tf.float32)
+
+        # Get pdf
+        mu, sg = self.call_prn(obs)
+        pdf    = tfd.MultivariateNormalDiag(loc        = mu,
+                                            scale_diag = sg)
+
+        return pdf
 
     # Reshape actions for training
     def reshape_actions(self, act):
@@ -115,26 +119,16 @@ class normal():
     def call_prn(self, state):
 
         out = self.prn.call(state)
-        pmu  = out[0]
-        psg  = tf.square(out[1])
+        mu  = out[0]
+        sg  = tf.square(out[1])
 
-        return pmu, psg
+        return mu, sg
 
     # Save previous policy
     def save_prv(self):
 
-        self.weights  = self.net.get_weights()
-        self.save_pdf = cp(self.pdf)
-
-        # On first call, prp is not initialized yet
-        if (self.prp) is None:
-            self.prp = cp(self.pdf)
-
-    # Set previous policy
-    def set_prv(self):
-
-        self.prn.set_weights(self.weights)
-        self.prp = cp(self.save_pdf)
+        self.prn.set_weights(self.net.get_weights())
+        self.prp = self.pdf.copy()
 
     # Get current learning rate
     def get_lr(self):

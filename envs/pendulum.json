@@ -23,7 +23,7 @@
         },
         "optimizer": {
             "type": "nadam",
-            "lr": 1.0e-3,
+            "lr": 2.0e-3,
             "grd_clip": 0.1
         },
         "loss": {

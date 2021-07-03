@@ -60,7 +60,7 @@ class categorical():
     def get_actions(self, obs):
 
         # Generate pdf
-        self.pdf = self.compute_pdf([obs], False)
+        self.pdf = self.compute_pdf([obs])
 
         # Sample actions
         actions = self.pdf.sample(1)
@@ -70,7 +70,7 @@ class categorical():
         return actions
 
     # Compute pdf
-    def compute_pdf(self, obs, previous=False):
+    def compute_pdf(self, obs):
 
         # Cast
         obs = tf.cast(obs, tf.float32)
@@ -79,14 +79,19 @@ class categorical():
         probs = self.call_net(obs)
         pdf   = tfd.Categorical(probs=probs)
 
-        # If previous pdf is needed
-        if previous:
-            probs = self.call_prn(obs)
-            prp   = tfd.Categorical(probs=probs)
+        return pdf
 
-            return pdf, prp
-        else:
-            return pdf
+    # Compute previous pdf
+    def compute_prp(self, obs):
+
+        # Cast
+        obs = tf.cast(obs, tf.float32)
+
+        # Get pdf
+        probs = self.call_prn(obs)
+        pdf   = tfd.Categorical(probs=probs)
+
+        return pdf
 
     # Reshape actions for training
     def reshape_actions(self, act):
@@ -111,20 +116,10 @@ class categorical():
     # Save previous policy
     def save_prv(self):
 
-        self.weights  = self.net.get_weights()
-        self.save_pdf = cp(self.pdf)
+        self.prn.set_weights(self.net.get_weights())
+        self.prp = self.pdf.copy()
 
-        # On first call, prp is not initialized yet
-        if (self.prp) is None:
-            self.prp = cp(self.pdf)
-
-    # Set previous policy
-    def set_prv(self):
-
-        self.prn.set_weights(self.weights)
-        self.prp = cp(self.save_pdf)
-
-    # Get current learning rate
+    # Geqt current learning rate
     def get_lr(self):
 
         return self.opt.get_lr()
