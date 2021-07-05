@@ -1,0 +1,71 @@
+{
+    "env_name": "cartpole:cartpole-continuous-v0",
+    "agent": "ppo",
+    "ep_end": 200,
+    "n_ep": 300,
+    "n_avg": 2,
+    "n_cpu": 1,
+    "render_every": 50,
+    "policy": {
+        "type": "normal",
+        "network": {
+            "type": "fc",
+            "trunk": {
+                "arch": [16],
+                "actv": "tanh"
+            },
+            "heads": {
+                "nb": 2,
+                "arch": [[16],[16]],
+                "actv": ["tanh","sigmoid"],
+                "final": ["tanh","sigmoid"]
+            }
+        },
+        "optimizer": {
+            "type": "nadam",
+            "lr": 2.0e-3,
+            "grd_clip": 0.1
+        },
+        "loss": {
+            "type": "ppo",
+            "pol_clip": 0.1,
+            "ent_coef": 0.01
+        }
+    },
+    "value": {
+        "type": "v_value",
+        "network": {
+            "type": "fc",
+            "trunk": {
+                "arch": [16,16],
+                "actv": "swish"
+            },
+            "heads": {
+                "nb": 1,
+                "arch": [[]],
+                "actv": ["swish"],
+                "final": ["linear"]
+            }
+        },
+        "optimizer": {
+            "type": "nadam",
+            "lr": 5.0e-3,
+            "grd_clip": 0.1
+        },
+        "loss": {
+            "type": "mse"
+        }
+    },
+    "retrn": {
+        "type": "gae",
+        "gamma": 0.99,
+        "gae_lambda": 0.99,
+        "ret_norm": true,
+        "ret_clip": true
+    },
+    "batch_frac": 0.5,
+    "n_buff": 16,
+    "n_epochs": 16,
+    "buff_size": 256,
+    "bootstrap": true
+}
