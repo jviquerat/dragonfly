@@ -4,6 +4,9 @@ import numpy           as np
 import multiprocessing as mp
 import time
 
+# Custom imports
+from dragonfly.core.constants import *
+
 ###############################################
 ### A wrapper class for parallel environments
 class par_envs:
@@ -36,11 +39,15 @@ class par_envs:
         self.obs_dim     = int(obs_dim)
 
         # Handle observation normalization
+        # To overcome the use of np.finfo, observation values
+        # are clipped to default min and max values (see core/constants.py)
         self.obs_min, self.obs_max, self.obs_norm = self.get_obs_bounds()
-        self.obs_min = np.where(self.obs_min < -100.0,
-                                -100.0, self.obs_min) # To overcome the use of np.finfo
-        self.obs_max = np.where(self.obs_max >  100.0,
-                                 100.0, self.obs_max) # To overcome the use of np.finfo
+        self.obs_min = np.where(self.obs_min < -def_obs_max,
+                                -def_obs_max,
+                                self.obs_min)
+        self.obs_max = np.where(self.obs_max >  def_obs_max,
+                                 def_obs_max,
+                                self.obs_max)
         self.obs_avg = 0.5*(self.obs_max + self.obs_min)
         self.obs_rng = 0.5*(self.obs_max - self.obs_min)
         self.obs_p   =      self.obs_max - self.obs_avg
