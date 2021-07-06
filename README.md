@@ -12,7 +12,7 @@ The agent learns to balance a pole fixed to a moving cart, using discrete latera
 </p>
 
 <p align="center">
-  <img width="600" alt="" src="dragonfly/save/cartpole/ppo.png">
+  <img width="700" alt="" src="dragonfly/save/cartpole/ppo.png">
 </p>
 
 ## `pendulum-v0` (continuous)
