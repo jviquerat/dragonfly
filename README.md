@@ -7,12 +7,12 @@ Dragonfly is a buffer-based DRL research code. It follows a basic level of modul
 The agent learns to balance a pole fixed to a moving cart, using discrete lateral movements of the cart.
 
 <p align="center">
-  <img width="300" alt="" src="https://user-images.githubusercontent.com/44053700/83844966-45bfdc00-a708-11ea-98ee-5623162e1fe1.gif">
-  <img width="300" alt="" src="https://user-images.githubusercontent.com/44053700/83844541-7a7f6380-a707-11ea-8a2c-148ca0c8f67b.gif">
+  <img width="300" alt="" src="dragonfly/save/cartpole/bad.gif">
+  <img width="300" alt="" src="dragonfly/save/cartpole/good.gif">
 </p>
 
 <p align="center">
-  <img width="800" alt="" src="https://user-images.githubusercontent.com/44053700/84269522-9b8ded00-ab29-11ea-8095-1fdd42daddb2.png">
+  <img width="600" alt="" src="dragonfly/save/cartpole/ppo.png">
 </p>
 
 ## `pendulum-v0` (continuous)
