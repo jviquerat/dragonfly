@@ -64,7 +64,8 @@ class normal():
 
         # Sample actions
         actions = self.pdf.sample(self.act_dim)
-        actions = tf.clip_by_value(actions, -1.0, 1.0)
+        #actions = tf.clip_by_value(actions, -1.0, 1.0)
+        actions = tf.tanh(actions)
         actions = actions.numpy()
         actions = np.reshape(actions, (self.store_dim))
 

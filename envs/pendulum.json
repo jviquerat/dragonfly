@@ -3,7 +3,7 @@
     "agent": "ppo",
     "ep_end": 200,
     "n_ep": 600,
-    "n_avg": 2,
+    "n_avg": 1,
     "n_cpu": 1,
     "render_every": 50,
     "policy": {
@@ -12,13 +12,13 @@
             "type": "fc",
             "trunk": {
                 "arch": [64,64],
-                "actv": "tanh"
+                "actv": "swish"
             },
             "heads": {
                 "nb": 2,
                 "arch": [[16],[16]],
-                "actv": ["tanh","sigmoid"],
-                "final": ["tanh","sigmoid"]
+                "actv": ["swish","swish"],
+                "final": ["tanh","softplus"]
             }
         },
         "optimizer": {
