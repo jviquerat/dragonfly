@@ -10,18 +10,11 @@ warnings.filterwarnings('ignore',category=FutureWarning)
 import tensorflow                    as     tf
 import tensorflow.keras              as     tk
 from   tensorflow.keras              import Model
-#from   tensorflow.keras.utils        import get_custom_objects
-from   tensorflow.keras.layers       import Activation, Dense, BatchNormalization
+from   tensorflow.keras.layers       import Dense, BatchNormalization
 from   tensorflow.keras.initializers import Orthogonal, GlorotUniform
 
 # Custom imports
 from   dragonfly.network.tree        import *
-
-#def lowsoftplus(x):
-#    return (tf.math.log(1.0+tf.math.exp(x)) + 0.1)/(tf.math.log(2.0) + 0.1)
-
-#get_custom_objects().update({'lowsoftplus': Activation(lowsoftplus)})
-
 
 ###############################################
 ### Fully-connected network class
