@@ -3,7 +3,7 @@
     "agent": "ppo",
     "ep_end": 200,
     "n_ep": 600,
-    "n_avg": 1,
+    "n_avg": 2,
     "n_cpu": 1,
     "render_every": 50,
     "policy": {
@@ -11,7 +11,7 @@
         "network": {
             "type": "fc",
             "trunk": {
-                "arch": [64,64],
+                "arch": [32,32],
                 "actv": "swish"
             },
             "heads": {
@@ -37,7 +37,7 @@
         "network": {
             "type": "fc",
             "trunk": {
-                "arch": [64,64],
+                "arch": [32,32],
                 "actv": "swish"
             },
             "heads": {
@@ -63,9 +63,9 @@
         "ret_norm": true,
         "ret_clip": true
     },
-    "batch_frac": 0.25,
+    "batch_frac": 0.5,
     "n_buff": 16,
     "n_epochs": 16,
-    "buff_size": 512,
+    "buff_size": 256,
     "bootstrap": true
 }
