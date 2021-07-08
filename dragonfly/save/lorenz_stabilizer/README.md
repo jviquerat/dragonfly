@@ -11,5 +11,5 @@ The second environment aims at minimizing the number of sign changes of the `x` 
 </p>
 
 <p align="center">
-  <img width="500" alt="oscillator_2D" src="lorenz.gif">
+  <img width="500" alt="oscillator_2D" src="good.gif">
 </p>
