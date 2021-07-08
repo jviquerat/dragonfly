@@ -1,11 +1,11 @@
 {
     "env_name": "LunarLander-v2",
     "agent": "ppo",
-    "ep_end": 400,
-    "n_ep": 1500,
+    "ep_end": 600,
+    "n_ep": 1000,
     "n_avg": 2,
     "n_cpu": 1,
-    "render_every": 500,
+    "render_every": 50,
     "policy": {
         "type": "categorical",
         "network": {
@@ -23,13 +23,13 @@
         },
         "optimizer": {
             "type": "nadam",
-            "lr": 5.0e-3,
-            "grd_clip": 0.5
+            "lr": 1.0e-3,
+            "grd_clip": 0.1
         },
         "loss": {
             "type": "ppo",
             "pol_clip": 0.1,
-            "ent_coef": 0.2
+            "ent_coef": 0.01
         }
     },
     "value": {
@@ -38,19 +38,19 @@
             "type": "fc",
             "trunk": {
                 "arch": [32,32],
-                "actv": "tanh"
+                "actv": "swish"
             },
             "heads": {
                 "nb": 1,
                 "arch": [[]],
-                "actv": ["tanh"],
+                "actv": ["swish"],
                 "final": ["linear"]
             }
         },
         "optimizer": {
             "type": "nadam",
             "lr": 5.0e-3,
-            "grd_clip": 0.5
+            "grd_clip": 0.1
         },
         "loss": {
             "type": "mse"
@@ -64,8 +64,8 @@
         "ret_clip": true
     },
     "batch_frac": 0.5,
-    "n_buff": 8,
-    "n_epochs": 8,
-    "buff_size": 1024,
+    "n_buff": 16,
+    "n_epochs": 16,
+    "buff_size": 512,
     "bootstrap": true
 }
