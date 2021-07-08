@@ -37,9 +37,9 @@ class par_buff:
 ### buff_size : max buffer size
 class loc_buff:
     def __init__(self, n_cpu, obs_dim, act_dim, buff_size):
-        self.n_cpu   = n_cpu
-        self.obs_dim = obs_dim
-        self.act_dim = act_dim
+        self.n_cpu     = n_cpu
+        self.obs_dim   = obs_dim
+        self.act_dim   = act_dim
         self.buff_size = buff_size
         self.reset()
 
@@ -65,7 +65,7 @@ class loc_buff:
                 self.trm.buff[cpu][-1] = 2
 
     def test_buff_loop(self):
-        return (self.size < self.buff_size - 1)
+        return (self.size < self.buff_size)
 
     def serialize(self):
         obs = self.obs.serialize()
@@ -101,9 +101,9 @@ class glb_buff:
 
     def reset(self):
         self.obs  = np.empty([0,self.obs_dim])
+        self.act  = np.empty([0,self.act_dim])
         self.adv  = np.empty([0,1])
         self.tgt  = np.empty([0,1])
-        self.act  = np.empty([0,self.act_dim])
         self.size = 0
 
     def store(self, obs, adv, tgt, act):

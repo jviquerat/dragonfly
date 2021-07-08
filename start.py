@@ -5,11 +5,11 @@ import time
 import numpy as np
 
 # Custom imports
-from dragonfly.core.training  import *
-from dragonfly.utils.json     import *
-from dragonfly.utils.data     import *
-from dragonfly.agents.factory import *
-from dragonfly.envs.par_envs  import *
+from dragonfly.core.training import *
+from dragonfly.utils.json    import *
+from dragonfly.utils.data    import *
+from dragonfly.agent.agent   import *
+from dragonfly.envs.par_envs import *
 
 ########################
 # Average training over multiple runs
@@ -42,8 +42,8 @@ if __name__ == '__main__':
     # Declare environement
     env   = par_envs(pms.env_name, pms.n_cpu, path)
     agent = agent_factory.create(pms.agent,
-                                 act_dim = env.act_dim,
                                  obs_dim = env.obs_dim,
+                                 act_dim = env.act_dim,
                                  pms     = pms)
 
     # Intialize averager
@@ -54,8 +54,11 @@ if __name__ == '__main__':
         print('### Avg run #'+str(run))
         start_time = time.time()
         agent.reset()
-        launch_training(pms, path, run, env, agent)
-        print("--- %s seconds ---" % (time.time() - start_time))
+        env.set_cpus()
+        launch_training(path, run, env, agent)
+        dt = time.time() - start_time
+        dt = f"{dt:.3f}"
+        print("# Elapsed time: "+str(dt)+" seconds")
         filename = path+'/'+pms.agent+'_'+str(run)+'.dat'
         averager.store(filename, run)
 
@@ -67,4 +70,4 @@ if __name__ == '__main__':
     averager.average(filename)
 
     # Plot
-    os.system('gnuplot -c dragonfly/plot/plot.gnu '+path)
+    os.system('gnuplot -c dragonfly/plot/plot_light.gnu '+path)

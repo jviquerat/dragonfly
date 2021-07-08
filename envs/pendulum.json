@@ -1,26 +1,71 @@
 {
     "env_name": "Pendulum-v0",
     "agent": "ppo",
-    "pol_type": "normal",
     "ep_end": 200,
-    "n_ep": 300,
-    "n_avg": 2,
+    "n_ep": 400,
+    "n_avg": 3,
     "n_cpu": 1,
-    "render_every": 500,
-    "actor_lr": 1.0e-2,
-    "critic_lr": 1.0e-2,
-    "actor_arch": [16,16],
-    "critic_arch": [16,16],
+    "render_every": 50,
+    "policy": {
+        "type": "normal",
+        "network": {
+            "type": "fc",
+            "trunk": {
+                "arch": [32,32],
+                "actv": "swish"
+            },
+            "heads": {
+                "nb": 2,
+                "arch": [[16],[16]],
+                "actv": ["swish","swish"],
+                "final": ["tanh","softplus"]
+            }
+        },
+        "optimizer": {
+            "type": "nadam",
+            "lr": 2.0e-3,
+            "grd_clip": 0.1
+        },
+        "loss": {
+            "type": "ppo",
+            "pol_clip": 0.1,
+            "ent_coef": 0.01
+        }
+    },
+    "value": {
+        "type": "v_value",
+        "network": {
+            "type": "fc",
+            "trunk": {
+                "arch": [32,32],
+                "actv": "swish"
+            },
+            "heads": {
+                "nb": 1,
+                "arch": [[]],
+                "actv": ["swish"],
+                "final": ["linear"]
+            }
+        },
+        "optimizer": {
+            "type": "nadam",
+            "lr": 5.0e-3,
+            "grd_clip": 0.1
+        },
+        "loss": {
+            "type": "mse"
+        }
+    },
+    "retrn": {
+        "type": "gae",
+        "gamma": 0.99,
+        "gae_lambda": 0.99,
+        "ret_norm": true,
+        "ret_clip": true
+    },
     "batch_frac": 0.5,
-    "n_buff": 8,
-    "n_epochs": 8,
-    "buff_size": 128,
-    "pol_clip": 0.1,
-    "grd_clip": 0.5,
-    "entropy": 0.01,
-    "gamma": 0.99,
-    "gae_lambda": 0.99,
-    "adv_norm": true,
-    "adv_clip": true,
+    "n_buff": 16,
+    "n_epochs": 16,
+    "buff_size": 256,
     "bootstrap": true
 }
