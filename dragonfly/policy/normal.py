@@ -63,7 +63,8 @@ class normal():
         self.pdf = self.compute_pdf([obs])
 
         # Sample actions
-        actions = self.pdf.sample(self.act_dim)
+        # The size of the action is already set as event_size in the pdf
+        actions = self.pdf.sample(1)
         #actions = tf.clip_by_value(actions, -1.0, 1.0)
         actions = tf.tanh(actions)
         actions = actions.numpy()
