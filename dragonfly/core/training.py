@@ -1,11 +1,21 @@
 # Generic imports
-import time
 import numpy as np
+
+# Custom imports
+from dragonfly.utils.timer import *
 
 ########################
 # Process training
 ########################
 def launch_training(path, run, env, agent):
+
+    # Initialize timers
+    timer_global   = timer("global  ")
+    timer_training = timer("training")
+    timer_env      = timer("env     ")
+
+    # Start global timer
+    timer_global.tic()
 
     # Reset environment
     obs = env.reset_all()
@@ -21,7 +31,9 @@ def launch_training(path, run, env, agent):
 
             # Make one iteration
             act            = agent.get_actions(obs)
+            timer_env.tic()
             nxt, rwd, done = env.step(act)
+            timer_env.toc()
 
             # Handle termination state
             trm, done      = agent.handle_term(done)
@@ -31,8 +43,10 @@ def launch_training(path, run, env, agent):
 
             # Update observation and buffer counter
             obs = nxt
+            timer_training.tic()
             agent.update_score(rwd)
             agent.update_step()
+            timer_training.toc()
 
             # Handle rendering
             rnd = env.render(agent.get_render_cpu())
@@ -42,7 +56,9 @@ def launch_training(path, run, env, agent):
             agent.finish_episodes(path, done)
 
             # Reset only finished environments
+            timer_env.tic()
             env.reset(done, obs)
+            timer_env.toc()
 
         # Prepare training and train agent
         agent.finalize_buffers()
@@ -53,3 +69,9 @@ def launch_training(path, run, env, agent):
 
     # Last printing
     agent.print_episode()
+
+    # Close timers and show
+    timer_global.toc()
+    timer_global.show()
+    timer_env.show()
+    timer_training.show()

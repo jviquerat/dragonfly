@@ -34,10 +34,8 @@ if __name__ == '__main__':
     path      = res_path+'/'+pms.env_name+'_'+str(path_time)
 
     # Open repositories
-    if (not os.path.exists(res_path)):
-        os.makedirs(res_path)
-    if (not os.path.exists(path)):
-        os.makedirs(path)
+    os.makedirs(res_path, exist_ok=True)
+    os.makedirs(path,     exist_ok=True)
 
     # Declare environement
     env   = par_envs(pms.env_name, pms.n_cpu, path)
@@ -52,13 +50,9 @@ if __name__ == '__main__':
     # Run
     for run in range(pms.n_avg):
         print('### Avg run #'+str(run))
-        start_time = time.time()
         agent.reset()
         env.set_cpus()
         launch_training(path, run, env, agent)
-        dt = time.time() - start_time
-        dt = f"{dt:.3f}"
-        print("# Elapsed time: "+str(dt)+" seconds")
         filename = path+'/'+pms.agent+'_'+str(run)+'.dat'
         averager.store(filename, run)
 
