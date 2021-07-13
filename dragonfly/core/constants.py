@@ -10,3 +10,6 @@ ppo_eps = 1.0e-8
 
 ### Default max value for observable normalization
 def_obs_max = 100.0
+
+### Smoothing horizon for score
+n_smooth = 10

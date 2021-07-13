@@ -25,13 +25,13 @@ file = path."/ppo_avg.dat"
 set multiplot layout 1,3
 
 # Plot score
-plot file u 1:3:4 w filledc lt 1 notitle, \
-     file u 1:2   w l ls 1 t "score"
+plot file u 1:6:7 w filledc lt 1 notitle, \
+     file u 1:5   w l ls 1 t "score"
 
 # Plot episode length
-plot file u 1:6:7 w filledc lt 2 notitle, \
-     file u 1:5   w l ls 2 t "ep length"
+plot file u 1:12:13 w filledc lt 2 notitle, \
+     file u 1:11    w l ls 2 t "ep length"
 
 # Plot entropy
-plot file u 1:15:16 w filledc lt 5 notitle, \
-     file u 1:14    w l ls 5 t "entropy"
+plot file u 1:24:25 w filledc lt 5 notitle, \
+     file u 1:23    w l ls 5 t "entropy"
