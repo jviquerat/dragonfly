@@ -11,6 +11,7 @@ from dragonfly.utils.buff     import *
 from dragonfly.utils.report   import *
 from dragonfly.utils.renderer import *
 from dragonfly.utils.counter  import *
+from dragonfly.utils.error    import *
 
 ###############################################
 ### PPO agent
@@ -111,6 +112,10 @@ class ppo():
             act = np.reshape(act, (-1))
         if (self.policy.kind == "continuous"):
             act = np.reshape(act, (-1,self.act_dim))
+
+        # Check for NaNs
+        if (np.isnan(act).any()):
+            error("ppo", "get_actions", "Detected NaN in generated actions")
 
         return act
 
