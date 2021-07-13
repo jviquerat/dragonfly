@@ -54,7 +54,8 @@ class fc(Model):
 
         # Check that out_dim and heads have same dimension
         if (len(self.out_dim) != pms.heads.nb):
-            error("fc", "__init__", "Out_dim and heads should have same dimension")
+            error("fc", "__init__",
+                  "Out_dim and heads should have same dimension")
 
         # Initialize network
         self.net = []

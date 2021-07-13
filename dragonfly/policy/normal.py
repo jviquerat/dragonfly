@@ -32,8 +32,13 @@ class normal():
         self.kind       = "continuous"
 
         # Define and init network
-        # Force tanh activation, as this is normal policy
-        #pms.network.heads.final = ["tanh","sigmoid"]
+        if (pms.network.heads.final[0] != "tanh"):
+            warning("normal", "__init__",
+                    "Final activation for mean network of normal policy is not tanh")
+        if (pms.network.heads.final[1] != "softplus"):
+            warning("normal", "__init__",
+                    "Final activation for dev network of normal policy is not softplus")
+
         self.net = net_factory.create(pms.network.type,
                                       inp_dim = obs_dim,
                                       out_dim = [self.dim,self.dim],

@@ -24,7 +24,7 @@ class pg():
             pdf     = policy.compute_pdf(obs)
             act     = policy.reshape_actions(act)
             lgp     = pdf.log_prob(act)
-            loss_pg = -tf.reduce_mean(lgp)
+            loss_pg =-tf.reduce_mean(lgp)
 
             # Compute entropy loss
             entropy      = pdf.entropy()
@@ -36,8 +36,9 @@ class pg():
             loss = loss_pg + self.ent_coef*loss_entropy
 
             # Compute KL div
-            kl = pdf.kl_divergence(prp)
-            kl = tf.reduce_mean(kl)
+            prp = policy.compute_prp(obs)
+            kl  = pdf.kl_divergence(prp)
+            kl  = tf.reduce_mean(kl)
 
             # Apply gradients
             pol_var = policy.trainables

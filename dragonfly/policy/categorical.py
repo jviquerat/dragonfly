@@ -32,8 +32,10 @@ class categorical():
         self.kind       = "discrete"
 
         # Define and init network
-        # Force softmax activation, as this is multinomial policy
-        pms.network.fnl_actv = "softmax"
+        if (pms.network.heads.final[0] != "softmax"):
+            warning("categorical", "__init__",
+                    "Chosen final activation for categorical policy is not softmax")
+
         self.net = net_factory.create(pms.network.type,
                                       inp_dim = obs_dim,
                                       out_dim = [self.dim],
