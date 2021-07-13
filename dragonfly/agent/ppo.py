@@ -7,6 +7,7 @@ import numpy as np
 from dragonfly.policy.policy  import *
 from dragonfly.value.value    import *
 from dragonfly.retrn.retrn    import *
+from dragonfly.core.constants import *
 from dragonfly.utils.buff     import *
 from dragonfly.utils.report   import *
 from dragonfly.utils.renderer import *
@@ -20,7 +21,7 @@ class ppo():
 
         # Initialize from arguments
         self.name         = 'ppo'
-        self.n_vars       = 9
+        self.n_vars       = 12
 
         self.act_dim      = act_dim
         self.obs_dim      = obs_dim
@@ -71,9 +72,9 @@ class ppo():
                                  self.buff_size, self.btc_frac)
 
         # Initialize learning data report
-        self.report_fields = ["episode", "score", "length",
-                              "policy_loss", "v_value_loss",
-                              "entropy", "policy_gnorm",
+        self.report_fields = ["episode", "score", "smooth_score", "length",
+                              "smooth_length", "policy_loss", "v_value_loss",
+                              "entropy", "smooth_entropy", "policy_gnorm",
                               "v_value_gnorm", "kl_div",
                               "policy_lr", "v_value_lr", "step"]
         self.report   = report(self.report_fields)
@@ -184,7 +185,7 @@ class ppo():
 
         # Average and print
         if (self.counter.ep <= self.counter.n_ep):
-            avg    = np.mean(self.report.data["score"][-25:])
+            avg    = np.mean(self.report.data["score"][-n_smooth:])
             avg    = f"{avg:.3f}"
             bst    = self.counter.best_score
             bst    = f"{bst:.3f}"
@@ -276,10 +277,16 @@ class ppo():
 
         self.report.append("episode",       self.counter.ep)
         self.report.append("score",         self.counter.score[cpu])
+        smooth_score   = np.mean(self.report.data["score"][-n_smooth:])
+        self.report.append("smooth_score",  smooth_score)
         self.report.append("length",        self.counter.ep_step[cpu])
+        smooth_length  = np.mean(self.report.data["length"][-n_smooth:])
+        self.report.append("smooth_length", smooth_length)
         self.report.append("policy_loss",   self.p_loss)
         self.report.append("v_value_loss",  self.v_loss)
         self.report.append("entropy",       self.entropy)
+        smooth_entropy = np.mean(self.report.data["entropy"][-n_smooth:])
+        self.report.append("smooth_entropy",smooth_entropy)
         self.report.append("policy_gnorm",  self.p_gnorm)
         self.report.append("v_value_gnorm", self.v_gnorm)
         self.report.append("kl_div",        self.kl_div)
