@@ -8,6 +8,7 @@ import numpy as np
 from dragonfly.core.training import *
 from dragonfly.utils.json    import *
 from dragonfly.utils.data    import *
+from dragonfly.utils.prints  import *
 from dragonfly.agent.agent   import *
 from dragonfly.envs.par_envs import *
 
@@ -48,8 +49,10 @@ if __name__ == '__main__':
     averager = data_avg(agent.n_vars, pms.n_ep, pms.n_avg)
 
     # Run
+    disclaimer()
     for run in range(pms.n_avg):
-        print('### Avg run #'+str(run))
+        liner()
+        print('Avg run #'+str(run))
         agent.reset()
         env.set_cpus()
         launch_training(path, run, env, agent)

@@ -1,6 +1,9 @@
 # Generic imports
 import time
 
+# Custom imports
+from dragonfly.utils.prints import *
+
 ###############################################
 ### timer class
 ### Used to measure time spent on different operations
@@ -25,4 +28,5 @@ class timer():
 
     def show(self):
         str_dt = str(f"{self.dt:.2f}")
-        print("# Timer "+str(self.name)+": "+str_dt+" seconds")
+        spacer()
+        print("Timer "+str(self.name)+": "+str_dt+" seconds")
