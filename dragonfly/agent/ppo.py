@@ -21,7 +21,7 @@ class ppo():
 
         # Initialize from arguments
         self.name         = 'ppo'
-        self.n_vars       = 12
+        self.n_vars       = 6
 
         self.act_dim      = act_dim
         self.obs_dim      = obs_dim
@@ -73,10 +73,7 @@ class ppo():
 
         # Initialize learning data report
         self.report_fields = ["episode", "score", "smooth_score", "length",
-                              "smooth_length", "policy_loss", "v_value_loss",
-                              "entropy", "smooth_entropy", "policy_gnorm",
-                              "v_value_gnorm", "kl_div",
-                              "policy_lr", "v_value_lr", "step"]
+                              "smooth_length", "entropy", "smooth_entropy", "step"]
         self.report   = report(self.report_fields)
 
         # Initialize renderer
@@ -282,16 +279,9 @@ class ppo():
         self.report.append("length",        self.counter.ep_step[cpu])
         smooth_length  = np.mean(self.report.data["length"][-n_smooth:])
         self.report.append("smooth_length", smooth_length)
-        self.report.append("policy_loss",   self.p_loss)
-        self.report.append("v_value_loss",  self.v_loss)
         self.report.append("entropy",       self.entropy)
         smooth_entropy = np.mean(self.report.data["entropy"][-n_smooth:])
         self.report.append("smooth_entropy",smooth_entropy)
-        self.report.append("policy_gnorm",  self.p_gnorm)
-        self.report.append("v_value_gnorm", self.v_gnorm)
-        self.report.append("kl_div",        self.kl_div)
-        self.report.append("policy_lr",     self.policy.get_lr())
-        self.report.append("v_value_lr",    self.v_value.get_lr())
 
         self.report.step(self.counter.ep_step[cpu])
 

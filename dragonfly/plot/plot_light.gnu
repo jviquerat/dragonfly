@@ -33,5 +33,5 @@ plot file u 1:12:13 w filledc lt 2 notitle, \
      file u 1:11    w l ls 2 t "ep length"
 
 # Plot entropy
-plot file u 1:24:25 w filledc lt 5 notitle, \
-     file u 1:23    w l ls 5 t "entropy"
+plot file u 1:18:19 w filledc lt 5 notitle, \
+     file u 1:17    w l ls 5 t "entropy"

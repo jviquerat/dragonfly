@@ -11,7 +11,7 @@
         "network": {
             "type": "fc",
             "trunk": {
-                "arch": [32,16],
+                "arch": [32,32],
                 "actv": "tanh"
             },
             "heads": {
@@ -24,7 +24,7 @@
         "optimizer": {
             "type": "nadam",
             "lr": 1.0e-3,
-            "grd_clip": 0.5
+            "grd_clip": 0.1
         },
         "loss": {
             "type": "ppo",
@@ -37,7 +37,7 @@
         "network": {
             "type": "fc",
             "trunk": {
-                "arch": [32,16],
+                "arch": [32,32],
                 "actv": "tanh"
             },
             "heads": {
@@ -49,8 +49,8 @@
         },
         "optimizer": {
             "type": "nadam",
-            "lr": 1.0e-3,
-            "grd_clip": 0.5
+            "lr": 2.0e-3,
+            "grd_clip": 0.1
         },
         "loss": {
             "type": "mse"
