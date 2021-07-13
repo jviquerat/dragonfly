@@ -11,6 +11,7 @@ from dragonfly.utils.buff     import *
 from dragonfly.utils.report   import *
 from dragonfly.utils.renderer import *
 from dragonfly.utils.counter  import *
+from dragonfly.utils.error    import *
 
 ###############################################
 ### PPO agent
@@ -38,12 +39,15 @@ class ppo():
         self.bst_score    =-1.0e8
 
         # Build policies
-        pms.policy.save      = True
-        pms.policy.loss.type = "ppo"
-        self.policy          = pol_factory.create(pms.policy.type,
-                                                  obs_dim = obs_dim,
-                                                  act_dim = act_dim,
-                                                  pms     = pms.policy)
+        pms.policy.save   = True
+        if (pms.policy.loss.type != "ppo"):
+            warning("ppo", "__init__",
+                    "Loss type for ppo agent is not ppo")
+
+        self.policy       = pol_factory.create(pms.policy.type,
+                                               obs_dim = obs_dim,
+                                               act_dim = act_dim,
+                                               pms     = pms.policy)
 
         # act_dim is overwritten with policy.store_dim
         # This allows compatibility between continuous and discrete envs
@@ -111,6 +115,10 @@ class ppo():
             act = np.reshape(act, (-1))
         if (self.policy.kind == "continuous"):
             act = np.reshape(act, (-1,self.act_dim))
+
+        # Check for NaNs
+        if (np.isnan(act).any()):
+            error("ppo", "get_actions", "Detected NaN in generated actions")
 
         return act
 
