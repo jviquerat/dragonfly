@@ -14,6 +14,7 @@ from   tensorflow.keras.layers       import Dense, BatchNormalization
 from   tensorflow.keras.initializers import Orthogonal, GlorotUniform
 
 # Custom imports
+from   dragonfly.utils.error         import *
 from   dragonfly.network.tree        import *
 
 ###############################################
@@ -53,9 +54,7 @@ class fc(Model):
 
         # Check that out_dim and heads have same dimension
         if (len(self.out_dim) != pms.heads.nb):
-            print("Input error in fc network")
-            print("Out_dim and heads should have same dimension")
-            exit()
+            error("fc", "__init__", "Out_dim and heads should have same dimension")
 
         # Initialize network
         self.net = []
