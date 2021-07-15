@@ -44,5 +44,5 @@ steps   = floor(n_steps/n_imgs)
 
 # Plot all points sampling
 do for [i=0:n_imgs] {
-   splot file u 2:3:4:2 every ::0::i*steps w l palette lw 1.5 notitle
+   splot file u 2:3:4:2 every ::0::i*steps w l palette lw 2.0 notitle
 }
