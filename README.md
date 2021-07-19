@@ -1,7 +1,6 @@
 # dragonfly
 
-![master badge](https://github.com/jviquerat/dragonfly/workflows/dragonfly/badge.svg)
-![testing badge](https://github.com/jviquerat/dragonfly/workflows/dragonfly/badge.svg)
+![master badge](https://github.com/jviquerat/dragonfly/workflows/dragonfly/badge.svg?branch=master)
 
 Dragonfly is a buffer-based DRL research code. It follows a basic level of modularity to make new developments quick and easy. Below are a few environment solved with the library.
 
