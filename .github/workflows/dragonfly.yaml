@@ -1,12 +1,18 @@
 name: dragonfly
 
-# Triggers testing at every push for any branch
-on: push
+# Triggers testing
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
 
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
