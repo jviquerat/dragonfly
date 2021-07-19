@@ -1,0 +1,14 @@
+{
+    "env_name": "test_env",
+    "agent": "test_agent",
+    "policy": {
+        "type": "categorical",
+        "network": {
+            "type": "fc",
+            "trunk": {
+                "arch": [16,16],
+                "actv": "tanh"
+            }
+        }
+    }
+}
