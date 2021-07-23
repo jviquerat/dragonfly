@@ -30,9 +30,7 @@ class par_buff:
 
     def serialize(self):
         arr = self.buff[:,:self.idx,:]
-        arr = np.reshape(arr, (self.n_cpu*self.idx, self.dim))
-
-        return np.reshape(arr, (-1,self.dim))
+        return np.reshape(arr, (self.n_cpu*self.idx, self.dim))
 
 ###############################################
 ### Local parallel buffer class, used to store
