@@ -5,12 +5,12 @@ import time
 import numpy as np
 
 # Custom imports
-from dragonfly.core.training import *
-from dragonfly.utils.json    import *
-from dragonfly.utils.data    import *
-from dragonfly.utils.prints  import *
-from dragonfly.agent.agent   import *
-from dragonfly.envs.par_envs import *
+from dragonfly.src.core.training import *
+from dragonfly.src.utils.json    import *
+from dragonfly.src.utils.data    import *
+from dragonfly.src.utils.prints  import *
+from dragonfly.src.agent.agent   import *
+from dragonfly.src.envs.par_envs import *
 
 ########################
 # Average training over multiple runs
