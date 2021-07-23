@@ -13,6 +13,7 @@ def test_ppo():
     # Initial space
     print("")
 
+    #########################
     # Initialize json parser and read test json file
     reader_discrete = json_parser()
     reader_discrete.read("dragonfly/tst/agent/discrete.json")
@@ -26,6 +27,7 @@ def test_ppo():
     assert((act == [0]) or (act == [1]))
     print("")
 
+    #########################
     # Initialize json parser and read test json file
     reader_continuous = json_parser()
     reader_continuous.read("dragonfly/tst/agent/continuous.json")
