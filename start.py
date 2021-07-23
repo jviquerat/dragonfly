@@ -67,4 +67,4 @@ if __name__ == '__main__':
     averager.average(filename)
 
     # Plot
-    os.system('gnuplot -c dragonfly/plot/plot_light.gnu '+path)
+    os.system('gnuplot -c dragonfly/src/plot/plot_light.gnu '+path)
