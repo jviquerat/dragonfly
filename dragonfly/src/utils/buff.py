@@ -21,15 +21,24 @@ class par_buff:
         self.buff[:,:,:] = 0.0
 
     def append(self, vec):
+        #print(vec)
+        #exit()
         if (np.ndim(vec) == 1):
+            #print(vec)
             vec = np.reshape(vec, (-1, self.dim))
+            #print(vec)
+            #exit()
 
         for cpu in range(self.n_cpu):
-            self.buff[cpu,self.idx,:] = vec[cpu][:]
+            for d in range(self.dim):
+                self.buff[cpu,self.idx,d] = vec[cpu][d]
         self.idx += 1
 
     def serialize(self):
+        #print(self.buff[:,:self.idx,:])
         arr = self.buff[:,:self.idx,:]
+        #print(np.reshape(arr, (self.n_cpu*self.idx, self.dim)))
+        #exit()
         return np.reshape(arr, (self.n_cpu*self.idx, self.dim))
 
 ###############################################
