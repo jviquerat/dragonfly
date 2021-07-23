@@ -55,7 +55,9 @@ class ppo():
         self.act_dim = self.policy.store_dim
 
         # Build values
-        pms.value.type = "v_value"
+        if (pms.value.type != "v_value"):
+            warning("ppo", "__init__",
+                    "Value type for ppo agent is not v_value")
         self.v_value   = val_factory.create(pms.value.type,
                                             obs_dim = obs_dim,
                                             pms     = pms.value)
