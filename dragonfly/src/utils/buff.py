@@ -9,22 +9,28 @@ import tensorflow as tf
 ### n_cpu : nb of parallel environments
 ### dim   : dimension of array
 class par_buff:
-    def __init__(self, n_cpu, dim):
+    def __init__(self, n_cpu, dim, size):
         self.n_cpu = n_cpu
         self.dim   = dim
+        self.size  = size
+        self.buff  = np.zeros((self.n_cpu, self.size, self.dim))
         self.reset()
 
     def reset(self):
-        self.buff = [np.array([]) for _ in range(self.n_cpu)]
+        self.idx         = 0
+        self.buff[:,:,:] = 0.0
 
     def append(self, vec):
+        if (np.ndim(vec) == 1):
+            vec = np.reshape(vec, (-1, self.dim))
+
         for cpu in range(self.n_cpu):
-            self.buff[cpu] = np.append(self.buff[cpu], vec[cpu])
+            self.buff[cpu,self.idx,:] = vec[cpu][:]
+        self.idx += 1
 
     def serialize(self):
-        arr = np.array([])
-        for cpu in range(self.n_cpu):
-            arr = np.append(arr, self.buff[cpu])
+        arr = self.buff[:,:self.idx,:]
+        arr = np.reshape(arr, (self.n_cpu*self.idx, self.dim))
 
         return np.reshape(arr, (-1,self.dim))
 
@@ -44,11 +50,11 @@ class loc_buff:
         self.reset()
 
     def reset(self):
-        self.obs  = par_buff(self.n_cpu, self.obs_dim)
-        self.nxt  = par_buff(self.n_cpu, self.obs_dim)
-        self.act  = par_buff(self.n_cpu, self.act_dim)
-        self.rwd  = par_buff(self.n_cpu, 1)
-        self.trm  = par_buff(self.n_cpu, 1)
+        self.obs  = par_buff(self.n_cpu, self.obs_dim, self.buff_size)
+        self.nxt  = par_buff(self.n_cpu, self.obs_dim, self.buff_size)
+        self.act  = par_buff(self.n_cpu, self.act_dim, self.buff_size)
+        self.rwd  = par_buff(self.n_cpu, 1,            self.buff_size)
+        self.trm  = par_buff(self.n_cpu, 1,            self.buff_size)
         self.size = 0
 
     def store(self, obs, nxt, act, rwd, trm):
