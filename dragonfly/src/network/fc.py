@@ -83,6 +83,7 @@ class fc(Model):
         self.init_weights = self.get_weights()
 
     # Network forward pass
+    @tf.function
     def call(self, var):
 
         # Initialize
