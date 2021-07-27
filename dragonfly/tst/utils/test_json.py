@@ -12,6 +12,7 @@ def test_json_reader():
     # Initial space
     print("")
 
+    #########################
     # Initialize json parser and read test json file
     reader = json_parser()
     reader.read("dragonfly/tst/utils/json_file.json")
