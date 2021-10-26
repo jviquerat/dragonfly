@@ -7,24 +7,25 @@ from dragonfly.src.optimizer.optimizer import *
 from dragonfly.src.loss.loss           import *
 
 ###############################################
-### v_value class
-### obs_dim : input dimension
+### q_value class
+### obs_dim : input  dimension
+### act_dim : action dimension
 ### pms     : parameters
-class v_value():
-    def __init__(self, obs_dim, pms):
+class q_value():
+    def __init__(self, obs_dim, act_dim, pms):
 
         # Fill structure
-        self.dim = 1
+        self.act_dim = act_dim
         self.obs_dim = obs_dim
 
         # Define and init network
         if (pms.network.heads.final[0] != "linear"):
-            warning("v_value", "__init__",
-                    "Chosen final activation for v_value is not linear")
+            warning("q_value", "__init__",
+                    "Chosen final activation for q_value is not linear")
 
         self.net = net_factory.create(pms.network.type,
-                                      inp_dim = obs_dim,
-                                      out_dim = [self.dim],
+                                      inp_dim = self.obs_dim,
+                                      out_dim = [self.act_dim],
                                       pms     = pms.network)
 
         # Define trainables
@@ -37,8 +38,8 @@ class v_value():
 
         # Define loss
         if (pms.loss.type != "mse"):
-            warning("v_value", "__init__",
-                    "Chosen loss for v_value is not mse")
+            warning("q_value", "__init__",
+                    "Chosen loss for q_value is not mse")
         self.loss = loss_factory.create(pms.loss.type,
                                         pms = pms.loss)
 
@@ -50,7 +51,7 @@ class v_value():
 
         # Predict values
         values = np.array(self.call_net(obs))
-        values = np.reshape(values, (-1,1))
+        values = np.reshape(values, (-1,self.act_dim))
 
         return values
 
