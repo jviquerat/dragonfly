@@ -7,7 +7,7 @@ from dragonfly.src.utils.timer import *
 ###############################################
 ### Class for buffer-based training
 ### pms : parameters
-def buffer_based(pms):
+class buffer_based():
     def __init__(self, pms):
 
         # Initialize timers

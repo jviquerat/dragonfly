@@ -50,8 +50,7 @@ if __name__ == '__main__':
     averager = data_avg(agent.n_vars, pms.n_ep, pms.n_avg)
 
     # Initialize training style
-    trainer = trainer_factory.create(pms.trainer,
-                                     pms = pms)
+    trainer = trainer_factory.create(pms.trainer.style, pms=pms)
 
     # Run
     disclaimer()
