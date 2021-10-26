@@ -45,10 +45,10 @@ class ppo():
             warning("ppo", "__init__",
                     "Loss type for ppo agent is not ppo")
 
-        self.policy       = pol_factory.create(pms.policy.type,
-                                               obs_dim = obs_dim,
-                                               act_dim = act_dim,
-                                               pms     = pms.policy)
+        self.policy = pol_factory.create(pms.policy.type,
+                                         obs_dim = obs_dim,
+                                         act_dim = act_dim,
+                                         pms     = pms.policy)
 
         # act_dim is overwritten with policy.store_dim
         # This allows compatibility between continuous and discrete envs
