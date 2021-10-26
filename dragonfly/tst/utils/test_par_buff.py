@@ -12,7 +12,7 @@ def test_par_buff():
     # Initial space
     print("")
 
-     #########################
+    #########################
     # Initialize buffer
     # Size index (last argument) is voluntarily too large to
     # check that the buffer is trimmed correctly before
