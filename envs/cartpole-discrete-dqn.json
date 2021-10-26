@@ -1,0 +1,46 @@
+{
+    "env_name": "CartPole-v0",
+    "agent": "dqn",
+    "ep_end": 200,
+    "n_ep": 1000,
+    "n_avg": 3,
+    "n_cpu": 1,
+    "render_every": 500,
+    "value": {
+        "type": "q_value",
+        "network": {
+            "type": "fc",
+            "trunk": {
+                "arch": [16,16],
+                "actv": "relu"
+            },
+            "heads": {
+                "nb": 1,
+                "arch": [[]],
+                "actv": ["relu"],
+                "final": ["linear"]
+            }
+        },
+        "optimizer": {
+            "type": "nadam",
+            "lr": 1.0e-3,
+            "grd_clip": 0.1
+        },
+        "loss": {
+            "type": "mse"
+        }
+    },
+    "epsilon": {
+        "decay": {
+            "type": "linear",
+            "start": 0.1,
+            "end": 0.05,
+            "n_steps": 100000
+        }
+    },
+    "batch_frac": 0.1,
+    "n_buff": 50,
+    "n_epochs": 1,
+    "buff_size": 128,
+    "bootstrap": true
+}

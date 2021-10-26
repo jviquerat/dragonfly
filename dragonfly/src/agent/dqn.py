@@ -4,7 +4,7 @@ import copy
 import numpy as np
 
 # Custom imports
-from dragonfly.src.policy.policy  import *
+from dragonfly.src.decay.decay    import *
 from dragonfly.src.value.value    import *
 from dragonfly.src.core.constants import *
 from dragonfly.src.utils.buff     import *
@@ -50,10 +50,6 @@ class dqn():
                                             obs_dim = obs_dim,
                                             pms     = pms.value)
 
-        # Build advantage
-        self.retrn = retrn_factory.create(pms.retrn.type,
-                                          pms = pms.retrn)
-
         # Initialize buffers
         self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
                                  self.act_dim,   self.buff_size)
@@ -63,7 +59,7 @@ class dqn():
 
         # Initialize learning data report
         self.report_fields = ["episode", "score", "smooth_score", "length",
-                              "smooth_length", "entropy", "smooth_entropy", "step"]
+                              "smooth_length", "step"]
         self.report   = report(self.report_fields)
 
         # Initialize renderer
@@ -77,8 +73,7 @@ class dqn():
 
     # Reset
     def reset(self):
-        self.policy.reset()
-        self.v_value.reset()
+        self.q_value.reset()
         self.loc_buff.reset()
         self.glb_buff.reset()
         self.report.reset(self.report_fields)
@@ -269,9 +264,6 @@ class dqn():
         self.report.append("length",        self.counter.ep_step[cpu])
         smooth_length  = np.mean(self.report.data["length"][-n_smooth:])
         self.report.append("smooth_length", smooth_length)
-        self.report.append("entropy",       self.entropy)
-        smooth_entropy = np.mean(self.report.data["entropy"][-n_smooth:])
-        self.report.append("smooth_entropy",smooth_entropy)
 
         self.report.step(self.counter.ep_step[cpu])
 
