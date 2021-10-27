@@ -151,17 +151,19 @@ class ppo():
         # Loop over environments
         for i in range(self.n_cpu):
             ep_step = self.counter.ep_step[i]
+            if (not done[i]): trm[i] = 0
+            if (    done[i]): trm[i] = 1
 
-            if (not self.bootstrap):
-                if (not done[i]): trm[i] = 0
-                if (    done[i]): trm[i] = 1
-            if (    self.bootstrap):
-                if (    done[i] and ep_step <  self.ep_end-1): trm[i] = 1
-                if (    done[i] and ep_step >= self.ep_end-1): trm[i] = 2
-                if (not done[i] and ep_step <  self.ep_end-1): trm[i] = 0
-                if (not done[i] and ep_step >= self.ep_end-1):
-                    trm[i]  = 2
-                    done[i] = True
+            #if (not self.bootstrap):
+            #if (not done[i]): trm[i] = 0
+            #    if (    done[i]): trm[i] = 1
+            #if (    self.bootstrap):
+            #    if (    done[i] and ep_step <  self.ep_end-1): trm[i] = 1
+            #    if (    done[i] and ep_step >= self.ep_end-1): trm[i] = 2
+            #    if (not done[i] and ep_step <  self.ep_end-1): trm[i] = 0
+            #    if (not done[i] and ep_step >= self.ep_end-1):
+            #        trm[i]  = 2
+            #        done[i] = True
 
         return trm, done
 

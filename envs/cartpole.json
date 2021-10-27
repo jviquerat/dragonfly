@@ -59,7 +59,7 @@
     "retrn": {
         "type": "gae",
         "gamma": 0.99,
-        "gae_lambda": 0.99,
+        "gae_lambda": 0.98,
         "ret_norm": true,
         "ret_clip": true
     },
@@ -67,5 +67,5 @@
     "n_buff": 8,
     "n_epochs": 8,
     "buff_size": 128,
-    "bootstrap": true
+    "bootstrap": false
 }
