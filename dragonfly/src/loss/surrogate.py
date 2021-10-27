@@ -5,8 +5,8 @@ import tensorflow as tf
 from dragonfly.src.core.constants import *
 
 ###############################################
-### PPO loss class
-class ppo():
+### Surrogate loss class
+class surrogate():
     def __init__(self, pms):
 
         # Set default values

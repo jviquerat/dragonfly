@@ -2,8 +2,8 @@
 import tensorflow as tf
 
 ###############################################
-### PG loss class
-class pg():
+### Log-prob loss class
+class log_prob():
     def __init__(self, pms):
 
         # Set default values
