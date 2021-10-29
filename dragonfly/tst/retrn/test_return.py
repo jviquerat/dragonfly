@@ -108,80 +108,66 @@ def test_return():
     assert(np.all(np.abs(ret-ret_ref)/np.abs(ret_ref + ret_eps) < 1.0e-8))
     print("")
 
-    # #########################
-    # # Test full return with normalization and clipping
-    # print("Full return, normalized, clipped")
+    #########################
+    # Test discounted return with normalization and clipping
+    print("Disc. return, normalized, clipped, no bootstrap, no terminal")
 
-    # # Modify retrn object
-    # retrn.ret_clip = True
+    # Modify retrn object
+    retrn.ret_clip = True
 
-    # # Compute returns
-    # # avg is 2.960298802
-    # # std is 1.3792204603784504
-    # tgt, ret = retrn.compute(rwd, val, nxt, trm)
-    # ret_ref  = np.array([1.407096446,    0.7106189519,
-    #                      0.007106331643, 0.0, 0.0])
+    # Compute returns
+    # avg is 2.960298802
+    # std is 1.3792204603784504
+    tgt, ret = retrn.compute(rwd, val, nxt, trm, bts)
+    ret_ref  = np.array([1.407096446,    0.7106189519,
+                         0.007106331643, 0.0, 0.0])
 
-    # print("Reference return")
-    # print(ret_ref)
-    # print("Computed return")
-    # print(ret)
+    print("Reference return")
+    print(ret_ref)
+    print("Computed return")
+    print(ret)
 
-    # assert(np.all(np.abs(ret-ret_ref)/np.abs(ret_ref + ret_eps) < 1.0e-8))
-    # print("")
+    assert(np.all(np.abs(ret-ret_ref)/np.abs(ret_ref + ret_eps) < 1.0e-8))
+    print("")
 
-    # #########################
-    # # Test vanilla advantage
-    # print("Advantage, no normalization, no clip")
+    #########################
+    # Test vanilla advantage
+    print("Advantage, no norm, no clip, no bootstrap, no terminal")
 
-    # # Read json file and declare return
-    # reader.read("dragonfly/tst/retrn/advantage.json")
-    # retrn = advantage(reader.pms.retrn)
+    # Read json file and declare return
+    reader.read("dragonfly/tst/retrn/advantage.json")
+    retrn = advantage(reader.pms.retrn)
 
-    # # Declare input vectors
-    # size = 5
-    # rwd  = np.ones(size)
-    # val  = np.array([4.0, 3.0, 2.0, 1.0, 0.5])
-    # nxt  = np.zeros(size)
-    # trm  = np.ones(size)
+    # Compute returns
+    tgt, ret = retrn.compute(rwd, val, nxt, trm, bts)
+    ret_ref  = np.array([4.90099501, 3.940399, 2.9701, 1.99, 1.])
+    ret_ref -= val
 
-    # # Compute returns
-    # tgt, ret = retrn.compute(rwd, val, nxt, trm)
-    # ret_ref  = np.array([4.90099501, 3.940399, 2.9701, 1.99, 1.])
-    # ret_ref -= val
+    print("Reference return")
+    print(ret_ref)
+    print("Computed return")
+    print(ret)
 
-    # print("Reference return")
-    # print(ret_ref)
-    # print("Computed return")
-    # print(ret)
+    assert(np.all(np.abs(ret-ret_ref)/np.abs(ret_ref + ret_eps) < 1.0e-8))
+    print("")
 
-    # assert(np.all(np.abs(ret-ret_ref)/np.abs(ret_ref + ret_eps) < 1.0e-8))
-    # print("")
+    #########################
+    # Test vanilla GAE
+    print("GAE, no norm, no clip, no bootstrap, no terminal")
 
-    # #########################
-    # # Test vanilla GAE
-    # print("GAE, no normalization, no clip")
+    # Read json file and declare return
+    reader.read("dragonfly/tst/retrn/gae.json")
+    retrn = gae(reader.pms.retrn)
 
-    # # Read json file and declare return
-    # reader.read("dragonfly/tst/retrn/gae.json")
-    # retrn = gae(reader.pms.retrn)
+    # Compute returns
+    tgt, ret = retrn.compute(rwd, val, nxt, trm, bts)
+    ret_ref  = np.array([1.01167994, 1.07367546,
+                         1.12726805, 1.1721996, 0.698])
 
-    # # Declare input vectors
-    # size = 5
-    # rwd  = np.ones(size)
-    # val  = np.array([4.0, 3.0, 2.0, 1.0, 0.5])
-    # nxt  = np.array([3.0, 2.0, 1.0, 0.5, 0.2])
-    # trm  = np.ones(size)
+    print("Reference return")
+    print(ret_ref)
+    print("Computed return")
+    print(ret)
 
-    # # Compute returns
-    # tgt, ret = retrn.compute(rwd, val, nxt, trm)
-    # ret_ref  = np.array([4.90099501, 3.940399, 2.9701, 1.99, 1.])
-    # ret_ref -= val
-
-    # print("Reference return")
-    # print(ret_ref)
-    # print("Computed return")
-    # print(ret)
-
-    # assert(np.all(np.abs(ret-ret_ref)/np.abs(ret_ref + ret_eps) < 1.0e-8))
-    # print("")
+    assert(np.all(np.abs(ret-ret_ref)/np.abs(ret_ref + ret_eps) < 1.0e-8))
+    print("")
