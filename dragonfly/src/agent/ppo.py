@@ -27,13 +27,12 @@ class ppo():
         self.obs_dim      = obs_dim
         self.n_cpu        = pms.n_cpu
         self.ep_end       = pms.ep_end
+        self.bootstrap    = pms.bootstrap
 
         self.n_buff       = pms.n_buff
         self.buff_size    = pms.buff_size
         self.btc_frac     = pms.batch_frac
         self.n_epochs     = pms.n_epochs
-
-        self.bootstrap    = pms.bootstrap
 
         # Variables for terminal printings
         self.bst_ep       = 0
@@ -126,17 +125,18 @@ class ppo():
     def finalize_buffers(self):
 
         # Handle fixed-size buffer termination
+        # This imposes bootstraping on the final element of each buffer
         self.loc_buff.fix_trm_buffer()
 
         # Retrieve serialized arrays
-        obs, nxt, act, rwd, trm = self.loc_buff.serialize()
+        obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
 
         # Get current and next values
         crt_val = self.v_value.get_values(obs)
         nxt_val = self.v_value.get_values(nxt)
 
         # Compute advantages
-        tgt, adv = self.retrn.compute(rwd, crt_val, nxt_val, trm)
+        tgt, adv = self.retrn.compute(rwd, crt_val, nxt_val, trm, bts)
 
         # Store in global buffers
         self.glb_buff.store(obs, adv, tgt, act)
@@ -147,25 +147,20 @@ class ppo():
         # "done" possibly contains signals from multiple parallel
         # environments. We assume it does and unroll it in a loop
         trm = np.zeros([self.n_cpu])
+        bts = np.zeros([self.n_cpu])
 
         # Loop over environments
         for i in range(self.n_cpu):
-            ep_step = self.counter.ep_step[i]
-            if (not done[i]): trm[i] = 0
-            if (    done[i]): trm[i] = 1
 
-            #if (not self.bootstrap):
-            #if (not done[i]): trm[i] = 0
-            #    if (    done[i]): trm[i] = 1
-            #if (    self.bootstrap):
-            #    if (    done[i] and ep_step <  self.ep_end-1): trm[i] = 1
-            #    if (    done[i] and ep_step >= self.ep_end-1): trm[i] = 2
-            #    if (not done[i] and ep_step <  self.ep_end-1): trm[i] = 0
-            #    if (not done[i] and ep_step >= self.ep_end-1):
-            #        trm[i]  = 2
-            #        done[i] = True
+            # Set terminal value, whatever the cause
+            trm[i] = float(not (done[i] == True))
 
-        return trm, done
+            # If bootstrap is on, test and fill
+            step = self.counter.ep_step[i]
+            if (self.bootstrap and (step >= self.ep_end-1)):
+                bts[i] = 1.0
+
+        return trm, bts
 
     # Finish if some episodes are done
     def finish_episodes(self, path, done):
@@ -265,9 +260,9 @@ class ppo():
         return self.loc_buff.test_buff_loop()
 
     # Store transition in local buffer
-    def store_transition(self, obs, nxt, act, rwd, trm):
+    def store_transition(self, obs, nxt, act, rwd, trm, bts):
 
-        self.loc_buff.store(obs, nxt, act, rwd, trm)
+        self.loc_buff.store(obs, nxt, act, rwd, trm, bts)
 
     ################################
     ### Report wrappings

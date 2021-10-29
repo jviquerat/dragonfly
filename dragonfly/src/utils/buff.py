@@ -49,20 +49,23 @@ class loc_buff:
         self.act  = par_buff(self.n_cpu, self.act_dim)
         self.rwd  = par_buff(self.n_cpu, 1)
         self.trm  = par_buff(self.n_cpu, 1)
+        self.bts  = par_buff(self.n_cpu, 1)
         self.size = 0
 
-    def store(self, obs, nxt, act, rwd, trm):
+    def store(self, obs, nxt, act, rwd, trm, bts):
         self.obs.append(obs)
         self.nxt.append(nxt)
         self.act.append(act)
         self.rwd.append(rwd)
         self.trm.append(trm)
+        self.bts.append(bts)
         self.size += self.n_cpu
 
     def fix_trm_buffer(self):
         for cpu in range(self.n_cpu):
-            if (self.trm.buff[cpu][-1] == 0):
-                self.trm.buff[cpu][-1] = 2
+            if (self.trm.buff[cpu][-1] == 1.0):
+                self.bts.buff[cpu][-1] = 1.0
+                self.trm.buff[cpu][-1] = 0.0
 
     def test_buff_loop(self):
         return (self.size < self.buff_size)
@@ -73,8 +76,9 @@ class loc_buff:
         act = self.act.serialize()
         rwd = self.rwd.serialize()
         trm = self.trm.serialize()
+        bts = self.bts.serialize()
 
-        return obs, nxt, act, rwd, trm
+        return obs, nxt, act, rwd, trm, bts
 
 ###############################################
 ### Global parallel buffer class, used to store
