@@ -21,8 +21,8 @@ class nadam():
         # Initialize optimizer
         # A fake optimization step is applied so the saved
         # weights and config have the correct sizes
-        self.opt = Nadam(lr       = self.lr,
-                         clipnorm = self.grd_clip)
+        self.opt = Nadam(learning_rate = self.lr,
+                         clipnorm      = self.grd_clip)
         zero_grads = [tf.zeros_like(w) for w in grad_vars]
         self.opt.apply_gradients(zip(zero_grads, grad_vars))
 

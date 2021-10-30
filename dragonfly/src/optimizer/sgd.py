@@ -25,10 +25,10 @@ class sgd():
         # Initialize optimizer
         # A fake optimization step is applied so the saved
         # weights and config have the correct sizes
-        self.opt = SGD(lr       = self.lr,
-                       clipnorm = self.grd_clip,
-                       momentum = self.momentum,
-                       nesterov = self.nesterov)
+        self.opt = SGD(learning_rate = self.lr,
+                       clipnorm      = self.grd_clip,
+                       momentum      = self.momentum,
+                       nesterov      = self.nesterov)
         zero_grads = [tf.zeros_like(w) for w in grad_vars]
         self.opt.apply_gradients(zip(zero_grads, grad_vars))
 

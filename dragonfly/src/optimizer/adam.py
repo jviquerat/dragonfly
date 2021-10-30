@@ -25,10 +25,10 @@ class adam():
         # Initialize optimizer
         # A fake optimization step is applied so the saved
         # weights and config have the correct sizes
-        self.opt = Adam(lr        = self.lr,
-                        clipnorm  = self.grd_clip,
-                        beta_1    = self.beta_1,
-                        beta_2    = self.beta_2)
+        self.opt = Adam(learning_rate = self.lr,
+                        clipnorm      = self.grd_clip,
+                        beta_1        = self.beta_1,
+                        beta_2        = self.beta_2)
         zero_grads = [tf.zeros_like(w) for w in grad_vars]
         self.opt.apply_gradients(zip(zero_grads, grad_vars))
 

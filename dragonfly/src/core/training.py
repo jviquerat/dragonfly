@@ -40,11 +40,11 @@ def launch_training(path, run, env, agent):
             nxt, rwd, done = env.step(act)
             timer_env.toc()
 
-            # Handle termination state
-            trm, done = agent.handle_term(done)
+            # Handle termination state and bootstrapping
+            trm, bts = agent.handle_term(done)
 
             # Store transition
-            agent.store_transition(obs, nxt, act, rwd, trm)
+            agent.store_transition(obs, nxt, act, rwd, trm, bts)
 
             # Update observation and buffer counter
             obs = nxt

@@ -1,0 +1,8 @@
+{
+    "retrn": {
+        "type": "full",
+        "gamma": 0.99,
+        "ret_norm": false,
+        "ret_clip": false
+    }
+}
