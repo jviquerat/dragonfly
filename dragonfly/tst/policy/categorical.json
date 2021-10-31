@@ -1,0 +1,28 @@
+{
+    "policy": {
+        "type": "categorical",
+        "network": {
+            "type": "fc",
+            "trunk": {
+                "arch": [16,16],
+                "actv": "tanh"
+            },
+            "heads": {
+                "nb": 1,
+                "arch": [[]],
+                "actv": ["tanh"],
+                "final": ["softmax"]
+            }
+        },
+        "optimizer": {
+            "type": "nadam",
+            "lr": 2.0e-3,
+            "grd_clip": 0.1
+        },
+        "loss": {
+            "type": "ppo",
+            "pol_clip": 0.1,
+            "ent_coef": 0.01
+        }
+    }
+}
