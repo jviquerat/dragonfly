@@ -1,5 +1,8 @@
 {
     "env_name": "CartPole-v0",
+    "trainer": {
+        "style": "buffer_based"
+    },
     "agent": "ppo",
     "ep_end": 200,
     "bootstrap": false,
@@ -58,7 +61,7 @@
         }
     },
     "retrn": {
-        "type": "advantage",
+        "type": "gae",
         "gamma": 0.99,
         "gae_lambda": 0.99,
         "ret_norm": true,
