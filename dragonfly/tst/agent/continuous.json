@@ -1,6 +1,9 @@
 {
     "env_name": "Pendulum-v0",
     "agent": "ppo",
+    "trainer": {
+        "style": "buffer_based"
+    },
     "ep_end": 200,
     "n_ep": 2,
     "n_avg": 2,
