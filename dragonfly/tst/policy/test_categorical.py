@@ -26,6 +26,6 @@ def test_categorical():
     obs = [[1.0]]
     act = policy.get_actions(obs)
     print("Actions:",act)
-    
+
     assert((act == [0]) or (act == [1]))
     print("")
