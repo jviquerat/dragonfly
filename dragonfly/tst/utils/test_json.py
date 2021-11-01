@@ -20,12 +20,10 @@ def test_json_reader():
     print("Test contents")
     assert(reader.pms.env_name == "test_env")
     assert(reader.pms.policy.network.type == "fc")
-    print("")
 
     print("Test contents extraction")
     pms_extract = reader.pms.policy.network
     assert(pms_extract.trunk.arch[0] == 16)
-    print("")
 
     print("Test adding content")
     with pytest.raises(Exception):

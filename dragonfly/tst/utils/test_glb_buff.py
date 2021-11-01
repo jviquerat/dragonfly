@@ -12,123 +12,88 @@ def test_glb_buff():
     # Initial space
     print("")
 
-    # #########################
-    # # Initialize buffer
-    # # Size index (last argument) is voluntarily too large to
-    # # check that the buffer is trimmed correctly before
-    # # being returned
-    # # First test is done with 1 cpu
-    # n_cpu   = 1
-    # obs_dim = 3
-    # buff    = par_buff(n_cpu, obs_dim, 4)
+    #########################
+    # Initialize buffer
+    n_cpu     = 1
+    obs_dim   = 3
+    act_dim   = 2
+    n_buff    = 5
+    buff_size = 1
+    btc_frac  = 0.5
+    buff      = glb_buff(n_cpu,  obs_dim,   act_dim,
+                         n_buff, buff_size, btc_frac)
 
-    # # Generate a vector to fill buffer
-    # vec = np.array([])
-    # v1  = 1.0*np.ones((obs_dim,1))
-    # vec = np.append(vec, v1)
-    # vec = np.reshape(vec, (-1,obs_dim))
+    # Create fake buffers
+    obs = np.array([[0.0, 0.0, 0.0],
+                    [1.0, 0.0, 0.0],
+                    [1.0, 1.0, 0.0],
+                    [1.0, 2.0, 0.0],
+                    [1.0, 0.0, 1.0]])
+    act = np.array([[1.0, 0.5],
+                    [0.0, 1.0],
+                    [0.5, 1.0],
+                    [1.0, 1.0],
+                    [0.5, 0.5]])
+    adv = np.array([[0.1],
+                    [0.5],
+                    [0.3],
+                    [0.2],
+                    [0.1]])
+    tgt = np.array([[0.8],
+                    [0.3],
+                    [0.2],
+                    [0.1],
+                    [0.1]])
+    buff.store(obs, adv, tgt, act)
 
-    # print("Vector to append to par_buff")
-    # print(vec)
-    # print("")
+    print("Storing buffers")
+    print("obs: ")
+    print(obs)
+    print("act: ")
+    print(act)
+    print("adv: ")
+    print(adv)
+    print("tgt: ")
+    print(tgt)
 
-    # # Append to par_buff several times
-    # buff.append(vec)
-    # buff.append(vec)
+    # Retrieve buffer
+    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buff()
 
-    # print("par_buff after 2 append operations")
-    # print(buff.buff)
-    # print("")
+    # Retrieve first batch
+    start, end, done = buff.get_indices()
+    btc_obs          = obs[start:end]
+    btc_act          = act[start:end]
+    btc_adv          = adv[start:end]
+    btc_tgt          = tgt[start:end]
 
-    # # Serialize
-    # arr = buff.serialize()
+    assert(len(btc_obs)==2)
+    assert(len(btc_act)==2)
+    assert(len(btc_adv)==2)
+    assert(len(btc_tgt)==2)
+    assert(done==False)
 
-    # print("Serialized par_buff")
-    # print(arr)
-    # print("")
+    # Retrieve second batch
+    start, end, done = buff.get_indices()
+    btc_obs          = obs[start:end]
+    btc_act          = act[start:end]
+    btc_adv          = adv[start:end]
+    btc_tgt          = tgt[start:end]
 
-    # tst_arr = np.array([[1, 1, 1],
-    #                     [1, 1, 1]])
+    assert(len(btc_obs)==2)
+    assert(len(btc_act)==2)
+    assert(len(btc_adv)==2)
+    assert(len(btc_tgt)==2)
+    assert(done==False)
 
-    # assert (arr==tst_arr).all()
+    # Retrieve third batch
+    start, end, done = buff.get_indices()
+    btc_obs          = obs[start:end]
+    btc_act          = act[start:end]
+    btc_adv          = adv[start:end]
+    btc_tgt          = tgt[start:end]
 
-    # #########################
-    # # Same test with 2 cpus
-    # n_cpu   = 2
-    # obs_dim = 3
-    # buff    = par_buff(n_cpu, obs_dim, 4)
-
-    # # Generate a vector to fill buffer
-    # vec = np.array([])
-    # v1  = 1.0*np.ones((obs_dim,1))
-    # v2  = 2.0*np.ones((obs_dim,1))
-    # vec = np.append(vec, v1)
-    # vec = np.append(vec, v2)
-    # vec = np.reshape(vec, (-1,obs_dim))
-
-    # print("Vector to append to par_buff")
-    # print(vec)
-    # print("")
-
-    # # Append to par_buff several times
-    # buff.append(vec)
-    # buff.append(vec)
-
-    # print("par_buff after 2 append operations")
-    # print(buff.buff)
-    # print("")
-
-    # # Serialize
-    # arr = buff.serialize()
-
-    # print("Serialized par_buff")
-    # print(arr)
-    # print("")
-
-    # tst_arr = np.array([[1, 1, 1],
-    #                     [1, 1, 1],
-    #                     [2, 2, 2],
-    #                     [2, 2, 2]])
-
-    # assert (arr==tst_arr).all()
-
-    # #########################
-    # # Same test with inputs of size 1
-    # n_cpu   = 2
-    # obs_dim = 1
-    # buff    = par_buff(n_cpu, obs_dim, 4)
-
-    # # Generate a vector to fill buffer
-    # vec = np.array([])
-    # v1  = 1.0*np.ones((obs_dim))
-    # v2  = 2.0*np.ones((obs_dim))
-    # vec = np.append(vec, v1)
-    # vec = np.append(vec, v2)
-
-    # print("Vector to append to par_buff")
-    # print(vec)
-    # print("")
-
-    # # Append to par_buff several times
-    # buff.append(vec)
-    # buff.append(vec)
-
-    # print("par_buff after 2 append operations")
-    # print(buff.buff)
-    # print("")
-
-    # # Serialize
-    # arr = buff.serialize()
-
-    # print("Serialized par_buff")
-    # print(arr)
-    # print("")
-
-    # tst_arr = np.array([[1],
-    #                     [1],
-    #                     [2],
-    #                     [2]])
-
-    # assert (arr==tst_arr).all()
-
-
+    assert(len(btc_obs)==1)
+    assert(len(btc_act)==1)
+    assert(len(btc_adv)==1)
+    assert(len(btc_tgt)==1)
+    assert(done==True)

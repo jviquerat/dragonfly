@@ -23,12 +23,17 @@ def test_decay():
     epsilon = linear(reader.pms.decay)
 
     # Test initial value
-    assert(epsilon.get()==1.0)
+    val = epsilon.get()
+    print("Initial value:", val)
+    assert(val==1.0)
 
     # Decay
     for i in range(200):
         epsilon.get()
 
     # Test minimal value
-    assert(epsilon.get()==0.0)
+    val = epsilon.get()
+    print("Final value:", val)
+    assert(val==0.0)
+
     print("")

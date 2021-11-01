@@ -117,6 +117,7 @@ class glb_buff:
         self.act = np.append(self.act, act, axis=0)
 
     def get_buff(self):
+
         # Start/end indices
         end    = len(self.obs)
         start  = max(0,end - self.n_buff*self.buff_size)
