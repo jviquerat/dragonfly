@@ -1,9 +1,9 @@
 {
-    "env_name": "pendulum:pendulum-modified-v0",
+    "env_name": "Pendulum-v0",
     "agent": "ppo",
     "ep_end": 200,
-    "n_ep": 400,
-    "n_avg": 3,
+    "n_ep": 2,
+    "n_avg": 2,
     "n_cpu": 1,
     "render_every": 50,
     "policy": {
@@ -23,7 +23,7 @@
         },
         "optimizer": {
             "type": "nadam",
-            "lr": 2.0e-3,
+            "lr": 1.0e-3,
             "grd_clip": 0.1
         },
         "loss": {

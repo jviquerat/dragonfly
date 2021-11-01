@@ -1,24 +1,24 @@
 {
-    "env_name": "pendulum:pendulum-modified-v0",
+    "env_name": "CartPole-v0",
     "agent": "ppo",
     "ep_end": 200,
-    "n_ep": 400,
-    "n_avg": 3,
+    "n_ep": 10,
+    "n_avg": 2,
     "n_cpu": 1,
-    "render_every": 50,
+    "render_every": 500,
     "policy": {
-        "type": "normal",
+        "type": "categorical",
         "network": {
             "type": "fc",
             "trunk": {
-                "arch": [32,32],
-                "actv": "swish"
+                "arch": [16,16],
+                "actv": "tanh"
             },
             "heads": {
-                "nb": 2,
-                "arch": [[16],[16]],
-                "actv": ["swish","swish"],
-                "final": ["tanh","softplus"]
+                "nb": 1,
+                "arch": [[]],
+                "actv": ["tanh"],
+                "final": ["softmax"]
             }
         },
         "optimizer": {
@@ -37,7 +37,7 @@
         "network": {
             "type": "fc",
             "trunk": {
-                "arch": [32,32],
+                "arch": [16,16],
                 "actv": "swish"
             },
             "heads": {
@@ -49,7 +49,7 @@
         },
         "optimizer": {
             "type": "nadam",
-            "lr": 5.0e-3,
+            "lr": 1.0e-2,
             "grd_clip": 0.1
         },
         "loss": {
@@ -64,8 +64,8 @@
         "ret_clip": true
     },
     "batch_frac": 0.5,
-    "n_buff": 16,
-    "n_epochs": 16,
-    "buff_size": 256,
+    "n_buff": 8,
+    "n_epochs": 8,
+    "buff_size": 128,
     "bootstrap": true
 }
