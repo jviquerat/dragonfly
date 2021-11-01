@@ -35,5 +35,5 @@ def test_decay():
     val = epsilon.get()
     print("Final value:", val)
     assert(val==0.0)
-    
+
     print("")
