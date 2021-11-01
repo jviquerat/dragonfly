@@ -1,0 +1,26 @@
+{
+    "value": {
+        "type": "q_value",
+        "network": {
+            "type": "fc",
+            "trunk": {
+                "arch": [16,16],
+                "actv": "swish"
+            },
+            "heads": {
+                "nb": 1,
+                "arch": [[]],
+                "actv": ["swish"],
+                "final": ["linear"]
+            }
+        },
+        "optimizer": {
+            "type": "nadam",
+            "lr": 1.0e-2,
+            "grd_clip": 0.1
+        },
+        "loss": {
+            "type": "mse"
+        }
+    }
+}
