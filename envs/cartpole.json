@@ -28,7 +28,7 @@
             "grd_clip": 0.1
         },
         "loss": {
-            "type": "ppo",
+            "type": "surrogate",
             "pol_clip": 0.1,
             "ent_coef": 0.01
         }

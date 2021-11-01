@@ -5,8 +5,8 @@ import tensorflow as tf
 from dragonfly.src.core.constants import *
 
 ###############################################
-### PPO loss class
-class ppo():
+### Surrogate loss class
+class surrogate():
     def __init__(self, pms):
 
         # Set default values
@@ -35,8 +35,8 @@ class ppo():
             p2       = tf.clip_by_value(ratio,
                                         1.0-self.pol_clip,
                                         1.0+self.pol_clip)
-            p2       = tf.multiply(adv,p2)
-            loss_ppo =-tf.reduce_mean(tf.minimum(p1,p2))
+            p2             = tf.multiply(adv,p2)
+            loss_surrogate =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss
             entropy      = pdf.entropy()
@@ -45,7 +45,7 @@ class ppo():
             loss_entropy =-entropy
 
             # Compute total loss
-            loss = loss_ppo + self.ent_coef*loss_entropy
+            loss = loss_surrogate + self.ent_coef*loss_entropy
 
             # Compute KL div
             kl = pdf.kl_divergence(prp)

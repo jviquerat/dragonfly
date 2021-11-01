@@ -40,9 +40,9 @@ class ppo():
 
         # Build policies
         pms.policy.save   = True
-        if (pms.policy.loss.type != "ppo"):
+        if (pms.policy.loss.type != "surrogate"):
             warning("ppo", "__init__",
-                    "Loss type for ppo agent is not ppo")
+                    "Loss type for ppo agent is not surrogate")
 
         self.policy       = pol_factory.create(pms.policy.type,
                                                obs_dim = obs_dim,
