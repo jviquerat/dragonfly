@@ -49,7 +49,10 @@ if __name__ == '__main__':
     averager = data_avg(agent.n_vars, pms.n_ep, pms.n_avg)
 
     # Initialize training style
-    trainer = trainer_factory.create(pms.trainer.style, pms=pms)
+    trainer = trainer_factory.create(pms.trainer.style,
+                                     obs_dim = env.obs_dim,
+                                     act_dim = env.act_dim,
+                                     pms     = pms)
 
     # Run
     disclaimer()
@@ -57,6 +60,7 @@ if __name__ == '__main__':
         liner()
         print('Avg run #'+str(run))
         agent.reset()
+        trainer.reset()
         env.set_cpus()
         trainer.train(path, run, env, agent)
         filename = path+'/'+pms.agent+'_'+str(run)+'.dat'

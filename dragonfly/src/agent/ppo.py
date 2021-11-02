@@ -66,8 +66,8 @@ class ppo():
                                           pms = pms.retrn)
 
         # Initialize buffers
-        self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
-                                 self.act_dim,   self.buff_size)
+        #self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
+        #                         self.act_dim,   self.buff_size)
         self.glb_buff = glb_buff(self.n_cpu,     self.obs_dim,
                                  self.act_dim,   self.n_buff,
                                  self.buff_size, self.btc_frac)
@@ -90,7 +90,7 @@ class ppo():
     def reset(self):
         self.policy.reset()
         self.v_value.reset()
-        self.loc_buff.reset()
+        #self.loc_buff.reset()
         self.glb_buff.reset()
         self.report.reset(self.report_fields)
         self.renderer.reset()
@@ -121,15 +121,28 @@ class ppo():
 
         return act
 
+    # # Finalize buffers before training
+    # def finalize_buffers(self):
+
+    #     # Handle fixed-size buffer termination
+    #     # This imposes bootstraping on the final element of each buffer
+    #     #self.loc_buff.fix_trm_buffer()
+
+    #     # Retrieve serialized arrays
+    #     #obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
+
+    #     # Get current and next values
+    #     crt_val = self.v_value.get_values(obs)
+    #     nxt_val = self.v_value.get_values(nxt)
+
+    #     # Compute advantages
+    #     tgt, adv = self.retrn.compute(rwd, crt_val, nxt_val, trm, bts)
+
+    #     # Store in global buffers
+    #     self.glb_buff.store(obs, adv, tgt, act)
+
     # Finalize buffers before training
-    def finalize_buffers(self):
-
-        # Handle fixed-size buffer termination
-        # This imposes bootstraping on the final element of each buffer
-        self.loc_buff.fix_trm_buffer()
-
-        # Retrieve serialized arrays
-        obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
+    def compute_returns(self, obs, nxt, act, rwd, trm, bts):
 
         # Get current and next values
         crt_val = self.v_value.get_values(obs)
@@ -250,19 +263,19 @@ class ppo():
     ################################
 
     # Reset local buffer
-    def reset_buff(self):
+    #def reset_buff(self):
 
-        self.loc_buff.reset()
+     #   self.loc_buff.reset()
 
     # Test buffer loop criterion
-    def test_buff_loop(self):
+    #def test_buff_loop(self):
 
-        return self.loc_buff.test_buff_loop()
+     #   return self.loc_buff.test_buff_loop()
 
     # Store transition in local buffer
-    def store_transition(self, obs, nxt, act, rwd, trm, bts):
+    #def store_transition(self, obs, nxt, act, rwd, trm, bts):
 
-        self.loc_buff.store(obs, nxt, act, rwd, trm, bts)
+     #   self.loc_buff.store(obs, nxt, act, rwd, trm, bts)
 
     ################################
     ### Report wrappings
