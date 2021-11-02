@@ -49,9 +49,9 @@ class ppo():
                                                act_dim = act_dim,
                                                pms     = pms.policy)
 
-        # act_dim is overwritten with policy.store_dim
+        # pol_act_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
-        self.act_dim = self.policy.store_dim
+        self.pol_act_dim = self.policy.store_dim
 
         # Build values
         if (pms.value.type != "v_value"):
@@ -68,9 +68,9 @@ class ppo():
         # Initialize buffers
         #self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
         #                         self.act_dim,   self.buff_size)
-        self.glb_buff = glb_buff(self.n_cpu,     self.obs_dim,
-                                 self.act_dim,   self.n_buff,
-                                 self.buff_size, self.btc_frac)
+        self.glb_buff = glb_buff(self.n_cpu,       self.obs_dim,
+                                 self.pol_act_dim, self.n_buff,
+                                 self.buff_size,   self.btc_frac)
 
         # Initialize learning data report
         self.report_fields = ["episode", "score", "smooth_score", "length",
@@ -101,7 +101,7 @@ class ppo():
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
-        act = np.zeros([self.n_cpu, self.act_dim],
+        act = np.zeros([self.n_cpu, self.pol_act_dim],
                        dtype=self.policy.store_type)
 
         # Loop over cpus
@@ -113,7 +113,7 @@ class ppo():
         if (self.policy.kind == "discrete"):
             act = np.reshape(act, (-1))
         if (self.policy.kind == "continuous"):
-            act = np.reshape(act, (-1,self.act_dim))
+            act = np.reshape(act, (-1,self.pol_act_dim))
 
         # Check for NaNs
         if (np.isnan(act).any()):

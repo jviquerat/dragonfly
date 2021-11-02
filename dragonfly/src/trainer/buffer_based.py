@@ -9,16 +9,19 @@ from dragonfly.src.utils.buff  import *
 ### Class for buffer-based training
 ### pms : parameters
 class buffer_based():
-    def __init__(self, obs_dim, act_dim, pms):
+    def __init__(self, obs_dim, act_dim, pol_act_dim, pms):
 
         # Initialize from input
-        self.obs_dim   = obs_dim
-        self.act_dim   = act_dim
-        self.n_cpu     = pms.n_cpu
-        self.buff_size = pms.buff_size
+        self.obs_dim     = obs_dim
+        self.act_dim     = act_dim
+        self.pol_act_dim = pol_act_dim
+        self.n_cpu       = pms.n_cpu
+        self.buff_size   = pms.buff_size
 
-        self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
-                                 self.act_dim,   self.buff_size)
+        # pol_act_dim is the true dimension of the action provided to the env
+        # This allows compatibility between continuous and discrete envs
+        self.loc_buff = loc_buff(self.n_cpu,       self.obs_dim,
+                                 self.pol_act_dim, self.buff_size)
 
         # Initialize timers
         self.timer_global   = timer("global   ")

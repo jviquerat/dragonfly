@@ -32,6 +32,9 @@ def test_ppo_continuous():
 
     # Initialize training style
     trainer = trainer_factory.create(reader.pms.trainer.style,
+                                     obs_dim     = env.obs_dim,
+                                     act_dim     = env.act_dim,
+                                     pol_act_dim = agent.pol_act_dim,
                                      pms=reader.pms)
 
     print("Test continuous agent")
