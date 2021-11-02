@@ -41,12 +41,6 @@ class buffer_based():
         self.loc_buff.reset()
         self.glb_buff.reset()
 
-    # Reset
-    def reset_loc_buff(self):
-
-        self.loc_buff.reset()
-        #pass
-
     # Test buffer loop criterion
     def test_buff_loop(self):
 
@@ -80,9 +74,6 @@ class buffer_based():
 
                 agent.train(btc_obs, btc_act, btc_adv, btc_tgt, end-start)
 
-                #self.train_policy (btc_obs, btc_adv, btc_act)
-                #self.train_v_value(btc_obs, btc_tgt, end - start)
-
     # Loop
     def loop(self, path, run, env, agent):
 
@@ -96,7 +87,7 @@ class buffer_based():
         while (agent.test_ep_loop()):
 
             # Reset local buffer
-            self.reset_loc_buff()
+            self.loc_buff.reset()
 
             # Loop over buff size
             while (self.test_buff_loop()):

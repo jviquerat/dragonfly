@@ -8,7 +8,6 @@ from dragonfly.src.policy.policy  import *
 from dragonfly.src.value.value    import *
 from dragonfly.src.retrn.retrn    import *
 from dragonfly.src.core.constants import *
-#from dragonfly.src.utils.buff     import *
 from dragonfly.src.utils.report   import *
 from dragonfly.src.utils.renderer import *
 from dragonfly.src.utils.counter  import *
@@ -65,13 +64,6 @@ class ppo():
         self.retrn = retrn_factory.create(pms.retrn.type,
                                           pms = pms.retrn)
 
-        # Initialize buffers
-        #self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
-        #                         self.act_dim,   self.buff_size)
-        #self.glb_buff = glb_buff(self.n_cpu,       self.obs_dim,
-        #                         self.pol_act_dim, self.n_buff,
-        #                         self.buff_size,   self.btc_frac)
-
         # Initialize learning data report
         self.report_fields = ["episode", "score", "smooth_score", "length",
                               "smooth_length", "entropy", "smooth_entropy", "step"]
@@ -88,10 +80,9 @@ class ppo():
 
     # Reset
     def reset(self):
+
         self.policy.reset()
         self.v_value.reset()
-        #self.loc_buff.reset()
-        #self.glb_buff.reset()
         self.report.reset(self.report_fields)
         self.renderer.reset()
         self.counter.reset()
@@ -121,26 +112,6 @@ class ppo():
 
         return act
 
-    # # Finalize buffers before training
-    # def finalize_buffers(self):
-
-    #     # Handle fixed-size buffer termination
-    #     # This imposes bootstraping on the final element of each buffer
-    #     #self.loc_buff.fix_trm_buffer()
-
-    #     # Retrieve serialized arrays
-    #     #obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
-
-    #     # Get current and next values
-    #     crt_val = self.v_value.get_values(obs)
-    #     nxt_val = self.v_value.get_values(nxt)
-
-    #     # Compute advantages
-    #     tgt, adv = self.retrn.compute(rwd, crt_val, nxt_val, trm, bts)
-
-    #     # Store in global buffers
-    #     self.glb_buff.store(obs, adv, tgt, act)
-
     # Finalize buffers before training
     def compute_returns(self, obs, nxt, act, rwd, trm, bts):
 
@@ -152,9 +123,6 @@ class ppo():
         tgt, adv = self.retrn.compute(rwd, crt_val, nxt_val, trm, bts)
 
         return tgt, adv
-
-        # Store in global buffers
-        #self.glb_buff.store(obs, adv, tgt, act)
 
     # Handle termination
     def handle_term(self, done):
@@ -219,24 +187,6 @@ class ppo():
     # Training
     def train(self, btc_obs, btc_act, btc_adv, btc_tgt, size):
 
-        # # Save previous policy
-        # self.policy.save_prv()
-
-        # # Train policy and v_value
-        # for epoch in range(self.n_epochs):
-
-        #     # Retrieve data
-        #     obs, act, adv, tgt = self.glb_buff.get_buff()
-        #     done               = False
-
-        #     # Visit all available history
-        #     while not done:
-        #         start, end, done = self.glb_buff.get_indices()
-        #         btc_obs          = obs[start:end]
-        #         btc_act          = act[start:end]
-        #         btc_adv          = adv[start:end]
-        #         btc_tgt          = tgt[start:end]
-
         self.train_policy (btc_obs, btc_adv, btc_act)
         self.train_v_value(btc_obs, btc_tgt, size)
 
@@ -259,25 +209,6 @@ class ppo():
         outputs      = self.v_value.train(obs, tgt, size)
         self.v_loss  = outputs[0]
         self.v_gnorm = outputs[1]
-
-    ################################
-    ### Local buffer wrappings
-    ################################
-
-    # Reset local buffer
-    #def reset_buff(self):
-
-     #   self.loc_buff.reset()
-
-    # Test buffer loop criterion
-    #def test_buff_loop(self):
-
-     #   return self.loc_buff.test_buff_loop()
-
-    # Store transition in local buffer
-    #def store_transition(self, obs, nxt, act, rwd, trm, bts):
-
-     #   self.loc_buff.store(obs, nxt, act, rwd, trm, bts)
 
     ################################
     ### Report wrappings
