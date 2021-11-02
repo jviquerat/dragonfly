@@ -17,11 +17,17 @@ class buffer_based():
         self.pol_act_dim = pol_act_dim
         self.n_cpu       = pms.n_cpu
         self.buff_size   = pms.buff_size
+        self.n_buff      = pms.n_buff
+        self.btc_frac    = pms.batch_frac
+        self.n_epochs    = pms.n_epochs
 
         # pol_act_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
         self.loc_buff = loc_buff(self.n_cpu,       self.obs_dim,
                                  self.pol_act_dim, self.buff_size)
+        self.glb_buff = glb_buff(self.n_cpu,       self.obs_dim,
+                                 self.pol_act_dim, self.n_buff,
+                                 self.buff_size,   self.btc_frac)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
@@ -32,7 +38,8 @@ class buffer_based():
     # Reset
     def reset(self):
 
-        pass
+        self.loc_buff.reset()
+        self.glb_buff.reset()
 
     # Reset
     def reset_loc_buff(self):
@@ -51,7 +58,33 @@ class buffer_based():
         self.loc_buff.store(obs, nxt, act, rwd, trm, bts)
 
     # Train
-    def train(self, path, run, env, agent):
+    def train(self, agent):
+
+        # Save previous policy
+        agent.policy.save_prv()
+
+        # Train policy and v_value
+        for epoch in range(self.n_epochs):
+
+            # Retrieve data
+            obs, act, adv, tgt = self.glb_buff.get_buff()
+            done               = False
+
+            # Visit all available history
+            while not done:
+                start, end, done = self.glb_buff.get_indices()
+                btc_obs          = obs[start:end]
+                btc_act          = act[start:end]
+                btc_adv          = adv[start:end]
+                btc_tgt          = tgt[start:end]
+
+                agent.train(btc_obs, btc_act, btc_adv, btc_tgt, end-start)
+
+                #self.train_policy (btc_obs, btc_adv, btc_act)
+                #self.train_v_value(btc_obs, btc_tgt, end - start)
+
+    # Loop
+    def loop(self, path, run, env, agent):
 
         # Start global timer
         self.timer_global.tic()
@@ -105,11 +138,15 @@ class buffer_based():
             #agent.finalize_buffers()
             self.loc_buff.fix_trm_buffer()
             obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
-            agent.compute_returns(obs, nxt, act, rwd, trm, bts)
+            tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
+
+            # Store in global buffers
+            self.glb_buff.store(obs, adv, tgt, act)
 
             # Train agent
             self.timer_training.tic()
-            agent.train()
+            #agent.train()
+            self.train(agent)
             self.timer_training.toc()
 
             # Write report data to file

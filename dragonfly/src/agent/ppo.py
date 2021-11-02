@@ -8,7 +8,7 @@ from dragonfly.src.policy.policy  import *
 from dragonfly.src.value.value    import *
 from dragonfly.src.retrn.retrn    import *
 from dragonfly.src.core.constants import *
-from dragonfly.src.utils.buff     import *
+#from dragonfly.src.utils.buff     import *
 from dragonfly.src.utils.report   import *
 from dragonfly.src.utils.renderer import *
 from dragonfly.src.utils.counter  import *
@@ -68,9 +68,9 @@ class ppo():
         # Initialize buffers
         #self.loc_buff = loc_buff(self.n_cpu,     self.obs_dim,
         #                         self.act_dim,   self.buff_size)
-        self.glb_buff = glb_buff(self.n_cpu,       self.obs_dim,
-                                 self.pol_act_dim, self.n_buff,
-                                 self.buff_size,   self.btc_frac)
+        #self.glb_buff = glb_buff(self.n_cpu,       self.obs_dim,
+        #                         self.pol_act_dim, self.n_buff,
+        #                         self.buff_size,   self.btc_frac)
 
         # Initialize learning data report
         self.report_fields = ["episode", "score", "smooth_score", "length",
@@ -91,7 +91,7 @@ class ppo():
         self.policy.reset()
         self.v_value.reset()
         #self.loc_buff.reset()
-        self.glb_buff.reset()
+        #self.glb_buff.reset()
         self.report.reset(self.report_fields)
         self.renderer.reset()
         self.counter.reset()
@@ -151,8 +151,10 @@ class ppo():
         # Compute advantages
         tgt, adv = self.retrn.compute(rwd, crt_val, nxt_val, trm, bts)
 
+        return tgt, adv
+
         # Store in global buffers
-        self.glb_buff.store(obs, adv, tgt, act)
+        #self.glb_buff.store(obs, adv, tgt, act)
 
     # Handle termination
     def handle_term(self, done):
@@ -215,28 +217,28 @@ class ppo():
         self.v_gnorm = 0.0
 
     # Training
-    def train(self):
+    def train(self, btc_obs, btc_act, btc_adv, btc_tgt, size):
 
-        # Save previous policy
-        self.policy.save_prv()
+        # # Save previous policy
+        # self.policy.save_prv()
 
-        # Train policy and v_value
-        for epoch in range(self.n_epochs):
+        # # Train policy and v_value
+        # for epoch in range(self.n_epochs):
 
-            # Retrieve data
-            obs, act, adv, tgt = self.glb_buff.get_buff()
-            done               = False
+        #     # Retrieve data
+        #     obs, act, adv, tgt = self.glb_buff.get_buff()
+        #     done               = False
 
-            # Visit all available history
-            while not done:
-                start, end, done = self.glb_buff.get_indices()
-                btc_obs          = obs[start:end]
-                btc_act          = act[start:end]
-                btc_adv          = adv[start:end]
-                btc_tgt          = tgt[start:end]
+        #     # Visit all available history
+        #     while not done:
+        #         start, end, done = self.glb_buff.get_indices()
+        #         btc_obs          = obs[start:end]
+        #         btc_act          = act[start:end]
+        #         btc_adv          = adv[start:end]
+        #         btc_tgt          = tgt[start:end]
 
-                self.train_policy (btc_obs, btc_adv, btc_act)
-                self.train_v_value(btc_obs, btc_tgt, end - start)
+        self.train_policy (btc_obs, btc_adv, btc_act)
+        self.train_v_value(btc_obs, btc_tgt, size)
 
     ################################
     ### Policy/value wrappings

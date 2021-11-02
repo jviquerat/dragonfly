@@ -63,7 +63,7 @@ if __name__ == '__main__':
         agent.reset()
         trainer.reset()
         env.set_cpus()
-        trainer.train(path, run, env, agent)
+        trainer.loop(path, run, env, agent)
         filename = path+'/'+pms.agent+'_'+str(run)+'.dat'
         averager.store(filename, run)
 
