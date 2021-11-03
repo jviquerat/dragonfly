@@ -137,23 +137,6 @@ class ppo():
 
         return trm, bts
 
-    # Printings at the end of an episode
-    def print_episode(self):
-
-        # No initial printing
-        if (self.counter.ep == 0): return
-
-        # Average and print
-        if (self.counter.ep <= self.counter.n_ep):
-            avg    = np.mean(self.report.data["score"][-n_smooth:])
-            avg    = f"{avg:.3f}"
-            bst    = self.counter.best_score
-            bst    = f"{bst:.3f}"
-            bst_ep = self.counter.best_ep
-            end    = '\n'
-            if (self.counter.ep < self.counter.n_ep): end = '\r'
-            print('# Ep #'+str(self.counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
-
     # Training
     def train(self, btc_obs, btc_act, btc_adv, btc_tgt, size):
 

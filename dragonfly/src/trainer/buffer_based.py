@@ -2,8 +2,10 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.src.utils.timer import *
-from dragonfly.src.utils.buff  import *
+from dragonfly.src.utils.timer    import *
+from dragonfly.src.utils.buff     import *
+from dragonfly.src.core.constants import *
+
 
 ###############################################
 ### Class for buffer-based training
@@ -58,7 +60,7 @@ class buffer_based():
         for cpu in range(self.n_cpu):
             if (done[cpu]):
                 agent.store_report(cpu)
-                agent.print_episode()
+                self.print_episode(agent.counter, agent.report)
                 agent.finish_rendering(path, cpu)
                 agent.counter.reset_ep(cpu)
 
@@ -84,6 +86,23 @@ class buffer_based():
                 btc_tgt          = tgt[start:end]
 
                 agent.train(btc_obs, btc_act, btc_adv, btc_tgt, end-start)
+
+    # Printings at the end of an episode
+    def print_episode(self, counter, report):
+
+        # No initial printing
+        if (counter.ep == 0): return
+
+        # Average and print
+        if (counter.ep <= counter.n_ep):
+            avg    = np.mean(report.data["score"][-n_smooth:])
+            avg    = f"{avg:.3f}"
+            bst    = counter.best_score
+            bst    = f"{bst:.3f}"
+            bst_ep = counter.best_ep
+            end    = '\n'
+            if (counter.ep < counter.n_ep): end = '\r'
+            print('# Ep #'+str(counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
 
     # Loop
     def loop(self, path, run, env, agent):
@@ -137,7 +156,6 @@ class buffer_based():
                 self.timer_env.toc()
 
             # Finalize buffers for training
-            #agent.finalize_buffers()
             self.loc_buff.fix_trm_buffer()
             obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
             tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
@@ -147,7 +165,6 @@ class buffer_based():
 
             # Train agent
             self.timer_training.tic()
-            #agent.train()
             self.train(agent)
             self.timer_training.toc()
 
@@ -155,7 +172,7 @@ class buffer_based():
             agent.write_report(path, run)
 
         # Last printing
-        agent.print_episode()
+        self.print_episode(agent.counter, agent.report)
 
         # Close timers and show
         self.timer_global.toc()
