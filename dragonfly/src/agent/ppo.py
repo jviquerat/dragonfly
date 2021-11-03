@@ -71,7 +71,7 @@ class ppo():
         self.counter  = counter(self.n_cpu, pms.n_ep)
 
         # Initialize inner temporary buffer
-        self.init_tmp_data()
+        self.entropy = 0.0
 
     # Reset
     def reset(self):
@@ -167,17 +167,6 @@ class ppo():
             end    = '\n'
             if (self.counter.ep < self.counter.n_ep): end = '\r'
             print('# Ep #'+str(self.counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
-
-    # Init temporary data
-    def init_tmp_data(self):
-
-        # These values are temporary storage for report struct
-        self.p_loss  = 0.0
-        self.entropy = 0.0
-        self.p_gnorm = 0.0
-        self.kl_div  = 0.0
-        self.v_loss  = 0.0
-        self.v_gnorm = 0.0
 
     # Training
     def train(self, btc_obs, btc_act, btc_adv, btc_tgt, size):
