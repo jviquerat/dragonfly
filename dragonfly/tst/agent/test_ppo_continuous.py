@@ -38,10 +38,12 @@ def test_ppo_continuous():
                                      pms=reader.pms)
 
     print("Test continuous agent")
+    trainer.reset()
     agent.reset()
     env.set_cpus()
     trainer.loop(".", 0, env, agent)
     averager.store("ppo_0.dat", 0)
+    trainer.reset()
     agent.reset()
     env.set_cpus()
     trainer.loop(".", 1, env, agent)
