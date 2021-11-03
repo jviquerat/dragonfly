@@ -28,10 +28,6 @@ class ppo():
         self.ep_end       = pms.ep_end
         self.bootstrap    = pms.bootstrap
 
-        # Variables for terminal printings
-        self.bst_ep       = 0
-        self.bst_score    =-1.0e8
-
         # Build policies
         pms.policy.save   = True
         if (pms.policy.loss.type != "surrogate"):
