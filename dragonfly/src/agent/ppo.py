@@ -137,17 +137,6 @@ class ppo():
 
         return trm, bts
 
-    # Finish if some episodes are done
-    def finish_episodes(self, path, done):
-
-        # Loop over environments and finalize/reset
-        for cpu in range(self.n_cpu):
-            if (done[cpu]):
-                self.store_report(cpu)
-                self.print_episode()
-                self.finish_rendering(path, cpu)
-                self.counter.reset_ep(cpu)
-
     # Printings at the end of an episode
     def print_episode(self):
 

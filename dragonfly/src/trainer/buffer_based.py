@@ -51,6 +51,17 @@ class buffer_based():
 
         self.loc_buff.store(obs, nxt, act, rwd, trm, bts)
 
+    # Finish if some episodes are done
+    def finish_episodes(self, agent, path, done):
+
+        # Loop over environments and finalize/reset
+        for cpu in range(self.n_cpu):
+            if (done[cpu]):
+                agent.store_report(cpu)
+                agent.print_episode()
+                agent.finish_rendering(path, cpu)
+                agent.counter.reset_ep(cpu)
+
     # Train
     def train(self, agent):
 
@@ -118,7 +129,7 @@ class buffer_based():
                 agent.store_rendering(rnd)
 
                 # Finish if some episodes are done
-                agent.finish_episodes(path, done)
+                self.finish_episodes(agent, path, done)
 
                 # Reset only finished environments
                 self.timer_env.tic()
