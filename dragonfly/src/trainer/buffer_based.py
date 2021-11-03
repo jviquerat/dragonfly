@@ -5,6 +5,7 @@ import numpy as np
 from dragonfly.src.utils.timer    import *
 from dragonfly.src.utils.buff     import *
 from dragonfly.src.utils.report   import *
+from dragonfly.src.utils.renderer import *
 from dragonfly.src.core.constants import *
 
 ###############################################
@@ -37,6 +38,9 @@ class buffer_based():
                               "length", "smooth_length",
                               "step"]
         self.report   = report(self.report_fields)
+
+        # Initialize renderer
+        self.renderer = renderer(self.n_cpu, pms.render_every)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
@@ -84,8 +88,8 @@ class buffer_based():
                 agent.update_step()
 
                 # Handle rendering
-                rnd = env.render(agent.get_render_cpu())
-                agent.store_rendering(rnd)
+                rnd = env.render(self.renderer.render)
+                self.renderer.store(rnd)
 
                 # Finish if some episodes are done
                 self.finish_episodes(agent, path, done)
@@ -150,6 +154,7 @@ class buffer_based():
         self.loc_buff.reset()
         self.glb_buff.reset()
         self.report.reset(self.report_fields)
+        self.renderer.reset()
 
     # Test buffer loop criterion
     def test_buff_loop(self):
@@ -169,7 +174,7 @@ class buffer_based():
             if (done[cpu]):
                 self.store_report(agent.counter, cpu)
                 self.print_episode(agent.counter, self.report)
-                agent.finish_rendering(path, cpu)
+                self.renderer.finish(path, agent.counter.ep, cpu)
                 agent.counter.reset_ep(cpu)
 
     # Printings at the end of an episode

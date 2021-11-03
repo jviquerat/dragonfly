@@ -8,7 +8,6 @@ from dragonfly.src.policy.policy  import *
 from dragonfly.src.value.value    import *
 from dragonfly.src.retrn.retrn    import *
 from dragonfly.src.core.constants import *
-from dragonfly.src.utils.renderer import *
 from dragonfly.src.utils.counter  import *
 from dragonfly.src.utils.error    import *
 
@@ -54,9 +53,6 @@ class ppo():
         self.retrn = retrn_factory.create(pms.retrn.type,
                                           pms = pms.retrn)
 
-        # Initialize renderer
-        self.renderer = renderer(self.n_cpu, pms.render_every)
-
         # Initialize counter
         self.counter  = counter(self.n_cpu, pms.n_ep)
 
@@ -65,7 +61,6 @@ class ppo():
 
         self.policy.reset()
         self.v_value.reset()
-        self.renderer.reset()
         self.counter.reset()
 
     # Get actions
@@ -131,25 +126,6 @@ class ppo():
 
         self.policy.train(btc_obs, btc_adv, btc_act)
         self.v_value.train(btc_obs, btc_tgt, size)
-
-    ################################
-    ### Renderer wrappings
-    ################################
-
-    # Return rendering selection array
-    def get_render_cpu(self):
-
-        return self.renderer.render
-
-    # Store one rendering step for all cpus
-    def store_rendering(self, rnd):
-
-        self.renderer.store(rnd)
-
-    # Finish rendering process
-    def finish_rendering(self, path, cpu):
-
-        self.renderer.finish(path, self.counter.ep, cpu)
 
     ################################
     ### Counter wrappings
