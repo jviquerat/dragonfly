@@ -37,73 +37,6 @@ class buffer_based():
         self.timer_actions  = timer("actions  ")
         self.timer_training = timer("training ")
 
-    # Reset
-    def reset(self):
-
-        self.loc_buff.reset()
-        self.glb_buff.reset()
-
-    # Test buffer loop criterion
-    def test_buff_loop(self):
-
-        return self.loc_buff.test_buff_loop()
-
-    # Store transition in local buffer
-    def store_transition(self, obs, nxt, act, rwd, trm, bts):
-
-        self.loc_buff.store(obs, nxt, act, rwd, trm, bts)
-
-    # Finish if some episodes are done
-    def finish_episodes(self, agent, path, done):
-
-        # Loop over environments and finalize/reset
-        for cpu in range(self.n_cpu):
-            if (done[cpu]):
-                agent.store_report(cpu)
-                self.print_episode(agent.counter, agent.report)
-                agent.finish_rendering(path, cpu)
-                agent.counter.reset_ep(cpu)
-
-    # Train
-    def train(self, agent):
-
-        # Save previous policy
-        agent.policy.save_prv()
-
-        # Train policy and v_value
-        for epoch in range(self.n_epochs):
-
-            # Retrieve data
-            obs, act, adv, tgt = self.glb_buff.get_buff()
-            done               = False
-
-            # Visit all available history
-            while not done:
-                start, end, done = self.glb_buff.get_indices()
-                btc_obs          = obs[start:end]
-                btc_act          = act[start:end]
-                btc_adv          = adv[start:end]
-                btc_tgt          = tgt[start:end]
-
-                agent.train(btc_obs, btc_act, btc_adv, btc_tgt, end-start)
-
-    # Printings at the end of an episode
-    def print_episode(self, counter, report):
-
-        # No initial printing
-        if (counter.ep == 0): return
-
-        # Average and print
-        if (counter.ep <= counter.n_ep):
-            avg    = np.mean(report.data["score"][-n_smooth:])
-            avg    = f"{avg:.3f}"
-            bst    = counter.best_score
-            bst    = f"{bst:.3f}"
-            bst_ep = counter.best_ep
-            end    = '\n'
-            if (counter.ep < counter.n_ep): end = '\r'
-            print('# Ep #'+str(counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
-
     # Loop
     def loop(self, path, run, env, agent):
 
@@ -180,3 +113,70 @@ class buffer_based():
         self.timer_env.show()
         self.timer_actions.show()
         self.timer_training.show()
+
+    # Train
+    def train(self, agent):
+
+        # Save previous policy
+        agent.policy.save_prv()
+
+        # Train policy and v_value
+        for epoch in range(self.n_epochs):
+
+            # Retrieve data
+            obs, act, adv, tgt = self.glb_buff.get_buff()
+            done               = False
+
+            # Visit all available history
+            while not done:
+                start, end, done = self.glb_buff.get_indices()
+                btc_obs          = obs[start:end]
+                btc_act          = act[start:end]
+                btc_adv          = adv[start:end]
+                btc_tgt          = tgt[start:end]
+
+                agent.train(btc_obs, btc_act, btc_adv, btc_tgt, end-start)
+
+    # Reset
+    def reset(self):
+
+        self.loc_buff.reset()
+        self.glb_buff.reset()
+
+    # Test buffer loop criterion
+    def test_buff_loop(self):
+
+        return self.loc_buff.test_buff_loop()
+
+    # Store transition in local buffer
+    def store_transition(self, obs, nxt, act, rwd, trm, bts):
+
+        self.loc_buff.store(obs, nxt, act, rwd, trm, bts)
+
+    # Finish if some episodes are done
+    def finish_episodes(self, agent, path, done):
+
+        # Loop over environments and finalize/reset
+        for cpu in range(self.n_cpu):
+            if (done[cpu]):
+                agent.store_report(cpu)
+                self.print_episode(agent.counter, agent.report)
+                agent.finish_rendering(path, cpu)
+                agent.counter.reset_ep(cpu)
+
+    # Printings at the end of an episode
+    def print_episode(self, counter, report):
+
+        # No initial printing
+        if (counter.ep == 0): return
+
+        # Average and print
+        if (counter.ep <= counter.n_ep):
+            avg    = np.mean(report.data["score"][-n_smooth:])
+            avg    = f"{avg:.3f}"
+            bst    = counter.best_score
+            bst    = f"{bst:.3f}"
+            bst_ep = counter.best_ep
+            end    = '\n'
+            if (counter.ep < counter.n_ep): end = '\r'
+            print('# Ep #'+str(counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
