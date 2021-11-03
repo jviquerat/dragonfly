@@ -4,8 +4,8 @@ import numpy as np
 # Custom imports
 from dragonfly.src.utils.timer    import *
 from dragonfly.src.utils.buff     import *
+from dragonfly.src.utils.report   import *
 from dragonfly.src.core.constants import *
-
 
 ###############################################
 ### Class for buffer-based training
@@ -30,6 +30,13 @@ class buffer_based():
         self.glb_buff = glb_buff(self.n_cpu,       self.obs_dim,
                                  self.pol_act_dim, self.n_buff,
                                  self.buff_size,   self.btc_frac)
+
+        # Initialize learning data report
+        self.report_fields = ["episode",
+                              "score",  "smooth_score",
+                              "length", "smooth_length",
+                              "step"]
+        self.report   = report(self.report_fields)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
@@ -102,10 +109,10 @@ class buffer_based():
             self.timer_training.toc()
 
             # Write report data to file
-            agent.write_report(path, run)
+            self.write_report(agent, path, run)
 
         # Last printing
-        self.print_episode(agent.counter, agent.report)
+        self.print_episode(agent.counter, self.report)
 
         # Close timers and show
         self.timer_global.toc()
@@ -142,6 +149,7 @@ class buffer_based():
 
         self.loc_buff.reset()
         self.glb_buff.reset()
+        self.report.reset(self.report_fields)
 
     # Test buffer loop criterion
     def test_buff_loop(self):
@@ -159,8 +167,8 @@ class buffer_based():
         # Loop over environments and finalize/reset
         for cpu in range(self.n_cpu):
             if (done[cpu]):
-                agent.store_report(cpu)
-                self.print_episode(agent.counter, agent.report)
+                self.store_report(agent.counter, cpu)
+                self.print_episode(agent.counter, self.report)
                 agent.finish_rendering(path, cpu)
                 agent.counter.reset_ep(cpu)
 
@@ -180,3 +188,27 @@ class buffer_based():
             end    = '\n'
             if (counter.ep < counter.n_ep): end = '\r'
             print('# Ep #'+str(counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
+
+    ################################
+    ### Report wrappings
+    ################################
+
+    # Store data in report
+    def store_report(self, counter, cpu):
+
+        self.report.append("episode",       counter.ep)
+        self.report.append("score",         counter.score[cpu])
+        smooth_score   = np.mean(self.report.data["score"][-n_smooth:])
+        self.report.append("smooth_score",  smooth_score)
+        self.report.append("length",        counter.ep_step[cpu])
+        smooth_length  = np.mean(self.report.data["length"][-n_smooth:])
+        self.report.append("smooth_length", smooth_length)
+
+        self.report.step(counter.ep_step[cpu])
+
+    # Write learning data report
+    def write_report(self, agent, path, run):
+
+        # Set filename with method name and run number
+        filename = path+'/'+agent.name+'_'+str(run)+'.dat'
+        self.report.write(filename, self.report_fields)

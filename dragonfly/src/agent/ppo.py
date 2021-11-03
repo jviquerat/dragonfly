@@ -8,7 +8,6 @@ from dragonfly.src.policy.policy  import *
 from dragonfly.src.value.value    import *
 from dragonfly.src.retrn.retrn    import *
 from dragonfly.src.core.constants import *
-from dragonfly.src.utils.report   import *
 from dragonfly.src.utils.renderer import *
 from dragonfly.src.utils.counter  import *
 from dragonfly.src.utils.error    import *
@@ -55,11 +54,6 @@ class ppo():
         self.retrn = retrn_factory.create(pms.retrn.type,
                                           pms = pms.retrn)
 
-        # Initialize learning data report
-        self.report_fields = ["episode", "score", "smooth_score", "length",
-                              "smooth_length", "step"]
-        self.report   = report(self.report_fields)
-
         # Initialize renderer
         self.renderer = renderer(self.n_cpu, pms.render_every)
 
@@ -71,7 +65,6 @@ class ppo():
 
         self.policy.reset()
         self.v_value.reset()
-        self.report.reset(self.report_fields)
         self.renderer.reset()
         self.counter.reset()
 
@@ -138,30 +131,6 @@ class ppo():
 
         self.policy.train(btc_obs, btc_adv, btc_act)
         self.v_value.train(btc_obs, btc_tgt, size)
-
-    ################################
-    ### Report wrappings
-    ################################
-
-    # Store data in report
-    def store_report(self, cpu):
-
-        self.report.append("episode",       self.counter.ep)
-        self.report.append("score",         self.counter.score[cpu])
-        smooth_score   = np.mean(self.report.data["score"][-n_smooth:])
-        self.report.append("smooth_score",  smooth_score)
-        self.report.append("length",        self.counter.ep_step[cpu])
-        smooth_length  = np.mean(self.report.data["length"][-n_smooth:])
-        self.report.append("smooth_length", smooth_length)
-
-        self.report.step(self.counter.ep_step[cpu])
-
-    # Write learning data report
-    def write_report(self, path, run):
-
-        # Set filename with method name and run number
-        filename = path+'/'+self.name+'_'+str(run)+'.dat'
-        self.report.write(filename, self.report_fields)
 
     ################################
     ### Renderer wrappings
