@@ -8,7 +8,6 @@ from dragonfly.src.policy.policy  import *
 from dragonfly.src.value.value    import *
 from dragonfly.src.retrn.retrn    import *
 from dragonfly.src.core.constants import *
-from dragonfly.src.utils.counter  import *
 from dragonfly.src.utils.error    import *
 
 ###############################################
@@ -17,25 +16,25 @@ class ppo():
     def __init__(self, obs_dim, act_dim, pms):
 
         # Initialize from arguments
-        self.name         = 'ppo'
-        self.n_vars       = 4
+        self.name      = 'ppo'
+        self.n_vars    = 4
 
-        self.act_dim      = act_dim
-        self.obs_dim      = obs_dim
-        self.n_cpu        = pms.n_cpu
-        self.ep_end       = pms.ep_end
-        self.bootstrap    = pms.bootstrap
+        self.act_dim   = act_dim
+        self.obs_dim   = obs_dim
+        self.n_cpu     = pms.n_cpu
+        self.ep_end    = pms.ep_end
+        self.bootstrap = pms.bootstrap
 
         # Build policies
-        pms.policy.save   = True
+        pms.policy.save = True
         if (pms.policy.loss.type != "surrogate"):
             warning("ppo", "__init__",
                     "Loss type for ppo agent is not surrogate")
 
-        self.policy       = pol_factory.create(pms.policy.type,
-                                               obs_dim = obs_dim,
-                                               act_dim = act_dim,
-                                               pms     = pms.policy)
+        self.policy = pol_factory.create(pms.policy.type,
+                                         obs_dim = obs_dim,
+                                         act_dim = act_dim,
+                                         pms     = pms.policy)
 
         # pol_act_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
@@ -45,23 +44,19 @@ class ppo():
         if (pms.value.type != "v_value"):
             warning("ppo", "__init__",
                     "Value type for ppo agent is not v_value")
-        self.v_value   = val_factory.create(pms.value.type,
-                                            obs_dim = obs_dim,
-                                            pms     = pms.value)
+        self.v_value = val_factory.create(pms.value.type,
+                                          obs_dim = obs_dim,
+                                          pms     = pms.value)
 
         # Build advantage
         self.retrn = retrn_factory.create(pms.retrn.type,
                                           pms = pms.retrn)
-
-        # Initialize counter
-        self.counter  = counter(self.n_cpu, pms.n_ep)
 
     # Reset
     def reset(self):
 
         self.policy.reset()
         self.v_value.reset()
-        self.counter.reset()
 
     # Get actions
     def get_actions(self, observations):
@@ -101,7 +96,7 @@ class ppo():
         return tgt, adv
 
     # Handle termination
-    def handle_term(self, done):
+    def handle_term(self, counter, done):
 
         # "done" possibly contains signals from multiple parallel
         # environments. We assume it does and unroll it in a loop
@@ -115,7 +110,7 @@ class ppo():
             trm[i] = float(not (done[i] == True))
 
             # If bootstrap is on, test and fill
-            step = self.counter.ep_step[i]
+            step = counter.ep_step[i]
             if (self.bootstrap and (step >= self.ep_end-1)):
                 bts[i] = 1.0
 
@@ -126,22 +121,3 @@ class ppo():
 
         self.policy.train(btc_obs, btc_adv, btc_act)
         self.v_value.train(btc_obs, btc_tgt, size)
-
-    ################################
-    ### Counter wrappings
-    ################################
-
-    # Test episode loop criterion
-    def test_ep_loop(self):
-
-        return self.counter.test_ep_loop()
-
-    # Update score
-    def update_score(self, rwd):
-
-        return self.counter.update_score(rwd)
-
-    # Update step
-    def update_step(self):
-
-        return self.counter.update_step()
