@@ -20,7 +20,7 @@ class ppo():
 
         # Initialize from arguments
         self.name         = 'ppo'
-        self.n_vars       = 6
+        self.n_vars       = 4
 
         self.act_dim      = act_dim
         self.obs_dim      = obs_dim
@@ -61,7 +61,7 @@ class ppo():
 
         # Initialize learning data report
         self.report_fields = ["episode", "score", "smooth_score", "length",
-                              "smooth_length", "entropy", "smooth_entropy", "step"]
+                              "smooth_length", "step"]
         self.report   = report(self.report_fields)
 
         # Initialize renderer
@@ -69,9 +69,6 @@ class ppo():
 
         # Initialize counter
         self.counter  = counter(self.n_cpu, pms.n_ep)
-
-        # Initialize inner temporary buffer
-        self.entropy = 0.0
 
     # Reset
     def reset(self):
@@ -171,28 +168,8 @@ class ppo():
     # Training
     def train(self, btc_obs, btc_act, btc_adv, btc_tgt, size):
 
-        self.train_policy (btc_obs, btc_adv, btc_act)
-        self.train_v_value(btc_obs, btc_tgt, size)
-
-    ################################
-    ### Policy/value wrappings
-    ################################
-
-    # Training function for policy
-    def train_policy(self, obs, adv, act):
-
-        outputs      = self.policy.train(obs, adv, act)
-        self.p_loss  = outputs[0]
-        self.kl_div  = outputs[1]
-        self.p_gnorm = outputs[2]
-        self.entropy = outputs[3]
-
-    # Training function for critic
-    def train_v_value(self, obs, tgt, size):
-
-        outputs      = self.v_value.train(obs, tgt, size)
-        self.v_loss  = outputs[0]
-        self.v_gnorm = outputs[1]
+        self.policy.train(btc_obs, btc_adv, btc_act)
+        self.v_value.train(btc_obs, btc_tgt, size)
 
     ################################
     ### Report wrappings
@@ -208,9 +185,6 @@ class ppo():
         self.report.append("length",        self.counter.ep_step[cpu])
         smooth_length  = np.mean(self.report.data["length"][-n_smooth:])
         self.report.append("smooth_length", smooth_length)
-        self.report.append("entropy",       self.entropy)
-        smooth_entropy = np.mean(self.report.data["entropy"][-n_smooth:])
-        self.report.append("smooth_entropy",smooth_entropy)
 
         self.report.step(self.counter.ep_step[cpu])
 
