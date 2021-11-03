@@ -28,11 +28,6 @@ class ppo():
         self.ep_end       = pms.ep_end
         self.bootstrap    = pms.bootstrap
 
-        self.n_buff       = pms.n_buff
-        self.buff_size    = pms.buff_size
-        self.btc_frac     = pms.batch_frac
-        self.n_epochs     = pms.n_epochs
-
         # Variables for terminal printings
         self.bst_ep       = 0
         self.bst_score    =-1.0e8
