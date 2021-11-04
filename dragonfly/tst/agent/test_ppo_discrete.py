@@ -1,4 +1,5 @@
 # Generic imports
+import os
 import pytest
 
 # Custom imports
@@ -50,4 +51,8 @@ def test_ppo_discrete():
     averager.store("ppo_1.dat", 1)
     env.close()
     averager.average("ppo_avg.dat")
+
+    os.remove("ppo_0.dat")
+    os.remove("ppo_1.dat")
+    os.remove("ppo_avg.dat")
     print("")
