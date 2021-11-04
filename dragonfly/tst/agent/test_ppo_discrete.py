@@ -29,7 +29,7 @@ def test_ppo_discrete():
     agent = ppo(4, 1, reader.pms)
 
     # Intialize averager
-    averager = data_avg(agent.n_vars, reader.pms.n_ep, reader.pms.n_avg)
+    averager = data_avg(4, reader.pms.n_ep, reader.pms.n_avg)
 
     # Initialize training style
     trainer = trainer_factory.create(reader.pms.trainer.style,

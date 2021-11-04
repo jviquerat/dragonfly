@@ -17,8 +17,6 @@ class ppo():
 
         # Initialize from arguments
         self.name      = 'ppo'
-        self.n_vars    = 4
-
         self.act_dim   = act_dim
         self.obs_dim   = obs_dim
         self.n_cpu     = pms.n_cpu

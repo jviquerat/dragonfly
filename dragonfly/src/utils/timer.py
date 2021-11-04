@@ -9,10 +9,10 @@ from dragonfly.src.utils.prints import *
 ### Used to measure time spent on different operations
 class timer():
     def __init__(self, name):
-        self.reset(name)
+        self.name = name
+        self.reset()
 
-    def reset(self, name):
-        self.name     = name
+    def reset(self):
         self.time_tic = None
         self.time_toc = None
         self.dt       = 0.0
@@ -30,3 +30,4 @@ class timer():
         str_dt = str(f"{self.dt:.2f}")
         spacer()
         print("Timer "+str(self.name)+": "+str_dt+" seconds")
+        self.reset()
