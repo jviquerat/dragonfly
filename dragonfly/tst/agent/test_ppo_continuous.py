@@ -1,13 +1,14 @@
 # Generic imports
+import os
 import pytest
 
 # Custom imports
-from dragonfly.tst.tst           import *
-from dragonfly.src.core.training import *
-from dragonfly.src.agent.ppo     import *
-from dragonfly.src.utils.json    import *
-from dragonfly.src.utils.data    import *
-from dragonfly.src.envs.par_envs import *
+from dragonfly.tst.tst             import *
+from dragonfly.src.agent.ppo       import *
+from dragonfly.src.utils.json      import *
+from dragonfly.src.utils.data      import *
+from dragonfly.src.envs.par_envs   import *
+from dragonfly.src.trainer.trainer import *
 
 ###############################################
 ### Test continuous ppo agent
@@ -28,17 +29,30 @@ def test_ppo_continuous():
     agent = ppo(3, 1, reader.pms)
 
     # Intialize averager
-    averager = data_avg(agent.n_vars, reader.pms.n_ep, reader.pms.n_avg)
+    averager = data_avg(4, reader.pms.n_ep, reader.pms.n_avg)
+
+    # Initialize training style
+    trainer = trainer_factory.create(reader.pms.trainer.style,
+                                     obs_dim     = env.obs_dim,
+                                     act_dim     = env.act_dim,
+                                     pol_act_dim = agent.pol_act_dim,
+                                     pms=reader.pms)
 
     print("Test continuous agent")
+    trainer.reset()
     agent.reset()
     env.set_cpus()
-    launch_training(".", 0, env, agent)
+    trainer.loop(".", 0, env, agent)
     averager.store("ppo_0.dat", 0)
+    trainer.reset()
     agent.reset()
     env.set_cpus()
-    launch_training(".", 1, env, agent)
+    trainer.loop(".", 1, env, agent)
     averager.store("ppo_1.dat", 1)
     env.close()
     averager.average("ppo_avg.dat")
+
+    os.remove("ppo_0.dat")
+    os.remove("ppo_1.dat")
+    os.remove("ppo_avg.dat")
     print("")

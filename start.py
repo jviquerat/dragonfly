@@ -5,12 +5,12 @@ import time
 import numpy as np
 
 # Custom imports
-from dragonfly.src.core.training import *
-from dragonfly.src.utils.json    import *
-from dragonfly.src.utils.data    import *
-from dragonfly.src.utils.prints  import *
-from dragonfly.src.agent.agent   import *
-from dragonfly.src.envs.par_envs import *
+from dragonfly.src.utils.json      import *
+from dragonfly.src.utils.data      import *
+from dragonfly.src.utils.prints    import *
+from dragonfly.src.agent.agent     import *
+from dragonfly.src.trainer.trainer import *
+from dragonfly.src.envs.par_envs   import *
 
 ########################
 # Average training over multiple runs
@@ -46,7 +46,14 @@ if __name__ == '__main__':
                                  pms     = pms)
 
     # Intialize averager
-    averager = data_avg(agent.n_vars, pms.n_ep, pms.n_avg)
+    averager = data_avg(4, pms.n_ep, pms.n_avg)
+
+    # Initialize training style
+    trainer = trainer_factory.create(pms.trainer.style,
+                                     obs_dim     = env.obs_dim,
+                                     act_dim     = env.act_dim,
+                                     pol_act_dim = agent.pol_act_dim,
+                                     pms         = pms)
 
     # Run
     disclaimer()
@@ -54,8 +61,9 @@ if __name__ == '__main__':
         liner()
         print('Avg run #'+str(run))
         agent.reset()
+        trainer.reset()
         env.set_cpus()
-        launch_training(path, run, env, agent)
+        trainer.loop(path, run, env, agent)
         filename = path+'/'+pms.agent+'_'+str(run)+'.dat'
         averager.store(filename, run)
 
