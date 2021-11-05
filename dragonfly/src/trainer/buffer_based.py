@@ -2,29 +2,31 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.src.core.constants import *
-from dragonfly.src.utils.timer    import *
-from dragonfly.src.utils.buff     import *
-from dragonfly.src.utils.report   import *
-from dragonfly.src.utils.renderer import *
-from dragonfly.src.utils.counter  import *
+from dragonfly.src.core.constants        import *
+from dragonfly.src.terminator.terminator import *
+from dragonfly.src.utils.timer           import *
+from dragonfly.src.utils.buff            import *
+from dragonfly.src.utils.report          import *
+from dragonfly.src.utils.renderer        import *
+from dragonfly.src.utils.counter         import *
 
 ###############################################
 ### Class for buffer-based training
 ### pms : parameters
 class buffer_based():
-    def __init__(self, obs_dim, act_dim, pol_act_dim, pms):
+    def __init__(self, obs_dim, act_dim,
+                 pol_act_dim, n_cpu, n_ep, pms):
 
         # Initialize from input
         self.obs_dim     = obs_dim
         self.act_dim     = act_dim
         self.pol_act_dim = pol_act_dim
-        self.n_cpu       = pms.n_cpu
+        self.n_cpu       = n_cpu
+        self.n_ep        = n_ep
         self.buff_size   = pms.buff_size
         self.n_buff      = pms.n_buff
         self.btc_frac    = pms.batch_frac
         self.n_epochs    = pms.n_epochs
-        self.n_ep        = pms.n_ep
 
         # pol_act_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
@@ -39,13 +41,18 @@ class buffer_based():
                               "score",  "smooth_score",
                               "length", "smooth_length",
                               "step"]
-        self.report   = report(self.report_fields)
+        self.report = report(self.report_fields)
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu, pms.render_every)
 
         # Initialize counter
-        self.counter  = counter(self.n_cpu, self.n_ep)
+        self.counter = counter(self.n_cpu, self.n_ep)
+
+        # Initialize terminator
+        self.terminator = terminator_factory.create(pms.terminator.type,
+                                                    n_cpu = self.n_cpu,
+                                                    pms   = pms.terminator)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
@@ -82,7 +89,7 @@ class buffer_based():
                 self.timer_env.toc()
 
                 # Handle termination state
-                trm, bts = agent.handle_term(self.counter, done)
+                trm, bts = self.terminator.terminate(self.counter, done)
 
                 # Store transition
                 self.loc_buff.store(obs, nxt, act, rwd, trm, bts)

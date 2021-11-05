@@ -13,15 +13,13 @@ from dragonfly.src.utils.error    import *
 ###############################################
 ### PPO agent
 class ppo():
-    def __init__(self, obs_dim, act_dim, pms):
+    def __init__(self, obs_dim, act_dim, n_cpu, pms):
 
         # Initialize from arguments
         self.name      = 'ppo'
         self.act_dim   = act_dim
         self.obs_dim   = obs_dim
-        self.n_cpu     = pms.n_cpu
-        self.ep_end    = pms.ep_end
-        self.bootstrap = pms.bootstrap
+        self.n_cpu     = n_cpu
 
         # Build policies
         pms.policy.save = True
@@ -49,12 +47,6 @@ class ppo():
         # Build advantage
         self.retrn = retrn_factory.create(pms.retrn.type,
                                           pms = pms.retrn)
-
-    # Reset
-    def reset(self):
-
-        self.policy.reset()
-        self.v_value.reset()
 
     # Get actions
     def get_actions(self, observations):
@@ -93,29 +85,14 @@ class ppo():
 
         return tgt, adv
 
-    # Handle termination
-    def handle_term(self, counter, done):
-
-        # "done" possibly contains signals from multiple parallel
-        # environments. We assume it does and unroll it in a loop
-        trm = np.zeros([self.n_cpu])
-        bts = np.zeros([self.n_cpu])
-
-        # Loop over environments
-        for i in range(self.n_cpu):
-
-            # Set terminal value, whatever the cause
-            trm[i] = float(not (done[i] == True))
-
-            # If bootstrap is on, test and fill
-            step = counter.ep_step[i]
-            if (self.bootstrap and (step >= self.ep_end-1)):
-                bts[i] = 1.0
-
-        return trm, bts
-
     # Training
     def train(self, btc_obs, btc_act, btc_adv, btc_tgt, size):
 
         self.policy.train(btc_obs, btc_adv, btc_act)
         self.v_value.train(btc_obs, btc_tgt, size)
+
+    # Reset
+    def reset(self):
+
+        self.policy.reset()
+        self.v_value.reset()
