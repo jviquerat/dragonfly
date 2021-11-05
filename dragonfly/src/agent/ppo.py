@@ -48,12 +48,6 @@ class ppo():
         self.retrn = retrn_factory.create(pms.retrn.type,
                                           pms = pms.retrn)
 
-    # Reset
-    def reset(self):
-
-        self.policy.reset()
-        self.v_value.reset()
-
     # Get actions
     def get_actions(self, observations):
 
@@ -91,29 +85,14 @@ class ppo():
 
         return tgt, adv
 
-    # # Handle termination
-    # def handle_term(self, counter, done):
-
-    #     # "done" possibly contains signals from multiple parallel
-    #     # environments. We assume it does and unroll it in a loop
-    #     trm = np.zeros([self.n_cpu])
-    #     bts = np.zeros([self.n_cpu])
-
-    #     # Loop over environments
-    #     for i in range(self.n_cpu):
-
-    #         # Set terminal value, whatever the cause
-    #         trm[i] = float(not (done[i] == True))
-
-    #         # If bootstrap is on, test and fill
-    #         step = counter.ep_step[i]
-    #         if (self.bootstrap and (step >= self.ep_end-1)):
-    #             bts[i] = 1.0
-
-    #     return trm, bts
-
     # Training
     def train(self, btc_obs, btc_act, btc_adv, btc_tgt, size):
 
         self.policy.train(btc_obs, btc_adv, btc_act)
         self.v_value.train(btc_obs, btc_tgt, size)
+
+    # Reset
+    def reset(self):
+
+        self.policy.reset()
+        self.v_value.reset()
