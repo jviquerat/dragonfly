@@ -20,8 +20,6 @@ class ppo():
         self.act_dim   = act_dim
         self.obs_dim   = obs_dim
         self.n_cpu     = n_cpu
-        self.ep_end    = pms.ep_end
-        self.bootstrap = pms.bootstrap
 
         # Build policies
         pms.policy.save = True
@@ -93,26 +91,26 @@ class ppo():
 
         return tgt, adv
 
-    # Handle termination
-    def handle_term(self, counter, done):
+    # # Handle termination
+    # def handle_term(self, counter, done):
 
-        # "done" possibly contains signals from multiple parallel
-        # environments. We assume it does and unroll it in a loop
-        trm = np.zeros([self.n_cpu])
-        bts = np.zeros([self.n_cpu])
+    #     # "done" possibly contains signals from multiple parallel
+    #     # environments. We assume it does and unroll it in a loop
+    #     trm = np.zeros([self.n_cpu])
+    #     bts = np.zeros([self.n_cpu])
 
-        # Loop over environments
-        for i in range(self.n_cpu):
+    #     # Loop over environments
+    #     for i in range(self.n_cpu):
 
-            # Set terminal value, whatever the cause
-            trm[i] = float(not (done[i] == True))
+    #         # Set terminal value, whatever the cause
+    #         trm[i] = float(not (done[i] == True))
 
-            # If bootstrap is on, test and fill
-            step = counter.ep_step[i]
-            if (self.bootstrap and (step >= self.ep_end-1)):
-                bts[i] = 1.0
+    #         # If bootstrap is on, test and fill
+    #         step = counter.ep_step[i]
+    #         if (self.bootstrap and (step >= self.ep_end-1)):
+    #             bts[i] = 1.0
 
-        return trm, bts
+    #     return trm, bts
 
     # Training
     def train(self, btc_obs, btc_act, btc_adv, btc_tgt, size):

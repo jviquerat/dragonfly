@@ -2,12 +2,13 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.src.core.constants import *
-from dragonfly.src.utils.timer    import *
-from dragonfly.src.utils.buff     import *
-from dragonfly.src.utils.report   import *
-from dragonfly.src.utils.renderer import *
-from dragonfly.src.utils.counter  import *
+from dragonfly.src.core.constants        import *
+from dragonfly.src.terminator.terminator import *
+from dragonfly.src.utils.timer           import *
+from dragonfly.src.utils.buff            import *
+from dragonfly.src.utils.report          import *
+from dragonfly.src.utils.renderer        import *
+from dragonfly.src.utils.counter         import *
 
 ###############################################
 ### Class for buffer-based training
@@ -40,13 +41,18 @@ class buffer_based():
                               "score",  "smooth_score",
                               "length", "smooth_length",
                               "step"]
-        self.report   = report(self.report_fields)
+        self.report = report(self.report_fields)
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu, pms.render_every)
 
         # Initialize counter
-        self.counter  = counter(self.n_cpu, self.n_ep)
+        self.counter = counter(self.n_cpu, self.n_ep)
+
+        # Initialize terminator
+        self.terminator = terminator_factory.create(pms.terminator.type,
+                                                    n_cpu = self.n_cpu,
+                                                    pms   = pms.terminator)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
@@ -83,7 +89,7 @@ class buffer_based():
                 self.timer_env.toc()
 
                 # Handle termination state
-                trm, bts = agent.handle_term(self.counter, done)
+                trm, bts = self.terminator.terminate(self.counter, done)
 
                 # Store transition
                 self.loc_buff.store(obs, nxt, act, rwd, trm, bts)

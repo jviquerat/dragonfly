@@ -9,12 +9,14 @@
         "n_buff": 16,
         "batch_frac": 0.5,
         "n_epochs": 16,
-        "render_every": 50
+        "render_every": 50,
+        "terminator": {
+            "type": "bootstrap",
+            "ep_end": 200
+        }
     },
     "agent": {
         "type": "ppo",
-        "bootstrap": true,
-        "ep_end": 200,
         "policy": {
             "type": "normal",
             "network": {

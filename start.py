@@ -67,14 +67,14 @@ if __name__ == '__main__':
         trainer.reset()
         env.set_cpus()
         trainer.loop(path, run, env, agent)
-        filename = path+'/'+pms.agent+'_'+str(run)+'.dat'
+        filename = path+'/'+pms.agent.type+'_'+str(run)+'.dat'
         averager.store(filename, run)
 
     # Close environments
     env.close()
 
     # Write to file
-    filename = path+'/'+pms.agent+'_avg.dat'
+    filename = path+'/'+pms.agent.type+'_avg.dat'
     averager.average(filename)
 
     # Plot
