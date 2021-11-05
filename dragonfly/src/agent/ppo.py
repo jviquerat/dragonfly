@@ -13,13 +13,13 @@ from dragonfly.src.utils.error    import *
 ###############################################
 ### PPO agent
 class ppo():
-    def __init__(self, obs_dim, act_dim, pms):
+    def __init__(self, obs_dim, act_dim, n_cpu, pms):
 
         # Initialize from arguments
         self.name      = 'ppo'
         self.act_dim   = act_dim
         self.obs_dim   = obs_dim
-        self.n_cpu     = pms.n_cpu
+        self.n_cpu     = n_cpu
         self.ep_end    = pms.ep_end
         self.bootstrap = pms.bootstrap
 

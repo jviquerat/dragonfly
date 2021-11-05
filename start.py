@@ -40,10 +40,11 @@ if __name__ == '__main__':
 
     # Declare environement
     env   = par_envs(pms.env_name, pms.n_cpu, path)
-    agent = agent_factory.create(pms.agent,
+    agent = agent_factory.create(pms.agent.type,
                                  obs_dim = env.obs_dim,
                                  act_dim = env.act_dim,
-                                 pms     = pms)
+                                 n_cpu   = pms.n_cpu,
+                                 pms     = pms.agent)
 
     # Intialize averager
     averager = data_avg(4, pms.n_ep, pms.n_avg)
@@ -53,7 +54,9 @@ if __name__ == '__main__':
                                      obs_dim     = env.obs_dim,
                                      act_dim     = env.act_dim,
                                      pol_act_dim = agent.pol_act_dim,
-                                     pms         = pms)
+                                     n_cpu       = pms.n_cpu,
+                                     n_ep        = pms.n_ep,
+                                     pms         = pms.trainer)
 
     # Run
     disclaimer()

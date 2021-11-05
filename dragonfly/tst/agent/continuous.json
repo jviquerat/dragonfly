@@ -1,74 +1,76 @@
 {
     "env_name": "Pendulum-v0",
-    "agent": "ppo",
-    "trainer": {
-        "style": "buffer_based"
-    },
-    "ep_end": 200,
-    "n_ep": 2,
     "n_avg": 2,
     "n_cpu": 1,
-    "render_every": 50,
-    "policy": {
-        "type": "normal",
-        "network": {
-            "type": "fc",
-            "trunk": {
-                "arch": [32,32],
-                "actv": "swish"
+    "n_ep": 2,
+    "trainer": {
+        "style": "buffer_based",
+        "buff_size": 256,
+        "n_buff": 16,
+        "batch_frac": 0.5,
+        "n_epochs": 16,
+        "render_every": 50
+    },
+    "agent": {
+        "type": "ppo",
+        "bootstrap": true,
+        "ep_end": 200,
+        "policy": {
+            "type": "normal",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [32,32],
+                    "actv": "swish"
+                },
+                "heads": {
+                    "nb": 2,
+                    "arch": [[16],[16]],
+                    "actv": ["swish","swish"],
+                    "final": ["tanh","softplus"]
+                }
             },
-            "heads": {
-                "nb": 2,
-                "arch": [[16],[16]],
-                "actv": ["swish","swish"],
-                "final": ["tanh","softplus"]
+            "optimizer": {
+                "type": "nadam",
+                "lr": 1.0e-3,
+                "grd_clip": 0.1
+            },
+            "loss": {
+                "type": "surrogate",
+                "pol_clip": 0.1,
+                "ent_coef": 0.01
             }
         },
-        "optimizer": {
-            "type": "nadam",
-            "lr": 1.0e-3,
-            "grd_clip": 0.1
-        },
-        "loss": {
-            "type": "surrogate",
-            "pol_clip": 0.1,
-            "ent_coef": 0.01
-        }
-    },
-    "value": {
-        "type": "v_value",
-        "network": {
-            "type": "fc",
-            "trunk": {
-                "arch": [32,32],
-                "actv": "swish"
+        "value": {
+            "type": "v_value",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [32,32],
+                    "actv": "swish"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["swish"],
+                    "final": ["linear"]
+                }
             },
-            "heads": {
-                "nb": 1,
-                "arch": [[]],
-                "actv": ["swish"],
-                "final": ["linear"]
+            "optimizer": {
+                "type": "nadam",
+                "lr": 5.0e-3,
+                "grd_clip": 0.1
+            },
+            "loss": {
+                "type": "mse"
             }
         },
-        "optimizer": {
-            "type": "nadam",
-            "lr": 5.0e-3,
-            "grd_clip": 0.1
-        },
-        "loss": {
-            "type": "mse"
+        "retrn": {
+            "type": "gae",
+            "gamma": 0.99,
+            "gae_lambda": 0.99,
+            "ret_norm": true,
+            "ret_clip": true
         }
-    },
-    "retrn": {
-        "type": "gae",
-        "gamma": 0.99,
-        "gae_lambda": 0.99,
-        "ret_norm": true,
-        "ret_clip": true
-    },
-    "batch_frac": 0.5,
-    "n_buff": 16,
-    "n_epochs": 16,
-    "buff_size": 256,
-    "bootstrap": true
+    }
 }

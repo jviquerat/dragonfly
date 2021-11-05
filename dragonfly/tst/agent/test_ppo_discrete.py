@@ -26,7 +26,7 @@ def test_ppo_discrete():
     env = par_envs(reader.pms.env_name, reader.pms.n_cpu, ".")
 
     # Initialize discrete agent
-    agent = ppo(4, 1, reader.pms)
+    agent = ppo(4, 1, reader.pms.n_cpu, reader.pms.agent)
 
     # Intialize averager
     averager = data_avg(4, reader.pms.n_ep, reader.pms.n_avg)
@@ -36,7 +36,9 @@ def test_ppo_discrete():
                                      obs_dim     = env.obs_dim,
                                      act_dim     = env.act_dim,
                                      pol_act_dim = agent.pol_act_dim,
-                                     pms=reader.pms)
+                                     n_cpu       = reader.pms.n_cpu,
+                                     n_ep        = reader.pms.n_ep,
+                                     pms=reader.pms.trainer)
 
     print("Test discrete agent")
     trainer.reset()

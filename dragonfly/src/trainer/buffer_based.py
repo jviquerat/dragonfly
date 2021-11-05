@@ -13,18 +13,19 @@ from dragonfly.src.utils.counter  import *
 ### Class for buffer-based training
 ### pms : parameters
 class buffer_based():
-    def __init__(self, obs_dim, act_dim, pol_act_dim, pms):
+    def __init__(self, obs_dim, act_dim,
+                 pol_act_dim, n_cpu, n_ep, pms):
 
         # Initialize from input
         self.obs_dim     = obs_dim
         self.act_dim     = act_dim
         self.pol_act_dim = pol_act_dim
-        self.n_cpu       = pms.n_cpu
+        self.n_cpu       = n_cpu
+        self.n_ep        = n_ep
         self.buff_size   = pms.buff_size
         self.n_buff      = pms.n_buff
         self.btc_frac    = pms.batch_frac
         self.n_epochs    = pms.n_epochs
-        self.n_ep        = pms.n_ep
 
         # pol_act_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
