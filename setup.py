@@ -3,5 +3,7 @@ from setuptools import setup
 setup(
     name='dragonfly',
     version='0.0.1',
-    scripts=['dragonfly/bin/dragonfly'],
+    entry_points = {
+        'console_scripts': ['dragonfly=dragonfly.src.core.main:main'],
+    }
 )

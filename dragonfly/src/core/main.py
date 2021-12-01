@@ -1,4 +1,4 @@
-#!/usr/bin/env python
-
 from dragonfly.src.core.run import run
-run()
+
+def main():
+    run()
