@@ -2,7 +2,27 @@
 
 ![master badge](https://github.com/jviquerat/dragonfly/workflows/dragonfly/badge.svg?branch=master)
 
-Dragonfly is a DRL research library. It follows a basic level of modularity to make new developments quick and easy. Below are a few environment solved with it.
+Dragonfly is a DRL research library. It follows a basic level of modularity based on a simple abstract factory to make new developments quick and easy. 
+
+## Installation and usage
+
+Clone this repository and install it locally:
+
+```
+git clone git@github.com:jviquerat/dragonfly.git
+cd dragonfly
+pip install -e .
+```
+
+Environments are expected to be available locally or present in the path. Once you have written the corresponding `<env_name>.json` file to configure your agent (sample `.json` files are available in `envs/`), just run:
+
+```
+dragonfly <env_name>.json
+```
+
+## Solved environments
+
+Below are a few environment solved with the library.
 
 | Environment | Description | Illustration |
 | :--- | :--- | :---: |
