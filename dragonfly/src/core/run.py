@@ -12,10 +12,8 @@ from dragonfly.src.agent.agent     import *
 from dragonfly.src.trainer.trainer import *
 from dragonfly.src.envs.par_envs   import *
 
-########################
 # Average training over multiple runs
-########################
-if __name__ == '__main__':
+def run():
 
     # Check command-line input for json file
     if (len(sys.argv) == 2):
