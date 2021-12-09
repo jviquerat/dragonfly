@@ -38,27 +38,10 @@ class par_envs:
         self.act_dim     = int(act_dim)
         self.obs_dim     = int(obs_dim)
 
-        # Handle observation normalization
-        # To overcome the use of np.finfo, observation values
-        # are clipped to default min and max values (see core/constants.py)
-        self.obs_min, self.obs_max, self.obs_norm = self.get_obs_bounds()
-        self.obs_min = np.where(self.obs_min < -def_obs_max,
-                                -def_obs_max,
-                                self.obs_min)
-        self.obs_max = np.where(self.obs_max >  def_obs_max,
-                                 def_obs_max,
-                                self.obs_max)
-        self.obs_avg = 0.5*(self.obs_max + self.obs_min)
-        self.obs_rng = 0.5*(self.obs_max - self.obs_min)
-        self.obs_p   =      self.obs_max - self.obs_avg
-        self.obs_m   =      self.obs_avg - self.obs_min
-
-        # Handle actions normalization
+        # Handle actions scaling
         self.act_min, self.act_max, self.act_norm = self.get_act_bounds()
         self.act_avg = 0.5*(self.act_max + self.act_min)
         self.act_rng = 0.5*(self.act_max - self.act_min)
-        self.act_p   =      self.act_max - self.act_avg
-        self.act_m   =      self.act_avg - self.act_min
 
     # Reset all environments
     def reset_all(self):
@@ -70,12 +53,7 @@ class par_envs:
         # Receive and normalize
         results = np.array([])
         for cpu in range(self.n_cpu):
-            obs = self.p_pipes[cpu].recv()
-            # Normalize if required
-            if (self.obs_norm):
-                for i in range(self.obs_dim):
-                    obs[i] = (obs[i] - self.obs_avg[i])/self.obs_rng[i]
-
+            obs     = self.p_pipes[cpu].recv()
             results = np.append(results, obs)
 
         return np.reshape(results, (-1,self.obs_dim))
@@ -91,12 +69,7 @@ class par_envs:
         # Receive and normalize
         for cpu in range(self.n_cpu):
             if (done[cpu]):
-                obs = self.p_pipes[cpu].recv()
-                # Normalize if required
-                if (self.obs_norm):
-                    for i in range(self.obs_dim):
-                        obs[i] = (obs[i] - self.obs_avg[i])/self.obs_rng[i]
-
+                obs            = self.p_pipes[cpu].recv()
                 obs_array[cpu] = obs
 
     # Get environment dimensions
@@ -110,17 +83,6 @@ class par_envs:
         results = np.append(results, self.p_pipes[0].recv())
 
         return results
-
-    # Get observations boundaries
-    def get_obs_bounds(self):
-
-        # Send
-        self.p_pipes[0].send(('get_obs_bounds', None))
-
-        # Receive
-        obs_min, obs_max, obs_norm = self.p_pipes[0].recv()
-
-        return obs_min, obs_max, obs_norm
 
     # Get action boundaries
     def get_act_bounds(self):
@@ -242,18 +204,6 @@ def worker(env_name, name, pipe, p_pipe, path):
                 if (type(env.observation_space).__name__ == "Box"):
                     obs_dim = env.observation_space.shape[0]
                 pipe.send((act_dim, obs_dim))
-
-            if (command == 'get_obs_bounds'):
-                # Continuous observation space
-                if (type(env.observation_space).__name__ == "Box"):
-                    obs_min  = env.observation_space.low
-                    obs_max  = env.observation_space.high
-                    obs_norm = True
-                else:
-                    obs_min  = 1.0
-                    obs_max  = 1.0
-                    obs_norm = False
-                pipe.send((obs_min, obs_max, obs_norm))
 
             if (command == 'get_act_bounds'):
                 # Continuous action space
