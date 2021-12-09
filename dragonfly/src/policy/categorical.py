@@ -1,19 +1,12 @@
-# Generic imports
-import numpy                as np
-from   copy import deepcopy as cp
-
 # Custom imports
-from dragonfly.src.policy.tfd          import *
-from dragonfly.src.network.network     import *
-from dragonfly.src.optimizer.optimizer import *
-from dragonfly.src.loss.loss           import *
+from dragonfly.src.policy.base import *
 
 ###############################################
 ### Categorical policy class (discrete)
 ### obs_dim : input  dimension
 ### act_dim : output dimension
 ### pms     : parameters
-class categorical():
+class categorical(base_policy):
     def __init__(self, obs_dim, act_dim, pms):
 
         # Set default values
@@ -100,11 +93,6 @@ class categorical():
 
         return tf.reshape(act, [-1])
 
-    # Call loss for training
-    def train(self, obs, adv, act):
-
-        return self.loss.train(obs, adv, act, self)
-
     # Network forward pass
     def call_net(self, state):
 
@@ -114,25 +102,3 @@ class categorical():
     def call_prn(self, state):
 
         return self.prn.call(state)
-
-    # Save previous policy
-    def save_prv(self):
-
-        self.prn.set_weights(self.net.get_weights())
-        self.prp = self.pdf.copy()
-
-    # Geqt current learning rate
-    def get_lr(self):
-
-        return self.opt.get_lr()
-
-    # Reset
-    def reset(self):
-
-        self.net.reset()
-        self.opt.reset()
-        self.pdf = None
-
-        if (self.save):
-            self.prn.reset()
-            self.prp = None

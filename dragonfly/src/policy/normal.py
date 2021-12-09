@@ -1,19 +1,12 @@
-# Generic imports
-import numpy                as np
-from   copy import deepcopy as cp
-
 # Custom imports
-from dragonfly.src.policy.tfd          import *
-from dragonfly.src.network.network     import *
-from dragonfly.src.optimizer.optimizer import *
-from dragonfly.src.loss.loss           import *
+from dragonfly.src.policy.base import *
 
 ###############################################
 ### Normal policy class (continuous)
 ### obs_dim : input  dimension
 ### act_dim : output dimension
 ### pms     : parameters
-class normal():
+class normal(base_policy):
     def __init__(self, obs_dim, act_dim, pms):
 
         # Set default values
@@ -108,11 +101,6 @@ class normal():
 
         return tf.reshape(act, [-1, self.act_dim])
 
-    # Call loss for training
-    def train(self, obs, adv, act):
-
-        return self.loss.train(obs, adv, act, self)
-
     # Networks forward pass
     def call_net(self, state):
 
@@ -130,26 +118,3 @@ class normal():
         sg  = tf.square(out[1])
 
         return mu, sg
-
-    # Save previous policy
-    def save_prv(self):
-
-        self.prn.set_weights(self.net.get_weights())
-        self.prp = self.pdf.copy()
-
-    # Get current learning rate
-    def get_lr(self):
-
-        return self.opt.get_lr()
-
-    # Reset
-    def reset(self):
-
-        self.net.reset()
-        self.opt.reset()
-        self.pdf = None
-
-        if (self.save):
-            self.prn.reset()
-            self.prp = None
-
