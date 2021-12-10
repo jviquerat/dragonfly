@@ -75,7 +75,7 @@ class buffer_based():
         obs = env.reset_all()
 
         # Loop until max episode number is reached
-        while (not self.counter.max_total_ep()):
+        while (not self.counter.done_ep_max()):
 
             # Reset local buffer
             self.loc_buff.reset()
@@ -192,18 +192,18 @@ class buffer_based():
     def print_episode(self, counter, report):
 
         # No initial printing
-        if (counter.ep == 0): return
+        if (counter.get_ep() == 0): return
 
         # Average and print
-        if (counter.ep <= counter.n_ep):
-            avg    = np.mean(report.data["score"][-n_smooth:])
+        if (counter.get_ep() <= counter.get_n_ep_max()):
+            avg    = report.avg_score(n_smooth)
             avg    = f"{avg:.3f}"
-            bst    = counter.best_score
+            bst    = counter.get_best_score()
             bst    = f"{bst:.3f}"
-            bst_ep = counter.best_ep
+            bst_ep = counter.get_best_ep()
             end    = '\n'
-            if (counter.ep < counter.n_ep): end = '\r'
-            print('# Ep #'+str(counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
+            if (counter.get_ep() < counter.get_n_ep_max()): end = '\r'
+            print('# Ep #'+str(counter.get_ep())+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
 
     ################################
     ### Report wrappings
