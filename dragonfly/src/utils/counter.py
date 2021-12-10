@@ -8,23 +8,23 @@ import numpy as np
 class counter:
     def __init__(self, n_cpu, n_ep):
 
-        # Initialize
         self.n_cpu   = n_cpu
         self.n_ep    = n_ep
         self.reset()
 
     # Reset
     def reset(self):
+
         self.ep         =  0
         self.best_ep    =  0
         self.best_score =-1.0e8
         self.ep_step    = [0     for _ in range(self.n_cpu)]
         self.score      = [0.0   for _ in range(self.n_cpu)]
 
-    # Test episode loop
-    def test_ep_loop(self):
+    # Test total nb of episodes
+    def max_total_ep(self):
 
-        return (self.ep < self.n_ep)
+        return (self.ep >= self.n_ep)
 
     # Update score
     def update_score(self, rwd):

@@ -30,11 +30,16 @@ class buffer_based():
 
         # pol_act_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
-        self.loc_buff = loc_buff(self.n_cpu,       self.obs_dim,
-                                 self.pol_act_dim, self.buff_size)
-        self.glb_buff = glb_buff(self.n_cpu,       self.obs_dim,
-                                 self.pol_act_dim, self.n_buff,
-                                 self.buff_size,   self.btc_frac)
+        self.loc_buff = loc_buff(self.n_cpu,
+                                 self.obs_dim,
+                                 self.pol_act_dim,
+                                 self.buff_size)
+        self.glb_buff = glb_buff(self.n_cpu,
+                                 self.obs_dim,
+                                 self.pol_act_dim,
+                                 self.n_buff,
+                                 self.buff_size,
+                                 self.btc_frac)
 
         # Initialize learning data report
         self.report_fields = ["episode",
@@ -70,7 +75,7 @@ class buffer_based():
         obs = env.reset_all()
 
         # Loop until max episode number is reached
-        while (self.counter.test_ep_loop()):
+        while (not self.counter.max_total_ep()):
 
             # Reset local buffer
             self.loc_buff.reset()
@@ -92,7 +97,7 @@ class buffer_based():
                 trm, bts = self.terminator.terminate(self.counter, done)
 
                 # Store transition
-                self.loc_buff.store(obs, nxt, act, rwd, trm, bts)
+                self.loc_buff.store(obs, nxt, act, rwd, trm, bts, )
 
                 # Update observation and buffer counter
                 obs = nxt
@@ -115,7 +120,7 @@ class buffer_based():
                 self.timer_env.toc()
 
             # Finalize buffers for training
-            self.loc_buff.fix_trm_buffer()
+            self.terminator.bootstrap_terminal(self.loc_buff)
             obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
             tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
 
