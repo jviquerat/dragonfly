@@ -12,17 +12,22 @@ from dragonfly.src.utils.counter         import *
 
 ###############################################
 ### Class for buffer-based training
-### pms : parameters
+### obs_dim     : dimension of observations
+### act_dim     : dimension of actions
+### pol_act_dim : true dimension of the actions provided to the env
+### n_cpu       : nb of parallel environments
+### n_ep_max    : max nb of episodes to unroll in a run
+### pms         : parameters
 class buffer_based():
     def __init__(self, obs_dim, act_dim,
-                 pol_act_dim, n_cpu, n_ep, pms):
+                 pol_act_dim, n_cpu, n_ep_max, pms):
 
         # Initialize from input
         self.obs_dim     = obs_dim
         self.act_dim     = act_dim
         self.pol_act_dim = pol_act_dim
         self.n_cpu       = n_cpu
-        self.n_ep        = n_ep
+        self.n_ep_max    = n_ep_max
         self.buff_size   = pms.buff_size
         self.n_buff      = pms.n_buff
         self.btc_frac    = pms.batch_frac
@@ -52,7 +57,7 @@ class buffer_based():
         self.renderer = renderer(self.n_cpu, pms.render_every)
 
         # Initialize counter
-        self.counter = counter(self.n_cpu, self.n_ep)
+        self.counter = counter(self.n_cpu, self.n_ep_max)
 
         # Initialize terminator
         self.terminator = terminator_factory.create(pms.terminator.type,
