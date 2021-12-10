@@ -37,9 +37,7 @@ class buffer_based():
         # This allows compatibility between continuous and discrete envs
         self.loc_buff = loc_buff(self.n_cpu,
                                  self.obs_dim,
-                                 self.pol_act_dim,
-                                 "buffer",
-                                 buff_size=self.buff_size)
+                                 self.pol_act_dim)
         self.glb_buff = glb_buff(self.n_cpu,
                                  self.obs_dim,
                                  self.pol_act_dim,
@@ -58,7 +56,10 @@ class buffer_based():
         self.renderer = renderer(self.n_cpu, pms.render_every)
 
         # Initialize counter
-        self.counter = counter(self.n_cpu, self.n_ep_max)
+        self.counter = counter(self.n_cpu,
+                               self.n_ep_max,
+                               "buffer",
+                               buff_size=self.buff_size)
 
         # Initialize terminator
         self.terminator = terminator_factory.create(pms.terminator.type,
@@ -81,13 +82,13 @@ class buffer_based():
         obs = env.reset_all()
 
         # Loop until max episode number is reached
-        while (not self.counter.done()):
+        while (not self.counter.done_max_ep()):
 
             # Reset local buffer
             self.loc_buff.reset()
 
             # Loop over buff size
-            while (not self.loc_buff.full()):
+            while (not self.counter.done_buffer(self.loc_buff)):
 
                 # Get actions
                 self.timer_actions.tic()

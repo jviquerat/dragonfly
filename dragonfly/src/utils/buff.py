@@ -24,6 +24,10 @@ class par_buff:
         for cpu in range(self.n_cpu):
             self.buff[cpu] = np.append(self.buff[cpu], vec[cpu])
 
+    def size(self):
+
+        return len(self.buff[0])
+
     def serialize(self):
 
         arr = np.array([])
@@ -38,32 +42,23 @@ class par_buff:
 ### n_cpu     : nb of parallel environments
 ### obs_dim   : dimension of observations
 ### act_dim   : dimension of actions
-### buff_size : max buffer size
 class loc_buff:
-    def __init__(self, n_cpu, obs_dim, act_dim, style,
-                 buff_size   = None,
-                 n_ep_unroll = None):
+    def __init__(self, n_cpu, obs_dim, act_dim):
 
-        self.n_cpu     = n_cpu
-        self.obs_dim   = obs_dim
-        self.act_dim   = act_dim
-        self.style     = style
-        if (self.style == "buffer"):
-            self.buff_size = buff_size
-        if (self.style == "episode"):
-            self.n_ep_unroll = n_ep_unroll
+        self.n_cpu   = n_cpu
+        self.obs_dim = obs_dim
+        self.act_dim = act_dim
         self.reset()
 
     def reset(self):
 
-        self.obs  = par_buff(self.n_cpu, self.obs_dim)
-        self.nxt  = par_buff(self.n_cpu, self.obs_dim)
-        self.act  = par_buff(self.n_cpu, self.act_dim)
-        self.rwd  = par_buff(self.n_cpu, 1)
-        self.trm  = par_buff(self.n_cpu, 1)
-        self.bts  = par_buff(self.n_cpu, 1)
-        self.epn  = par_buff(self.n_cpu, 1)
-        self.size = 0
+        self.obs = par_buff(self.n_cpu, self.obs_dim)
+        self.nxt = par_buff(self.n_cpu, self.obs_dim)
+        self.act = par_buff(self.n_cpu, self.act_dim)
+        self.rwd = par_buff(self.n_cpu, 1)
+        self.trm = par_buff(self.n_cpu, 1)
+        self.bts = par_buff(self.n_cpu, 1)
+        self.epn = par_buff(self.n_cpu, 1)
 
     def store(self, obs, nxt, act, rwd, trm, bts, epn):
 
@@ -74,12 +69,10 @@ class loc_buff:
         self.trm.append(trm)
         self.bts.append(bts)
         self.epn.append(epn)
-        self.size += self.n_cpu
 
-    def full(self):
+    def size(self):
 
-        if (self.style == "buffer"):
-            return (self.size >= self.buff_size)
+        return self.epn.size()*self.n_cpu
 
     def serialize(self):
 
