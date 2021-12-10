@@ -40,12 +40,18 @@ class par_buff:
 ### act_dim   : dimension of actions
 ### buff_size : max buffer size
 class loc_buff:
-    def __init__(self, n_cpu, obs_dim, act_dim, buff_size):
+    def __init__(self, n_cpu, obs_dim, act_dim, style,
+                 buff_size   = None,
+                 n_ep_unroll = None):
 
         self.n_cpu     = n_cpu
         self.obs_dim   = obs_dim
         self.act_dim   = act_dim
-        self.buff_size = buff_size
+        self.style     = style
+        if (self.style == "buffer"):
+            self.buff_size = buff_size
+        if (self.style == "episode"):
+            self.n_ep_unroll = n_ep_unroll
         self.reset()
 
     def reset(self):
@@ -68,9 +74,10 @@ class loc_buff:
         self.bts.append(bts)
         self.size += self.n_cpu
 
-    def test_buff_loop(self):
+    def full(self):
 
-        return (self.size < self.buff_size)
+        if (self.style == "buffer"):
+            return (self.size >= self.buff_size)
 
     def serialize(self):
 

@@ -2,7 +2,7 @@
     "env_name": "Pendulum-v0",
     "n_avg": 2,
     "n_cpu": 1,
-    "n_ep": 2,
+    "n_ep_max": 2,
     "trainer": {
         "style": "buffer_based",
         "buff_size": 256,

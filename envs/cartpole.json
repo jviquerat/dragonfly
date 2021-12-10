@@ -2,7 +2,7 @@
     "env_name": "CartPole-v0",
     "n_avg": 3,
     "n_cpu": 1,
-    "n_ep": 300,
+    "n_ep_max": 300,
     "trainer": {
         "style": "buffer_based",
         "buff_size": 128,

@@ -38,7 +38,8 @@ class buffer_based():
         self.loc_buff = loc_buff(self.n_cpu,
                                  self.obs_dim,
                                  self.pol_act_dim,
-                                 self.buff_size)
+                                 "buffer",
+                                 buff_size=self.buff_size)
         self.glb_buff = glb_buff(self.n_cpu,
                                  self.obs_dim,
                                  self.pol_act_dim,
@@ -80,13 +81,13 @@ class buffer_based():
         obs = env.reset_all()
 
         # Loop until max episode number is reached
-        while (not self.counter.done_ep_max()):
+        while (not self.counter.done()):
 
             # Reset local buffer
             self.loc_buff.reset()
 
             # Loop over buff size
-            while (self.loc_buff.test_buff_loop()):
+            while (not self.loc_buff.full()):
 
                 # Get actions
                 self.timer_actions.tic()

@@ -22,7 +22,7 @@ class counter:
         self.score      = [0.0   for _ in range(self.n_cpu)]
 
     # Test total nb of episodes
-    def done_ep_max(self):
+    def done(self):
 
         return (self.ep >= self.n_ep_max)
 
