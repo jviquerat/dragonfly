@@ -44,7 +44,12 @@ def test_glb_buff():
                     [0.2],
                     [0.1],
                     [0.1]])
-    buff.store(obs, adv, tgt, act)
+    epn = np.array([[1],
+                    [1],
+                    [1],
+                    [1],
+                    [1]])
+    buff.store(obs, adv, tgt, act, epn)
 
     print("Storing buffers")
     print("obs: ")
@@ -55,6 +60,8 @@ def test_glb_buff():
     print(adv)
     print("tgt: ")
     print(tgt)
+    print("epn: ")
+    print(epn)
 
     # Retrieve buffer
     buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buff()

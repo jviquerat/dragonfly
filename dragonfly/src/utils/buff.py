@@ -62,9 +62,10 @@ class loc_buff:
         self.rwd  = par_buff(self.n_cpu, 1)
         self.trm  = par_buff(self.n_cpu, 1)
         self.bts  = par_buff(self.n_cpu, 1)
+        self.epn  = par_buff(self.n_cpu, 1)
         self.size = 0
 
-    def store(self, obs, nxt, act, rwd, trm, bts):
+    def store(self, obs, nxt, act, rwd, trm, bts, epn):
 
         self.obs.append(obs)
         self.nxt.append(nxt)
@@ -72,6 +73,7 @@ class loc_buff:
         self.rwd.append(rwd)
         self.trm.append(trm)
         self.bts.append(bts)
+        self.epn.append(epn)
         self.size += self.n_cpu
 
     def full(self):
@@ -87,8 +89,9 @@ class loc_buff:
         rwd = self.rwd.serialize()
         trm = self.trm.serialize()
         bts = self.bts.serialize()
+        epn = self.epn.serialize()
 
-        return obs, nxt, act, rwd, trm, bts
+        return obs, nxt, act, rwd, trm, bts, epn
 
 ###############################################
 ### Global parallel buffer class, used to store
@@ -120,14 +123,16 @@ class glb_buff:
         self.act  = np.empty([0,self.act_dim])
         self.adv  = np.empty([0,1])
         self.tgt  = np.empty([0,1])
+        self.epn  = np.empty([0,1])
         self.size = 0
 
-    def store(self, obs, adv, tgt, act):
+    def store(self, obs, adv, tgt, act, epn):
 
         self.obs = np.append(self.obs, obs, axis=0)
         self.adv = np.append(self.adv, adv, axis=0)
         self.tgt = np.append(self.tgt, tgt, axis=0)
         self.act = np.append(self.act, act, axis=0)
+        self.epn = np.append(self.epn, epn, axis=0)
 
     def get_buff(self):
 

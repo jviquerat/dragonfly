@@ -100,10 +100,10 @@ class buffer_based():
                 self.timer_env.toc()
 
                 # Handle termination state
-                trm, bts = self.terminator.terminate(self.counter, done)
+                trm, bts, epn = self.terminator.terminate(self.counter, done)
 
                 # Store transition
-                self.loc_buff.store(obs, nxt, act, rwd, trm, bts, )
+                self.loc_buff.store(obs, nxt, act, rwd, trm, bts, epn)
 
                 # Update observation and buffer counter
                 obs = nxt
@@ -127,11 +127,11 @@ class buffer_based():
 
             # Finalize buffers for training
             self.terminator.bootstrap_terminal(self.loc_buff)
-            obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
+            obs, nxt, act, rwd, trm, bts, epn = self.loc_buff.serialize()
             tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
 
             # Store in global buffers
-            self.glb_buff.store(obs, adv, tgt, act)
+            self.glb_buff.store(obs, adv, tgt, act, epn)
 
             # Train agent
             self.timer_training.tic()
