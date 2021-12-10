@@ -12,17 +12,22 @@ from dragonfly.src.utils.counter         import *
 
 ###############################################
 ### Class for buffer-based training
-### pms : parameters
+### obs_dim     : dimension of observations
+### act_dim     : dimension of actions
+### pol_act_dim : true dimension of the actions provided to the env
+### n_cpu       : nb of parallel environments
+### n_ep_max    : max nb of episodes to unroll in a run
+### pms         : parameters
 class buffer_based():
     def __init__(self, obs_dim, act_dim,
-                 pol_act_dim, n_cpu, n_ep, pms):
+                 pol_act_dim, n_cpu, n_ep_max, pms):
 
         # Initialize from input
         self.obs_dim     = obs_dim
         self.act_dim     = act_dim
         self.pol_act_dim = pol_act_dim
         self.n_cpu       = n_cpu
-        self.n_ep        = n_ep
+        self.n_ep_max    = n_ep_max
         self.buff_size   = pms.buff_size
         self.n_buff      = pms.n_buff
         self.btc_frac    = pms.batch_frac
@@ -30,11 +35,15 @@ class buffer_based():
 
         # pol_act_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
-        self.loc_buff = loc_buff(self.n_cpu,       self.obs_dim,
-                                 self.pol_act_dim, self.buff_size)
-        self.glb_buff = glb_buff(self.n_cpu,       self.obs_dim,
-                                 self.pol_act_dim, self.n_buff,
-                                 self.buff_size,   self.btc_frac)
+        self.loc_buff = loc_buff(self.n_cpu,
+                                 self.obs_dim,
+                                 self.pol_act_dim)
+        self.glb_buff = glb_buff(self.n_cpu,
+                                 self.obs_dim,
+                                 self.pol_act_dim,
+                                 self.n_buff,
+                                 self.buff_size,
+                                 self.btc_frac)
 
         # Initialize learning data report
         self.report_fields = ["episode",
@@ -47,7 +56,10 @@ class buffer_based():
         self.renderer = renderer(self.n_cpu, pms.render_every)
 
         # Initialize counter
-        self.counter = counter(self.n_cpu, self.n_ep)
+        self.counter = counter(self.n_cpu,
+                               self.n_ep_max,
+                               "buffer",
+                               buff_size=self.buff_size)
 
         # Initialize terminator
         self.terminator = terminator_factory.create(pms.terminator.type,
@@ -70,13 +82,13 @@ class buffer_based():
         obs = env.reset_all()
 
         # Loop until max episode number is reached
-        while (self.counter.test_ep_loop()):
+        while (not self.counter.done_max_ep()):
 
             # Reset local buffer
             self.loc_buff.reset()
 
             # Loop over buff size
-            while (self.loc_buff.test_buff_loop()):
+            while (not self.counter.done_buffer(self.loc_buff)):
 
                 # Get actions
                 self.timer_actions.tic()
@@ -89,10 +101,10 @@ class buffer_based():
                 self.timer_env.toc()
 
                 # Handle termination state
-                trm, bts = self.terminator.terminate(self.counter, done)
+                trm, bts, epn = self.terminator.terminate(self.counter, done)
 
                 # Store transition
-                self.loc_buff.store(obs, nxt, act, rwd, trm, bts)
+                self.loc_buff.store(obs, nxt, act, rwd, trm, bts, epn)
 
                 # Update observation and buffer counter
                 obs = nxt
@@ -115,12 +127,12 @@ class buffer_based():
                 self.timer_env.toc()
 
             # Finalize buffers for training
-            self.loc_buff.fix_trm_buffer()
-            obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
+            self.terminator.bootstrap_terminal(self.loc_buff)
+            obs, nxt, act, rwd, trm, bts, epn = self.loc_buff.serialize()
             tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
 
             # Store in global buffers
-            self.glb_buff.store(obs, adv, tgt, act)
+            self.glb_buff.store(obs, adv, tgt, act, epn)
 
             # Train agent
             self.timer_training.tic()
@@ -187,18 +199,18 @@ class buffer_based():
     def print_episode(self, counter, report):
 
         # No initial printing
-        if (counter.ep == 0): return
+        if (counter.get_ep() == 0): return
 
         # Average and print
-        if (counter.ep <= counter.n_ep):
-            avg    = np.mean(report.data["score"][-n_smooth:])
+        if (counter.get_ep() <= counter.get_n_ep_max()):
+            avg    = report.avg_score(n_smooth)
             avg    = f"{avg:.3f}"
-            bst    = counter.best_score
+            bst    = counter.get_best_score()
             bst    = f"{bst:.3f}"
-            bst_ep = counter.best_ep
+            bst_ep = counter.get_best_ep()
             end    = '\n'
-            if (counter.ep < counter.n_ep): end = '\r'
-            print('# Ep #'+str(counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
+            if (counter.get_ep() < counter.get_n_ep_max()): end = '\r'
+            print('# Ep #'+str(counter.get_ep())+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
 
     ################################
     ### Report wrappings

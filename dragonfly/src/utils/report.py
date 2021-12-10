@@ -29,6 +29,11 @@ class report:
         self.step_count += length
         self.data["step"].append(self.step_count)
 
+    # Return an average of n last scores
+    def avg_score(self, n):
+
+        return np.mean(self.data["score"][-n:])
+
     # Write report
     def write(self, filename, names):
 

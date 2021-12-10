@@ -29,7 +29,7 @@ def test_ppo_continuous():
     agent = ppo(3, 1, reader.pms.n_cpu, reader.pms.agent)
 
     # Intialize averager
-    averager = data_avg(4, reader.pms.n_ep, reader.pms.n_avg)
+    averager = data_avg(4, reader.pms.n_ep_max, reader.pms.n_avg)
 
     # Initialize training style
     trainer = trainer_factory.create(reader.pms.trainer.style,
@@ -37,7 +37,7 @@ def test_ppo_continuous():
                                      act_dim     = env.act_dim,
                                      pol_act_dim = agent.pol_act_dim,
                                      n_cpu       = reader.pms.n_cpu,
-                                     n_ep        = reader.pms.n_ep,
+                                     n_ep_max    = reader.pms.n_ep_max,
                                      pms=reader.pms.trainer)
 
     print("Test continuous agent")
