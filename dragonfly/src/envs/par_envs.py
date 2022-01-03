@@ -165,19 +165,6 @@ class par_envs:
 
         return nxt, rwd, done
 
-    # Unroll parallel environments until next update
-    def unroll(self, agent, counter):
-
-        # Send
-        for cpu in range(self.n_cpu):
-            self.pipes[cpu].send(('unroll', None))
-
-        # Receive and normalize
-        for cpu in range(self.n_cpu):
-            if (done[cpu]):
-                obs            = self.pipes[cpu].recv()
-                obs_array[cpu] = obs
-
 # Target function for process
 def worker(env_name, name, pipe, path):
     env = gym.make(env_name)
