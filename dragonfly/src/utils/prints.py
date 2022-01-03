@@ -9,7 +9,7 @@ bld_clr = '\033[1m'
 
 ### New line
 def new_line():
-    print("\n")
+    print("")
 
 ### Header
 def header():
