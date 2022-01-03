@@ -1,9 +1,9 @@
 {
     "env_name": "LunarLander-v2",
     "agent": "ppo",
-    "ep_end": 600,
-    "n_ep": 1400,
-    "n_avg": 3,
+    "ep_end": 1000,
+    "n_ep": 1000,
+    "n_avg": 1,
     "n_cpu": 1,
     "render_every": 50,
     "policy": {
