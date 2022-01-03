@@ -114,10 +114,7 @@ class buffer_based():
                 self.renderer.store(rnd)
 
                 # Finish if some episodes are done
-                self.finish_episodes(self.counter,
-                                     self.report,
-                                     self.renderer,
-                                     path, done)
+                self.finish_episodes(path, done)
 
                 # Reset only finished environments
                 self.timer_env.tic()
@@ -186,15 +183,15 @@ class buffer_based():
         self.counter.reset()
 
     # Finish if some episodes are done
-    def finish_episodes(self, counter, report, renderer, path, done):
+    def finish_episodes(self, path, done):
 
         # Loop over environments and finalize/reset
         for cpu in range(self.n_cpu):
             if (done[cpu]):
-                self.store_report(counter, report, cpu)
-                self.print_episode(counter, report)
-                renderer.finish(path, counter.ep, cpu)
-                counter.reset_ep(cpu)
+                self.store_report(self.counter, self.report, cpu)
+                self.print_episode(self.counter, self.report)
+                self.renderer.finish(path, self.counter.ep, cpu)
+                self.counter.reset_ep(cpu)
 
     # Printings at the end of an episode
     def print_episode(self, counter, report):
