@@ -43,13 +43,13 @@ class par_envs:
     def reset_all(self):
 
         # Send
-        for cpu in range(self.n_cpu):
-            self.pipes[cpu].send(('reset', None))
+        for p in self.pipes:
+            p.send(('reset', None))
 
         # Receive and normalize
         results = np.array([])
-        for cpu in range(self.n_cpu):
-            obs     = self.pipes[cpu].recv()
+        for p in self.pipes:
+            obs     = p.recv()
             results = np.append(results, obs)
 
         return np.reshape(results, (-1,self.obs_dim))
@@ -132,8 +132,8 @@ class par_envs:
     def close(self):
 
         # Close all envs
-        for cpu in range(self.n_cpu):
-            self.pipes[cpu].send(('close', None))
+        for p in self.pipes:
+            p.send(('close', None))
         for p in self.procs:
             p.terminate()
             p.join()
@@ -154,8 +154,9 @@ class par_envs:
         nxt  = np.array([])
         rwd  = np.array([])
         done = np.array([], dtype=np.bool)
-        for cpu in range(self.n_cpu):
-            n, r, d = self.pipes[cpu].recv()
+
+        for p in self.pipes:
+            n, r, d = p.recv()
             nxt     = np.append(nxt, n)
             rwd     = np.append(rwd, r)
             done    = np.append(done, bool(d))
@@ -201,7 +202,7 @@ def worker(env_name, name, pipe, path):
             if command == 'render':
                 pipe.send(env.render(mode='rgb_array'))
 
-            if (command == 'get_dims'):
+            if command == 'get_dims':
                 # Discrete action space
                 if (type(env.action_space).__name__ == "Discrete"):
                     act_dim = env.action_space.n
@@ -213,7 +214,7 @@ def worker(env_name, name, pipe, path):
                     obs_dim = env.observation_space.shape[0]
                 pipe.send((act_dim, obs_dim))
 
-            if (command == 'get_act_bounds'):
+            if command == 'get_act_bounds':
                 # Continuous action space
                 if (type(env.action_space).__name__ == "Box"):
                     act_min  = env.action_space.low
@@ -225,7 +226,7 @@ def worker(env_name, name, pipe, path):
                     act_norm = False
                 pipe.send((act_min, act_max, act_norm))
 
-            if (command == 'set_cpu'):
+            if command == 'set_cpu':
                 if hasattr(env, 'cpu'):
                     env.set_cpu(data[0], data[1])
 
