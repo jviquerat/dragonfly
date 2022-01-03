@@ -106,8 +106,7 @@ class buffer_based():
                 # Store transition
                 self.loc_buff.store(obs, nxt, act, rwd, trm, bts, epn)
 
-                # Update observation and buffer counter
-                obs = nxt
+                # Update counter
                 self.counter.update_score(rwd)
                 self.counter.update_step()
 
@@ -125,6 +124,9 @@ class buffer_based():
                 self.timer_env.tic()
                 env.reset(done, obs)
                 self.timer_env.toc()
+
+                # Update observation for next step
+                obs = nxt
 
             # Finalize buffers for training
             self.terminator.bootstrap_terminal(self.loc_buff)
