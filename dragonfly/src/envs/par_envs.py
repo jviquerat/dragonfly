@@ -13,25 +13,21 @@ class par_envs:
     def __init__(self, env_name, n_cpu, path):
 
         # Init pipes and processes
-        self.n_cpu   = n_cpu
-        self.p_pipes = []
-        self.proc    = []
+        self.n_cpu = n_cpu
+        self.pipes = []
+        self.procs = []
 
         # Start environments
         for cpu in range(n_cpu):
             p_pipe, c_pipe = mp.Pipe()
-            name           = str(cpu)
             process        = mp.Process(target = worker,
-                                        name   = name,
-                                        args   = (env_name, name,
-                                                  c_pipe, p_pipe, path))
+                                        args   = (env_name, str(cpu), c_pipe, path))
 
-            self.p_pipes.append(p_pipe)
-            self.proc.append(process)
+            self.pipes.append(p_pipe)
+            self.procs.append(process)
 
             process.daemon = True
             process.start()
-            c_pipe.close()
 
         # Handle action and observation dimensions
         act_dim, obs_dim = self.get_dims()
@@ -48,12 +44,12 @@ class par_envs:
 
         # Send
         for cpu in range(self.n_cpu):
-            self.p_pipes[cpu].send(('reset', None))
+            self.pipes[cpu].send(('reset', None))
 
         # Receive and normalize
         results = np.array([])
         for cpu in range(self.n_cpu):
-            obs     = self.p_pipes[cpu].recv()
+            obs     = self.pipes[cpu].recv()
             results = np.append(results, obs)
 
         return np.reshape(results, (-1,self.obs_dim))
@@ -64,23 +60,23 @@ class par_envs:
         # Send
         for cpu in range(self.n_cpu):
             if (done[cpu]):
-                self.p_pipes[cpu].send(('reset', None))
+                self.pipes[cpu].send(('reset', None))
 
         # Receive and normalize
         for cpu in range(self.n_cpu):
             if (done[cpu]):
-                obs            = self.p_pipes[cpu].recv()
+                obs            = self.pipes[cpu].recv()
                 obs_array[cpu] = obs
 
     # Get environment dimensions
     def get_dims(self):
 
         # Send
-        self.p_pipes[0].send(('get_dims', None))
+        self.pipes[0].send(('get_dims', None))
 
         # Receive
         results = np.array([])
-        results = np.append(results, self.p_pipes[0].recv())
+        results = np.append(results, self.pipes[0].recv())
 
         return results
 
@@ -88,10 +84,10 @@ class par_envs:
     def get_act_bounds(self):
 
         # Send
-        self.p_pipes[0].send(('get_act_bounds', None))
+        self.pipes[0].send(('get_act_bounds', None))
 
         # Receive
-        act_min, act_max, act_norm = self.p_pipes[0].recv()
+        act_min, act_max, act_norm = self.pipes[0].recv()
 
         return act_min, act_max, act_norm
 
@@ -100,7 +96,7 @@ class par_envs:
 
         # Send
         for cpu in range(self.n_cpu):
-            self.p_pipes[cpu].send(('set_cpu', [cpu, self.n_cpu]))
+            self.pipes[cpu].send(('set_cpu', [cpu, self.n_cpu]))
 
     # Render environment
     def render(self, render):
@@ -112,12 +108,12 @@ class par_envs:
         # Send
         for cpu in range(self.n_cpu):
             if (render[cpu]):
-                self.p_pipes[cpu].send(('render', None))
+                self.pipes[cpu].send(('render', None))
 
         # Receive
         for cpu in range(self.n_cpu):
             if (render[cpu]):
-                rnd[cpu] = self.p_pipes[cpu].recv()
+                rnd[cpu] = self.pipes[cpu].recv()
 
         return rnd
 
@@ -125,10 +121,10 @@ class par_envs:
     def render_single(self, cpu):
 
         # Send
-        self.p_pipes[cpu].send(('render', None))
+        self.pipes[cpu].send(('render', None))
 
         # Receive
-        rgb = self.p_pipes[cpu].recv()
+        rgb = self.pipes[cpu].recv()
 
         return rgb
 
@@ -137,8 +133,8 @@ class par_envs:
 
         # Close all envs
         for cpu in range(self.n_cpu):
-            self.p_pipes[cpu].send(('close', None))
-        for p in self.proc:
+            self.pipes[cpu].send(('close', None))
+        for p in self.procs:
             p.terminate()
             p.join()
 
@@ -152,14 +148,14 @@ class par_envs:
                 for i in range(self.act_dim):
                     act[i] = self.act_rng[i]*act[i] + self.act_avg[i]
 
-            self.p_pipes[cpu].send(('step', act))
+            self.pipes[cpu].send(('step', act))
 
         # Receive
         nxt  = np.array([])
         rwd  = np.array([])
         done = np.array([], dtype=np.bool)
         for cpu in range(self.n_cpu):
-            n, r, d = self.p_pipes[cpu].recv()
+            n, r, d = self.pipes[cpu].recv()
             nxt     = np.append(nxt, n)
             rwd     = np.append(rwd, r)
             done    = np.append(done, bool(d))
@@ -168,10 +164,22 @@ class par_envs:
 
         return nxt, rwd, done
 
+    # Unroll parallel environments until next update
+    def unroll(self, agent, counter):
+
+        # Send
+        for cpu in range(self.n_cpu):
+            self.pipes[cpu].send(('unroll', None))
+
+        # Receive and normalize
+        for cpu in range(self.n_cpu):
+            if (done[cpu]):
+                obs            = self.pipes[cpu].recv()
+                obs_array[cpu] = obs
+
 # Target function for process
-def worker(env_name, name, pipe, p_pipe, path):
+def worker(env_name, name, pipe, path):
     env = gym.make(env_name)
-    p_pipe.close()
     try:
         while True:
             # Receive command
