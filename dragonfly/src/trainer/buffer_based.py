@@ -106,10 +106,8 @@ class buffer_based():
                 # Store transition
                 self.loc_buff.store(obs, nxt, act, rwd, trm, bts, epn)
 
-                # Update observation and buffer counter
-
-                self.counter.update_score(rwd)
-                self.counter.update_step()
+                # Update counter
+                self.counter.update(rwd)
 
                 # Handle rendering
                 rnd = env.render(self.renderer.render)
