@@ -114,13 +114,13 @@ class buffer_based():
                 # Finish if some episodes are done
                 self.finish_episodes(path, dne)
 
+                # Update observation for next step
+                obs = nxt
+
                 # Reset only finished environments
                 self.timer_env.tic()
                 env.reset(dne, obs)
                 self.timer_env.toc()
-
-                # Update observation for next step
-                obs = nxt
 
             # Finalize buffers for training
             self.terminator.terminate(self.loc_buff)

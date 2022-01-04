@@ -34,9 +34,6 @@ class bootstrap():
                 if (buff.stp.buff[j][i] >= self.ep_end-1): bts[j] = 1.0
 
             # Store terminal arrays
-            print(trm)
-            print(bts)
-            print("")
             buff.store_terminal(trm, bts)
 
         # When using buffer-based updates, the last step of each
