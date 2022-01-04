@@ -97,14 +97,12 @@ class buffer_based():
 
                 # Make one env step
                 self.timer_env.tic()
-                nxt, rwd, done = env.step(act)
+                nxt, rwd, dne = env.step(act)
                 self.timer_env.toc()
 
-                # Handle termination state
-                trm, bts, epn = self.terminator.terminate(self.counter, done)
-
                 # Store transition
-                self.loc_buff.store(obs, nxt, act, rwd, trm, bts, epn)
+                stp = self.counter.ep_step
+                self.loc_buff.store(obs, nxt, act, rwd, dne, stp)
 
                 # Update counter
                 self.counter.update(rwd)
@@ -114,23 +112,23 @@ class buffer_based():
                 self.renderer.store(rnd)
 
                 # Finish if some episodes are done
-                self.finish_episodes(path, done)
+                self.finish_episodes(path, dne)
 
                 # Reset only finished environments
                 self.timer_env.tic()
-                env.reset(done, obs)
+                env.reset(dne, obs)
                 self.timer_env.toc()
 
                 # Update observation for next step
                 obs = nxt
 
             # Finalize buffers for training
-            self.terminator.bootstrap_terminal(self.loc_buff)
-            obs, nxt, act, rwd, trm, bts, epn = self.loc_buff.serialize()
+            self.terminator.terminate(self.loc_buff)
+            obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
             tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
 
             # Store in global buffers
-            self.glb_buff.store(obs, adv, tgt, act, epn)
+            self.glb_buff.store(obs, adv, tgt, act)
 
             # Train agent
             self.timer_training.tic()
@@ -149,6 +147,17 @@ class buffer_based():
         self.timer_env.show()
         self.timer_actions.show()
         self.timer_training.show()
+
+    # Finish if some episodes are done
+    def finish_episodes(self, path, done):
+
+        # Loop over environments and finalize/reset
+        for cpu in range(self.n_cpu):
+            if (done[cpu]):
+                self.store_report(self.counter, self.report, cpu)
+                self.print_episode(self.counter, self.report)
+                self.renderer.finish(path, self.counter.ep, cpu)
+                self.counter.reset_ep(cpu)
 
     # Train
     def train(self, agent):
@@ -181,17 +190,6 @@ class buffer_based():
         self.report.reset(self.report_fields)
         self.renderer.reset()
         self.counter.reset()
-
-    # Finish if some episodes are done
-    def finish_episodes(self, path, done):
-
-        # Loop over environments and finalize/reset
-        for cpu in range(self.n_cpu):
-            if (done[cpu]):
-                self.store_report(self.counter, self.report, cpu)
-                self.print_episode(self.counter, self.report)
-                self.renderer.finish(path, self.counter.ep, cpu)
-                self.counter.reset_ep(cpu)
 
     # Printings at the end of an episode
     def print_episode(self, counter, report):

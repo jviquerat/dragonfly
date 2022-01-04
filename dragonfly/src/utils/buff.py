@@ -24,7 +24,7 @@ class par_buff:
         for cpu in range(self.n_cpu):
             self.buff[cpu] = np.append(self.buff[cpu], vec[cpu])
 
-    def size(self):
+    def length(self):
 
         return len(self.buff[0])
 
@@ -56,23 +56,33 @@ class loc_buff:
         self.nxt = par_buff(self.n_cpu, self.obs_dim)
         self.act = par_buff(self.n_cpu, self.act_dim)
         self.rwd = par_buff(self.n_cpu, 1)
+        self.dne = par_buff(self.n_cpu, 1)
+        self.stp = par_buff(self.n_cpu, 1)
+
         self.trm = par_buff(self.n_cpu, 1)
         self.bts = par_buff(self.n_cpu, 1)
-        self.epn = par_buff(self.n_cpu, 1)
 
-    def store(self, obs, nxt, act, rwd, trm, bts, epn):
+    def store(self, obs, nxt, act, rwd, dne, stp):
 
         self.obs.append(obs)
         self.nxt.append(nxt)
         self.act.append(act)
         self.rwd.append(rwd)
+        self.dne.append(dne)
+        self.stp.append(stp)
+
+    def store_terminal(self, trm, bts):
+
         self.trm.append(trm)
         self.bts.append(bts)
-        self.epn.append(epn)
+
+    def length(self):
+
+        return self.rwd.length()
 
     def size(self):
 
-        return self.epn.size()*self.n_cpu
+        return self.rwd.length()*self.n_cpu
 
     def serialize(self):
 
@@ -82,9 +92,8 @@ class loc_buff:
         rwd = self.rwd.serialize()
         trm = self.trm.serialize()
         bts = self.bts.serialize()
-        epn = self.epn.serialize()
 
-        return obs, nxt, act, rwd, trm, bts, epn
+        return obs, nxt, act, rwd, trm, bts
 
 ###############################################
 ### Global parallel buffer class, used to store
@@ -116,16 +125,14 @@ class glb_buff:
         self.act  = np.empty([0,self.act_dim])
         self.adv  = np.empty([0,1])
         self.tgt  = np.empty([0,1])
-        self.epn  = np.empty([0,1])
         self.size = 0
 
-    def store(self, obs, adv, tgt, act, epn):
+    def store(self, obs, adv, tgt, act):
 
         self.obs = np.append(self.obs, obs, axis=0)
         self.adv = np.append(self.adv, adv, axis=0)
         self.tgt = np.append(self.tgt, tgt, axis=0)
         self.act = np.append(self.act, act, axis=0)
-        self.epn = np.append(self.epn, epn, axis=0)
 
     def get_buff(self):
 
