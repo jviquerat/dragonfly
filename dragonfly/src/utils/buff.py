@@ -58,8 +58,9 @@ class loc_buff:
         self.rwd = par_buff(self.n_cpu, 1)
         self.trm = par_buff(self.n_cpu, 1)
         self.bts = par_buff(self.n_cpu, 1)
+        self.stp = par_buff(self.n_cpu, 1)
 
-    def store(self, obs, nxt, act, rwd, trm, bts):
+    def store(self, obs, nxt, act, rwd, trm, bts, stp):
 
         self.obs.append(obs)
         self.nxt.append(nxt)
@@ -67,6 +68,7 @@ class loc_buff:
         self.rwd.append(rwd)
         self.trm.append(trm)
         self.bts.append(bts)
+        self.stp.append(stp)
 
     def size(self):
 

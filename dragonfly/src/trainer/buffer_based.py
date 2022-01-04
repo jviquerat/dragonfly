@@ -104,7 +104,8 @@ class buffer_based():
                 trm, bts = self.terminator.terminate(self.counter, dne)
 
                 # Store transition
-                self.loc_buff.store(obs, nxt, act, rwd, trm, bts)
+                stp = self.counter.ep_step
+                self.loc_buff.store(obs, nxt, act, rwd, trm, bts, stp)
 
                 # Update counter
                 self.counter.update(rwd)
