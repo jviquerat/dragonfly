@@ -107,7 +107,7 @@ class buffer_based():
                 self.loc_buff.store(obs, nxt, act, rwd, trm, bts, epn)
 
                 # Update observation and buffer counter
-                obs = nxt
+
                 self.counter.update_score(rwd)
                 self.counter.update_step()
 
@@ -120,6 +120,9 @@ class buffer_based():
                                      self.report,
                                      self.renderer,
                                      path, done)
+
+                # Update observation
+                obs = nxt
 
                 # Reset only finished environments
                 self.timer_env.tic()
