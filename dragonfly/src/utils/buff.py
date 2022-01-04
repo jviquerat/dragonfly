@@ -24,7 +24,7 @@ class par_buff:
         for cpu in range(self.n_cpu):
             self.buff[cpu] = np.append(self.buff[cpu], vec[cpu])
 
-    def size(self):
+    def length(self):
 
         return len(self.buff[0])
 
@@ -72,7 +72,11 @@ class loc_buff:
 
     def size(self):
 
-        return self.epn.size()*self.n_cpu
+        return self.epn.length()*self.n_cpu
+
+    def length(self):
+
+        return self.epn.length()
 
     def serialize(self):
 

@@ -97,11 +97,11 @@ class buffer_based():
 
                 # Make one env step
                 self.timer_env.tic()
-                nxt, rwd, done = env.step(act)
+                nxt, rwd, dne = env.step(act)
                 self.timer_env.toc()
 
                 # Handle termination state
-                trm, bts, epn = self.terminator.terminate(self.counter, done)
+                trm, bts, epn = self.terminator.terminate(self.counter, dne)
 
                 # Store transition
                 self.loc_buff.store(obs, nxt, act, rwd, trm, bts, epn)
@@ -114,14 +114,14 @@ class buffer_based():
                 self.renderer.store(rnd)
 
                 # Finish if some episodes are done
-                self.finish_episodes(path, done)
+                self.finish_episodes(path, dne)
 
                 # Update observation
                 obs = nxt
 
                 # Reset only finished environments
                 self.timer_env.tic()
-                env.reset(done, obs)
+                env.reset(dne, obs)
                 self.timer_env.toc()
 
             # Finalize buffers for training
