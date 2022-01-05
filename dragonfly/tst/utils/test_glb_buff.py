@@ -19,9 +19,7 @@ def test_glb_buff():
     act_dim   = 2
     n_buff    = 5
     buff_size = 1
-    btc_frac  = 0.5
-    buff      = glb_buff(n_cpu,  obs_dim,   act_dim,
-                         n_buff, buff_size, btc_frac)
+    buff      = glb_buff(n_cpu, obs_dim, act_dim)
 
     # Create fake buffers
     obs = np.array([[0.0, 0.0, 0.0],
@@ -56,44 +54,14 @@ def test_glb_buff():
     print("tgt: ")
     print(tgt)
 
-    # Retrieve buffer
-    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buff()
+    # Retrieve full buffer
+    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(n_buff, buff_size)
+    assert(len(buff_obs)==n_buff)
 
-    # Retrieve first batch
-    start, end, done = buff.get_indices()
-    btc_obs          = obs[start:end]
-    btc_act          = act[start:end]
-    btc_adv          = adv[start:end]
-    btc_tgt          = tgt[start:end]
+    # Retrieve smaller buffer
+    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(n_buff-1, buff_size)
+    assert(len(buff_obs)==n_buff-1)
 
-    assert(len(btc_obs)==2)
-    assert(len(btc_act)==2)
-    assert(len(btc_adv)==2)
-    assert(len(btc_tgt)==2)
-    assert(done==False)
-
-    # Retrieve second batch
-    start, end, done = buff.get_indices()
-    btc_obs          = obs[start:end]
-    btc_act          = act[start:end]
-    btc_adv          = adv[start:end]
-    btc_tgt          = tgt[start:end]
-
-    assert(len(btc_obs)==2)
-    assert(len(btc_act)==2)
-    assert(len(btc_adv)==2)
-    assert(len(btc_tgt)==2)
-    assert(done==False)
-
-    # Retrieve third batch
-    start, end, done = buff.get_indices()
-    btc_obs          = obs[start:end]
-    btc_act          = act[start:end]
-    btc_adv          = adv[start:end]
-    btc_tgt          = tgt[start:end]
-
-    assert(len(btc_obs)==1)
-    assert(len(btc_act)==1)
-    assert(len(btc_adv)==1)
-    assert(len(btc_tgt)==1)
-    assert(done==True)
+    # Retrieve larger buffer
+    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(n_buff+2, buff_size)
+    assert(len(buff_obs)==n_buff)
