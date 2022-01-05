@@ -1,4 +1,5 @@
 # Generic imports
+import math
 import numpy as np
 
 # Custom imports
@@ -31,6 +32,7 @@ class buffer_based():
         self.buff_size   = pms.buff_size
         self.n_buff      = pms.n_buff
         self.btc_frac    = pms.batch_frac
+        self.btc_size    = math.floor(self.n_buff*self.buff_size*self.btc_frac)
         self.n_epochs    = pms.n_epochs
 
         # pol_act_dim is the true dimension of the action provided to the env
@@ -40,10 +42,10 @@ class buffer_based():
                                  self.pol_act_dim)
         self.glb_buff = glb_buff(self.n_cpu,
                                  self.obs_dim,
-                                 self.pol_act_dim,
-                                 self.n_buff,
-                                 self.buff_size,
-                                 self.btc_frac)
+                                 self.pol_act_dim)
+                                 #self.n_buff,
+                                 #self.buff_size,
+                                 #self.btc_frac)
 
         # Initialize learning data report
         self.report_fields = ["episode",
@@ -168,18 +170,26 @@ class buffer_based():
         for epoch in range(self.n_epochs):
 
             # Retrieve data
-            obs, act, adv, tgt = self.glb_buff.get_buff()
-            done               = False
+            obs, act, adv, tgt = self.glb_buff.get_buffers(self.n_buff,
+                                                           self.buff_size)
 
             # Visit all available history
+            done = False
+            btc  = 0
             while not done:
-                start, end, done = self.glb_buff.get_indices()
-                btc_obs          = obs[start:end]
-                btc_act          = act[start:end]
-                btc_adv          = adv[start:end]
-                btc_tgt          = tgt[start:end]
+                lgt   = len(obs)
+                start = btc*self.btc_size
+                end   = min((btc+1)*self.btc_size, lgt)
+
+                btc_obs = obs[start:end]
+                btc_act = act[start:end]
+                btc_adv = adv[start:end]
+                btc_tgt = tgt[start:end]
 
                 agent.train(btc_obs, btc_act, btc_adv, btc_tgt, end-start)
+
+                btc += 1
+                if (end == lgt): done = True
 
     # Reset
     def reset(self):
