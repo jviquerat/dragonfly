@@ -120,7 +120,6 @@ class glb_buff:
         self.act  = np.empty([0,self.act_dim])
         self.adv  = np.empty([0,1])
         self.tgt  = np.empty([0,1])
-        self.size = 0
 
     def store(self, obs, adv, tgt, act):
 
