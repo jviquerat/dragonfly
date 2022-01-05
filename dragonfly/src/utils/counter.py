@@ -50,14 +50,10 @@ class counter:
 
         pass
 
-    # Update score
-    def update_score(self, rwd):
+    # Update score and step counter
+    def update(self, rwd):
 
-        self.score[:] += rwd[:]
-
-    # Update step
-    def update_step(self):
-
+        self.score[:]  += rwd[:]
         self.ep_step[:] = [x+1 for x in self.ep_step]
 
     # Reset episode counters and update best values

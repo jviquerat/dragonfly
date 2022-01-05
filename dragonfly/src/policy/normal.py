@@ -28,9 +28,9 @@ class normal(base_policy):
         if (pms.network.heads.final[0] != "tanh"):
             warning("normal", "__init__",
                     "Final activation for mean network of normal policy is not tanh")
-        if (pms.network.heads.final[1] != "softplus"):
+        if (pms.network.heads.final[1] != "sigmoid"):
             warning("normal", "__init__",
-                    "Final activation for dev network of normal policy is not softplus")
+                    "Final activation for dev network of normal policy is not sigmoid")
 
         self.net = net_factory.create(pms.network.type,
                                       inp_dim = obs_dim,

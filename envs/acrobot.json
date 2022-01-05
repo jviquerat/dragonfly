@@ -35,7 +35,7 @@
             "optimizer": {
                 "type": "nadam",
                 "lr": 2.0e-3,
-                "grd_clip": 0.1
+                "grd_clip": 0.5
             },
             "loss": {
                 "type": "surrogate",
@@ -61,7 +61,7 @@
             "optimizer": {
                 "type": "nadam",
                 "lr": 1.0e-2,
-                "grd_clip": 0.1
+                "grd_clip": 0.5
             },
             "loss": {
                 "type": "mse"
