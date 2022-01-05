@@ -21,6 +21,7 @@ class counter:
             self.buff_size = buff_size
         if (self.style == "episode"):
             self.n_ep_unroll = n_ep_unroll
+            self.unroll = 0
 
         self.reset()
 
@@ -46,9 +47,13 @@ class counter:
 
     # Test nb of unrolled episodes
     # Only for style="episode"
-    def done_unroll_ep(self):
+    def done_unroll(self):
 
-        pass
+        if (self.unroll >= self.n_ep_unroll):
+            self.unroll = 0
+            return True
+
+        return False
 
     # Update score and step counter
     def update(self, rwd):
