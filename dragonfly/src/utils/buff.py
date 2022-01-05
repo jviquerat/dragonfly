@@ -107,16 +107,11 @@ class loc_buff:
 ### buff_size : max buffer size
 ### btc_frac  : relative size of a batch compared to buffer (in [0,1])
 class glb_buff:
-    def __init__(self, n_cpu, obs_dim, act_dim):# n_buff, buff_size, btc_frac):
+    def __init__(self, n_cpu, obs_dim, act_dim):
 
         self.n_cpu     = n_cpu
         self.obs_dim   = obs_dim
         self.act_dim   = act_dim
-        #self.n_buff    = n_buff
-        #self.buff_size = buff_size
-        #self.btc_frac  = btc_frac
-        #self.lgt       = n_buff*buff_size
-        #self.btc_size  = math.floor(self.lgt*btc_frac)
         self.reset()
 
     def reset(self):
