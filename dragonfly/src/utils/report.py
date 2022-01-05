@@ -23,6 +23,11 @@ class report:
 
         self.data[name].append(value)
 
+    # Get data from the report
+    def get(self, name):
+
+        return self.data[name]
+
     # Increase step_count
     def step(self, length):
 

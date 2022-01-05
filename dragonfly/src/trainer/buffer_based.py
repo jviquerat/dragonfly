@@ -32,7 +32,6 @@ class buffer_based():
         self.buff_size   = pms.buff_size
         self.n_buff      = pms.n_buff
         self.btc_frac    = pms.batch_frac
-        self.btc_size    = math.floor(self.n_buff*self.buff_size*self.btc_frac)
         self.n_epochs    = pms.n_epochs
 
         # pol_act_dim is the true dimension of the action provided to the env
@@ -43,9 +42,6 @@ class buffer_based():
         self.glb_buff = glb_buff(self.n_cpu,
                                  self.obs_dim,
                                  self.pol_act_dim)
-                                 #self.n_buff,
-                                 #self.buff_size,
-                                 #self.btc_frac)
 
         # Initialize learning data report
         self.report_fields = ["episode",
@@ -166,11 +162,14 @@ class buffer_based():
         # Save previous policy
         agent.policy.save_prv()
 
+        # Compute training buff size and batch size
+        size      = self.n_buff*self.buff_size
+        btc_size  = math.floor(size*self.btc_frac)
+
         # Train policy and v_value
         for epoch in range(self.n_epochs):
 
             # Retrieve data
-            size               = self.n_buff*self.buff_size
             obs, act, adv, tgt = self.glb_buff.get_buffers(size)
 
             # Visit all available history
@@ -178,8 +177,8 @@ class buffer_based():
             btc  = 0
             while not done:
                 lgt   = len(obs)
-                start = btc*self.btc_size
-                end   = min((btc+1)*self.btc_size, lgt)
+                start = btc*btc_size
+                end   = min((btc+1)*btc_size, lgt)
 
                 btc_obs = obs[start:end]
                 btc_act = act[start:end]

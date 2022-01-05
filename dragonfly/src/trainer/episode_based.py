@@ -16,24 +16,28 @@ from dragonfly.src.utils.error           import *
 ### pms : parameters
 class episode_based():
     def __init__(self, obs_dim, act_dim,
-                 pol_act_dim, n_cpu, n_ep, pms):
+                 pol_act_dim, n_cpu, n_ep_max, pms):
 
         # Initialize from input
         self.obs_dim     = obs_dim
         self.act_dim     = act_dim
         self.pol_act_dim = pol_act_dim
         self.n_cpu       = n_cpu
-        self.n_ep        = n_ep
+        self.n_ep_max    = n_ep_max
         self.n_ep_unroll = pms.n_ep_unroll
         self.n_ep_train  = pms.n_ep_train
         self.btc_frac    = pms.batch_frac
         self.n_epochs    = pms.n_epochs
 
         # Check that n_ep_unroll is a multiple of n_cpu
-        if (n_ep_unroll%n_cpu != 0):
+        #if (n_ep_unroll%n_cpu != 0):
+            #error("episode_based",
+            #      "init",
+            #      "n_ep_unroll is not a multiple of n_cpu")
+        if (n_cpu != 1):
             error("episode_based",
                   "init",
-                  "n_ep_unroll is not a multiple of n_cpu")
+                  "episode-based learning does not support parallel envs")
 
         # pol_act_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
@@ -42,10 +46,7 @@ class episode_based():
                                  self.pol_act_dim)
         self.glb_buff = glb_buff(self.n_cpu,
                                  self.obs_dim,
-                                 self.pol_act_dim,
-                                 self.btc_frac,
-                                 self.n_buff,
-                                 self.buff_size)
+                                 self.pol_act_dim)
 
         # Initialize learning data report
         self.report_fields = ["episode",
@@ -58,7 +59,10 @@ class episode_based():
         self.renderer = renderer(self.n_cpu, pms.render_every)
 
         # Initialize counter
-        self.counter = counter(self.n_cpu, self.n_ep)
+        self.counter = counter(self.n_cpu,
+                               self.n_ep_max,
+                               "episode",
+                               n_ep_unroll=self.n_ep_unroll)
 
         # Initialize terminator
         self.terminator = terminator_factory.create(pms.terminator.type,
@@ -96,7 +100,7 @@ class episode_based():
 
                 # Make one env step
                 self.timer_env.tic()
-                nxt, rwd, done = env.step(act)
+                nxt, rwd, dne = env.step(act)
                 self.timer_env.toc()
 
                 # Store transition
@@ -122,19 +126,21 @@ class episode_based():
 
             # Finalize buffers for training
             self.terminator.terminate(self.loc_buff)
-            obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
+            obs, nxt, act, rwd, trm, bts, stp = self.loc_buff.serialize()
             tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
 
             # Store in global buffers
             self.glb_buff.store(obs, adv, tgt, act)
+
+            # Write report data to file
+            self.write_report(agent, self.report, path, run)
 
             # Train agent
             self.timer_training.tic()
             self.train(agent)
             self.timer_training.toc()
 
-            # Write report data to file
-            self.write_report(agent, self.report, path, run)
+            
 
         # Last printing
         self.print_episode(self.counter, self.report)
@@ -156,6 +162,7 @@ class episode_based():
                 self.print_episode(self.counter, self.report)
                 self.renderer.finish(path, self.counter.ep, cpu)
                 self.counter.reset_ep(cpu)
+                self.counter.unroll += 1
 
     # Train
     def train(self, agent):
@@ -163,22 +170,34 @@ class episode_based():
         # Save previous policy
         agent.policy.save_prv()
 
+        # Retrieve size of training buffer using stored episode lengths
+        lengths  = self.report.get("length")
+        size     = np.sum(lengths[-self.n_ep_train:])
+        btc_size = math.floor(size*self.btc_frac)
+
         # Train policy and v_value
         for epoch in range(self.n_epochs):
 
             # Retrieve data
-            obs, act, adv, tgt = self.glb_buff.get_buff()
-            done               = False
+            obs, act, adv, tgt = self.glb_buff.get_buffers(size)
 
             # Visit all available history
+            done = False
+            btc  = 0
             while not done:
-                start, end, done = self.glb_buff.get_indices()
-                btc_obs          = obs[start:end]
-                btc_act          = act[start:end]
-                btc_adv          = adv[start:end]
-                btc_tgt          = tgt[start:end]
+                lgt   = len(obs)
+                start = btc*btc_size
+                end   = min((btc+1)*btc_size, lgt)
+
+                btc_obs = obs[start:end]
+                btc_act = act[start:end]
+                btc_adv = adv[start:end]
+                btc_tgt = tgt[start:end]
 
                 agent.train(btc_obs, btc_act, btc_adv, btc_tgt, end-start)
+
+                btc += 1
+                if (end == lgt): done = True
 
     # Reset
     def reset(self):
@@ -193,18 +212,18 @@ class episode_based():
     def print_episode(self, counter, report):
 
         # No initial printing
-        if (counter.ep == 0): return
+        if (counter.get_ep() == 0): return
 
         # Average and print
-        if (counter.ep <= counter.n_ep):
-            avg    = np.mean(report.data["score"][-n_smooth:])
+        if (counter.get_ep() <= counter.get_n_ep_max()):
+            avg    = report.avg_score(n_smooth)
             avg    = f"{avg:.3f}"
-            bst    = counter.best_score
+            bst    = counter.get_best_score()
             bst    = f"{bst:.3f}"
-            bst_ep = counter.best_ep
+            bst_ep = counter.get_best_ep()
             end    = '\n'
-            if (counter.ep < counter.n_ep): end = '\r'
-            print('# Ep #'+str(counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
+            if (counter.get_ep() < counter.get_n_ep_max()): end = '\r'
+            print('# Ep #'+str(counter.get_ep())+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
 
     ################################
     ### Report wrappings

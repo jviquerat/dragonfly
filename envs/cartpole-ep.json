@@ -6,7 +6,7 @@
     "trainer": {
         "style": "episode_based",
         "n_ep_unroll": 1,
-        "n_ep_train": 4,
+        "n_ep_train": 12,
         "batch_frac": 0.5,
         "n_epochs": 8,
         "render_every": 500,
