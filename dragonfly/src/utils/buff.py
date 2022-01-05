@@ -129,11 +129,11 @@ class glb_buff:
         self.tgt = np.append(self.tgt, tgt, axis=0)
         self.act = np.append(self.act, act, axis=0)
 
-    def get_buffers(self, n_buff, buff_size):
+    def get_buffers(self, size):
 
         # Start/end indices
         end    = len(self.obs)
-        start  = max(0,end - n_buff*buff_size)
+        start  = max(0,end - size)
         size   = end - start
 
         # Randomize batch

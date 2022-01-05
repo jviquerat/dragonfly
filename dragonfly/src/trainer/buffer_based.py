@@ -170,8 +170,8 @@ class buffer_based():
         for epoch in range(self.n_epochs):
 
             # Retrieve data
-            obs, act, adv, tgt = self.glb_buff.get_buffers(self.n_buff,
-                                                           self.buff_size)
+            size               = self.n_buff*self.buff_size
+            obs, act, adv, tgt = self.glb_buff.get_buffers(size)
 
             # Visit all available history
             done = False
