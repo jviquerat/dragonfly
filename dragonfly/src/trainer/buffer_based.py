@@ -100,19 +100,15 @@ class buffer_based():
                 nxt, rwd, dne = env.step(act)
                 self.timer_env.toc()
 
-                # Handle termination state
-                trm, bts = self.terminator.terminate(self.counter, dne)
-
                 # Store transition
                 stp = self.counter.ep_step
-                self.loc_buff.store(obs, nxt, act, rwd, trm, bts, stp)
+                self.loc_buff.store(obs, nxt, act, rwd, dne, stp)
 
                 # Update counter
                 self.counter.update(rwd)
 
                 # Handle rendering
-                rnd = env.render(self.renderer.render)
-                self.renderer.store(rnd)
+                self.renderer.store(env.render(self.renderer.render))
 
                 # Finish if some episodes are done
                 self.finish_episodes(path, dne)
@@ -126,7 +122,7 @@ class buffer_based():
                 self.timer_env.toc()
 
             # Finalize buffers for training
-            self.terminator.bootstrap_terminal(self.loc_buff)
+            self.terminator.terminate(self.loc_buff)
             obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
             tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
 

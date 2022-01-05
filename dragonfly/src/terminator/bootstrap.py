@@ -12,30 +12,33 @@ class bootstrap():
         self.ep_end = pms.ep_end
 
     # Terminate buffers
-    def terminate(self, counter, done):
+    def terminate(self, buff):
 
         # Initialize arrays
         trm = np.zeros([self.n_cpu])
         bts = np.zeros([self.n_cpu])
 
-        # Loop over environments
-        for i in range(self.n_cpu):
+        # Loop over steps
+        for k in range(buff.length()):
 
-            # Set terminal value, whatever the cause
-            trm[i] = float(not (done[i] == True))
+            trm[:] = 0.0
+            bts[:] = 0.0
 
-            # If bootstrap is on, test and fill
-            step = counter.ep_step[i]
-            if (step >= self.ep_end-1): bts[i] = 1.0
+            # Loop over environments
+            for i in range(self.n_cpu):
 
-        return trm, bts
+                # Set terminal value, whatever the cause
+                trm[i] = float(not (buff.dne.buff[i][k] == True))
 
-    # Bootstrap terminal step of buffer once buffer is full
-    def bootstrap_terminal(self, loc_buff):
+                # If bootstrap is on, test and fill
+                if (buff.stp.buff[i][k] >= self.ep_end-1): bts[i] = 1.0
+
+            # Store terminal data to buffer
+            buff.store_terminal(trm, bts)
 
         # When using buffer-based updates, the last step of each
         # buffer must be bootstraped to mimic a continuing episode
-        for cpu in range(self.n_cpu):
-            if (loc_buff.trm.buff[cpu][-1] == 1.0):
-                loc_buff.bts.buff[cpu][-1] = 1.0
-                loc_buff.trm.buff[cpu][-1] = 0.0
+        for i in range(self.n_cpu):
+            if (buff.trm.buff[i][-1] == 1.0):
+                buff.bts.buff[i][-1] =  1.0
+                buff.trm.buff[i][-1] =  0.0
