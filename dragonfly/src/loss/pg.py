@@ -33,15 +33,7 @@ class pg():
             # Compute total loss
             loss = loss_pg + self.ent_coef*loss_entropy
 
-            # Compute KL div
-            prp = policy.compute_prp(obs)
-            kl  = pdf.kl_divergence(prp)
-            kl  = tf.reduce_mean(kl)
-
             # Apply gradients
             pol_var = policy.trainables
             grads   = tape.gradient(loss, pol_var)
-            norm    = tf.linalg.global_norm(grads)
         policy.opt.apply_grads(zip(grads, pol_var))
-
-        return loss, kl, norm, entropy
