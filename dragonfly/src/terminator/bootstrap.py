@@ -38,6 +38,7 @@ class bootstrap():
 
         # When using buffer-based updates, the last step of each
         # buffer must be bootstraped to mimic a continuing episode
+        # This operation doesn't affect episode-based training[O]
         for i in range(self.n_cpu):
             if (buff.trm.buff[i][-1] == 1.0):
                 buff.bts.buff[i][-1] =  1.0
