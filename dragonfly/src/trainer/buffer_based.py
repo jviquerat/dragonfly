@@ -127,13 +127,13 @@ class buffer_based():
             # Store in global buffers
             self.glb_buff.store(obs, adv, tgt, act)
 
+            # Write report data to file
+            self.write_report(agent, self.report, path, run)
+
             # Train agent
             self.timer_training.tic()
             self.train(agent)
             self.timer_training.toc()
-
-            # Write report data to file
-            self.write_report(agent, self.report, path, run)
 
         # Last printing
         self.print_episode(self.counter, self.report)
