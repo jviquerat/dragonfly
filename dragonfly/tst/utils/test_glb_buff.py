@@ -55,13 +55,16 @@ def test_glb_buff():
     print(tgt)
 
     # Retrieve full buffer
-    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(n_buff, buff_size)
+    size = n_buff*buff_size
+    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(size)
     assert(len(buff_obs)==n_buff)
 
     # Retrieve smaller buffer
-    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(n_buff-1, buff_size)
+    size = (n_buff-1)*buff_size
+    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(size)
     assert(len(buff_obs)==n_buff-1)
 
     # Retrieve larger buffer
-    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(n_buff+2, buff_size)
+    size = (n_buff+2)*buff_size
+    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(size)
     assert(len(buff_obs)==n_buff)

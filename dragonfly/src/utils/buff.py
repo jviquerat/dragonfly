@@ -92,9 +92,8 @@ class loc_buff:
         rwd = self.rwd.serialize()
         trm = self.trm.serialize()
         bts = self.bts.serialize()
-        stp = self.stp.serialize()
 
-        return obs, nxt, act, rwd, trm, bts, stp
+        return obs, nxt, act, rwd, trm, bts
 
 ###############################################
 ### Global parallel buffer class, used to store

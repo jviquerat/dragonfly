@@ -126,7 +126,7 @@ class episode_based():
 
             # Finalize buffers for training
             self.terminator.terminate(self.loc_buff)
-            obs, nxt, act, rwd, trm, bts, stp = self.loc_buff.serialize()
+            obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
             tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
 
             # Store in global buffers
@@ -139,8 +139,6 @@ class episode_based():
             self.timer_training.tic()
             self.train(agent)
             self.timer_training.toc()
-
-            
 
         # Last printing
         self.print_episode(self.counter, self.report)
