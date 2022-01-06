@@ -11,6 +11,7 @@ from dragonfly.src.utils.prints    import *
 from dragonfly.src.agent.agent     import *
 from dragonfly.src.trainer.trainer import *
 from dragonfly.src.envs.par_envs   import *
+from dragonfly.src.plot.plot       import *
 
 # Average training over multiple runs
 def run():
@@ -73,7 +74,8 @@ def run():
 
     # Write to file
     filename = path+'/'+pms.agent.type+'_avg.dat'
-    averager.average(filename)
+    data = averager.average(filename)
 
     # Plot
-    os.system('gnuplot -c dragonfly/src/plot/plot_light.gnu '+path)
+    filename = agent.name + ' - ' + pms.env_name
+    plot_avg(data, filename)

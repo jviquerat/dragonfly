@@ -30,7 +30,7 @@ class bootstrap():
                 # Set terminal value, whatever the cause
                 trm[i] = float(not (buff.dne.buff[i][k] == True))
 
-                # If bootstrap is on, test and fill
+                # Bootstrap end of episode if it is a regular ending
                 if (buff.stp.buff[i][k] >= self.ep_end-1): bts[i] = 1.0
 
             # Store terminal data to buffer
