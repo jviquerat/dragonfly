@@ -3,6 +3,7 @@ import numpy as np
 
 # Custom imports
 from dragonfly.src.core.constants        import *
+from dragonfly.src.trainer.base          import *
 from dragonfly.src.terminator.terminator import *
 from dragonfly.src.utils.timer           import *
 from dragonfly.src.utils.buff            import *
@@ -14,7 +15,7 @@ from dragonfly.src.utils.error           import *
 ###############################################
 ### Class for episode-based training
 ### pms : parameters
-class episode_based():
+class episode_based(trainer_base):
     def __init__(self, obs_dim, act_dim,
                  pol_act_dim, n_cpu, n_ep_max, pms):
 
@@ -196,53 +197,3 @@ class episode_based():
 
                 btc += 1
                 if (end == lgt): done = True
-
-    # Reset
-    def reset(self):
-
-        self.loc_buff.reset()
-        self.glb_buff.reset()
-        self.report.reset(self.report_fields)
-        self.renderer.reset()
-        self.counter.reset()
-
-    # Printings at the end of an episode
-    def print_episode(self, counter, report):
-
-        # No initial printing
-        if (counter.get_ep() == 0): return
-
-        # Average and print
-        if (counter.get_ep() <= counter.get_n_ep_max()):
-            avg    = report.avg_score(n_smooth)
-            avg    = f"{avg:.3f}"
-            bst    = counter.get_best_score()
-            bst    = f"{bst:.3f}"
-            bst_ep = counter.get_best_ep()
-            end    = '\n'
-            if (counter.get_ep() < counter.get_n_ep_max()): end = '\r'
-            print('# Ep #'+str(counter.get_ep())+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
-
-    ################################
-    ### Report wrappings
-    ################################
-
-    # Store data in report
-    def store_report(self, counter, report, cpu):
-
-        report.append("episode",       counter.ep)
-        report.append("score",         counter.score[cpu])
-        smooth_score   = np.mean(report.data["score"][-n_smooth:])
-        report.append("smooth_score",  smooth_score)
-        report.append("length",        counter.ep_step[cpu])
-        smooth_length  = np.mean(report.data["length"][-n_smooth:])
-        report.append("smooth_length", smooth_length)
-
-        report.step(counter.ep_step[cpu])
-
-    # Write learning data report
-    def write_report(self, agent, report, path, run):
-
-        # Set filename with method name and run number
-        filename = path+'/'+agent.name+'_'+str(run)+'.dat'
-        report.write(filename, self.report_fields)
