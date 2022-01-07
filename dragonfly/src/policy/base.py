@@ -22,10 +22,6 @@ class base_policy():
     def compute_pdf(self, obs):
         raise NotImplementedError
 
-    # Compute previous pdf
-    def compute_prp(self, obs):
-        raise NotImplementedError
-
     # Reshape actions for training
     def reshape_actions(self, act):
         raise NotImplementedError
@@ -34,20 +30,20 @@ class base_policy():
     def call_net(self, state):
         raise NotImplementedError
 
-    # Previous networks forward pass
-    def call_prn(self, state):
-        raise NotImplementedError
+    # Save network weights
+    def save_weights(self):
+
+        self.weights = self.net.get_weights()
+
+    # Set network weights
+    def set_weights(self, weights):
+
+        self.net.set_weights(weights)
 
     # Call loss for training
-    def train(self, obs, adv, act):
+    def train(self, obs, adv, act, lgp):
 
-        return self.loss.train(obs, adv, act, self)
-
-    # Save previous policy
-    def save_prv(self):
-
-        self.prn.set_weights(self.net.get_weights())
-        self.prp = self.pdf.copy()
+        return self.loss.train(obs, adv, act, lgp, self)
 
     # Get current learning rate
     def get_lr(self):
@@ -60,7 +56,3 @@ class base_policy():
         self.net.reset()
         self.opt.reset()
         self.pdf = None
-
-        if (self.save):
-            self.prn.reset()
-            self.prp = None

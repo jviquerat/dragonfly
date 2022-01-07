@@ -22,7 +22,6 @@ class ppo():
         self.n_cpu     = n_cpu
 
         # Build policies
-        pms.policy.save = True
         if (pms.policy.loss.type != "surrogate"):
             warning("ppo", "__init__",
                     "Loss type for ppo agent is not surrogate")
@@ -55,11 +54,12 @@ class ppo():
         # environments. We assume it does and unroll it in a loop
         act = np.zeros([self.n_cpu, self.pol_act_dim],
                        dtype=self.policy.store_type)
+        lgp = np.zeros([self.n_cpu, 1])
 
         # Loop over cpus
         for i in range(self.n_cpu):
-            obs      = observations[i]
-            act[i,:] = self.policy.get_actions(obs)
+            obs              = observations[i]
+            act[i,:], lgp[i] = self.policy.get_actions(obs)
 
         # Reshape actions depending on policy type
         if (self.policy.kind == "discrete"):
@@ -71,7 +71,7 @@ class ppo():
         if (np.isnan(act).any()):
             error("ppo", "get_actions", "Detected NaN in generated actions")
 
-        return act
+        return act, lgp
 
     # Finalize buffers before training
     def compute_returns(self, obs, nxt, act, rwd, trm, bts):
@@ -86,9 +86,9 @@ class ppo():
         return tgt, adv
 
     # Training
-    def train(self, btc_obs, btc_act, btc_adv, btc_tgt, size):
+    def train(self, btc_obs, btc_act, btc_adv, btc_tgt, btc_lgp, size):
 
-        self.policy.train(btc_obs, btc_adv, btc_act)
+        self.policy.train(btc_obs, btc_adv, btc_act, btc_lgp)
         self.v_value.train(btc_obs, btc_tgt, size)
 
     # Reset

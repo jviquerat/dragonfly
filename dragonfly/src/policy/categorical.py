@@ -9,12 +9,6 @@ from dragonfly.src.policy.base import *
 class categorical(base_policy):
     def __init__(self, obs_dim, act_dim, pms):
 
-        # Set default values
-        self.save = False
-
-        # Check inputs
-        if hasattr(pms, "save"): self.save = pms.save
-
         # Fill structure
         self.act_dim    = act_dim
         self.obs_dim    = obs_dim
@@ -46,11 +40,6 @@ class categorical(base_policy):
         self.loss = loss_factory.create(pms.loss.type,
                                         pms = pms.loss)
 
-        # Optional previous version of network and pdf
-        if (self.save):
-            self.prn = cp(self.net)
-            self.prp = None
-
     # Get actions
     def get_actions(self, obs):
 
@@ -59,10 +48,11 @@ class categorical(base_policy):
 
         # Sample actions
         actions = self.pdf.sample(1)
+        log_prb = self.pdf.log_prob(actions)
         actions = actions.numpy()
         actions = np.reshape(actions, (self.store_dim))
 
-        return actions
+        return actions, log_prb
 
     # Compute pdf
     def compute_pdf(self, obs):
@@ -76,18 +66,6 @@ class categorical(base_policy):
 
         return pdf
 
-    # Compute previous pdf
-    def compute_prp(self, obs):
-
-        # Cast
-        obs = tf.cast(obs, tf.float32)
-
-        # Get pdf
-        probs = self.call_prn(obs)
-        pdf   = tfd.Categorical(probs=probs)
-
-        return pdf
-
     # Reshape actions for training
     def reshape_actions(self, act):
 
@@ -97,8 +75,3 @@ class categorical(base_policy):
     def call_net(self, state):
 
         return self.net.call(state)
-
-    # Previous network forward pass
-    def call_prn(self, state):
-
-        return self.prn.call(state)

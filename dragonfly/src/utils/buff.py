@@ -55,6 +55,7 @@ class loc_buff:
         self.obs = par_buff(self.n_cpu, self.obs_dim)
         self.nxt = par_buff(self.n_cpu, self.obs_dim)
         self.act = par_buff(self.n_cpu, self.act_dim)
+        self.lgp = par_buff(self.n_cpu, 1)
         self.rwd = par_buff(self.n_cpu, 1)
         self.dne = par_buff(self.n_cpu, 1)
         self.stp = par_buff(self.n_cpu, 1)
@@ -62,11 +63,12 @@ class loc_buff:
         self.trm = par_buff(self.n_cpu, 1)
         self.bts = par_buff(self.n_cpu, 1)
 
-    def store(self, obs, nxt, act, rwd, dne, stp):
+    def store(self, obs, nxt, act, lgp, rwd, dne, stp):
 
         self.obs.append(obs)
         self.nxt.append(nxt)
         self.act.append(act)
+        self.lgp.append(lgp)
         self.rwd.append(rwd)
         self.dne.append(dne)
         self.stp.append(stp)
@@ -89,11 +91,12 @@ class loc_buff:
         obs = self.obs.serialize()
         nxt = self.nxt.serialize()
         act = self.act.serialize()
+        lgp = self.lgp.serialize()
         rwd = self.rwd.serialize()
         trm = self.trm.serialize()
         bts = self.bts.serialize()
 
-        return obs, nxt, act, rwd, trm, bts
+        return obs, nxt, act, lgp, rwd, trm, bts
 
 ###############################################
 ### Global parallel buffer class, used to store
@@ -120,13 +123,15 @@ class glb_buff:
         self.act  = np.empty([0,self.act_dim])
         self.adv  = np.empty([0,1])
         self.tgt  = np.empty([0,1])
+        self.lgp  = np.empty([0,1])
 
-    def store(self, obs, adv, tgt, act):
+    def store(self, obs, adv, tgt, act, lgp):
 
         self.obs = np.append(self.obs, obs, axis=0)
         self.adv = np.append(self.adv, adv, axis=0)
         self.tgt = np.append(self.tgt, tgt, axis=0)
         self.act = np.append(self.act, act, axis=0)
+        self.lgp = np.append(self.lgp, lgp, axis=0)
 
     def get_buffers(self, size):
 
@@ -144,11 +149,13 @@ class glb_buff:
         act = [self.act[i] for i in sample]
         adv = [self.adv[i] for i in sample]
         tgt = [self.tgt[i] for i in sample]
+        lgp = [self.lgp[i] for i in sample]
 
         # Reshape
         obs = tf.reshape(tf.cast(obs, tf.float32), [size, self.obs_dim])
         act = tf.reshape(tf.cast(act, tf.float32), [size, self.act_dim])
         adv = tf.reshape(tf.cast(adv, tf.float32), [size])
         tgt = tf.reshape(tf.cast(tgt, tf.float32), [size])
+        lgp = tf.reshape(tf.cast(lgp, tf.float32), [size])
 
-        return obs, act, adv, tgt
+        return obs, act, adv, tgt, lgp
