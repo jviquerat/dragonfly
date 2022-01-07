@@ -1,4 +1,5 @@
 # Generic imports
+import math
 import numpy as np
 
 # Custom imports
@@ -10,31 +11,29 @@ from dragonfly.src.utils.buff            import *
 from dragonfly.src.utils.report          import *
 from dragonfly.src.utils.renderer        import *
 from dragonfly.src.utils.counter         import *
-from dragonfly.src.utils.error           import *
 
 ###############################################
-### Class for episode-based training
-### pms : parameters
-class episode_based(trainer_base):
+### Class for buffer-based training
+### obs_dim  : dimension of observations
+### act_dim  : dimension of actions
+### pol_dim  : true dimension of the actions provided to the env
+### n_cpu    : nb of parallel environments
+### n_ep_max : max nb of episodes to unroll in a run
+### pms      : parameters
+class buffer(trainer_base):
     def __init__(self, obs_dim, act_dim,
                  pol_dim, n_cpu, n_ep_max, pms):
 
         # Initialize from input
-        self.obs_dim     = obs_dim
-        self.act_dim     = act_dim
-        self.pol_dim     = pol_dim
-        self.n_cpu       = n_cpu
+        self.obs_dim   = obs_dim
+        self.act_dim   = act_dim
+        self.pol_dim   = pol_dim
+        self.n_cpu     = n_cpu
         self.n_ep_max    = n_ep_max
-        self.n_ep_unroll = pms.n_ep_unroll
-        self.n_ep_train  = pms.n_ep_train
+        self.buff_size   = pms.buff_size
+        self.n_buff      = pms.n_buff
         self.btc_frac    = pms.batch_frac
         self.n_epochs    = pms.n_epochs
-
-        # Check that n_ep_unroll is a multiple of n_cpu
-        if (n_cpu != 1):
-            error("episode_based",
-                  "init",
-                  "episode-based learning does not support parallel envs")
 
         # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
@@ -56,8 +55,8 @@ class episode_based(trainer_base):
         # Initialize counter
         self.counter = counter(self.n_cpu,
                                self.n_ep_max,
-                               "episode",
-                               n_ep_unroll=self.n_ep_unroll)
+                               "buffer",
+                               buff_size=self.buff_size)
 
         # Initialize terminator
         self.terminator = terminator_factory.create(pms.terminator.type,
@@ -85,8 +84,8 @@ class episode_based(trainer_base):
             # Reset local buffer
             self.buff.reset()
 
-            # Loop over training episodes
-            while (not self.counter.done_unroll()):
+            # Loop over buff size
+            while (not self.counter.done_buffer(self.buff)):
 
                 # Get actions
                 self.timer_actions.tic()
@@ -159,15 +158,13 @@ class episode_based(trainer_base):
                 self.print_episode(self.counter, self.report)
                 self.renderer.finish(path, self.counter.ep, cpu)
                 self.counter.reset_ep(cpu)
-                self.counter.unroll += 1
 
     # Train
     def train(self, agent):
 
-        # Retrieve size of training buffer using stored episode lengths
-        lengths  = self.report.get("length")
-        size     = np.sum(lengths[-self.n_ep_train:])
-        btc_size = math.floor(size*self.btc_frac)
+        # Compute training buff size and batch size
+        size      = self.n_buff*self.buff_size
+        btc_size  = math.floor(size*self.btc_frac)
 
         # Train policy and v_value
         for epoch in range(self.n_epochs):

@@ -11,8 +11,8 @@ from dragonfly.src.envs.par_envs   import *
 from dragonfly.src.trainer.trainer import *
 
 ###############################################
-### Test buffer-based training
-def test_buffer_based():
+### Test episode-based training
+def test_episode():
 
     # Initial space
     print("")
@@ -20,7 +20,7 @@ def test_buffer_based():
     #########################
     # Initialize json parser and read test json file
     reader = json_parser()
-    reader.read("dragonfly/tst/trainer/buffer_based.json")
+    reader.read("dragonfly/tst/trainer/episode.json")
 
     # Initialize environment
     env = par_envs(reader.pms.env_name, reader.pms.n_cpu, ".")
@@ -40,7 +40,7 @@ def test_buffer_based():
                                      n_ep_max = reader.pms.n_ep_max,
                                      pms=reader.pms.trainer)
 
-    print("Test buffer-based trainer")
+    print("Test episode-based trainer")
     trainer.reset()
     agent.reset()
     env.set_cpus()
