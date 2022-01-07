@@ -29,7 +29,7 @@ def test_decay():
 
     # Decay
     for i in range(200):
-        epsilon.get()
+        epsilon.decay()
 
     # Test minimal value
     val = epsilon.get()

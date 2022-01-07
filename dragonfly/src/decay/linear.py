@@ -16,13 +16,16 @@ class linear():
         self.step     = 0
         self.val      = self.start
 
-    # Get current value and decay
+    # Get current value
     def get(self):
+
+        return self.val
+
+    # Decay
+    def decay(self):
 
         # Check if max step number is reached
         if (self.step <= self.n_steps):
             r          = float(self.step/self.n_steps)
             self.val   = self.start + r*(self.end-self.start)
             self.step += 1
-
-        return self.val
