@@ -8,43 +8,34 @@ import tensorflow as tf
 ### store data from parallel environments
 ### n_cpu : nb of parallel environments
 ### dim   : dimension of array
-class par_buff:
-    def __init__(self, size, n_cpu, dim):
 
-        self.size  = size
+class par_buff:
+    def __init__(self, n_cpu, dim):
+
         self.n_cpu = n_cpu
         self.dim   = dim
         self.reset()
 
     def reset(self):
 
-        self.n    = 0
-        self.buff = [np.zeros((self.size,self.dim)) for _ in range(self.n_cpu)]
+        self.buff = [np.array([]) for _ in range(self.n_cpu)]
 
     def append(self, vec):
 
         for cpu in range(self.n_cpu):
-            self.buff[cpu][self.n] = vec[cpu]
-
-        self.n += 1
+            self.buff[cpu] = np.append(self.buff[cpu], vec[cpu])
 
     def length(self):
 
-        return self.n
+        return len(self.buff[0])
 
     def serialize(self):
 
-        s = [0]*self.n_cpu
+        arr = np.array([])
         for cpu in range(self.n_cpu):
-            s[cpu] = len(self.buff[cpu])
-        arr = np.zeros((np.sum(s),self.dim))
+            arr = np.append(arr, self.buff[cpu])
 
-        i = 0
-        for cpu in range(self.n_cpu):
-            arr[i:i+s[cpu],:] = self.buff[cpu][:]
-            i                += s[cpu]
-
-        return arr
+        return np.reshape(arr, (-1,self.dim))
 
 ###############################################
 ### Local parallel buffer class, used to store
@@ -53,26 +44,25 @@ class par_buff:
 ### obs_dim   : dimension of observations
 ### act_dim   : dimension of actions
 class loc_buff:
-    def __init__(self, n_cpu, obs_dim, act_dim, par_size):
+    def __init__(self, n_cpu, obs_dim, act_dim):
 
         self.n_cpu    = n_cpu
         self.obs_dim  = obs_dim
         self.act_dim  = act_dim
-        self.par_size = par_size
         self.reset()
 
     def reset(self):
 
-        self.obs = par_buff(self.par_size, self.n_cpu, self.obs_dim)
-        self.nxt = par_buff(self.par_size, self.n_cpu, self.obs_dim)
-        self.act = par_buff(self.par_size, self.n_cpu, self.act_dim)
-        self.lgp = par_buff(self.par_size, self.n_cpu, 1)
-        self.rwd = par_buff(self.par_size, self.n_cpu, 1)
-        self.dne = par_buff(self.par_size, self.n_cpu, 1)
-        self.stp = par_buff(self.par_size, self.n_cpu, 1)
+        self.obs = par_buff(self.n_cpu, self.obs_dim)
+        self.nxt = par_buff(self.n_cpu, self.obs_dim)
+        self.act = par_buff(self.n_cpu, self.act_dim)
+        self.lgp = par_buff(self.n_cpu, 1)
+        self.rwd = par_buff(self.n_cpu, 1)
+        self.dne = par_buff(self.n_cpu, 1)
+        self.stp = par_buff(self.n_cpu, 1)
 
-        self.trm = par_buff(self.par_size, self.n_cpu, 1)
-        self.bts = par_buff(self.par_size, self.n_cpu, 1)
+        self.trm = par_buff(self.n_cpu, 1)
+        self.bts = par_buff(self.n_cpu, 1)
 
     def store(self, obs, nxt, act, lgp, rwd, dne, stp):
 

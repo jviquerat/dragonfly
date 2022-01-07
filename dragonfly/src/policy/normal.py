@@ -46,19 +46,25 @@ class normal(base_policy):
     # Get actions
     def get_actions(self, obs):
 
+        act, lgp = self.sample(obs)
+        #act     = tf.clip_by_value(act, -1.0, 1.0)
+        act      = tf.tanh(act)
+        act      = np.reshape(act.numpy(), (self.store_dim))
+
+        return act, lgp
+
+    # Sample actions
+    @tf.function
+    def sample(self, obs):
+
         # Generate pdf
         self.pdf = self.compute_pdf([obs])
 
         # Sample actions
-        # The size of the action is already set as event_size in the pdf
-        actions = self.pdf.sample(1)
-        log_prb = self.pdf.log_prob(actions)
-        #actions = tf.clip_by_value(actions, -1.0, 1.0)
-        actions = tf.tanh(actions)
-        actions = actions.numpy()
-        actions = np.reshape(actions, (self.store_dim))
+        act = self.pdf.sample(1)
+        lgp = self.pdf.log_prob(act)
 
-        return actions, log_prb
+        return act, lgp
 
     # Compute pdf
     def compute_pdf(self, obs):
