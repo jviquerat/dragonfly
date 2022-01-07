@@ -34,14 +34,17 @@ class par_buff:
 
     def serialize(self):
 
-        #size = 0
-        #for cpu in range(self.n_cpu):
-        #    size += len(self.buff[cpu])
-        arr = np.array([])
+        s = [0]*self.n_cpu
         for cpu in range(self.n_cpu):
-            arr = np.append(arr, self.buff[cpu])
+            s[cpu] = len(self.buff[cpu])
+        arr = np.zeros((np.sum(s),self.dim))
 
-        return np.reshape(arr, (-1,self.dim))
+        i = 0
+        for cpu in range(self.n_cpu):
+            arr[i:i+s[cpu],:] = self.buff[cpu][:]
+            i                += s[cpu]
+
+        return arr
 
 ###############################################
 ### Local parallel buffer class, used to store
