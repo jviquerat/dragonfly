@@ -1,5 +1,4 @@
 # Generic imports
-import math
 import numpy as np
 
 # Custom imports
@@ -11,16 +10,12 @@ from dragonfly.src.utils.buff            import *
 from dragonfly.src.utils.report          import *
 from dragonfly.src.utils.renderer        import *
 from dragonfly.src.utils.counter         import *
+from dragonfly.src.utils.error           import *
 
 ###############################################
-### Class for buffer-based training
-### obs_dim     : dimension of observations
-### act_dim     : dimension of actions
-### pol_act_dim : true dimension of the actions provided to the env
-### n_cpu       : nb of parallel environments
-### n_ep_max    : max nb of episodes to unroll in a run
-### pms         : parameters
-class buffer_based(trainer_base):
+### Class for temporal-difference training
+### pms : parameters
+class td(trainer_base):
     def __init__(self, obs_dim, act_dim,
                  pol_act_dim, n_cpu, n_ep_max, pms):
 
@@ -30,10 +25,13 @@ class buffer_based(trainer_base):
         self.pol_act_dim = pol_act_dim
         self.n_cpu       = n_cpu
         self.n_ep_max    = n_ep_max
-        self.buff_size   = pms.buff_size
-        self.n_buff      = pms.n_buff
-        self.btc_frac    = pms.batch_frac
-        self.n_epochs    = pms.n_epochs
+        self.mem_size    = pms.mem_size
+        self.btc_size    = pms.btc_size
+
+        if (n_cpu != 1):
+            error("episode_based",
+                  "init",
+                  "episode-based learning does not support parallel envs")
 
         # pol_act_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
@@ -57,8 +55,8 @@ class buffer_based(trainer_base):
         # Initialize counter
         self.counter = counter(self.n_cpu,
                                self.n_ep_max,
-                               "buffer",
-                               buff_size=self.buff_size)
+                               "td",
+                               n_stp_unroll=1)
 
         # Initialize terminator
         self.terminator = terminator_factory.create(pms.terminator.type,
@@ -86,12 +84,12 @@ class buffer_based(trainer_base):
             # Reset local buffer
             self.loc_buff.reset()
 
-            # Loop over buff size
-            while (not self.counter.done_buffer(self.loc_buff)):
+            # Loop over training steps
+            while (not self.counter.done_stp_unroll()):
 
                 # Get actions
                 self.timer_actions.tic()
-                act, lgp = agent.get_actions(obs)
+                act = agent.get_actions(obs)
                 self.timer_actions.toc()
 
                 # Make one env step
@@ -101,7 +99,7 @@ class buffer_based(trainer_base):
 
                 # Store transition
                 stp = self.counter.ep_step
-                self.loc_buff.store(obs, nxt, act, lgp, rwd, dne, stp)
+                self.loc_buff.store(obs, nxt, act, rwd, dne, stp)
 
                 # Update counter
                 self.counter.update(rwd)
@@ -122,11 +120,11 @@ class buffer_based(trainer_base):
 
             # Finalize buffers for training
             self.terminator.terminate(self.loc_buff)
-            obs, nxt, act, lgp, rwd, trm, bts = self.loc_buff.serialize()
-            tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
+            obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
+            tgt = agent.compute_target(obs, nxt, act, rwd, trm, bts)
 
             # Store in global buffers
-            self.glb_buff.store(obs, adv, tgt, act, lgp)
+            self.glb_buff.store(obs, tgt, act)
 
             # Write report data to file
             self.write_report(agent, self.report, path, run)
@@ -156,36 +154,25 @@ class buffer_based(trainer_base):
                 self.print_episode(self.counter, self.report)
                 self.renderer.finish(path, self.counter.ep, cpu)
                 self.counter.reset_ep(cpu)
+                self.counter.unroll += 1
 
     # Train
     def train(self, agent):
 
-        # Compute training buff size and batch size
-        size      = self.n_buff*self.buff_size
-        btc_size  = math.floor(size*self.btc_frac)
+        # Retrieve data
+        obs, act, adv, tgt, lgp = self.glb_buff.get_buffers(self.mem_size)
 
-        # Train policy and v_value
-        for epoch in range(self.n_epochs):
+        if (len(obs) < self.btc_size): return
 
-            # Retrieve data
-            obs, act, adv, tgt, lgp = self.glb_buff.get_buffers(size)
+        # Visit only one batch size
+        start = 0
+        end   = btc_size
 
-            # Visit all available history
-            done = False
-            btc  = 0
-            while not done:
-                lgt   = len(obs)
-                start = btc*btc_size
-                end   = min((btc+1)*btc_size, lgt)
+        btc_obs = obs[start:end]
+        btc_act = act[start:end]
+        btc_adv = adv[start:end]
+        btc_tgt = tgt[start:end]
+        btc_lgp = lgp[start:end]
 
-                btc_obs = obs[start:end]
-                btc_act = act[start:end]
-                btc_adv = adv[start:end]
-                btc_tgt = tgt[start:end]
-                btc_lgp = lgp[start:end]
-
-                agent.train(btc_obs, btc_act, btc_adv,
-                            btc_tgt, btc_lgp, end-start)
-
-                btc += 1
-                if (end == lgt): done = True
+        agent.train(btc_obs, btc_act, btc_adv,
+                    btc_tgt, btc_lgp, end-start)

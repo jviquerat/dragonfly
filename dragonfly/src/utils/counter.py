@@ -10,8 +10,9 @@ import numpy as np
 ### n_ep_unroll : nb of episodes to unroll for "episode" update style
 class counter:
     def __init__(self, n_cpu, n_ep_max, style,
-                 buff_size   = None,
-                 n_ep_unroll = None):
+                 buff_size    = None,
+                 n_ep_unroll  = None,
+                 n_stp_unroll = None):
 
         self.n_cpu    = n_cpu
         self.n_ep_max = n_ep_max
@@ -21,6 +22,9 @@ class counter:
             self.buff_size = buff_size
         if (self.style == "episode"):
             self.n_ep_unroll = n_ep_unroll
+            self.unroll = 0
+        if (self.style == "td"):
+            self.n_stp_unroll = n_stp_unroll
             self.unroll = 0
 
         self.reset()
@@ -47,9 +51,19 @@ class counter:
 
     # Test nb of unrolled episodes
     # Only for style="episode"
-    def done_unroll(self):
+    def done_ep_unroll(self):
 
         if (self.unroll >= self.n_ep_unroll):
+            self.unroll = 0
+            return True
+
+        return False
+
+    # Test nb of unrolled steps
+    # Only for style="td"
+    def done_stp_unroll(self):
+
+        if (self.unroll >= self.n_stp_unroll):
             self.unroll = 0
             return True
 
