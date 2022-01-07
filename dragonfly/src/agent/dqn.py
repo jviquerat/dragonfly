@@ -66,8 +66,7 @@ class dqn():
             obs = tf.cast([obs], tf.float32)
             val = self.q_val.get_values(obs)
             act = np.argmax(val)
-
-        act = np.reshape(act, (-1))
+            act = np.reshape(act, (-1))
 
         return act
 

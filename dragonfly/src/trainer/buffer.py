@@ -20,7 +20,7 @@ from dragonfly.src.utils.counter         import *
 ### n_cpu    : nb of parallel environments
 ### n_ep_max : max nb of episodes to unroll in a run
 ### pms      : parameters
-class buffer_based(trainer_base):
+class buffer(trainer_base):
     def __init__(self, obs_dim, act_dim,
                  pol_dim, n_cpu, n_ep_max, pms):
 
