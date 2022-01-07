@@ -91,7 +91,7 @@ class buffer_based(trainer_base):
 
                 # Get actions
                 self.timer_actions.tic()
-                act = agent.get_actions(obs)
+                act, lgp = agent.get_actions(obs)
                 self.timer_actions.toc()
 
                 # Make one env step
@@ -101,7 +101,7 @@ class buffer_based(trainer_base):
 
                 # Store transition
                 stp = self.counter.ep_step
-                self.loc_buff.store(obs, nxt, act, rwd, dne, stp)
+                self.loc_buff.store(obs, nxt, act, lgp, rwd, dne, stp)
 
                 # Update counter
                 self.counter.update(rwd)
@@ -122,11 +122,11 @@ class buffer_based(trainer_base):
 
             # Finalize buffers for training
             self.terminator.terminate(self.loc_buff)
-            obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
+            obs, nxt, act, lgp, rwd, trm, bts = self.loc_buff.serialize()
             tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
 
             # Store in global buffers
-            self.glb_buff.store(obs, adv, tgt, act)
+            self.glb_buff.store(obs, adv, tgt, act, lgp)
 
             # Write report data to file
             self.write_report(agent, self.report, path, run)
@@ -160,9 +160,6 @@ class buffer_based(trainer_base):
     # Train
     def train(self, agent):
 
-        # Save previous policy
-        agent.policy.save_prv()
-
         # Compute training buff size and batch size
         size      = self.n_buff*self.buff_size
         btc_size  = math.floor(size*self.btc_frac)
@@ -171,7 +168,7 @@ class buffer_based(trainer_base):
         for epoch in range(self.n_epochs):
 
             # Retrieve data
-            obs, act, adv, tgt = self.glb_buff.get_buffers(size)
+            obs, act, adv, tgt, lgp = self.glb_buff.get_buffers(size)
 
             # Visit all available history
             done = False
@@ -185,8 +182,10 @@ class buffer_based(trainer_base):
                 btc_act = act[start:end]
                 btc_adv = adv[start:end]
                 btc_tgt = tgt[start:end]
+                btc_lgp = lgp[start:end]
 
-                agent.train(btc_obs, btc_act, btc_adv, btc_tgt, end-start)
+                agent.train(btc_obs, btc_act, btc_adv,
+                            btc_tgt, btc_lgp, end-start)
 
                 btc += 1
                 if (end == lgt): done = True

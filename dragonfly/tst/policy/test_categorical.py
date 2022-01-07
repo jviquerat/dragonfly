@@ -24,7 +24,7 @@ def test_categorical():
     # Test action values
     print("Test categorical policy")
     obs = [[1.0]]
-    act = policy.get_actions(obs)
+    act, lgp = policy.get_actions(obs)
     print("Actions:",act)
 
     assert((act == [0]) or (act == [1]))

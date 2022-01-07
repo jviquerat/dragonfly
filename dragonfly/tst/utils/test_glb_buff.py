@@ -42,7 +42,12 @@ def test_glb_buff():
                     [0.2],
                     [0.1],
                     [0.1]])
-    buff.store(obs, adv, tgt, act)
+    lgp = np.array([[0.1],
+                    [0.2],
+                    [0.3],
+                    [0.1],
+                    [0.1]])
+    buff.store(obs, adv, tgt, act, lgp)
 
     print("Storing buffers")
     print("obs: ")
@@ -53,18 +58,20 @@ def test_glb_buff():
     print(adv)
     print("tgt: ")
     print(tgt)
+    print("lgp: ")
+    print(lgp)
 
     # Retrieve full buffer
     size = n_buff*buff_size
-    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(size)
+    buff_obs, buff_act, buff_adv, buff_tgt, buff_lgp = buff.get_buffers(size)
     assert(len(buff_obs)==n_buff)
 
     # Retrieve smaller buffer
     size = (n_buff-1)*buff_size
-    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(size)
+    buff_obs, buff_act, buff_adv, buff_tgt, buff_lgp = buff.get_buffers(size)
     assert(len(buff_obs)==n_buff-1)
 
     # Retrieve larger buffer
     size = (n_buff+2)*buff_size
-    buff_obs, buff_act, buff_adv, buff_tgt = buff.get_buffers(size)
+    buff_obs, buff_act, buff_adv, buff_tgt, buff_lgp = buff.get_buffers(size)
     assert(len(buff_obs)==n_buff)
