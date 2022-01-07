@@ -39,7 +39,8 @@ class buffer_based(trainer_base):
         # This allows compatibility between continuous and discrete envs
         self.loc_buff = loc_buff(self.n_cpu,
                                  self.obs_dim,
-                                 self.pol_act_dim)
+                                 self.pol_act_dim,
+                                 self.buff_size)
         self.glb_buff = glb_buff(self.n_cpu,
                                  self.obs_dim,
                                  self.pol_act_dim)
