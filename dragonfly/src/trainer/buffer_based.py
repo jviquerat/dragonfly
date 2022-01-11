@@ -40,9 +40,8 @@ class buffer_based(trainer_base):
         self.buff = buff(self.n_cpu,
                         ["obs", "nxt", "act", "lgp", "rwd", "dne", "stp", "trm", "bts"],
                         [obs_dim, obs_dim, pol_dim, 1, 1, 1, 1, 1, 1])
-        self.glb_buff = glb_buff(self.n_cpu,
-                                 self.obs_dim,
-                                 self.pol_dim)
+        self.gbuff = gbuff(["obs", "act", "adv", "tgt", "lgp"],
+                           [obs_dim, pol_dim, 1, 1, 1])
 
         # Initialize learning data report
         self.report = report(["episode",
@@ -128,7 +127,8 @@ class buffer_based(trainer_base):
             tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
 
             # Store in global buffers
-            self.glb_buff.store(obs, adv, tgt, act, lgp)
+            self.gbuff.store(["obs", "adv", "tgt", "act", "lgp"],
+                             [ obs,   adv,   tgt,   act,   lgp ])
 
             # Write report data to file
             self.write_report(agent, self.report, path, run)
@@ -170,7 +170,9 @@ class buffer_based(trainer_base):
         for epoch in range(self.n_epochs):
 
             # Retrieve data
-            obs, act, adv, tgt, lgp = self.glb_buff.get_buffers(size)
+            names = ["obs", "adv", "tgt", "act", "lgp"]
+            data  = self.gbuff.get_buffers(names, size)
+            obs, adv, tgt, act, lgp = (data[name] for name in names)
 
             # Visit all available history
             done = False

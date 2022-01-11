@@ -39,7 +39,7 @@ class trainer_base():
     def reset(self):
 
         self.buff.reset()
-        self.glb_buff.reset()
+        self.gbuff.reset()
         self.report.reset()
         self.renderer.reset()
         self.counter.reset()

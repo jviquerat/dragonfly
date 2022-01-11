@@ -6,9 +6,6 @@ import tensorflow as tf
 ###############################################
 ### Parallel buffer class, used to temporarily
 ### store data from parallel environments
-### n_cpu : nb of parallel environments
-### dim   : dimension of array
-
 class par_buff:
     def __init__(self, n_cpu, dim):
 
@@ -40,9 +37,6 @@ class par_buff:
 ###############################################
 ### Local parallel buffer class, used to store
 ### data between two updates of the agent
-### n_cpu     : nb of parallel environments
-### obs_dim   : dimension of observations
-### act_dim   : dimension of actions
 class buff:
     def __init__(self, n_cpu, names, dims):
 
@@ -77,42 +71,40 @@ class buff:
 ###############################################
 ### Global parallel buffer class, used to store
 ### all data since the beginning of learning
-### It is also responsible for providing buffer
-### indices during training procedure
-### n_cpu     : nb of parallel environments
-### obs_dim   : dimension of observations
-### act_dim   : dimension of actions
-### n_buff    : nb of buffers from history to return
-### buff_size : max buffer size
-### btc_frac  : relative size of a batch compared to buffer (in [0,1])
-class glb_buff:
-    def __init__(self, n_cpu, obs_dim, act_dim):
+class gbuff:
+    def __init__(self, names, dims):
 
-        self.n_cpu     = n_cpu
-        self.obs_dim   = obs_dim
-        self.act_dim   = act_dim
+        self.names = names
+        self.dims  = dims
         self.reset()
 
     def reset(self):
 
-        self.obs  = np.empty([0,self.obs_dim])
-        self.act  = np.empty([0,self.act_dim])
-        self.adv  = np.empty([0,1])
-        self.tgt  = np.empty([0,1])
-        self.lgp  = np.empty([0,1])
+        self.data = {}
+        for name, dim in zip(self.names, self.dims):
+            self.data[name] = np.empty([0,dim])
 
-    def store(self, obs, adv, tgt, act, lgp):
+    def store(self, names, fields):
 
-        self.obs = np.append(self.obs, obs, axis=0)
-        self.adv = np.append(self.adv, adv, axis=0)
-        self.tgt = np.append(self.tgt, tgt, axis=0)
-        self.act = np.append(self.act, act, axis=0)
-        self.lgp = np.append(self.lgp, lgp, axis=0)
+        for name, field in zip(names, fields):
+            self.data[name] = np.append(self.data[name], field, axis=0)
 
-    def get_buffers(self, size):
+    # def store(self, obs, adv, tgt, act, lgp):
+
+    #     self.obs = np.append(self.obs, obs, axis=0)
+    #     self.adv = np.append(self.adv, adv, axis=0)
+    #     self.tgt = np.append(self.tgt, tgt, axis=0)
+    #     self.act = np.append(self.act, act, axis=0)
+    #     self.lgp = np.append(self.lgp, lgp, axis=0)
+
+    def length(self):
+
+        return int(self.data[self.names[0]].shape[0])
+
+    def get_buffers(self, names, size):
 
         # Start/end indices
-        end    = len(self.obs)
+        end    = self.length()
         start  = max(0,end - size)
         size   = end - start
 
@@ -120,18 +112,31 @@ class glb_buff:
         sample = np.arange(start, end)
         np.random.shuffle(sample)
 
-        # Get shuffled buffer
-        obs = [self.obs[i] for i in sample]
-        act = [self.act[i] for i in sample]
-        adv = [self.adv[i] for i in sample]
-        tgt = [self.tgt[i] for i in sample]
-        lgp = [self.lgp[i] for i in sample]
+        out = {}
+        for name in names:
+            tmp = [self.data[name][i] for i in sample]
+            tmp = tf.cast(tmp, tf.float32)
+            dim = self.data[name].shape[1]
+            if (dim == 1):
+                tmp = tf.reshape(tmp, [size])
+            else:
+                tmp = tf.reshape(tmp, [size, dim])
+            out[name] = tmp
 
-        # Reshape
-        obs = tf.reshape(tf.cast(obs, tf.float32), [size, self.obs_dim])
-        act = tf.reshape(tf.cast(act, tf.float32), [size, self.act_dim])
-        adv = tf.reshape(tf.cast(adv, tf.float32), [size])
-        tgt = tf.reshape(tf.cast(tgt, tf.float32), [size])
-        lgp = tf.reshape(tf.cast(lgp, tf.float32), [size])
+        return {name : out[name] for name in names}
 
-        return obs, act, adv, tgt, lgp
+        # # Get shuffled buffer
+        # obs = [self.obs[i] for i in sample]
+        # act = [self.act[i] for i in sample]
+        # adv = [self.adv[i] for i in sample]
+        # tgt = [self.tgt[i] for i in sample]
+        # lgp = [self.lgp[i] for i in sample]
+
+        # # Reshape
+        # obs = tf.reshape(tf.cast(obs, tf.float32), [size, self.obs_dim])
+        # act = tf.reshape(tf.cast(act, tf.float32), [size, self.act_dim])
+        # adv = tf.reshape(tf.cast(adv, tf.float32), [size])
+        # tgt = tf.reshape(tf.cast(tgt, tf.float32), [size])
+        # lgp = tf.reshape(tf.cast(lgp, tf.float32), [size])
+
+        # return obs, act, adv, tgt, lgp
