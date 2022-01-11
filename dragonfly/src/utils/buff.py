@@ -27,7 +27,7 @@ class par_buff:
 
     def length(self):
 
-        return len(self.buff[0])
+        return int(len(self.buff[0])/self.dim)
 
     def serialize(self):
 
@@ -43,61 +43,36 @@ class par_buff:
 ### n_cpu     : nb of parallel environments
 ### obs_dim   : dimension of observations
 ### act_dim   : dimension of actions
-class loc_buff:
-    def __init__(self, n_cpu, obs_dim, act_dim):
+class buff:
+    def __init__(self, n_cpu, names, dims):
 
-        self.n_cpu    = n_cpu
-        self.obs_dim  = obs_dim
-        self.act_dim  = act_dim
+        self.n_cpu = n_cpu
+        self.names = names
+        self.dims  = dims
         self.reset()
 
     def reset(self):
 
-        self.obs = par_buff(self.n_cpu, self.obs_dim)
-        self.nxt = par_buff(self.n_cpu, self.obs_dim)
-        self.act = par_buff(self.n_cpu, self.act_dim)
-        self.lgp = par_buff(self.n_cpu, 1)
-        self.rwd = par_buff(self.n_cpu, 1)
-        self.dne = par_buff(self.n_cpu, 1)
-        self.stp = par_buff(self.n_cpu, 1)
+        self.data = {}
+        for name, dim in zip(self.names, self.dims):
+            self.data[name] = par_buff(self.n_cpu, dim)
 
-        self.trm = par_buff(self.n_cpu, 1)
-        self.bts = par_buff(self.n_cpu, 1)
+    def store(self, names, fields):
 
-    def store(self, obs, nxt, act, lgp, rwd, dne, stp):
-
-        self.obs.append(obs)
-        self.nxt.append(nxt)
-        self.act.append(act)
-        self.lgp.append(lgp)
-        self.rwd.append(rwd)
-        self.dne.append(dne)
-        self.stp.append(stp)
-
-    def store_terminal(self, trm, bts):
-
-        self.trm.append(trm)
-        self.bts.append(bts)
+        for name, field in zip(names, fields):
+            self.data[name].append(field)
 
     def size(self):
 
-        return self.rwd.length()*self.n_cpu
+        return self.length()*self.n_cpu
 
     def length(self):
 
-        return self.rwd.length()
+        return self.data[self.names[0]].length()
 
-    def serialize(self):
+    def serialize(self, names):
 
-        obs = self.obs.serialize()
-        nxt = self.nxt.serialize()
-        act = self.act.serialize()
-        lgp = self.lgp.serialize()
-        rwd = self.rwd.serialize()
-        trm = self.trm.serialize()
-        bts = self.bts.serialize()
-
-        return obs, nxt, act, lgp, rwd, trm, bts
+        return {name : self.data[name].serialize() for name in names}
 
 ###############################################
 ### Global parallel buffer class, used to store

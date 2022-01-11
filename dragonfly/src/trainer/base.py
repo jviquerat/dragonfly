@@ -13,12 +13,12 @@ from dragonfly.src.utils.counter         import *
 
 ###############################################
 ### Class for buffer-based training
-### obs_dim     : dimension of observations
-### act_dim     : dimension of actions
-### pol_act_dim : true dimension of the actions provided to the env
-### n_cpu       : nb of parallel environments
-### n_ep_max    : max nb of episodes to unroll in a run
-### pms         : parameters
+### obs_dim  : dimension of observations
+### act_dim  : dimension of actions
+### pol_dim  : true dimension of the actions provided to the env
+### n_cpu    : nb of parallel environments
+### n_ep_max : max nb of episodes to unroll in a run
+### pms      : parameters
 class trainer_base():
     def __init__(self):
         pass
@@ -38,9 +38,9 @@ class trainer_base():
     # Reset
     def reset(self):
 
-        self.loc_buff.reset()
+        self.buff.reset()
         self.glb_buff.reset()
-        self.report.reset(self.report_fields)
+        self.report.reset()
         self.renderer.reset()
         self.counter.reset()
 
@@ -83,4 +83,4 @@ class trainer_base():
 
         # Set filename with method name and run number
         filename = path+'/'+agent.name+'_'+str(run)+'.dat'
-        report.write(filename, self.report_fields)
+        report.write(filename)

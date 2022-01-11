@@ -42,19 +42,18 @@ class episode_based(trainer_base):
 
         # pol_act_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
-        self.loc_buff = loc_buff(self.n_cpu,
-                                 self.obs_dim,
-                                 self.pol_act_dim)
+        # self.loc_buff = loc_buff(self.n_cpu,
+        #                          self.obs_dim,
+        #                          self.pol_act_dim)
         self.glb_buff = glb_buff(self.n_cpu,
                                  self.obs_dim,
                                  self.pol_act_dim)
 
         # Initialize learning data report
-        self.report_fields = ["episode",
+        self.report = report(["episode",
                               "score",  "smooth_score",
                               "length", "smooth_length",
-                              "step"]
-        self.report = report(self.report_fields)
+                              "step"])
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu, pms.render_every)

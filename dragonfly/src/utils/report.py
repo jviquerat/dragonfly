@@ -6,13 +6,14 @@ import numpy as np
 class report:
     def __init__(self, names):
 
-        self.reset(names)
+        self.names = names
+        self.reset()
 
     # Reset
-    def reset(self, names):
+    def reset(self):
 
         self.data = {}
-        for name in names:
+        for name in self.names:
             self.data[name] = []
 
         # Initialize step
@@ -40,11 +41,11 @@ class report:
         return np.mean(self.data["score"][-n:])
 
     # Write report
-    def write(self, filename, names):
+    def write(self, filename):
 
         # Generate array to save
         array = np.array([])
-        for name in names:
+        for name in self.names:
             tmp = np.array(self.data[name],dtype=float)
             if array.size: array = np.vstack((array, tmp))
             else:          array = tmp
