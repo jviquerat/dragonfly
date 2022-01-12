@@ -16,11 +16,6 @@ class base_value():
     def get_values(self, obs):
         raise NotImplementedError
 
-    # Call loss for training
-    def train(self, obs, tgt, size):
-
-        return self.loss.train(obs, tgt, size, self)
-
     # Network forward pass
     def call_net(self, state):
 

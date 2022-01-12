@@ -32,9 +32,9 @@ class q_value(base_value):
                                       grad_vars = self.trainables)
 
         # Define loss
-        if (pms.loss.type != "mse"):
+        if (pms.loss.type != "mse_q"):
             warning("q_value", "__init__",
-                    "Chosen loss for q_value is not mse")
+                    "Chosen loss for q_value is not mse_q")
         self.loss = loss_factory.create(pms.loss.type,
                                         pms = pms.loss)
 
@@ -49,3 +49,8 @@ class q_value(base_value):
         values = np.reshape(values, (-1,self.act_dim))
 
         return values
+
+    # Call loss for training
+    def train(self, obs, act, tgt, size):
+
+        return self.loss.train(obs, act, tgt, size, self)

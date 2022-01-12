@@ -34,9 +34,9 @@ class dqn():
         self.eps = decay_factory.create(pms.exploration.type,
                                         pms = pms.exploration)
 
-        # pol_act_dim is the true dimension of the action provided to the env
+        # pol_dim is the true dimension of the action provided to the env
         # As dqn is only for discrete actions, it is set to 1
-        self.pol_act_dim = 1
+        self.pol_dim = 1
 
         # Build values
         if (pms.value.type != "q_value"):
@@ -57,7 +57,7 @@ class dqn():
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
-        act = np.zeros([self.n_cpu, self.pol_act_dim], dtype=int)
+        act = np.zeros([self.n_cpu, self.pol_dim], dtype=int)
 
         p = random.uniform(0, 1)
         if (p < self.eps.get()):
@@ -73,8 +73,9 @@ class dqn():
     # Compute target
     def compute_target(self, obs, nxt, act, rwd, trm, bts):
 
-        tgt  = tf.reshape(tf.reduce_max(self.q_tgt(nxt),axis=1), [-1,1])
-        tgt  = rwd + (1.0-trm)*self.gamma*tgt
+        tgt = self.q_tgt.get_values(nxt)
+        tgt = tf.reshape(tf.reduce_max(tgt,axis=1), [-1,1])
+        tgt = rwd + (1.0-trm)*self.gamma*tgt
 
         return tgt
 
@@ -89,9 +90,9 @@ class dqn():
             self.tgt_update += 1
 
     # Training
-    def train(self, obs, tgt, size):
+    def train(self, obs, act, tgt, size):
 
-        self.q_val.train(obs, tgt, size)
+        self.q_val.train(obs, act, tgt, size)
         self.update_target()
 
     # Reset
