@@ -20,7 +20,7 @@ def test_buff():
     dims  = [3, 2, 1]
     loc_buff = buff(n_cpu, names, dims)
 
-    # Append to buffer
+    # Create buffers to append
     obs = [[1.0, 0.0, 0.5]]
     act = [[0.1, 0.2]]
     rwd = [[1.0]]
@@ -35,87 +35,49 @@ def test_buff():
     assert(sobs[0]==obs[0]).all()
     assert(sobs[1]==obs[0]).all()
 
-    print("Serialized obs buff after 2 append operations")
+    print("Serialized obs buff after 2 append operations, on 1 cpu")
     print(sobs)
     print("")
 
-    # #########################
-    # # Same test with 2 cpus
-    # n_cpu   = 2
-    # obs_dim = 3
-    # buff    = par_buff(n_cpu, obs_dim)
+    # Test size and length
+    assert(loc_buff.length() == 2)
+    assert(loc_buff.size()   == 2)
 
-    # # Generate a vector to fill buffer
-    # vec = np.array([])
-    # v1  = 1.0*np.ones((obs_dim,1))
-    # v2  = 2.0*np.ones((obs_dim,1))
-    # vec = np.append(vec, v1)
-    # vec = np.append(vec, v2)
-    # vec = np.reshape(vec, (-1,obs_dim))
+    # Test reset
+    loc_buff.reset()
+    assert(loc_buff.length() == 0)
 
-    # print("Vector to append to par_buff")
-    # print(vec)
-    # print("")
+    #########################
+    # Same test with 2 cpus
+    n_cpu = 2
+    names = ["obs", "act", "rwd"]
+    dims  = [3, 2, 1]
+    loc_buff = buff(n_cpu, names, dims)
 
-    # # Append to par_buff several times
-    # buff.append(vec)
-    # buff.append(vec)
+    # Create buffers to append
+    obs = [[1.0, 0.0, 0.5],
+           [2.0, 0.0, 1.0]]
+    act = [[0.1, 0.2],
+           [0.2, 0.4]]
+    rwd = [[1.0],
+           [2.0]]
 
-    # print("par_buff after 2 append operations")
-    # print(buff.buff)
-    # print("")
+    # Append to par_buff several times
+    loc_buff.store(["obs", "act", "rwd"], [obs, act, rwd])
+    loc_buff.store(["act", "rwd", "obs"], [act, rwd, obs])
 
-    # # Serialize
-    # arr = buff.serialize()
+    # Serialize and check content
+    data = loc_buff.serialize(["obs"])
+    sobs = data["obs"]
+    assert(sobs[0]==obs[0]).all()
+    assert(sobs[1]==obs[0]).all()
+    assert(sobs[2]==obs[1]).all()
+    assert(sobs[3]==obs[1]).all()
 
-    # print("Serialized par_buff")
-    # print(arr)
-    # print("")
+    print("Serialized obs buff after 2 append operations, on 2 cpus")
+    print(sobs)
+    print("")
 
-    # tst_arr = np.array([[1, 1, 1],
-    #                     [1, 1, 1],
-    #                     [2, 2, 2],
-    #                     [2, 2, 2]])
-
-    # assert (arr==tst_arr).all()
-
-    # #########################
-    # # Same test with inputs of size 1
-    # n_cpu   = 2
-    # obs_dim = 1
-    # buff    = par_buff(n_cpu, obs_dim)
-
-    # # Generate a vector to fill buffer
-    # #vec = 1.0*np.ones((obs_dim))
-
-    # vec = np.array([])
-    # v1  = 1.0*np.ones((obs_dim))
-    # v2  = 2.0*np.ones((obs_dim))
-    # vec = np.append(vec, v1)
-    # vec = np.append(vec, v2)
-
-    # print("Vector to append to par_buff")
-    # print(vec)
-    # print("")
-
-    # # Append to par_buff several times
-    # buff.append(vec)
-    # buff.append(vec)
-
-    # print("par_buff after 2 append operations")
-    # print(buff.buff)
-    # print("")
-
-    # # Serialize
-    # arr = buff.serialize()
-
-    # print("Serialized par_buff")
-    # print(arr)
-    # print("")
-
-    # tst_arr = np.array([[1],
-    #                     [1],
-    #                     [2],
-    #                     [2]])
-
-    # assert (arr==tst_arr).all()
+    # Test size and length
+    assert(loc_buff.length() == 2)
+    assert(loc_buff.size()   == 4)

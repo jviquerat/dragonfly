@@ -6,7 +6,7 @@ import tensorflow as tf
 ###############################################
 ### Parallel buffer class, used to temporarily
 ### store data from parallel environments
-class par_buff:
+class pbuff:
     def __init__(self, n_cpu, dim):
 
         self.n_cpu = n_cpu
@@ -49,7 +49,7 @@ class buff:
 
         self.data = {}
         for name, dim in zip(self.names, self.dims):
-            self.data[name] = par_buff(self.n_cpu, dim)
+            self.data[name] = pbuff(self.n_cpu, dim)
 
     def store(self, names, fields):
 
