@@ -31,9 +31,9 @@ class ppo():
                                          act_dim = act_dim,
                                          pms     = pms.policy)
 
-        # pol_act_dim is the true dimension of the action provided to the env
+        # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
-        self.pol_act_dim = self.policy.store_dim
+        self.pol_dim = self.policy.store_dim
 
         # Build values
         if (pms.value.type != "v_value"):
@@ -52,7 +52,7 @@ class ppo():
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
-        act = np.zeros([self.n_cpu, self.pol_act_dim],
+        act = np.zeros([self.n_cpu, self.pol_dim],
                        dtype=self.policy.store_type)
         lgp = np.zeros([self.n_cpu, 1])
 
@@ -65,7 +65,7 @@ class ppo():
         if (self.policy.kind == "discrete"):
             act = np.reshape(act, (-1))
         if (self.policy.kind == "continuous"):
-            act = np.reshape(act, (-1,self.pol_act_dim))
+            act = np.reshape(act, (-1,self.pol_dim))
 
         # Check for NaNs
         if (np.isnan(act).any()):

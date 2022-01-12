@@ -50,12 +50,12 @@ def run():
 
     # Initialize training style
     trainer = trainer_factory.create(pms.trainer.style,
-                                     obs_dim     = env.obs_dim,
-                                     act_dim     = env.act_dim,
-                                     pol_act_dim = agent.pol_act_dim,
-                                     n_cpu       = pms.n_cpu,
-                                     n_ep_max    = pms.n_ep_max,
-                                     pms         = pms.trainer)
+                                     obs_dim  = env.obs_dim,
+                                     act_dim  = env.act_dim,
+                                     pol_dim  = agent.pol_dim,
+                                     n_cpu    = pms.n_cpu,
+                                     n_ep_max = pms.n_ep_max,
+                                     pms      = pms.trainer)
 
     # Run
     disclaimer()

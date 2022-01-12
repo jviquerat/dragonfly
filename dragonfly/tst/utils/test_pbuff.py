@@ -7,20 +7,17 @@ from dragonfly.src.utils.buff import *
 
 ###############################################
 ### Test parallel buffer class
-def test_par_buff():
+def test_pbuff():
 
     # Initial space
     print("")
 
     #########################
     # Initialize buffer
-    # Size index (last argument) is voluntarily too large to
-    # check that the buffer is trimmed correctly before
-    # being returned
     # First test is done with 1 cpu
     n_cpu   = 1
     obs_dim = 3
-    buff    = par_buff(n_cpu, obs_dim)
+    buff    = pbuff(n_cpu, obs_dim)
 
     # Generate a vector to fill buffer
     vec = np.array([])
@@ -28,22 +25,22 @@ def test_par_buff():
     vec = np.append(vec, v1)
     vec = np.reshape(vec, (-1,obs_dim))
 
-    print("Vector to append to par_buff")
+    print("Vector to append to pbuff")
     print(vec)
     print("")
 
-    # Append to par_buff several times
+    # Append to pbuff several times
     buff.append(vec)
     buff.append(vec)
 
-    print("par_buff after 2 append operations")
+    print("pbuff after 2 append operations")
     print(buff.buff)
     print("")
 
     # Serialize
     arr = buff.serialize()
 
-    print("Serialized par_buff")
+    print("Serialized pbuff")
     print(arr)
     print("")
 
@@ -56,7 +53,7 @@ def test_par_buff():
     # Same test with 2 cpus
     n_cpu   = 2
     obs_dim = 3
-    buff    = par_buff(n_cpu, obs_dim)
+    buff    = pbuff(n_cpu, obs_dim)
 
     # Generate a vector to fill buffer
     vec = np.array([])
@@ -66,22 +63,22 @@ def test_par_buff():
     vec = np.append(vec, v2)
     vec = np.reshape(vec, (-1,obs_dim))
 
-    print("Vector to append to par_buff")
+    print("Vector to append to pbuff")
     print(vec)
     print("")
 
-    # Append to par_buff several times
+    # Append to pbuff several times
     buff.append(vec)
     buff.append(vec)
 
-    print("par_buff after 2 append operations")
+    print("pbuff after 2 append operations")
     print(buff.buff)
     print("")
 
     # Serialize
     arr = buff.serialize()
 
-    print("Serialized par_buff")
+    print("Serialized pbuff")
     print(arr)
     print("")
 
@@ -96,7 +93,7 @@ def test_par_buff():
     # Same test with inputs of size 1
     n_cpu   = 2
     obs_dim = 1
-    buff    = par_buff(n_cpu, obs_dim)
+    buff    = pbuff(n_cpu, obs_dim)
 
     # Generate a vector to fill buffer
     #vec = 1.0*np.ones((obs_dim))
@@ -107,22 +104,22 @@ def test_par_buff():
     vec = np.append(vec, v1)
     vec = np.append(vec, v2)
 
-    print("Vector to append to par_buff")
+    print("Vector to append to pbuff")
     print(vec)
     print("")
 
-    # Append to par_buff several times
+    # Append to pbuff several times
     buff.append(vec)
     buff.append(vec)
 
-    print("par_buff after 2 append operations")
+    print("pbuff after 2 append operations")
     print(buff.buff)
     print("")
 
     # Serialize
     arr = buff.serialize()
 
-    print("Serialized par_buff")
+    print("Serialized pbuff")
     print(arr)
     print("")
 
