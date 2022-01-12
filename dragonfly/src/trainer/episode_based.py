@@ -17,12 +17,12 @@ from dragonfly.src.utils.error           import *
 ### pms : parameters
 class episode_based(trainer_base):
     def __init__(self, obs_dim, act_dim,
-                 pol_act_dim, n_cpu, n_ep_max, pms):
+                 pol_dim, n_cpu, n_ep_max, pms):
 
         # Initialize from input
         self.obs_dim     = obs_dim
         self.act_dim     = act_dim
-        self.pol_act_dim = pol_act_dim
+        self.pol_dim     = pol_dim
         self.n_cpu       = n_cpu
         self.n_ep_max    = n_ep_max
         self.n_ep_unroll = pms.n_ep_unroll
@@ -31,30 +31,24 @@ class episode_based(trainer_base):
         self.n_epochs    = pms.n_epochs
 
         # Check that n_ep_unroll is a multiple of n_cpu
-        #if (n_ep_unroll%n_cpu != 0):
-            #error("episode_based",
-            #      "init",
-            #      "n_ep_unroll is not a multiple of n_cpu")
         if (n_cpu != 1):
             error("episode_based",
                   "init",
                   "episode-based learning does not support parallel envs")
 
-        # pol_act_dim is the true dimension of the action provided to the env
+        # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
-        self.loc_buff = loc_buff(self.n_cpu,
-                                 self.obs_dim,
-                                 self.pol_act_dim)
-        self.glb_buff = glb_buff(self.n_cpu,
-                                 self.obs_dim,
-                                 self.pol_act_dim)
+        self.buff = buff(self.n_cpu,
+                        ["obs", "nxt", "act", "lgp", "rwd", "dne", "stp", "trm", "bts"],
+                        [obs_dim, obs_dim, pol_dim, 1, 1, 1, 1, 1, 1])
+        self.gbuff = gbuff(["obs", "act", "adv", "tgt", "lgp"],
+                           [obs_dim, pol_dim, 1, 1, 1])
 
         # Initialize learning data report
-        self.report_fields = ["episode",
+        self.report = report(["episode",
                               "score",  "smooth_score",
                               "length", "smooth_length",
-                              "step"]
-        self.report = report(self.report_fields)
+                              "step"])
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu, pms.render_every)
@@ -89,7 +83,7 @@ class episode_based(trainer_base):
         while (not self.counter.done_max_ep()):
 
             # Reset local buffer
-            self.loc_buff.reset()
+            self.buff.reset()
 
             # Loop over training episodes
             while (not self.counter.done_unroll()):
@@ -106,7 +100,8 @@ class episode_based(trainer_base):
 
                 # Store transition
                 stp = self.counter.ep_step
-                self.loc_buff.store(obs, nxt, act, lgp, rwd, dne, stp)
+                self.buff.store(["obs", "nxt", "act", "lgp", "rwd", "dne", "stp"],
+                                [ obs,   nxt,   act,   lgp,   rwd,   dne,   stp ])
 
                 # Update counter
                 self.counter.update(rwd)
@@ -126,12 +121,15 @@ class episode_based(trainer_base):
                 self.timer_env.toc()
 
             # Finalize buffers for training
-            self.terminator.terminate(self.loc_buff)
-            obs, nxt, act, lgp, rwd, trm, bts = self.loc_buff.serialize()
+            self.terminator.terminate(self.buff)
+            names = ["obs", "nxt", "act", "lgp", "rwd", "trm", "bts"]
+            data  = self.buff.serialize(names)
+            obs, nxt, act, lgp, rwd, trm, bts = (data[name] for name in names)
             tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
 
             # Store in global buffers
-            self.glb_buff.store(obs, adv, tgt, act, lgp)
+            self.gbuff.store(["obs", "adv", "tgt", "act", "lgp"],
+                             [ obs,   adv,   tgt,   act,   lgp ])
 
             # Write report data to file
             self.write_report(agent, self.report, path, run)
@@ -175,7 +173,9 @@ class episode_based(trainer_base):
         for epoch in range(self.n_epochs):
 
             # Retrieve data
-            obs, act, adv, tgt, lgp = self.glb_buff.get_buffers(size)
+            names = ["obs", "adv", "tgt", "act", "lgp"]
+            data  = self.gbuff.get_buffers(names, size)
+            obs, adv, tgt, act, lgp = (data[name] for name in names)
 
             # Visit all available history
             done = False

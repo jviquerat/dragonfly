@@ -14,12 +14,10 @@ def test_glb_buff():
 
     #########################
     # Initialize buffer
-    n_cpu     = 1
-    obs_dim   = 3
-    act_dim   = 2
-    n_buff    = 5
-    buff_size = 1
-    buff      = glb_buff(n_cpu, obs_dim, act_dim)
+    names = ["obs", "act", "adv", "tgt", "lgp"]
+    dims  = [3, 2, 1, 1, 1]
+    n     = 5
+    buff  = gbuff(names, dims)
 
     # Create fake buffers
     obs = np.array([[0.0, 0.0, 0.0],
@@ -47,7 +45,7 @@ def test_glb_buff():
                     [0.3],
                     [0.1],
                     [0.1]])
-    buff.store(obs, adv, tgt, act, lgp)
+    buff.store(names, [obs, act, adv, tgt, lgp])
 
     print("Storing buffers")
     print("obs: ")
@@ -61,17 +59,21 @@ def test_glb_buff():
     print("lgp: ")
     print(lgp)
 
+    # Test length
+    assert(buff.length() == n)
+
     # Retrieve full buffer
-    size = n_buff*buff_size
-    buff_obs, buff_act, buff_adv, buff_tgt, buff_lgp = buff.get_buffers(size)
-    assert(len(buff_obs)==n_buff)
+    data = buff.get_buffers(names, n)
+    assert(len(data["obs"])==n)
 
     # Retrieve smaller buffer
-    size = (n_buff-1)*buff_size
-    buff_obs, buff_act, buff_adv, buff_tgt, buff_lgp = buff.get_buffers(size)
-    assert(len(buff_obs)==n_buff-1)
+    data = buff.get_buffers(names, n-1)
+    assert(len(data["obs"])==(n-1))
 
     # Retrieve larger buffer
-    size = (n_buff+2)*buff_size
-    buff_obs, buff_act, buff_adv, buff_tgt, buff_lgp = buff.get_buffers(size)
-    assert(len(buff_obs)==n_buff)
+    data = buff.get_buffers(names, n+2)
+    assert(len(data["obs"])==n)
+
+    # Retrieve only one field
+    data = buff.get_buffers(["adv"], n)
+    assert(len(data["adv"])==n)

@@ -28,18 +28,18 @@ class bootstrap():
             for i in range(self.n_cpu):
 
                 # Set terminal value, whatever the cause
-                trm[i] = float(not (buff.dne.buff[i][k] == True))
+                trm[i] = float(not (buff.data["dne"].buff[i][k] == True))
 
                 # Bootstrap end of episode if it is a regular ending
-                if (buff.stp.buff[i][k] >= self.ep_end-1): bts[i] = 1.0
+                if (buff.data["stp"].buff[i][k] >= self.ep_end-1): bts[i] = 1.0
 
             # Store terminal data to buffer
-            buff.store_terminal(trm, bts)
+            buff.store(["trm", "bts"], [trm, bts])
 
         # When using buffer-based updates, the last step of each
         # buffer must be bootstraped to mimic a continuing episode
         # This operation doesn't affect episode-based training[O]
         for i in range(self.n_cpu):
-            if (buff.trm.buff[i][-1] == 1.0):
-                buff.bts.buff[i][-1] =  1.0
-                buff.trm.buff[i][-1] =  0.0
+            if (buff.data["trm"].buff[i][-1] == 1.0):
+                buff.data["bts"].buff[i][-1] =  1.0
+                buff.data["trm"].buff[i][-1] =  0.0
