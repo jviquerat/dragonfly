@@ -14,9 +14,6 @@ def test_par_buff():
 
     #########################
     # Initialize buffer
-    # Size index (last argument) is voluntarily too large to
-    # check that the buffer is trimmed correctly before
-    # being returned
     # First test is done with 1 cpu
     n_cpu   = 1
     obs_dim = 3
