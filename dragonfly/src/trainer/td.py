@@ -17,37 +17,36 @@ from dragonfly.src.utils.error           import *
 ### pms : parameters
 class td(trainer_base):
     def __init__(self, obs_dim, act_dim,
-                 pol_act_dim, n_cpu, n_ep_max, pms):
+                 pol_dim, n_cpu, n_ep_max, pms):
 
         # Initialize from input
-        self.obs_dim     = obs_dim
-        self.act_dim     = act_dim
-        self.pol_act_dim = pol_act_dim
-        self.n_cpu       = n_cpu
-        self.n_ep_max    = n_ep_max
-        self.mem_size    = pms.mem_size
-        self.btc_size    = pms.btc_size
+        self.obs_dim  = obs_dim
+        self.act_dim  = act_dim
+        self.pol_dim  = pol_dim
+        self.n_cpu    = n_cpu
+        self.n_ep_max = n_ep_max
+        self.mem_size = pms.mem_size
+        self.btc_size = pms.btc_size
 
+        # Check that n_cpu is 1
         if (n_cpu != 1):
-            error("episode_based",
+            error("td",
                   "init",
-                  "episode-based learning does not support parallel envs")
+                  "td learning does not support parallel envs")
 
-        # pol_act_dim is the true dimension of the action provided to the env
+        # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
-        self.loc_buff = loc_buff(self.n_cpu,
-                                 self.obs_dim,
-                                 self.pol_act_dim)
-        self.glb_buff = glb_buff(self.n_cpu,
-                                 self.obs_dim,
-                                 self.pol_act_dim)
+        self.buff = buff(self.n_cpu,
+                        ["obs", "nxt", "act", "rwd", "dne", "stp", "trm", "bts"],
+                        [obs_dim, obs_dim, pol_dim, 1, 1, 1, 1, 1])
+        self.gbuff = gbuff(["obs", "act", "tgt"],
+                           [obs_dim, pol_dim, 1])
 
         # Initialize learning data report
-        self.report_fields = ["episode",
+        self.report = report(["episode",
                               "score",  "smooth_score",
                               "length", "smooth_length",
-                              "step"]
-        self.report = report(self.report_fields)
+                              "step"])
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu, pms.render_every)
@@ -82,7 +81,7 @@ class td(trainer_base):
         while (not self.counter.done_max_ep()):
 
             # Reset local buffer
-            self.loc_buff.reset()
+            self.buff.reset()
 
             # Loop over training steps
             while (not self.counter.done_stp_unroll()):
@@ -94,12 +93,14 @@ class td(trainer_base):
 
                 # Make one env step
                 self.timer_env.tic()
+                print(act)
                 nxt, rwd, dne = env.step(act)
                 self.timer_env.toc()
 
                 # Store transition
                 stp = self.counter.ep_step
-                self.loc_buff.store(obs, nxt, act, rwd, dne, stp)
+                self.buff.store(["obs", "nxt", "act", "rwd", "dne", "stp"],
+                                [ obs,   nxt,   act,   rwd,   dne,   stp ])
 
                 # Update counter
                 self.counter.update(rwd)
@@ -119,12 +120,15 @@ class td(trainer_base):
                 self.timer_env.toc()
 
             # Finalize buffers for training
-            self.terminator.terminate(self.loc_buff)
-            obs, nxt, act, rwd, trm, bts = self.loc_buff.serialize()
-            tgt = agent.compute_target(obs, nxt, act, rwd, trm, bts)
+            self.terminator.terminate(self.buff)
+            names = ["obs", "nxt", "act", "rwd", "trm", "bts"]
+            data  = self.buff.serialize(names)
+            gobs, gnxt, gact, grwd, gtrm, gbts = (data[name] for name in names)
+            gtgt = agent.compute_target(gobs, gnxt, gact, grwd, gtrm, gbts)
 
             # Store in global buffers
-            self.glb_buff.store(obs, tgt, act)
+            self.gbuff.store(["obs", "tgt", "act"],
+                             [gobs,  gtgt,  gact ])
 
             # Write report data to file
             self.write_report(agent, self.report, path, run)
@@ -160,19 +164,18 @@ class td(trainer_base):
     def train(self, agent):
 
         # Retrieve data
-        obs, act, adv, tgt, lgp = self.glb_buff.get_buffers(self.mem_size)
+        names = ["obs", "act", "tgt"]
+        data  = self.gbuff.get_buffers(names, self.mem_size)
+        obs, act, tgt = (data[name] for name in names)
 
         if (len(obs) < self.btc_size): return
 
         # Visit only one batch size
         start = 0
-        end   = btc_size
+        end   = self.btc_size
 
         btc_obs = obs[start:end]
         btc_act = act[start:end]
-        btc_adv = adv[start:end]
         btc_tgt = tgt[start:end]
-        btc_lgp = lgp[start:end]
 
-        agent.train(btc_obs, btc_act, btc_adv,
-                    btc_tgt, btc_lgp, end-start)
+        agent.train(btc_obs, btc_act, btc_tgt, end-start)

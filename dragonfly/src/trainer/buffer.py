@@ -123,12 +123,12 @@ class buffer(trainer_base):
             self.terminator.terminate(self.buff)
             names = ["obs", "nxt", "act", "lgp", "rwd", "trm", "bts"]
             data  = self.buff.serialize(names)
-            obs, nxt, act, lgp, rwd, trm, bts = (data[name] for name in names)
-            tgt, adv = agent.compute_returns(obs, nxt, act, rwd, trm, bts)
+            gobs, gnxt, gact, glgp, grwd, gtrm, gbts = (data[name] for name in names)
+            gtgt, gadv = agent.compute_returns(gobs, gnxt, gact, grwd, gtrm, gbts)
 
             # Store in global buffers
             self.gbuff.store(["obs", "adv", "tgt", "act", "lgp"],
-                             [ obs,   adv,   tgt,   act,   lgp ])
+                             [gobs,  gadv,  gtgt,  gact,  glgp ])
 
             # Write report data to file
             self.write_report(agent, self.report, path, run)

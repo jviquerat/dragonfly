@@ -29,12 +29,12 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [32,32],
-                    "actv": "swish"
+                    "actv": "tanh"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["swish"],
+                    "actv": ["tanh"],
                     "final": ["linear"]
                 }
             },
@@ -44,7 +44,7 @@
                 "grd_clip": 0.5
             },
             "loss": {
-                "type": "mse"
+                "type": "mse_q"
             }
         }
     }
