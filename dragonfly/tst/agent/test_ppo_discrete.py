@@ -33,11 +33,11 @@ def test_ppo_discrete():
 
     # Initialize training style
     trainer = trainer_factory.create(reader.pms.trainer.style,
-                                     obs_dim     = env.obs_dim,
-                                     act_dim     = env.act_dim,
-                                     pol_act_dim = agent.pol_act_dim,
-                                     n_cpu       = reader.pms.n_cpu,
-                                     n_ep_max    = reader.pms.n_ep_max,
+                                     obs_dim  = env.obs_dim,
+                                     act_dim  = env.act_dim,
+                                     pol_dim  = agent.pol_dim,
+                                     n_cpu    = reader.pms.n_cpu,
+                                     n_ep_max = reader.pms.n_ep_max,
                                      pms=reader.pms.trainer)
 
     print("Test discrete agent")
