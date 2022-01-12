@@ -2,7 +2,7 @@
 import numpy as np
 
 ###############################################
-### Report buffer, used to store learning data
+### Report buffer, used to store learning metrics
 class report:
     def __init__(self, names):
 
@@ -16,9 +16,6 @@ class report:
         for name in self.names:
             self.data[name] = []
 
-        # Initialize step
-        self.step_count = 0
-
     # Append data to the report
     def append(self, name, value):
 
@@ -29,16 +26,10 @@ class report:
 
         return self.data[name]
 
-    # Increase step_count
-    def step(self, length):
+    # Return an average of n last values of given field
+    def avg(self, name, n):
 
-        self.step_count += length
-        self.data["step"].append(self.step_count)
-
-    # Return an average of n last scores
-    def avg_score(self, n):
-
-        return np.mean(self.data["score"][-n:])
+        return np.mean(self.data[name][-n:])
 
     # Write report
     def write(self, filename):

@@ -52,7 +52,7 @@ class trainer_base():
 
         # Average and print
         if (counter.get_ep() <= counter.get_n_ep_max()):
-            avg    = report.avg_score(n_smooth)
+            avg    = report.avg("score", n_smooth)
             avg    = f"{avg:.3f}"
             bst    = counter.get_best_score()
             bst    = f"{bst:.3f}"
@@ -68,15 +68,17 @@ class trainer_base():
     # Store data in report
     def store_report(self, counter, report, cpu):
 
+        n_step = counter.ep_step[cpu]
+        if (counter.ep > 0): n_step += report.get("step")[-1]
+
         report.append("episode",       counter.ep)
+        report.append("step",          n_step)
         report.append("score",         counter.score[cpu])
-        smooth_score   = np.mean(report.data["score"][-n_smooth:])
+        smooth_score = report.avg("score", n_smooth)
         report.append("smooth_score",  smooth_score)
         report.append("length",        counter.ep_step[cpu])
-        smooth_length  = np.mean(report.data["length"][-n_smooth:])
+        smooth_length = report.avg("length", n_smooth)
         report.append("smooth_length", smooth_length)
-
-        report.step(counter.ep_step[cpu])
 
     # Write learning data report
     def write_report(self, agent, report, path, run):

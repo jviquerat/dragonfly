@@ -89,14 +89,6 @@ class gbuff:
         for name, field in zip(names, fields):
             self.data[name] = np.append(self.data[name], field, axis=0)
 
-    # def store(self, obs, adv, tgt, act, lgp):
-
-    #     self.obs = np.append(self.obs, obs, axis=0)
-    #     self.adv = np.append(self.adv, adv, axis=0)
-    #     self.tgt = np.append(self.tgt, tgt, axis=0)
-    #     self.act = np.append(self.act, act, axis=0)
-    #     self.lgp = np.append(self.lgp, lgp, axis=0)
-
     def length(self):
 
         return int(self.data[self.names[0]].shape[0])
@@ -112,6 +104,7 @@ class gbuff:
         sample = np.arange(start, end)
         np.random.shuffle(sample)
 
+        # Return shuffled fields
         out = {}
         for name in names:
             tmp = [self.data[name][i] for i in sample]
@@ -124,19 +117,3 @@ class gbuff:
             out[name] = tmp
 
         return {name : out[name] for name in names}
-
-        # # Get shuffled buffer
-        # obs = [self.obs[i] for i in sample]
-        # act = [self.act[i] for i in sample]
-        # adv = [self.adv[i] for i in sample]
-        # tgt = [self.tgt[i] for i in sample]
-        # lgp = [self.lgp[i] for i in sample]
-
-        # # Reshape
-        # obs = tf.reshape(tf.cast(obs, tf.float32), [size, self.obs_dim])
-        # act = tf.reshape(tf.cast(act, tf.float32), [size, self.act_dim])
-        # adv = tf.reshape(tf.cast(adv, tf.float32), [size])
-        # tgt = tf.reshape(tf.cast(tgt, tf.float32), [size])
-        # lgp = tf.reshape(tf.cast(lgp, tf.float32), [size])
-
-        # return obs, act, adv, tgt, lgp
