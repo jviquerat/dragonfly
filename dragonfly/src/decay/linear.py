@@ -19,7 +19,9 @@ class linear():
     # Get current value
     def get(self):
 
-        return self.val
+        val = self.val
+        self.decay()
+        return val
 
     # Decay
     def decay(self):
