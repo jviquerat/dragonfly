@@ -7,6 +7,7 @@ from dragonfly.src.value.base import *
 ### pms     : parameters
 class v_value(base_value):
     def __init__(self, obs_dim, pms):
+        super(v_value, self).__init__()
 
         # Fill structure
         self.dim = 1

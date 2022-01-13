@@ -1,6 +1,9 @@
 # Generic imports
 import numpy as np
 
+# Keras imports
+from tensorflow.keras import Model
+
 # Custom imports
 from dragonfly.src.network.network     import *
 from dragonfly.src.optimizer.optimizer import *
@@ -8,9 +11,9 @@ from dragonfly.src.loss.loss           import *
 
 ###############################################
 ### Base value
-class base_value():
+class base_value(Model):
     def __init__(self):
-        pass
+        super(base_value, self).__init__()
 
     # Get values
     def get_values(self, obs):
@@ -21,10 +24,10 @@ class base_value():
 
         return self.net.call(state)
 
-    # Save network weights
-    def save_weights(self):
+    # Get network weights
+    def get_weights(self):
 
-        self.weights = self.net.get_weights()
+        return self.net.get_weights()
 
     # Set network weights
     def set_weights(self, weights):

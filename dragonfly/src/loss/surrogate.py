@@ -19,21 +19,25 @@ class surrogate():
 
     # Train
     @tf.function
-    def train(self, obs, adv, act, plgp, policy):
+    def train(self, obs, adv, act, plg, policy):
         with tf.GradientTape() as tape:
 
+            # Reshape
+            tfa   = tf.reshape(adv, [-1])
+            tfl   = tf.reshape(plg, [-1])
+
             # Compute ratio of probabilities
-            pdf      = policy.compute_pdf(obs)
-            act      = policy.reshape_actions(act)
-            lgp      = pdf.log_prob(act)
-            ratio    = tf.exp(lgp - plgp)
+            pdf   = policy.compute_pdf(obs)
+            act   = policy.reshape_actions(act)
+            lgp   = pdf.log_prob(act)
+            ratio = tf.exp(lgp - tfl)
 
             # Compute actor loss
-            p1       = tf.multiply(adv,ratio)
-            p2       = tf.clip_by_value(ratio,
+            p1    = tf.multiply(tfa,ratio)
+            p2    = tf.clip_by_value(ratio,
                                         1.0-self.pol_clip,
                                         1.0+self.pol_clip)
-            p2             = tf.multiply(adv,p2)
+            p2             = tf.multiply(tfa,p2)
             loss_surrogate =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss

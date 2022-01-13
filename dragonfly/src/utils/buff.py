@@ -107,13 +107,9 @@ class gbuff:
         # Return shuffled fields
         out = {}
         for name in names:
-            tmp = [self.data[name][i] for i in sample]
-            tmp = tf.cast(tmp, tf.float32)
-            dim = self.data[name].shape[1]
-            if (dim == 1):
-                tmp = tf.reshape(tmp, [size])
-            else:
-                tmp = tf.reshape(tmp, [size, dim])
-            out[name] = tmp
+            tmp       = [self.data[name][i] for i in sample]
+            tmp       = tf.cast(tmp, tf.float32)
+            dim       = self.data[name].shape[1]
+            out[name] = tf.reshape(tmp, [size, dim])
 
         return {name : out[name] for name in names}

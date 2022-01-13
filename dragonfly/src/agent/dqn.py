@@ -51,6 +51,7 @@ class dqn():
                                         obs_dim = obs_dim,
                                         act_dim = act_dim,
                                         pms     = pms.value)
+        self.update_target()
 
     # Get actions
     def get_actions(self, obs):
@@ -60,6 +61,7 @@ class dqn():
         act = np.zeros([self.n_cpu, self.pol_dim], dtype=int)
 
         p = random.uniform(0, 1)
+        q = self.eps.get()
         if (p < self.eps.get()):
             act = random.randrange(0, self.act_dim)
         else:
@@ -71,11 +73,12 @@ class dqn():
         return act
 
     # Compute target
-    def compute_target(self, obs, nxt, act, rwd, trm, bts):
+    def compute_target(self, nxt, rwd, trm):
 
         tgt = self.q_tgt.get_values(nxt)
-        tgt = tf.reshape(tf.reduce_max(tgt,axis=1), [-1,1])
-        tgt = rwd + (1.0-trm)*self.gamma*tgt
+        tgt = tf.reduce_max(tgt,axis=1)
+        tgt = tf.reshape(tgt, [-1,1])
+        tgt = rwd + trm*self.gamma*tgt
 
         return tgt
 

@@ -93,7 +93,6 @@ class td(trainer_base):
 
                 # Make one env step
                 self.timer_env.tic()
-                print(act)
                 nxt, rwd, dne = env.step(act)
                 self.timer_env.toc()
 
@@ -121,10 +120,10 @@ class td(trainer_base):
 
             # Finalize buffers for training
             self.terminator.terminate(self.buff)
-            names = ["obs", "nxt", "act", "rwd", "trm", "bts"]
+            names = ["obs", "nxt", "act", "rwd", "trm"]
             data  = self.buff.serialize(names)
-            gobs, gnxt, gact, grwd, gtrm, gbts = (data[name] for name in names)
-            gtgt = agent.compute_target(gobs, gnxt, gact, grwd, gtrm, gbts)
+            gobs, gnxt, gact, grwd, gtrm = (data[name] for name in names)
+            gtgt = agent.compute_target(gnxt, grwd, gtrm)
 
             # Store in global buffers
             self.gbuff.store(["obs", "tgt", "act"],

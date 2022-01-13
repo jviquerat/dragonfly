@@ -14,14 +14,18 @@ class pg():
 
     # Train
     @tf.function
-    def train(self, obs, adv, act, plgp, policy):
+    def train(self, obs, adv, act, plg, policy):
         with tf.GradientTape() as tape:
+
+            # Reshape
+            tfa     = tf.reshape(adv, [-1])
+            tfl     = tf.reshape(plg, [-1])
 
             # Compute loss
             pdf     = policy.compute_pdf(obs)
             act     = policy.reshape_actions(act)
             lgp     = pdf.log_prob(act)
-            lgp     = tf.multiply(adv, lgp)
+            lgp     = tf.multiply(tfa, lgp)
             loss_pg =-tf.reduce_mean(lgp)
 
             # Compute entropy loss

@@ -9,8 +9,7 @@
         "btc_size": 64,
         "render_every": 500,
         "terminator": {
-            "type": "bootstrap",
-            "ep_end": 200
+            "type": "regular"
         }
     },
     "agent": {
@@ -21,7 +20,7 @@
             "type": "linear",
             "start": 0.1,
             "end": 0.05,
-            "n_steps": 500
+            "n_steps": 5000
         },
         "value": {
             "type": "q_value",
@@ -29,12 +28,12 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [32,32],
-                    "actv": "tanh"
+                    "actv": "swish"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["tanh"],
+                    "actv": ["swish"],
                     "final": ["linear"]
                 }
             },
