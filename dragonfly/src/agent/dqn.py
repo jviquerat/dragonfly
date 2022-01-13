@@ -66,7 +66,8 @@ class dqn():
             obs = tf.cast([obs], tf.float32)
             val = self.q_val.get_values(obs)
             act = np.argmax(val)
-            act = np.reshape(act, (-1))
+
+        act = np.reshape(act, (-1))
 
         return act
 
@@ -85,7 +86,7 @@ class dqn():
 
         # Update target if necessary
         if (self.tgt_update == self.target_freq):
-            self.q_tgt.set_weights(self.q_val.get_weights())
+            self.q_tgt.net.set_weights(self.q_val.net.get_weights())
             self.tgt_update  = 0
         else:
             self.tgt_update += 1
@@ -93,6 +94,8 @@ class dqn():
     # Training
     def train(self, obs, act, tgt, size):
 
+        act = tf.reshape(act, [size,-1])
+        tgt = tf.reshape(tgt, [size,-1])
         self.q_val.train(obs, act, tgt, size)
         self.update_target()
 
