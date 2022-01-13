@@ -93,7 +93,6 @@ class td(trainer_base):
 
                 # Make one env step
                 self.timer_env.tic()
-                print(act)
                 nxt, rwd, dne = env.step(act)
                 self.timer_env.toc()
 
