@@ -37,8 +37,8 @@ class td(trainer_base):
         # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
         self.buff = buff(self.n_cpu,
-                        ["obs", "nxt", "act", "rwd", "dne", "stp", "trm", "bts"],
-                        [obs_dim, obs_dim, pol_dim, 1, 1, 1, 1, 1])
+                        ["obs", "nxt", "act", "rwd", "dne", "stp", "trm"],
+                        [obs_dim, obs_dim, pol_dim, 1, 1, 1, 1])
         self.gbuff = gbuff(["obs", "act", "tgt"],
                            [obs_dim, pol_dim, 1])
 
@@ -103,6 +103,7 @@ class td(trainer_base):
 
                 # Update counter
                 self.counter.update(rwd)
+                self.counter.unroll += 1
 
                 # Handle rendering
                 self.renderer.store(env.render(self.renderer.render))
@@ -120,10 +121,10 @@ class td(trainer_base):
 
             # Finalize buffers for training
             self.terminator.terminate(self.buff)
-            names = ["obs", "nxt", "act", "rwd", "trm", "bts"]
+            names = ["obs", "nxt", "act", "rwd", "trm"]
             data  = self.buff.serialize(names)
-            gobs, gnxt, gact, grwd, gtrm, gbts = (data[name] for name in names)
-            gtgt = agent.compute_target(gobs, gnxt, gact, grwd, gtrm, gbts)
+            gobs, gnxt, gact, grwd, gtrm = (data[name] for name in names)
+            gtgt = agent.compute_target(gobs, gnxt, gact, grwd, gtrm)
 
             # Store in global buffers
             self.gbuff.store(["obs", "tgt", "act"],
@@ -157,7 +158,6 @@ class td(trainer_base):
                 self.print_episode(self.counter, self.report)
                 self.renderer.finish(path, self.counter.ep, cpu)
                 self.counter.reset_ep(cpu)
-                self.counter.unroll += 1
 
     # Train
     def train(self, agent):

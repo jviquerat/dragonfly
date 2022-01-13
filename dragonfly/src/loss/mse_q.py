@@ -13,9 +13,9 @@ class mse_q():
         with tf.GradientTape() as tape:
 
             # Compute loss
-            #val  = tf.gather(value.call_net(obs), act, axis=1, batch_dims=1)
             act  = tf.cast(act, tf.int32)
-            val  = tf.reshape(value.call_net(obs), [btc, -1])
+            val  = tf.convert_to_tensor(value.call_net(obs))
+            val  = tf.reshape(val, [btc, -1])
             val  = tf.gather(val, act, axis=1, batch_dims=1)
 
             diff = tf.square(tgt - val)

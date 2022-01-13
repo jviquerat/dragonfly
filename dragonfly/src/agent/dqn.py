@@ -51,6 +51,7 @@ class dqn():
                                         obs_dim = obs_dim,
                                         act_dim = act_dim,
                                         pms     = pms.value)
+        self.q_tgt.net.set_weights(self.q_val.net.get_weights())
 
     # Get actions
     def get_actions(self, obs):
@@ -72,10 +73,10 @@ class dqn():
         return act
 
     # Compute target
-    def compute_target(self, obs, nxt, act, rwd, trm, bts):
+    def compute_target(self, obs, nxt, act, rwd, trm):
 
         tgt = self.q_tgt.get_values(nxt)
-        tgt = tf.reduce_max(tgt,axis=1)
+        tgt = tf.reduce_max(tgt, axis=1)
         tgt = tf.reshape(tgt, [-1,1])
         tgt = rwd + trm*self.gamma*tgt
 
