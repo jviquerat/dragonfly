@@ -14,7 +14,7 @@ class pg():
 
     # Train
     @tf.function
-    def train(self, obs, adv, act, plgp, policy):
+    def train(self, obs, adv, act, plg, policy):
         with tf.GradientTape() as tape:
 
             # Compute loss
