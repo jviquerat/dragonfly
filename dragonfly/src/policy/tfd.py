@@ -11,3 +11,5 @@ import tensorflow_probability as tfp
 # Define alias
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 tfd = tfp.distributions
+
+tf.random.set_seed(0)
