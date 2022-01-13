@@ -74,8 +74,9 @@ class dqn():
     def compute_target(self, obs, nxt, act, rwd, trm, bts):
 
         tgt = self.q_tgt.get_values(nxt)
-        tgt = tf.reshape(tf.reduce_max(tgt,axis=1), [-1,1])
-        tgt = rwd + (1.0-trm)*self.gamma*tgt
+        tgt = tf.reduce_max(tgt,axis=1)
+        tgt = tf.reshape(tgt, [-1,1])
+        tgt = rwd + trm*self.gamma*tgt
 
         return tgt
 
