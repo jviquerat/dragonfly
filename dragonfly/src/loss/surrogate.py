@@ -19,14 +19,14 @@ class surrogate():
 
     # Train
     @tf.function
-    def train(self, obs, adv, act, plgp, policy):
+    def train(self, obs, adv, act, plg, policy):
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
             pdf      = policy.compute_pdf(obs)
             act      = policy.reshape_actions(act)
             lgp      = pdf.log_prob(act)
-            ratio    = tf.exp(lgp - plgp)
+            ratio    = tf.exp(lgp - plg)
 
             # Compute actor loss
             p1       = tf.multiply(adv,ratio)
