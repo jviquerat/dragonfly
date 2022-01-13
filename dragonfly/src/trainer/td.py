@@ -164,17 +164,9 @@ class td(trainer_base):
 
         # Retrieve data
         names = ["obs", "act", "tgt"]
-        data  = self.gbuff.get_buffers(names, self.mem_size)
+        data  = self.gbuff.get_buffers(names, self.btc_size)
         obs, act, tgt = (data[name] for name in names)
 
         if (len(obs) < self.btc_size): return
 
-        # Visit only one batch size
-        start = 0
-        end   = self.btc_size
-
-        btc_obs = obs[start:end]
-        btc_act = act[start:end]
-        btc_tgt = tgt[start:end]
-
-        agent.train(btc_obs, btc_act, btc_tgt, end-start)
+        agent.train(obs, act, tgt, self.btc_size)
