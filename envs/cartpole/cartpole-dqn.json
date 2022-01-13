@@ -29,12 +29,12 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [32,32],
-                    "actv": "tanh"
+                    "actv": "swish"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["tanh"],
+                    "actv": ["swish"],
                     "final": ["linear"]
                 }
             },
