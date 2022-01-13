@@ -20,7 +20,4 @@ class mse_q():
             # Apply gradients
             val_var = value.trainables
             grads   = tape.gradient(loss, val_var)
-            norm    = tf.linalg.global_norm(grads)
         value.opt.apply_grads(zip(grads, val_var))
-
-        return loss, norm
