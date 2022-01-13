@@ -1,8 +1,8 @@
 {
     "env_name": "CartPole-v0",
-    "n_avg": 2,
+    "n_avg": 3,
     "n_cpu": 1,
-    "n_ep_max": 500,
+    "n_ep_max": 300,
     "trainer": {
         "style": "td",
         "mem_size": 10000,
@@ -39,7 +39,7 @@
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 5.0e-3,
+                "lr": 5.0e-4,
                 "grd_clip": 0.5
             },
             "loss": {
