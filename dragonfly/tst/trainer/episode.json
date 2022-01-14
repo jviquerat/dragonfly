@@ -1,15 +1,15 @@
 {
-    "env_name": "Pendulum-v0",
+    "env_name": "CartPole-v0",
     "n_avg": 2,
     "n_cpu": 1,
-    "n_ep_max": 2,
+    "n_ep_max": 10,
     "trainer": {
-        "style": "buffer_based",
-        "buff_size": 256,
-        "n_buff": 16,
+        "style": "episode",
+        "n_ep_unroll": 1,
+        "n_ep_train": 4,
         "batch_frac": 0.5,
-        "n_epochs": 16,
-        "render_every": 50,
+        "n_epochs": 8,
+        "render_every": 500,
         "terminator": {
             "type": "bootstrap",
             "ep_end": 200
@@ -18,23 +18,23 @@
     "agent": {
         "type": "ppo",
         "policy": {
-            "type": "normal",
+            "type": "categorical",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [32,32],
-                    "actv": "swish"
+                    "arch": [16,16],
+                    "actv": "tanh"
                 },
                 "heads": {
-                    "nb": 2,
-                    "arch": [[16],[16]],
-                    "actv": ["swish","swish"],
-                    "final": ["tanh","sigmoid"]
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["tanh"],
+                    "final": ["softmax"]
                 }
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 1.0e-3,
+                "lr": 2.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -48,7 +48,7 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [32,32],
+                    "arch": [16,16],
                     "actv": "swish"
                 },
                 "heads": {
@@ -60,7 +60,7 @@
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 5.0e-3,
+                "lr": 1.0e-2,
                 "grd_clip": 0.1
             },
             "loss": {

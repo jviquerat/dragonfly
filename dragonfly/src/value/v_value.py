@@ -43,3 +43,8 @@ class v_value(base_value):
         values = np.reshape(values, (-1,1))
 
         return values
+
+    # Call loss for training
+    def train(self, obs, tgt, size):
+
+        return self.loss.train(obs, tgt, size, self)

@@ -17,7 +17,8 @@ def test_glb_buff():
     names = ["obs", "act", "adv", "tgt", "lgp"]
     dims  = [3, 2, 1, 1, 1]
     n     = 5
-    buff  = gbuff(names, dims)
+    n_tot = 9
+    buff  = gbuff(n_tot, names, dims)
 
     # Create fake buffers
     obs = np.array([[0.0, 0.0, 0.0],
@@ -63,8 +64,11 @@ def test_glb_buff():
     assert(buff.length() == n)
 
     # Retrieve full buffer
-    data = buff.get_buffers(names, n)
+    data = buff.get_buffers(names, n, shuffle=False)
     assert(len(data["obs"])==n)
+    ob, ac, ad, tg, lg = (data[name] for name in names)
+    assert(ob.numpy()==obs).all()
+    assert(ac.numpy()==act).all()
 
     # Retrieve smaller buffer
     data = buff.get_buffers(names, n-1)
@@ -77,3 +81,14 @@ def test_glb_buff():
     # Retrieve only one field
     data = buff.get_buffers(["adv"], n)
     assert(len(data["adv"])==n)
+
+    # Re-store buffers
+    buff.store(names, [obs, act, adv, tgt, lgp])
+    assert(buff.length() == n_tot)
+
+    # Retrieve full buffer again
+    data = buff.get_buffers(names, n, shuffle=False)
+    assert(len(data["obs"])==n)
+    ob, ac, ad, tg, lg = (data[name] for name in names)
+    assert(ob.numpy()==obs).all()
+    assert(ac.numpy()==act).all()

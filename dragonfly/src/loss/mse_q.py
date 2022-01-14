@@ -2,21 +2,24 @@
 import tensorflow as tf
 
 ###############################################
-### MSE loss class
-class mse():
+### MSE loss class for Q-value
+class mse_q():
     def __init__(self, pms):
         pass
 
     # Train
     @tf.function
-    def train(self, obs, tgt, btc, value):
+    def train(self, obs, act, tgt, btc, value):
         with tf.GradientTape() as tape:
 
             # Compute loss
+            act  = tf.cast(act, tf.int32)
             val  = tf.convert_to_tensor(value.call_net(obs))
-            val  = tf.reshape(val, [btc])
-            p1   = tf.square(tgt - val)
-            loss = tf.reduce_mean(p1)
+            val  = tf.reshape(val, [btc, -1])
+            val  = tf.gather(val, act, axis=1, batch_dims=1)
+
+            diff = tf.square(tgt - val)
+            loss = tf.reduce_mean(diff)
 
             # Apply gradients
             val_var = value.trainables

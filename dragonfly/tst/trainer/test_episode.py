@@ -11,8 +11,8 @@ from dragonfly.src.envs.par_envs   import *
 from dragonfly.src.trainer.trainer import *
 
 ###############################################
-### Test discrete ppo agent
-def test_ppo_discrete():
+### Test episode-based training
+def test_episode():
 
     # Initial space
     print("")
@@ -20,7 +20,7 @@ def test_ppo_discrete():
     #########################
     # Initialize json parser and read test json file
     reader = json_parser()
-    reader.read("dragonfly/tst/agent/ppo_discrete.json")
+    reader.read("dragonfly/tst/trainer/episode.json")
 
     # Initialize environment
     env = par_envs(reader.pms.env_name, reader.pms.n_cpu, ".")
@@ -40,7 +40,7 @@ def test_ppo_discrete():
                                      n_ep_max = reader.pms.n_ep_max,
                                      pms=reader.pms.trainer)
 
-    print("Test discrete ppo")
+    print("Test episode-based trainer")
     trainer.reset()
     agent.reset()
     env.set_cpus()
