@@ -127,12 +127,10 @@ class td(trainer_base):
             gobs, gnxt, gact, grwd, gtrm = (data[name] for name in names)
             gtgt = agent.compute_target(gobs, gnxt, gact, grwd, gtrm)
 
+
             # Store in global buffers
             self.gbuff.store(["obs", "tgt", "act"],
                              [gobs,  gtgt,  gact ])
-
-            # Write report data to file
-            self.write_report(agent, self.report, path, run)
 
             # Train agent
             self.timer_training.tic()
@@ -141,6 +139,9 @@ class td(trainer_base):
 
         # Last printing
         self.print_episode(self.counter, self.report)
+
+        # Write report data to file
+        self.write_report(agent, self.report, path, run)
 
         # Close timers and show
         self.timer_global.toc()

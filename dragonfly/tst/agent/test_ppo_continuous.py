@@ -20,7 +20,7 @@ def test_ppo_continuous():
     #########################
     # Initialize json parser and read test json file
     reader = json_parser()
-    reader.read("dragonfly/tst/agent/continuous.json")
+    reader.read("dragonfly/tst/agent/ppo_continuous.json")
 
     # Initialize environment
     env = par_envs(reader.pms.env_name, reader.pms.n_cpu, ".")
@@ -40,7 +40,7 @@ def test_ppo_continuous():
                                      n_ep_max = reader.pms.n_ep_max,
                                      pms=reader.pms.trainer)
 
-    print("Test continuous agent")
+    print("Test continuous ppo")
     trainer.reset()
     agent.reset()
     env.set_cpus()

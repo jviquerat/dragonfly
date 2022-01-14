@@ -144,7 +144,7 @@ class gbuff:
 
         return self.data[self.names[0]].length()
 
-    def get_buffers(self, names, size):
+    def get_buffers(self, names, size, shuffle=True):
 
         if (size > self.size):
             error("gbuff",
@@ -157,7 +157,7 @@ class gbuff:
 
         # Randomized indices
         smp = np.arange(start, end)
-        np.random.shuffle(smp)
+        if (shuffle): np.random.shuffle(smp)
 
         # Return shuffled fields
         out = {}
