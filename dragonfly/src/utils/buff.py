@@ -3,6 +3,9 @@ import math
 import numpy      as np
 import tensorflow as tf
 
+# Custom imports
+from dragonfly.src.utils.error import *
+
 ###############################################
 ### Parallel buffer class, used to temporarily
 ### store data from parallel environments
@@ -69,11 +72,59 @@ class buff:
         return {name : self.data[name].serialize() for name in names}
 
 ###############################################
+### Ring buffer class, used as element of gbuff
+class rbuff:
+    def __init__(self, size, dim):
+
+        self.size  = size
+        self.dim   = dim
+        self.reset()
+
+    def reset(self):
+
+        self.i    = 0 # Filling index
+        self.n    = 0 # Global  index
+        self.full = False
+        self.buff = np.zeros([self.size,self.dim])
+
+    def length(self):
+
+        return self.n
+
+    def store(self, field):
+
+        for j in range(len(field)):
+            self.buff[self.i,:] = field[j,:]
+            self.i             += 1
+
+            # Handle filling and global index
+            if (self.i == self.size): self.i    = 0
+            if (not self.full):       self.n   += 1
+            if (self.n == self.size): self.full = True
+
+    def get_dim(self):
+
+        return self.dim
+
+    def get_indices(self, size):
+
+        end = self.i
+        if (    self.full): start = end-size
+        if (not self.full): start = max(0, end-size)
+
+        return start, end
+
+    def get(self, idx):
+
+        return [self.buff[i] for i in idx]
+
+###############################################
 ### Global parallel buffer class, used to store
 ### all data since the beginning of learning
 class gbuff:
-    def __init__(self, names, dims):
+    def __init__(self, size, names, dims):
 
+        self.size  = size
         self.names = names
         self.dims  = dims
         self.reset()
@@ -82,38 +133,42 @@ class gbuff:
 
         self.data = {}
         for name, dim in zip(self.names, self.dims):
-            self.data[name] = np.empty([0,dim])
+            self.data[name] = rbuff(self.size, dim)
 
     def store(self, names, fields):
 
         for name, field in zip(names, fields):
-            self.data[name] = np.append(self.data[name], field, axis=0)
+            self.data[name].store(field)
 
     def length(self):
 
-        return int(self.data[self.names[0]].shape[0])
+        return self.data[self.names[0]].length()
 
     def get_buffers(self, names, size):
 
-        # Start/end indices
-        end    = self.length()
-        start  = max(0,end - size)
-        size   = end - start
+        if (size > self.size):
+            error("gbuff",
+                  "get_buffers",
+                  "Size too large for buffer")
 
-        # Randomize batch
-        sample = np.arange(start, end)
-        np.random.shuffle(sample)
+        # Start/end indices
+        start, end = self.data[self.names[0]].get_indices(size)
+        s          = end-start
+
+        # Randomized indices
+        smp = np.arange(start, end)
+        np.random.shuffle(smp)
 
         # Return shuffled fields
         out = {}
         for name in names:
-            tmp = [self.data[name][i] for i in sample]
+            tmp = self.data[name].get(smp)
             tmp = tf.cast(tmp, tf.float32)
-            dim = self.data[name].shape[1]
+            dim = self.data[name].get_dim()
             if (dim == 1):
-                tmp = tf.reshape(tmp, [size])
+                tmp = tf.reshape(tmp, [s])
             else:
-                tmp = tf.reshape(tmp, [size, dim])
+                tmp = tf.reshape(tmp, [s, dim])
             out[name] = tmp
 
         return {name : out[name] for name in names}
