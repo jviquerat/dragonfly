@@ -5,7 +5,7 @@
     "n_ep_max": 500,
     "trainer": {
         "style": "td",
-        "mem_size": 20000,
+        "mem_size": 10000,
         "btc_size": 64,
         "render_every": 500,
         "terminator": {
@@ -18,9 +18,9 @@
         "gamma": 0.99,
         "exploration": {
             "type": "linear",
-            "start": 0.1,
+            "start": 0.5,
             "end": 0.01,
-            "n_steps": 50000
+            "n_steps": 20000
         },
         "value": {
             "type": "q_value",
@@ -38,9 +38,9 @@
                 }
             },
             "optimizer": {
-                "type": "nadam",
-                "lr": 1.0e-3,
-                "grd_clip": 0.5
+                "type": "adam",
+                "lr": 5.0e-4,
+                "grd_clip": 0.1
             },
             "loss": {
                 "type": "mse_q"
