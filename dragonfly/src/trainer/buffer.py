@@ -29,18 +29,19 @@ class buffer(trainer_base):
         self.act_dim   = act_dim
         self.pol_dim   = pol_dim
         self.n_cpu     = n_cpu
-        self.n_ep_max    = n_ep_max
-        self.buff_size   = pms.buff_size
-        self.n_buff      = pms.n_buff
-        self.btc_frac    = pms.batch_frac
-        self.n_epochs    = pms.n_epochs
+        self.n_ep_max  = n_ep_max
+        self.buff_size = pms.buff_size
+        self.n_buff    = pms.n_buff
+        self.btc_frac  = pms.batch_frac
+        self.n_epochs  = pms.n_epochs
 
         # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
         self.buff = buff(self.n_cpu,
                         ["obs", "nxt", "act", "lgp", "rwd", "dne", "stp", "trm", "bts"],
                         [obs_dim, obs_dim, pol_dim, 1, 1, 1, 1, 1, 1])
-        self.gbuff = gbuff(["obs", "act", "adv", "tgt", "lgp"],
+        self.gbuff = gbuff(self.n_buff*self.buff_size,
+                           ["obs", "act", "adv", "tgt", "lgp"],
                            [obs_dim, pol_dim, 1, 1, 1])
 
         # Initialize learning data report

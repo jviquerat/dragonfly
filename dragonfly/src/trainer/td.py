@@ -39,7 +39,8 @@ class td(trainer_base):
         self.buff = buff(self.n_cpu,
                         ["obs", "nxt", "act", "rwd", "dne", "stp", "trm"],
                         [obs_dim, obs_dim, pol_dim, 1, 1, 1, 1])
-        self.gbuff = gbuff(["obs", "act", "tgt"],
+        self.gbuff = gbuff(self.mem_size,
+                           ["obs", "act", "tgt"],
                            [obs_dim, pol_dim, 1])
 
         # Initialize learning data report

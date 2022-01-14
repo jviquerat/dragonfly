@@ -17,7 +17,7 @@ def test_glb_buff():
     names = ["obs", "act", "adv", "tgt", "lgp"]
     dims  = [3, 2, 1, 1, 1]
     n     = 5
-    buff  = gbuff(names, dims)
+    buff  = gbuff(9, names, dims)
 
     # Create fake buffers
     obs = np.array([[0.0, 0.0, 0.0],

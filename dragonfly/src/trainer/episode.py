@@ -32,7 +32,7 @@ class episode(trainer_base):
 
         # Check that n_ep_unroll is a multiple of n_cpu
         if (n_cpu != 1):
-            error("episode_based",
+            error("episode",
                   "init",
                   "episode-based learning does not support parallel envs")
 
@@ -41,7 +41,8 @@ class episode(trainer_base):
         self.buff = buff(self.n_cpu,
                         ["obs", "nxt", "act", "lgp", "rwd", "dne", "stp", "trm", "bts"],
                         [obs_dim, obs_dim, pol_dim, 1, 1, 1, 1, 1, 1])
-        self.gbuff = gbuff(["obs", "act", "adv", "tgt", "lgp"],
+        self.gbuff = gbuff(1000*self.n_ep_train,
+                           ["obs", "act", "adv", "tgt", "lgp"],
                            [obs_dim, pol_dim, 1, 1, 1])
 
         # Initialize learning data report
