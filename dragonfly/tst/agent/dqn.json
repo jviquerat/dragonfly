@@ -2,7 +2,7 @@
     "env_name": "CartPole-v0",
     "n_avg": 3,
     "n_cpu": 1,
-    "n_ep_max": 500,
+    "n_ep_max": 20,
     "trainer": {
         "style": "td",
         "mem_size": 20000,
@@ -14,7 +14,7 @@
     },
     "agent": {
         "type": "dqn",
-        "target_freq": 50,
+        "target_freq": 10,
         "gamma": 0.99,
         "exploration": {
             "type": "linear",
