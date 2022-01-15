@@ -165,10 +165,6 @@ class gbuff:
             tmp = self.data[name].get(smp)
             tmp = tf.cast(tmp, tf.float32)
             dim = self.data[name].get_dim()
-            if (dim == 1):
-                tmp = tf.reshape(tmp, [s])
-            else:
-                tmp = tf.reshape(tmp, [s, dim])
-            out[name] = tmp
+            out[name] = tf.reshape(tmp, [s, dim])
 
         return {name : out[name] for name in names}

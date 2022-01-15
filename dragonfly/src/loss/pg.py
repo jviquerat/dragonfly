@@ -19,7 +19,6 @@ class pg():
 
             # Compute loss
             pdf     = policy.compute_pdf(obs)
-            act     = policy.reshape_actions(act)
             lgp     = pdf.log_prob(act)
             lgp     = tf.multiply(adv, lgp)
             loss_pg =-tf.reduce_mean(lgp)

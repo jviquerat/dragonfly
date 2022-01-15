@@ -79,11 +79,6 @@ class normal(base_policy):
 
         return pdf
 
-    # Reshape actions for training
-    def reshape_actions(self, act):
-
-        return tf.reshape(act, [-1, self.act_dim])
-
     # Networks forward pass
     def call_net(self, state):
 
@@ -92,3 +87,11 @@ class normal(base_policy):
         sg  = tf.square(out[1])
 
         return mu, sg
+
+    # Call loss for training
+    def train(self, obs, adv, act, lgp):
+
+        act = tf.reshape(act, [-1, self.act_dim])
+        adv = tf.reshape(adv, [-1])
+        lgp = tf.reshape(lgp, [-1])
+        return self.loss.train(obs, adv, act, lgp, self)

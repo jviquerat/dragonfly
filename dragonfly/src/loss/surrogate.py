@@ -24,7 +24,6 @@ class surrogate():
 
             # Compute ratio of probabilities
             pdf      = policy.compute_pdf(obs)
-            act      = policy.reshape_actions(act)
             lgp      = pdf.log_prob(act)
             ratio    = tf.exp(lgp - plg)
 
