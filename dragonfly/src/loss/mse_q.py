@@ -12,6 +12,8 @@ class mse_q():
     def train(self, obs, act, tgt, btc, value):
         with tf.GradientTape() as tape:
 
+            tgt = tf.reshape(tgt, [-1])
+
             # Compute loss
             act  = tf.cast(act, tf.int32)
             val  = tf.convert_to_tensor(value.call_net(obs))
