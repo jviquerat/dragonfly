@@ -12,13 +12,11 @@ class mse():
     def train(self, obs, tgt, btc, value):
         with tf.GradientTape() as tape:
 
-            tgt = tf.reshape(tgt, [-1])
-
             # Compute loss
             val  = tf.convert_to_tensor(value.call_net(obs))
             val  = tf.reshape(val, [btc])
-            p1   = tf.square(tgt - val)
-            loss = tf.reduce_mean(p1)
+            diff = tf.square(tgt - val)
+            loss = tf.reduce_mean(diff)
 
             # Apply gradients
             val_var = value.trainables

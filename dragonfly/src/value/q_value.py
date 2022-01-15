@@ -53,4 +53,7 @@ class q_value(base_value):
     # Call loss for training
     def train(self, obs, act, tgt, size):
 
+        tgt = tf.reshape(tgt, [size,-1])
+        act = tf.reshape(act, [size,-1])
+        act = tf.cast(act, tf.int32)
         return self.loss.train(obs, act, tgt, size, self)

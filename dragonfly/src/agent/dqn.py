@@ -95,8 +95,6 @@ class dqn():
     # Training
     def train(self, obs, act, tgt, size):
 
-        act = tf.reshape(act, [size,-1])
-        tgt = tf.reshape(tgt, [size,-1])
         self.q_val.train(obs, act, tgt, size)
         self.update_target()
 

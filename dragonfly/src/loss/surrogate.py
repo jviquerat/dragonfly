@@ -22,12 +22,8 @@ class surrogate():
     def train(self, obs, adv, act, plg, policy):
         with tf.GradientTape() as tape:
 
-            adv = tf.reshape(adv, [-1])
-            plg = tf.reshape(plg, [-1])
-
             # Compute ratio of probabilities
             pdf      = policy.compute_pdf(obs)
-            act      = policy.reshape_actions(act)
             lgp      = pdf.log_prob(act)
             ratio    = tf.exp(lgp - plg)
 

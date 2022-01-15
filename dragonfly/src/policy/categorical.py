@@ -73,12 +73,15 @@ class categorical(base_policy):
 
         return pdf
 
-    # Reshape actions for training
-    def reshape_actions(self, act):
-
-        return tf.reshape(act, [-1])
-
     # Network forward pass
     def call_net(self, state):
 
         return self.net.call(state)
+
+    # Call loss for training
+    def train(self, obs, adv, act, lgp):
+
+        act = tf.reshape(act, [-1])
+        adv = tf.reshape(adv, [-1])
+        lgp = tf.reshape(lgp, [-1])
+        return self.loss.train(obs, adv, act, lgp, self)

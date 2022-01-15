@@ -40,11 +40,6 @@ class base_policy():
 
         self.net.set_weights(weights)
 
-    # Call loss for training
-    def train(self, obs, adv, act, lgp):
-
-        return self.loss.train(obs, adv, act, lgp, self)
-
     # Get current learning rate
     def get_lr(self):
 
