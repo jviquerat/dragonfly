@@ -22,12 +22,12 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [32,32],
+                    "arch": [32],
                     "actv": "swish"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[16],[16]],
+                    "arch": [[32],[32]],
                     "actv": ["swish","swish"],
                     "final": ["tanh","softplus"]
                 }
@@ -40,7 +40,7 @@
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.1,
-                "ent_coef": 0.01
+                "ent_coef": 0.05
             }
         },
         "value": {
