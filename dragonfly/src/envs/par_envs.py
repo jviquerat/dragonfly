@@ -39,6 +39,16 @@ class par_envs:
         self.act_avg = 0.5*(self.act_max + self.act_min)
         self.act_rng = 0.5*(self.act_max - self.act_min)
 
+        self.obs_min, self.obs_max, self.obs_norm = self.get_obs_bounds()
+        self.obs_min = np.where(self.obs_min < -def_obs_max,
+                                -1.0,
+                                self.obs_min)
+        self.obs_max = np.where(self.obs_max >  def_obs_max,
+                                 1.0,
+                                self.obs_max)
+        self.obs_avg = 0.5*(self.obs_max + self.obs_min)
+        self.obs_rng = 0.5*(self.obs_max - self.obs_min)
+
     # Reset all environments
     def reset_all(self):
 
@@ -49,7 +59,8 @@ class par_envs:
         # Receive and normalize
         results = np.array([])
         for p in self.pipes:
-            obs     = p.recv()
+            obs = p.recv()
+            obs = self.norm_obs(obs)
             results = np.append(results, obs)
 
         return np.reshape(results, (-1,self.obs_dim))
@@ -66,7 +77,15 @@ class par_envs:
         for cpu in range(self.n_cpu):
             if (done[cpu]):
                 obs            = self.pipes[cpu].recv()
+                obs            = self.norm_obs(obs)
                 obs_array[cpu] = obs
+
+    def norm_obs(self, obs):
+
+        for i in range(self.obs_dim):
+            obs[i] = (obs[i] - self.obs_avg[i])/self.obs_rng[i]
+
+        return obs
 
     # Get environment dimensions
     def get_dims(self):
@@ -90,6 +109,17 @@ class par_envs:
         act_min, act_max, act_norm = self.pipes[0].recv()
 
         return act_min, act_max, act_norm
+
+    # Get observations boundaries
+    def get_obs_bounds(self):
+
+        # Send
+        self.pipes[0].send(('get_obs_bounds', None))
+
+        # Receive
+        obs_min, obs_max, obs_norm = self.pipes[0].recv()
+
+        return obs_min, obs_max, obs_norm
 
     # Set cpu indices
     def set_cpus(self):
@@ -212,6 +242,18 @@ def worker(env_name, name, pipe, path):
                     act_max  = 1.0
                     act_norm = False
                 pipe.send((act_min, act_max, act_norm))
+
+            if (command == 'get_obs_bounds'):
+                # Continuous observation space
+                if (type(env.observation_space).__name__ == "Box"):
+                    obs_min  = env.observation_space.low
+                    obs_max  = env.observation_space.high
+                    obs_norm = True
+                else:
+                    obs_min  = 1.0
+                    obs_max  = 1.0
+                    obs_norm = False
+                pipe.send((obs_min, obs_max, obs_norm))
 
             if command == 'set_cpu':
                 if hasattr(env, 'cpu'):
