@@ -47,8 +47,8 @@ class normal(base_policy):
     def get_actions(self, obs):
 
         act, lgp = self.sample(obs)
-        act     = tf.clip_by_value(act, -1.0, 1.0)
-        #act      = tf.tanh(act)
+        #act     = tf.clip_by_value(act, -1.0, 1.0)
+        act      = tf.tanh(act)
         act      = np.reshape(act.numpy(), (self.store_dim))
 
         return act, lgp
@@ -84,7 +84,6 @@ class normal(base_policy):
 
         out = self.net.call(state)
         mu  = out[0]
-        #sg  = tf.square(out[1])
         sg  = out[1]
 
         return mu, sg
