@@ -1,5 +1,5 @@
 {
-    "env_name": "Pendulum-v0",
+    "env_name": "pendulum:pendulum-deterministic-v0",
     "n_avg": 3,
     "n_cpu": 1,
     "n_ep_max": 500,
@@ -22,12 +22,12 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [32],
+                    "arch": [16,16],
                     "actv": "swish"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[32],[32]],
+                    "arch": [[],[]],
                     "actv": ["swish","swish"],
                     "final": ["tanh","softplus"]
                 }
@@ -40,7 +40,7 @@
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.1,
-                "ent_coef": 0.05
+                "ent_coef": 0.02
             }
         },
         "value": {
@@ -48,7 +48,7 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [32,32],
+                    "arch": [16,16],
                     "actv": "swish"
                 },
                 "heads": {

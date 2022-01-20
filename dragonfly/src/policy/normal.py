@@ -22,7 +22,7 @@ class normal(base_policy):
         if (pms.network.heads.final[0] != "tanh"):
             warning("normal", "__init__",
                     "Final activation for mean network of normal policy is not tanh")
-        if (pms.network.heads.final[1] != "sigmoid"):
+        if (pms.network.heads.final[1] != "softplus"):
             warning("normal", "__init__",
                     "Final activation for dev network of normal policy is not sigmoid")
 
