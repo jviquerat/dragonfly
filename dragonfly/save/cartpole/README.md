@@ -18,3 +18,9 @@ and using episode-based training:
 <p align="center">
   <img width="700" alt="" src="ppo_episode.png">
 </p>
+
+Below is a resolution of a continuous version of the cartpole environment, using buffer-based PPO:
+
+<p align="center">
+  <img width="700" alt="" src="ppo_buffer_continuous.png">
+</p>
