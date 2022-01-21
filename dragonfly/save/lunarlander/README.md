@@ -7,6 +7,8 @@ The agent learns to land on a landing pad using 4 discrete actions.
   <img width="300" alt="" src="good.gif">
 </p>
 
+Here is a resolution with PPO, using buffer-based training:
+
 <p align="center">
-  <img width="700" alt="" src="ppo.png">
+  <img width="700" alt="" src="ppo_buffer.png">
 </p>
