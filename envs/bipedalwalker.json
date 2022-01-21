@@ -22,25 +22,25 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [64],
+                    "arch": [64,64],
                     "actv": "tanh"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[64],[64]],
+                    "arch": [[],[]],
                     "actv": ["tanh","sigmoid"],
                     "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 2.0e-3,
+                "lr": 1.0e-3,
                 "grd_clip": 0.5
             },
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.1,
-                "ent_coef": 0.05
+                "ent_coef": 0.01
             }
         },
         "value": {
@@ -60,7 +60,7 @@
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 1.0e-2,
+                "lr": 5.0e-3,
                 "grd_clip": 0.5
             },
             "loss": {

@@ -10,3 +10,6 @@ ppo_eps = 1.0e-8
 
 ### Smoothing horizon for score
 n_smooth = 10
+
+### Max value for observations
+def_obs_max = 1.0e8
