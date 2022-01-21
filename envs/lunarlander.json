@@ -1,71 +1,78 @@
 {
     "env_name": "LunarLander-v2",
-    "agent": "ppo",
-    "ep_end": 600,
-    "n_ep": 1400,
     "n_avg": 3,
     "n_cpu": 1,
-    "render_every": 50,
-    "policy": {
-        "type": "categorical",
-        "network": {
-            "type": "fc",
-            "trunk": {
-                "arch": [64,64],
-                "actv": "tanh"
-            },
-            "heads": {
-                "nb": 1,
-                "arch": [[]],
-                "actv": ["tanh"],
-                "final": ["softmax"]
-            }
-        },
-        "optimizer": {
-            "type": "nadam",
-            "lr": 1.0e-3,
-            "grd_clip": 0.1
-        },
-        "loss": {
-            "type": "surrogate",
-            "pol_clip": 0.1,
-            "ent_coef": 0.01
+    "n_ep_max": 1000,
+    "trainer": {
+        "style": "buffer",
+        "buff_size": 512,
+        "n_buff": 8,
+        "batch_frac": 0.5,
+        "n_epochs": 16,
+        "render_every": 100,
+        "terminator": {
+            "type": "bootstrap",
+            "ep_end": 1000
         }
     },
-    "value": {
-        "type": "v_value",
-        "network": {
-            "type": "fc",
-            "trunk": {
-                "arch": [64,64],
-                "actv": "swish"
+    "agent": {
+        "type": "ppo",
+        "policy": {
+            "type": "categorical",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [32,32],
+                    "actv": "tanh"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["tanh"],
+                    "final": ["softmax"]
+                }
             },
-            "heads": {
-                "nb": 1,
-                "arch": [[]],
-                "actv": ["swish"],
-                "final": ["linear"]
+            "optimizer": {
+                "type": "nadam",
+                "lr": 1.0e-3,
+                "grd_clip": 0.5
+            },
+            "loss": {
+                "type": "surrogate",
+                "pol_clip": 0.1,
+                "ent_coef": 0.01
             }
         },
-        "optimizer": {
-            "type": "nadam",
-            "lr": 5.0e-3,
-            "grd_clip": 0.1
+        "value": {
+            "type": "v_value",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [32,32],
+                    "actv": "swish"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["swish"],
+                    "final": ["linear"]
+                }
+            },
+            "optimizer": {
+                "type": "nadam",
+                "lr": 5.0e-3,
+                "grd_clip": 0.5
+            },
+            "loss": {
+                "type": "mse"
+            }
         },
-        "loss": {
-            "type": "mse"
+        "retrn": {
+            "type": "gae",
+            "gamma": 0.99,
+            "gae_lambda": 0.99,
+            "ret_norm": true,
+            "ret_clip": true
         }
-    },
-    "retrn": {
-        "type": "gae",
-        "gamma": 0.99,
-        "gae_lambda": 0.99,
-        "ret_norm": true,
-        "ret_clip": true
-    },
-    "batch_frac": 0.5,
-    "n_buff": 8,
-    "n_epochs": 8,
-    "buff_size": 1024,
-    "bootstrap": true
+    }
 }
