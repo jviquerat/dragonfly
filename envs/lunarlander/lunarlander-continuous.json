@@ -1,18 +1,18 @@
 {
-    "env_name": "cartpole:cartpole-continuous-v0",
+    "env_name": "LunarLanderContinuous-v2",
     "n_avg": 3,
     "n_cpu": 1,
-    "n_ep_max": 300,
+    "n_ep_max": 1500,
     "trainer": {
         "style": "buffer",
-        "buff_size": 128,
-        "n_buff": 8,
+        "buff_size": 512,
+        "n_buff": 16,
         "batch_frac": 0.5,
         "n_epochs": 16,
-        "render_every": 500,
+        "render_every": 100,
         "terminator": {
             "type": "bootstrap",
-            "ep_end": 200
+            "ep_end": 1000
         }
     },
     "agent": {
@@ -22,7 +22,7 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [32,32],
+                    "arch": [64,64],
                     "actv": "swish"
                 },
                 "heads": {
@@ -34,13 +34,13 @@
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 2.0e-3,
+                "lr": 1.0e-3,
                 "grd_clip": 0.5
             },
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.1,
-                "ent_coef": 0.01
+                "ent_coef": 0.02
             }
         },
         "value": {
@@ -48,7 +48,7 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [32,32],
+                    "arch": [64,64],
                     "actv": "swish"
                 },
                 "heads": {
@@ -60,7 +60,7 @@
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 1.0e-2,
+                "lr": 5.0e-3,
                 "grd_clip": 0.5
             },
             "loss": {

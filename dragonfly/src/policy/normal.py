@@ -22,7 +22,7 @@ class normal(base_policy):
         if (pms.network.heads.final[0] != "tanh"):
             warning("normal", "__init__",
                     "Final activation for mean network of normal policy is not tanh")
-        if (pms.network.heads.final[1] != "softplus"):
+        if (pms.network.heads.final[1] != "sigmoid"):
             warning("normal", "__init__",
                     "Final activation for dev network of normal policy is not sigmoid")
 
@@ -47,8 +47,8 @@ class normal(base_policy):
     def get_actions(self, obs):
 
         act, lgp = self.sample(obs)
-        #act     = tf.clip_by_value(act, -1.0, 1.0)
-        act      = tf.tanh(act)
+        act     = tf.clip_by_value(act, -1.0, 1.0)
+        #act      = tf.tanh(act)
         act      = np.reshape(act.numpy(), (self.store_dim))
 
         return act, lgp

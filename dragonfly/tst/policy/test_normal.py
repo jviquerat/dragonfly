@@ -27,6 +27,6 @@ def test_normal():
     act, lgp = policy.get_actions(obs)
     print("Actions:",act)
 
-    assert(np.all(act < 1.0))
-    assert(np.all(act >-1.0))
+    assert(np.all(act <= 1.0))
+    assert(np.all(act >=-1.0))
     print("")
