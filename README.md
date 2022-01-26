@@ -1,8 +1,10 @@
-# dragonfly
+<p align="center">
+  <img width="600" alt="logo" src="dragonfly/msc/logo.png">
+</p>
 
 ![master badge](https://github.com/jviquerat/dragonfly/workflows/dragonfly/badge.svg?branch=master)
 
-Dragonfly is a DRL research library. It follows a basic level of modularity based on a simple abstract factory to make new developments quick and easy. 
+Dragonfly is a small library for DRL. It follows a basic level of modularity based on a simple abstract factory to make new developments quick and easy.
 
 ## Installation and usage
 
