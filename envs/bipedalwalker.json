@@ -4,8 +4,8 @@
     "n_cpu": 1,
     "n_ep_max": 1500,
     "trainer": {
-        "style": "buffer_based",
-        "buff_size": 256,
+        "style": "buffer",
+        "buff_size": 1024,
         "n_buff": 8,
         "batch_frac": 0.5,
         "n_epochs": 8,
@@ -23,24 +23,24 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "tanh"
+                    "actv": "swish"
                 },
                 "heads": {
                     "nb": 2,
                     "arch": [[],[]],
-                    "actv": ["tanh","sigmoid"],
-                    "final": ["tanh","sigmoid"]
+                    "actv": ["swish","swish"],
+                    "final": ["tanh","softplus"]
                 }
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 1.0e-3,
+                "lr": 2.0e-3,
                 "grd_clip": 0.5
             },
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.1,
-                "ent_coef": 0.01
+                "ent_coef": 0.005
             }
         },
         "value": {
@@ -60,7 +60,7 @@
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 5.0e-3,
+                "lr": 1.0e-2,
                 "grd_clip": 0.5
             },
             "loss": {
