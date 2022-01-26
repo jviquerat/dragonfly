@@ -2,6 +2,8 @@
 
 ![master badge](https://github.com/jviquerat/dragonfly/workflows/dragonfly/badge.svg?branch=master)
 
+<img width="700" alt="logo" src="dragonfly/msc/logo.png">
+
 Dragonfly is a DRL research library. It follows a basic level of modularity based on a simple abstract factory to make new developments quick and easy. 
 
 ## Installation and usage
