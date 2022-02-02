@@ -56,7 +56,8 @@ class buff:
 
     def store(self, names, fields):
 
-        for name, field in zip(names, fields):
+        n,f = zip(*[(i,j) for i,j in zip(names,fields) if i in self.names])
+        for name, field in zip(n, f):
             self.data[name].append(field)
 
     def size(self):

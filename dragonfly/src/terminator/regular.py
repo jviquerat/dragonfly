@@ -15,6 +15,7 @@ class regular():
 
         # Initialize arrays
         trm = np.zeros([self.n_cpu])
+        bts = np.zeros([self.n_cpu])
 
         # Loop over steps
         for k in range(buff.length()):
@@ -28,4 +29,4 @@ class regular():
                 trm[i] = float(not (buff.data["dne"].buff[i][k] == True))
 
             # Store terminal data to buffer
-            buff.store(["trm"], [trm])
+            buff.store(["trm", "bts"], [trm, bts])

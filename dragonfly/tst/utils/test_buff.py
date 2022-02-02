@@ -47,6 +47,9 @@ def test_buff():
     loc_buff.reset()
     assert(loc_buff.length() == 0)
 
+    # Test to store data with name not in buffer
+    loc_buff.store(["obs", "act", "rwd", "tst"], [obs, act, rwd, rwd])
+
     #########################
     # Same test with 2 cpus
     n_cpu = 2
