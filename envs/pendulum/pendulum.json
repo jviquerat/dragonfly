@@ -5,7 +5,7 @@
     "n_ep_max": 500,
     "trainer": {
         "style": "buffer",
-        "buff_size": 256,
+        "buff_size": 128,
         "n_buff": 16,
         "batch_frac": 0.5,
         "n_epochs": 16,
@@ -23,7 +23,7 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "swish"
+                    "actv": "tanh"
                 },
                 "heads": {
                     "nb": 2,
@@ -40,7 +40,7 @@
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.1,
-                "ent_coef": 0.05
+                "ent_coef": 0.01
             }
         },
         "value": {
