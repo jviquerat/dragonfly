@@ -64,11 +64,6 @@ class normal(base_policy):
 
         return act, lgp
 
-    # Map actions from [-1,1] to natural range
-    def map_act(self, act):
-
-        return act
-
     # Compute pdf
     def compute_pdf(self, obs):
 

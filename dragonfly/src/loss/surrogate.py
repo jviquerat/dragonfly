@@ -24,8 +24,7 @@ class surrogate():
 
             # Compute ratio of probabilities
             pdf      = policy.compute_pdf(obs)
-            cac      = policy.map_act(act)
-            lgp      = pdf.log_prob(cac)
+            lgp      = pdf.log_prob(act)
             ratio    = tf.exp(lgp - plg)
 
             # Compute actor loss

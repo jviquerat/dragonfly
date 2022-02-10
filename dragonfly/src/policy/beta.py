@@ -66,13 +66,13 @@ class beta(base_policy):
 
         return act, lgp
 
-    # Map actions from [-1,1] to natural range
-    def map_act(self, act):
+    # # Map actiona from [-1,1] to natural range
+    # def map_act(self, act):
 
-        a = tf.add(1.0,act)
-        a = tf.scalar_mul(0.5,a)
+    #     a = tf.add(1.0,act)
+    #     a = tf.scalar_mul(0.5,a)
 
-        return a
+    #     return a
 
     # Compute pdf
     def compute_pdf(self, obs):
