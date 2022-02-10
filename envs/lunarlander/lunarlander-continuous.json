@@ -27,20 +27,20 @@
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[32,[32],
+                    "arch": [[32],[32]],
                     "actv": ["tanh","tanh"],
                     "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 2.5e-4,
+                "lr": 5.0e-4,
                 "grd_clip": 0.1
             },
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.2,
-                "ent_coef": 0.02
+                "ent_coef": 0.01
             }
         },
         "value": {
@@ -60,7 +60,7 @@
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 1.25e-3,
+                "lr": 2.5e-3,
                 "grd_clip": 0.1
             },
             "loss": {

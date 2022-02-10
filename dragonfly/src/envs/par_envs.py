@@ -174,6 +174,7 @@ class par_envs:
         # Send
         for cpu in range(self.n_cpu):
             act = actions[cpu]
+            act = np.clip(act,-1.0,1.0)
             if (self.act_norm):
                 for i in range(self.act_dim):
                     act[i] = self.act_rng[i]*act[i] + self.act_avg[i]

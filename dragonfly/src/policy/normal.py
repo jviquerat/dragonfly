@@ -47,8 +47,6 @@ class normal(base_policy):
     def get_actions(self, obs):
 
         act, lgp = self.sample(obs)
-        act     = tf.clip_by_value(act, -1.0, 1.0)
-        #act      = tf.tanh(act)
         act      = np.reshape(act.numpy(), (self.store_dim))
 
         return act, lgp
@@ -65,6 +63,11 @@ class normal(base_policy):
         lgp = self.pdf.log_prob(act)
 
         return act, lgp
+
+    # Map actions from [-1,1] to natural range
+    def map_act(self, act):
+
+        return act
 
     # Compute pdf
     def compute_pdf(self, obs):
