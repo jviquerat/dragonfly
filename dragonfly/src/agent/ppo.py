@@ -88,6 +88,6 @@ class ppo(base_agent):
         self.v_value.reset()
 
     # Save agent parameters
-    def save(self):
-        
-        self.policy.save()
+    def save(self, filename):
+
+        self.policy.save(filename)

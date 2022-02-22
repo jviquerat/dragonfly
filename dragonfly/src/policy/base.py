@@ -53,6 +53,6 @@ class base_policy():
         self.pdf = None
 
     # Save
-    def save(self):
-        pass
-        #raise NotImplementedError
+    def save(self, filename):
+
+        self.net.save_weights(filename)

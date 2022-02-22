@@ -159,7 +159,7 @@ class buffer(trainer_base):
                 self.print_episode(self.counter, self.report)
                 self.renderer.finish(path, self.counter.ep, cpu)
                 best = self.counter.reset_ep(cpu)
-                if best: agent.save()
+                if best: agent.save(path+'/'+agent.name)
 
     # Train
     def train(self, agent):
