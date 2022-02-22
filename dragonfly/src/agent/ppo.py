@@ -1,18 +1,9 @@
-# Generic imports
-import math
-import copy
-import numpy as np
-
 # Custom imports
-from dragonfly.src.policy.policy  import *
-from dragonfly.src.value.value    import *
-from dragonfly.src.retrn.retrn    import *
-from dragonfly.src.core.constants import *
-from dragonfly.src.utils.error    import *
+from dragonfly.src.agent.base import *
 
 ###############################################
 ### PPO agent
-class ppo():
+class ppo(base_agent):
     def __init__(self, obs_dim, act_dim, n_cpu, pms):
 
         # Initialize from arguments
@@ -48,7 +39,7 @@ class ppo():
                                           pms = pms.retrn)
 
     # Get actions
-    def get_actions(self, observations):
+    def get_actions(self, obs):
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
@@ -58,8 +49,7 @@ class ppo():
 
         # Loop over cpus
         for i in range(self.n_cpu):
-            obs              = observations[i]
-            act[i,:], lgp[i] = self.policy.get_actions(obs)
+            act[i,:], lgp[i] = self.policy.get_actions(obs[i])
 
         # Reshape actions depending on policy type
         if (self.policy.kind == "discrete"):
