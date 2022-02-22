@@ -26,5 +26,4 @@ class base_agent():
 
     # Save
     def save(self):
-        pass
-        #raise NotImplementedError
+        raise NotImplementedError

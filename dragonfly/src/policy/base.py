@@ -51,3 +51,8 @@ class base_policy():
         self.net.reset()
         self.opt.reset()
         self.pdf = None
+
+    # Save
+    def save(self):
+        pass
+        #raise NotImplementedError
