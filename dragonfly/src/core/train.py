@@ -54,6 +54,7 @@ def train(json_file):
     for run in range(pms.n_avg):
         liner()
         print('Avg run #'+str(run))
+        os.makedirs(path+'/'+str(run), exist_ok=True)
         agent.reset()
         trainer.reset()
         env.set_cpus()

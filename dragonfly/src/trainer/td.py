@@ -127,7 +127,6 @@ class td(trainer_base):
             gobs, gnxt, gact, grwd, gtrm = (data[name] for name in names)
             gtgt = agent.compute_target(gobs, gnxt, gact, grwd, gtrm)
 
-
             # Store in global buffers
             self.gbuff.store(["obs", "tgt", "act"],
                              [gobs,  gtgt,  gact ])
