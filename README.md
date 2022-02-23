@@ -21,7 +21,7 @@ pip install -e .
 Environments are expected to be available locally or present in the path. To train an agent on an environment, a `.json` case file is required (sample files are available for standard `gym` envs in `dragonfly/envs`). Once you have written the corresponding `<env_name>.json` file to configure your agent, just run:
 
 ```
-dgf --train <env_name>.json
+dgf --train <json_file>
 ```
 
 To evaluate a trained agent, you will need a trained agent saved with `tf` format, as well as a `.json` case file. Then, just run:
