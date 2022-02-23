@@ -1,18 +1,9 @@
-# Generic imports
-import math
-import copy
-import numpy as np
-
 # Custom imports
-from dragonfly.src.policy.policy  import *
-from dragonfly.src.value.value    import *
-from dragonfly.src.retrn.retrn    import *
-from dragonfly.src.core.constants import *
-from dragonfly.src.utils.error    import *
+from dragonfly.src.agent.base import *
 
 ###############################################
 ### PPO agent
-class ppo():
+class ppo(base_agent):
     def __init__(self, obs_dim, act_dim, n_cpu, pms):
 
         # Initialize from arguments
@@ -48,7 +39,7 @@ class ppo():
                                           pms = pms.retrn)
 
     # Get actions
-    def get_actions(self, observations):
+    def get_actions(self, obs):
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
@@ -58,8 +49,7 @@ class ppo():
 
         # Loop over cpus
         for i in range(self.n_cpu):
-            obs              = observations[i]
-            act[i,:], lgp[i] = self.policy.get_actions(obs)
+            act[i,:], lgp[i] = self.policy.get_actions(obs[i])
 
         # Reshape actions depending on policy type
         if (self.policy.kind == "discrete"):
@@ -72,6 +62,30 @@ class ppo():
             error("ppo", "get_actions", "Detected NaN in generated actions")
 
         return act, lgp
+
+    # Control (deterministic actions)
+    def control(self, obs):
+
+        # "obs" possibly contains observations from multiple parallel
+        # environments. We assume it does and unroll it in a loop
+        act = np.zeros([self.n_cpu, self.pol_dim],
+                       dtype=self.policy.store_type)
+
+        # Loop over cpus
+        for i in range(self.n_cpu):
+            act[i,:] = self.policy.control(obs[i])
+
+        # Reshape actions depending on policy type
+        if (self.policy.kind == "discrete"):
+            act = np.reshape(act, (-1))
+        if (self.policy.kind == "continuous"):
+            act = np.reshape(act, (-1,self.pol_dim))
+
+        # Check for NaNs
+        if (np.isnan(act).any()):
+            error("ppo", "get_actions", "Detected NaN in generated actions")
+
+        return act
 
     # Finalize buffers before training
     def compute_returns(self, obs, nxt, act, rwd, trm, bts):
@@ -96,3 +110,13 @@ class ppo():
 
         self.policy.reset()
         self.v_value.reset()
+
+    # Save agent parameters
+    def save(self, filename):
+
+        self.policy.save(filename)
+
+    # Load agent parameters
+    def load(self, filename):
+
+        self.policy.load(filename)

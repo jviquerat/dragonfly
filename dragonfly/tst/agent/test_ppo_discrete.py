@@ -1,5 +1,6 @@
 # Generic imports
 import os
+import shutil
 import pytest
 
 # Custom imports
@@ -41,20 +42,22 @@ def test_ppo_discrete():
                                      pms=reader.pms.trainer)
 
     print("Test discrete ppo")
+    os.makedirs("0/", exist_ok=True)
+    os.makedirs("1/", exist_ok=True)
     trainer.reset()
     agent.reset()
     env.set_cpus()
     trainer.loop(".", 0, env, agent)
-    averager.store("ppo_0.dat", 0)
+    averager.store("0/ppo_0.dat", 0)
     trainer.reset()
     agent.reset()
     env.set_cpus()
     trainer.loop(".", 1, env, agent)
-    averager.store("ppo_1.dat", 1)
+    averager.store("1/ppo_1.dat", 1)
     env.close()
     averager.average("ppo_avg.dat")
 
-    os.remove("ppo_0.dat")
-    os.remove("ppo_1.dat")
+    shutil.rmtree("0")
+    shutil.rmtree("1")
     os.remove("ppo_avg.dat")
     print("")

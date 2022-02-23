@@ -14,14 +14,7 @@ from dragonfly.src.envs.par_envs   import *
 from dragonfly.src.plot.plot       import *
 
 # Average training over multiple runs
-def run():
-
-    # Check command-line input for json file
-    if (len(sys.argv) == 2):
-        json_file = sys.argv[1]
-    else:
-        print('Command line error, please use as follows:')
-        print('python3 start.py my_file.json')
+def train(json_file):
 
     # Initialize json parser and read parameters
     parser = json_parser()
@@ -58,15 +51,15 @@ def run():
                                      pms      = pms.trainer)
 
     # Run
-    disclaimer()
     for run in range(pms.n_avg):
         liner()
         print('Avg run #'+str(run))
+        os.makedirs(path+'/'+str(run), exist_ok=True)
         agent.reset()
         trainer.reset()
         env.set_cpus()
         trainer.loop(path, run, env, agent)
-        filename = path+'/'+pms.agent.type+'_'+str(run)+'.dat'
+        filename = path+'/'+str(run)+'/'+pms.agent.type+'_'+str(run)+'.dat'
         averager.store(filename, run)
 
     # Close environments

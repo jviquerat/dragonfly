@@ -18,6 +18,10 @@ class base_policy():
     def get_actions(self, obs):
         raise NotImplementedError
 
+    # Control (deterministic actions)
+    def control(self, obs):
+        raise NotImplementedError
+
     # Compute pdf
     def compute_pdf(self, obs):
         raise NotImplementedError
@@ -51,3 +55,14 @@ class base_policy():
         self.net.reset()
         self.opt.reset()
         self.pdf = None
+
+    # Save
+    def save(self, filename):
+
+        self.net.save_weights(filename)
+
+    # Load
+    def load(self, filename):
+
+        load_status = self.net.load_weights(filename)
+        load_status.assert_consumed()

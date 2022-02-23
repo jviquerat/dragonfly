@@ -78,13 +78,17 @@ class counter:
     # Reset episode counters and update best values
     def reset_ep(self, cpu):
 
+        best = False
         if (self.score[cpu] >= self.best_score):
+            best            = True
             self.best_score = self.score[cpu]
             self.best_ep    = self.ep
 
         self.score[cpu]   = 0
         self.ep_step[cpu] = 0
         self.ep          += 1
+
+        return best
 
     # Expose current episode number
     def get_ep(self):
