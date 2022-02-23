@@ -110,7 +110,7 @@ class buffer(trainer_base):
                 self.renderer.store(env.render(self.renderer.render))
 
                 # Finish if some episodes are done
-                self.finish_episodes(agent, path, dne)
+                self.finish_episodes(agent, path, run, dne)
 
                 # Update observation
                 obs = nxt
@@ -150,7 +150,7 @@ class buffer(trainer_base):
         self.timer_training.show()
 
     # Finish if some episodes are done
-    def finish_episodes(self, agent, path, done):
+    def finish_episodes(self, agent, path, run, done):
 
         # Loop over environments and finalize/reset
         for cpu in range(self.n_cpu):
@@ -159,7 +159,7 @@ class buffer(trainer_base):
                 self.print_episode(self.counter, self.report)
                 self.renderer.finish(path, self.counter.ep, cpu)
                 best = self.counter.reset_ep(cpu)
-                if best: agent.save(path+"/"+agent.name)
+                if best: agent.save(path+"/"+str(run)+"/"+agent.name)
 
     # Train
     def train(self, agent):

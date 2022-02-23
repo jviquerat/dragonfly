@@ -18,11 +18,19 @@ cd dragonfly
 pip install -e .
 ```
 
-Environments are expected to be available locally or present in the path. Once you have written the corresponding `<env_name>.json` file to configure your agent (sample `.json` files are available in `envs/`), just run:
+Environments are expected to be available locally or present in the path. To train an agent on an environment, a `.json` case file is required (sample files are available for standard `gym` envs in `dragonfly/envs`). Once you have written the corresponding `<env_name>.json` file to configure your agent, just run:
 
 ```
-dragonfly <env_name>.json
+dgf --train <env_name>.json
 ```
+
+To evaluate a trained agent, you will need a trained agent saved with `tf` format, as well as a `.json` case file. Then, just run:
+
+``` 
+dgf --eval -net <net_file> -json <json_file>
+```
+
+In that case, the environment will just rely on the `done` signal to stop the evaluation. Alternatively, you can provide a `-steps <n>` option, that will override the `done` signal of the environment, and force its execution for `n` steps. Trained agents for standard `gym` environements are available in `dragonfly/envs`.
 
 ## Solved environments
 

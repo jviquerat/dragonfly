@@ -58,7 +58,7 @@ def train(json_file):
         trainer.reset()
         env.set_cpus()
         trainer.loop(path, run, env, agent)
-        filename = path+'/'+pms.agent.type+'_'+str(run)+'.dat'
+        filename = path+'/'+str(run)+'/'+pms.agent.type+'_'+str(run)+'.dat'
         averager.store(filename, run)
 
     # Close environments
