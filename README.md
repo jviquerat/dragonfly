@@ -38,7 +38,7 @@ Below are a few environment solved with the library.
 
 | Environment | Description | Illustration |
 | :--- | :--- | :---: |
-| `CartPole-v0` | The basic `gym` environment. The agent learns to balance a pole fixed to a moving cart, using discrete lateral movements of the cart. See additional details <a href="dragonfly/save/cartpole/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/save/cartpole/good.gif"> |
-| `Pendulum-v0` | The basic `gym` environment. The agent learns to balance a 1-bar pendulum vertically, using limited torque force. See additional details <a href="dragonfly/save/pendulum/README.md">here</a>.  | <img width="500" alt="gif" src="dragonfly/save/pendulum/good.gif"> |
-| `Acrobot-v1` | The basic `gym` environment. The agent learns to swing a two-links system up to a certain height. See additional details <a href="dragonfly/save/acrobot/README.md">here</a>.  | <img width="500" alt="gif" src="dragonfly/save/acrobot/good.gif">
-| `LunarLander-v2` | The basic `gym` environment. The agent learns to land on a landing pad using 4 discrete actions. See additional details <a href="dragonfly/save/lunarlander/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/save/lunarlander/good.gif"> |
+| `CartPole-v0` | The basic `gym` environment. The agent learns to balance a pole fixed to a moving cart, using discrete lateral movements of the cart. See additional details <a href="dragonfly/envs/cartpole/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/envs/cartpole/good.gif"> |
+| `Pendulum-v0` | The basic `gym` environment. The agent learns to balance a 1-bar pendulum vertically, using limited torque force. See additional details <a href="dragonfly/envs/pendulum/README.md">here</a>.  | <img width="500" alt="gif" src="dragonfly/envs/pendulum/good.gif"> |
+| `Acrobot-v1` | The basic `gym` environment. The agent learns to swing a two-links system up to a certain height. See additional details <a href="dragonfly/envs/acrobot/README.md">here</a>.  | <img width="500" alt="gif" src="dragonfly/envs/acrobot/good.gif">
+| `LunarLander-v2` | The basic `gym` environment. The agent learns to land on a landing pad using 4 discrete actions. See additional details <a href="dragonfly/envs/lunarlander/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/envs/lunarlander/good.gif"> |
