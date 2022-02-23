@@ -8,3 +8,6 @@ vids
 lorenz
 results
 *.egg-info
+checkpoint
+*.data*
+*.index

@@ -63,6 +63,30 @@ class ppo(base_agent):
 
         return act, lgp
 
+    # Control (deterministic actions)
+    def control(self, obs):
+
+        # "obs" possibly contains observations from multiple parallel
+        # environments. We assume it does and unroll it in a loop
+        act = np.zeros([self.n_cpu, self.pol_dim],
+                       dtype=self.policy.store_type)
+
+        # Loop over cpus
+        for i in range(self.n_cpu):
+            act[i,:] = self.policy.control(obs[i])
+
+        # Reshape actions depending on policy type
+        if (self.policy.kind == "discrete"):
+            act = np.reshape(act, (-1))
+        if (self.policy.kind == "continuous"):
+            act = np.reshape(act, (-1,self.pol_dim))
+
+        # Check for NaNs
+        if (np.isnan(act).any()):
+            error("ppo", "get_actions", "Detected NaN in generated actions")
+
+        return act
+
     # Finalize buffers before training
     def compute_returns(self, obs, nxt, act, rwd, trm, bts):
 
@@ -91,3 +115,8 @@ class ppo(base_agent):
     def save(self, filename):
 
         self.policy.save(filename)
+
+    # Load agent parameters
+    def load(self, filename):
+
+        self.policy.load(filename)

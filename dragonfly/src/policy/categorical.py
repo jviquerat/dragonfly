@@ -48,6 +48,16 @@ class categorical(base_policy):
 
         return act, lgp
 
+    # Control (deterministic actions)
+    def control(self, obs):
+
+        obs   = tf.cast([obs], tf.float32)
+        probs = self.call_net(obs)
+        act   = tf.argmax(probs[0][0])
+        act   = np.reshape(act.numpy(), (self.store_dim))
+
+        return act
+
     # Sample actions
     @tf.function
     def sample(self, obs):

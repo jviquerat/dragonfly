@@ -51,7 +51,6 @@ def train(json_file):
                                      pms      = pms.trainer)
 
     # Run
-    disclaimer()
     for run in range(pms.n_avg):
         liner()
         print('Avg run #'+str(run))
