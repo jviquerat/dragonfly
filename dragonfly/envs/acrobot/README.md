@@ -7,6 +7,8 @@ The agent learns to swing a two-links system by applying torque to the central j
   <img width="300" alt="" src="good.gif">
 </p>
 
+Here is a resolution with buffer-based ppo:
+
 <p align="center">
   <img width="700" alt="" src="ppo_buffer.png">
 </p>
