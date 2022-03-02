@@ -1,3 +1,6 @@
+# Custom imports
+from dragonfly.src.utils.error import *
+
 ###############################################
 ### A very basic factory
 class factory:
@@ -9,5 +12,10 @@ class factory:
 
     def create(self, key, **kwargs):
         creator = self.keys.get(key)
-        if not creator: raise ValueError(key)
+        if not creator:
+            try:
+                raise ValueError(key)
+            except ValueError:
+                error("factory", "create", "Unknown key provided")
+                raise
         return creator(**kwargs)
