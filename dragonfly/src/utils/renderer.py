@@ -20,14 +20,19 @@ class renderer:
         self.render = [False for _ in range(self.n_cpu)]
 
     # Store one rendering step for all cpus
-    def store(self, rnd):
+    def store(self, rnd, style):
+
+        self.style = style
 
         # Not all environment render simultaneously
         # We use a list to select those that render and those that don't
         for cpu in range(self.n_cpu):
             if (self.render[cpu]):
-                img = PIL.Image.fromarray(rnd[cpu])
-                self.rgb[cpu].append(img)
+                if (style == 'rgb_array'):
+                    img = PIL.Image.fromarray(rnd[cpu])
+                    self.rgb[cpu].append(img)
+                #if (style == 'human'):
+                    # Do nothing
 
     # Finish rendering process, saving to gif
     def finish(self, path, ep, cpu):
@@ -35,13 +40,14 @@ class renderer:
         # Render if necessary
         if (self.render[cpu]):
             self.render[cpu] = False
-            self.rgb[cpu][0].save(path+'/'+str(ep)+'.gif',
-                                  save_all=True,
-                                  append_images=self.rgb[cpu][1:],
-                                  optimize=False,
-                                  duration=50,
-                                  loop=1)
-            self.rgb[cpu] = []
+            if (self.style == 'rgb_array'):
+                self.rgb[cpu][0].save(path+'/'+str(ep)+'.gif',
+                                      save_all=True,
+                                      append_images=self.rgb[cpu][1:],
+                                      optimize=False,
+                                      duration=50,
+                                      loop=1)
+                self.rgb[cpu] = []
 
         # Prepare next rendering step
         if (((ep+1)%self.render_every == 0) and (ep != 0)):
