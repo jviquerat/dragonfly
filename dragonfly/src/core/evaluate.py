@@ -52,7 +52,7 @@ def evaluate(net_file, json_file, ns):
         n            += 1
 
         env.render(rnd.render)
-        rnd.store(env.render(rnd.render))
+        rnd.store(env.render(rnd.render), env.rnd_style)
         if (term_ns and n >= ns): break
         if (term_dn and dne):     break
 

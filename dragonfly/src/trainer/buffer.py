@@ -107,7 +107,7 @@ class buffer(trainer_base):
                 self.counter.update(rwd)
 
                 # Handle rendering
-                self.renderer.store(env.render(self.renderer.render))
+                self.renderer.store(env.render(self.renderer.render), env.rnd_style)
 
                 # Finish if some episodes are done
                 self.finish_episodes(agent, path, run, dne)

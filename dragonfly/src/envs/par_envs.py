@@ -49,6 +49,9 @@ class par_envs:
         self.obs_avg = 0.5*(self.obs_max + self.obs_min)
         self.obs_rng = 0.5*(self.obs_max - self.obs_min)
 
+        # Handle rendering
+        self.rnd_style = self.get_rnd_style()
+
     # Reset all environments
     def reset_all(self):
 
@@ -121,12 +124,16 @@ class par_envs:
 
         return obs_min, obs_max, obs_norm
 
-    # Set cpu indices
-    def set_cpus(self):
+    # Get rendering style
+    def get_rnd_style(self):
 
         # Send
-        for cpu in range(self.n_cpu):
-            self.pipes[cpu].send(('set_cpu', [cpu, self.n_cpu]))
+        self.pipes[0].send(('get_rnd_style', None))
+
+        # Receive
+        rnd_style = self.pipes[0].recv()
+
+        return rnd_style
 
     # Render environment
     def render(self, render):
@@ -138,7 +145,7 @@ class par_envs:
         # Send
         for cpu in range(self.n_cpu):
             if (render[cpu]):
-                self.pipes[cpu].send(('render', None))
+                self.pipes[cpu].send(('render', self.rnd_style))
 
         # Receive
         for cpu in range(self.n_cpu):
@@ -157,6 +164,13 @@ class par_envs:
         rgb = self.pipes[cpu].recv()
 
         return rgb
+
+    # Set cpu indices
+    def set_cpus(self):
+
+        # Send
+        for cpu in range(self.n_cpu):
+            self.pipes[cpu].send(('set_cpu', [cpu, self.n_cpu]))
 
     # Close
     def close(self):
@@ -184,7 +198,7 @@ class par_envs:
         # Receive
         nxt  = np.array([])
         rwd  = np.array([])
-        done = np.array([], dtype=np.bool)
+        done = np.array([], dtype=bool)
 
         for p in self.pipes:
             n, r, d = p.recv()
@@ -218,7 +232,7 @@ def worker(env_name, name, pipe, path):
                 pipe.send(None)
 
             if command == 'render':
-                pipe.send(env.render(mode='rgb_array'))
+                pipe.send(env.render(mode=data))
 
             if command == 'get_dims':
                 # Discrete action space
@@ -255,6 +269,14 @@ def worker(env_name, name, pipe, path):
                     obs_max  = 1.0
                     obs_norm = False
                 pipe.send((obs_min, obs_max, obs_norm))
+
+            if command == 'get_rnd_style':
+                rnd_style = env.metadata.get('render.modes')
+                if "rgb_array" in rnd_style:
+                    rnd_style = "rgb_array"
+                else:
+                    rnd_style = "human"
+                pipe.send(rnd_style)
 
             if command == 'set_cpu':
                 if hasattr(env, 'cpu'):

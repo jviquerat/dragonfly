@@ -107,7 +107,7 @@ class td(trainer_base):
                 self.counter.unroll += 1
 
                 # Handle rendering
-                self.renderer.store(env.render(self.renderer.render))
+                self.renderer.store(env.render(self.renderer.render), env.rnd_style)
 
                 # Finish if some episodes are done
                 self.finish_episodes(path, dne)
