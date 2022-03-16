@@ -1,0 +1,78 @@
+{
+    "env_name": "env:lorenz-discrete-v0",
+    "n_avg": 3,
+    "n_cpu": 1,
+    "n_ep_max": 5000,
+    "trainer": {
+        "style": "buffer",
+        "buff_size": 512,
+        "n_buff": 16,
+        "batch_frac": 0.5,
+        "n_epochs": 16,
+        "render_every": 5000,
+        "terminator": {
+            "type": "bootstrap",
+            "ep_end": 1000
+        }
+    },
+    "agent": {
+        "type": "ppo",
+        "policy": {
+            "type": "categorical",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [32,32],
+                    "actv": "tanh"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["tanh"],
+                    "final": ["softmax"]
+                }
+            },
+            "optimizer": {
+                "type": "nadam",
+                "lr": 5.0e-4,
+                "grd_clip": 0.1
+            },
+            "loss": {
+                "type": "surrogate",
+                "pol_clip": 0.2,
+                "ent_coef": 0.01
+            }
+        },
+        "value": {
+            "type": "v_value",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [32,32],
+                    "actv": "swish"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["swish"],
+                    "final": ["linear"]
+                }
+            },
+            "optimizer": {
+                "type": "nadam",
+                "lr": 2.5e-3,
+                "grd_clip": 0.1
+            },
+            "loss": {
+                "type": "mse"
+            }
+        },
+        "retrn": {
+            "type": "gae",
+            "gamma": 0.99,
+            "gae_lambda": 0.99,
+            "ret_norm": true,
+            "ret_clip": false
+        }
+    }
+}

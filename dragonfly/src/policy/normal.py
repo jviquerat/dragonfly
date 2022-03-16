@@ -87,6 +87,7 @@ class normal(base_policy):
         return pdf
 
     # Networks forward pass
+    @tf.function
     def call_net(self, state):
 
         out = self.net.call(state)
@@ -101,4 +102,5 @@ class normal(base_policy):
         act = tf.reshape(act, [-1, self.act_dim])
         adv = tf.reshape(adv, [-1])
         lgp = tf.reshape(lgp, [-1])
+
         return self.loss.train(obs, adv, act, lgp, self)

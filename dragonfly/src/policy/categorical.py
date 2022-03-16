@@ -84,6 +84,7 @@ class categorical(base_policy):
         return pdf
 
     # Network forward pass
+    @tf.function
     def call_net(self, state):
 
         return self.net.call(state)
@@ -94,4 +95,5 @@ class categorical(base_policy):
         act = tf.reshape(act, [-1])
         adv = tf.reshape(adv, [-1])
         lgp = tf.reshape(lgp, [-1])
+
         return self.loss.train(obs, adv, act, lgp, self)
