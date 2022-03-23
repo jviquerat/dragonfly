@@ -49,3 +49,7 @@ def main():
             n_steps = int(args[args.index("-steps")+1])
         evaluate(net_file, json_file, n_steps)
         return
+
+if __name__ == "__main__":
+
+    main()
