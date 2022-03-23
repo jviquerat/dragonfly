@@ -115,10 +115,6 @@ class rbuff:
 
         return start, end
 
-    def get(self, idx):
-
-        return [self.buff[i] for i in idx]
-
 ###############################################
 ### Global parallel buffer class, used to store
 ### all data since the beginning of learning
@@ -157,15 +153,14 @@ class gbuff:
         s          = end-start
 
         # Randomized indices
-        smp = np.arange(start, end)
-        if (shuffle): np.random.shuffle(smp)
+        p = np.arange(start, end)
+        if (shuffle): p = np.random.permutation(s)
 
         # Return shuffled fields
         out = {}
         for name in names:
-            tmp = self.data[name].get(smp)
+            tmp = self.data[name].buff[p]
             tmp = tf.cast(tmp, tf.float32)
             dim = self.data[name].get_dim()
             out[name] = tf.reshape(tmp, [s, dim])
-
         return {name : out[name] for name in names}
