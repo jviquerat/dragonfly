@@ -21,7 +21,8 @@ def train(json_file):
     pms    = parser.read(json_file)
 
     # Create paths for results and open repositories
-    res_path = 'results'
+    base_path = os.path.abspath(os.getcwd())
+    res_path  = 'results'
     t         = time.localtime()
     path_time = time.strftime("%H-%M-%S", t)
     path      = res_path+'/'+pms.env_name+'_'+str(path_time)
@@ -31,7 +32,7 @@ def train(json_file):
     os.makedirs(path,     exist_ok=True)
 
     # Declare environement
-    env   = par_envs(pms.env_name, pms.n_cpu, path)
+    env   = par_envs(pms.env_name, pms.n_cpu, base_path)
     agent = agent_factory.create(pms.agent.type,
                                  obs_dim = env.obs_dim,
                                  act_dim = env.act_dim,

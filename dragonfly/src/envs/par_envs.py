@@ -1,4 +1,6 @@
 # Generic imports
+import os
+import sys
 import gym
 import numpy           as np
 import multiprocessing as mp
@@ -212,7 +214,17 @@ class par_envs:
 
 # Target function for process
 def worker(env_name, name, pipe, path):
-    env = gym.make(env_name)
+
+    # Build environment
+    try:
+        env = gym.make(env_name)
+    except:
+        sys.path.append(path)
+        module    = __import__(env_name)
+        env_build = getattr(module, env_name)
+        env       = env_build()
+
+    # Run
     try:
         while True:
             # Receive command
