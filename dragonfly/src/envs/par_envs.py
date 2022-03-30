@@ -167,13 +167,6 @@ class par_envs:
 
         return rgb
 
-    # Set cpu indices
-    def set_cpus(self):
-
-        # Send
-        for cpu in range(self.n_cpu):
-            self.pipes[cpu].send(('set_cpu', [cpu, self.n_cpu]))
-
     # Close
     def close(self):
 
@@ -213,7 +206,7 @@ class par_envs:
         return nxt, rwd, done
 
 # Target function for process
-def worker(env_name, name, pipe, path):
+def worker(env_name, cpu, pipe, path):
 
     # Build environment
     try:
@@ -222,7 +215,10 @@ def worker(env_name, name, pipe, path):
         sys.path.append(path)
         module    = __import__(env_name)
         env_build = getattr(module, env_name)
-        env       = env_build()
+        try:
+            env = env_build(cpu)
+        except:
+            env = env_build()
 
     # Run
     try:
@@ -289,10 +285,6 @@ def worker(env_name, name, pipe, path):
                 else:
                     rnd_style = "human"
                 pipe.send(rnd_style)
-
-            if command == 'set_cpu':
-                if hasattr(env, 'cpu'):
-                    env.set_cpu(data[0], data[1])
 
             if command == 'close':
                 pipe.send(None)

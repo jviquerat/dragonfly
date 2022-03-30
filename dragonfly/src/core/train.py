@@ -58,7 +58,6 @@ def train(json_file):
         os.makedirs(path+'/'+str(run), exist_ok=True)
         agent.reset()
         trainer.reset()
-        env.set_cpus()
         trainer.loop(path, run, env, agent)
         filename = path+'/'+str(run)+'/'+pms.agent.type+'_'+str(run)+'.dat'
         averager.store(filename, run)
