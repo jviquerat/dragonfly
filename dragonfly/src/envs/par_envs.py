@@ -85,12 +85,20 @@ class par_envs:
                 obs            = self.norm_obs(obs)
                 obs_array[cpu] = obs
 
+    # Normalize observations
     def norm_obs(self, obs):
 
         for i in range(self.obs_dim):
             obs[i] = (obs[i] - self.obs_avg[i])/self.obs_rng[i]
 
         return obs
+
+    # Check action type
+    def get_action_type(self):
+
+        self.pipes[0].send(('get_action_type', None))
+        t = self.pipes[0].recv()
+        return t
 
     # Get environment dimensions
     def get_dims(self):
@@ -242,6 +250,12 @@ def worker(env_name, cpu, pipe, path):
             if command == 'render':
                 pipe.send(env.render(mode=data))
 
+            if command == "get_action_type":
+                if (type(env.action_space).__name__ == "Discrete"):
+                    pipe.send("discrete")
+                if (type(env.action_space).__name__ == "Box"):
+                    pipe.send("continuous")
+
             if command == 'get_dims':
                 # Discrete action space
                 if (type(env.action_space).__name__ == "Discrete"):
@@ -260,7 +274,7 @@ def worker(env_name, cpu, pipe, path):
                     act_min  = env.action_space.low
                     act_max  = env.action_space.high
                     act_norm = True
-                else:
+                if (type(env.action_space).__name__ == "Discrete"):
                     act_min  = 1.0
                     act_max  = 1.0
                     act_norm = False

@@ -10,9 +10,10 @@ def error():
     new_line()
     errr("""Command line error. Possible behaviors are:
     dgf --train <json_file>
-    dgf --eval -net   <net_file>
-               -json  <json_file>
-               -steps <n_steps> (optional)""")
+    dgf --eval -net    <net_file>
+               -json   <json_file>
+               -steps  <n_steps> (optional)
+               -warmup <n_warmup> <a_warmup> (optional, requires -steps option)""")
 
 def main():
 
@@ -44,10 +45,19 @@ def main():
         if ("-json" not in args): error()
         json_file = args[args.index("-json")+1]
 
-        n_steps = -1
+        n_steps = 0
         if ("-steps" in args):
             n_steps = int(args[args.index("-steps")+1])
-        evaluate(net_file, json_file, n_steps)
+
+        n_warmup = 0
+        a_warmup = None
+        if ("-warmup" in args):
+            if ("-steps" not in args):
+                error()
+            n_warmup = int(args[args.index("-warmup")+1])
+            a_warmup = args[args.index("-warmup")+2]
+
+        evaluate(net_file, json_file, n_steps, n_warmup, a_warmup)
         return
 
 if __name__ == "__main__":

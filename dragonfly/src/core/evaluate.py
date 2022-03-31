@@ -9,7 +9,7 @@ from dragonfly.src.utils.renderer import *
 from dragonfly.src.utils.prints   import *
 
 # Evaluate agent
-def evaluate(net_file, json_file, ns):
+def evaluate(net_file, json_file, ns, nw, aw):
 
     # Initialize json parser and read parameters
     parser = json_parser()
@@ -17,7 +17,6 @@ def evaluate(net_file, json_file, ns):
 
     # Load environment
     env = par_envs(pms.env_name, 1, ".")
-    env.set_cpus()
 
     # Create renderer
     rnd = renderer(1, 1)
@@ -37,14 +36,27 @@ def evaluate(net_file, json_file, ns):
     term_ns = True
     term_dn = False
 
-    if (ns == -1):
+    if (ns == 0):
         term_ns = False
         term_dn = True
 
-    # Unroll
+    # Reset
     n   = 0
     crd = 0.0
     obs = env.reset_all()
+
+    # Specify warmup (unrolling without control)
+    if (nw > 0):
+        # Retrieve action type
+        t  = env.get_action_type()
+        if (t == "continuous"): act = [[float(aw)]]
+        if (t == "discrete"):   act = [[int(aw)]]
+
+        # Loop with neutral action
+        for i in range(nw):
+            obs, rwd, dne = env.step(act)
+
+    # Unroll
     while True:
         act           = agent.control(obs)
         obs, rwd, dne = env.step(act)
