@@ -8,7 +8,7 @@ from dragonfly.src.utils.prints  import *
 
 def error():
     new_line()
-    errr("""Command line error. Possible behaviors are:
+    errr("""Command line error. Possible behaviors:
     dgf --train <json_file>
     dgf --eval -net    <net_file>
                -json   <json_file>
@@ -61,5 +61,4 @@ def main():
         return
 
 if __name__ == "__main__":
-
     main()

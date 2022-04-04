@@ -42,8 +42,11 @@ def evaluate(net_file, json_file, ns, nw, aw):
 
     # Reset
     n   = 0
-    crd = 0.0
+    scr = 0.0
     obs = env.reset_all()
+
+    # Set environment control tag to true if possible
+    env.set_control()
 
     # Specify warmup (unrolling without control)
     if (nw > 0):
@@ -60,7 +63,7 @@ def evaluate(net_file, json_file, ns, nw, aw):
     while True:
         act           = agent.control(obs)
         obs, rwd, dne = env.step(act)
-        crd          += rwd[0]
+        scr          += rwd[0]
         n            += 1
 
         env.render(rnd.render)
@@ -76,5 +79,5 @@ def evaluate(net_file, json_file, ns, nw, aw):
     spacer()
     print('Performed steps:  '+str(n))
     spacer()
-    print('Cumulated reward: '+str(crd))
+    print('Cumulated reward: '+str(scr))
 

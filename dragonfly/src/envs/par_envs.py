@@ -213,6 +213,11 @@ class par_envs:
 
         return nxt, rwd, done
 
+    # Set control to true if possible
+    def set_control(self):
+
+        self.pipes[0].send(('set_control', None))
+
 # Target function for process
 def worker(env_name, cpu, pipe, path):
 
@@ -303,5 +308,9 @@ def worker(env_name, cpu, pipe, path):
             if command == 'close':
                 pipe.send(None)
                 break
+
+            if command == 'set_control':
+                if (hasattr(env,'control')):
+                    env.control = True
     finally:
         env.close()
