@@ -18,6 +18,9 @@ def evaluate(net_file, json_file, ns, nw, aw):
     # Load environment
     env = par_envs(pms.env_name, 1, ".")
 
+    # Set environment control tag to true if possible
+    env.set_control()
+
     # Create renderer
     rnd = renderer(1, 1)
     rnd.render = [True]
@@ -44,9 +47,6 @@ def evaluate(net_file, json_file, ns, nw, aw):
     n   = 0
     scr = 0.0
     obs = env.reset_all()
-
-    # Set environment control tag to true if possible
-    env.set_control()
 
     # Specify warmup (unrolling without control)
     if (nw > 0):
