@@ -70,5 +70,5 @@ def train(json_file):
     data = averager.average(filename)
 
     # Plot
-    filename = agent.name + ' - ' + pms.env_name
+    filename = path+'/'+agent.name + ' - ' + pms.env_name
     plot_avg(data, filename)
