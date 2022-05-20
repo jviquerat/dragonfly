@@ -154,7 +154,7 @@ class gbuff:
 
         # Randomized indices
         p = np.arange(start, end)
-        if (shuffle): p = np.random.permutation(s)
+        if (shuffle): p = np.random.permutation(p)
 
         # Return shuffled fields
         out = {}
