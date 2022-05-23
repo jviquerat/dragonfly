@@ -22,16 +22,6 @@ class counter:
         self.ep_step    = [0     for _ in range(self.n_cpu)]
         self.score      = [0.0   for _ in range(self.n_cpu)]
 
-    # Test nb of unrolled steps
-    # Only for style="td"
-    def done_stp_unroll(self):
-
-        if (self.unroll >= self.n_stp_unroll):
-            self.unroll = 0
-            return True
-
-        return False
-
     # Update score and step counter
     def update(self, rwd):
 
