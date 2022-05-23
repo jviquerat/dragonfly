@@ -7,6 +7,7 @@
         "style": "td",
         "mem_size": 20000,
         "btc_size": 64,
+        "n_stp_unroll": 1,
         "render_every": 500,
         "terminator": {
             "type": "regular"
