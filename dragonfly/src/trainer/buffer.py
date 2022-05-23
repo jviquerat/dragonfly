@@ -76,6 +76,9 @@ class buffer(trainer_base):
         # Reset environment
         obs = env.reset_all()
 
+        # First computation of entropy
+        entropy = agent.entropy(obs)
+
         # Loop until max episode number is reached
         while (not (self.counter.ep >= self.n_ep_max)):
 
@@ -101,7 +104,6 @@ class buffer(trainer_base):
                                 [ obs,   nxt,   act,   lgp,   rwd,   dne,   stp ])
 
                 # Update counter
-                entropy = agent.entropy(obs)
                 self.counter.update(rwd, entropy)
 
                 # Handle rendering
@@ -136,6 +138,9 @@ class buffer(trainer_base):
             self.timer_training.tic()
             self.train(agent)
             self.timer_training.toc()
+
+            # Compute entropy
+            entropy = agent.entropy(obs)
 
         # Last printing
         self.print_episode(self.counter, self.report)
