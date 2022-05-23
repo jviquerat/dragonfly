@@ -99,7 +99,7 @@ class normal(base_policy):
     def entropy(self, obs):
 
         pdf = self.compute_pdf([obs])
-        return tf.get_static_value(pdf.entropy())[0][0]
+        return tf.get_static_value(pdf.entropy())[0]
 
     # Call loss for training
     def train(self, obs, adv, act, lgp):

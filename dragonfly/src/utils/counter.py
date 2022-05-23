@@ -24,11 +24,11 @@ class counter:
         self.entropy    = [0.0   for _ in range(self.n_cpu)]
 
     # Update score and step counter
-    def update(self, rwd, entropy=0.0):
+    def update(self, rwd, entropy=[0.0]):
 
         self.score[:]  += rwd[:]
         self.ep_step[:] = [x+1 for x in self.ep_step]
-        self.entropy[:] = entropy
+        self.entropy[:] = entropy #for _ in range(self.n_cpu)]
 
     # Reset episode counters and update best values
     def reset_ep(self, cpu):
