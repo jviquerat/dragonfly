@@ -77,14 +77,12 @@ class buffer(trainer_base):
         obs = env.reset_all()
 
         # Loop until max episode number is reached
-        #while (not self.counter.done_max_ep()):
         while (not (self.counter.ep >= self.n_ep_max)):
 
             # Reset local buffer
             self.buff.reset()
 
             # Loop over buff size
-            #while (not self.counter.done_buffer(self.buff)):
             while (not (self.buff.size() >= self.buff_size)):
 
                 # Get actions
