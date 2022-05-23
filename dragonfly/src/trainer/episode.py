@@ -49,10 +49,10 @@ class episode(trainer_base):
                            [obs_dim, pol_dim, 1, 1, 1])
 
         # Initialize learning data report
-        self.report = report(["episode",
+        self.report = report(["episode", "step",
                               "score",  "smooth_score",
                               "length", "smooth_length",
-                              "step"])
+                              "entropy", "smooth_entropy"])
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu, pms.render_every)
@@ -105,7 +105,8 @@ class episode(trainer_base):
                                 [ obs,   nxt,   act,   lgp,   rwd,   dne,   stp ])
 
                 # Update counter
-                self.counter.update(rwd)
+                entropy = agent.entropy(obs)
+                self.counter.update(rwd, entropy)
 
                 # Handle rendering
                 self.renderer.store(env.render(self.renderer.render), env.rnd_style)

@@ -40,7 +40,7 @@
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.2,
-                "ent_coef": 0.01
+                "ent_coef": 0.001
             }
         },
         "value": {

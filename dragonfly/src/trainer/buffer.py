@@ -45,10 +45,10 @@ class buffer(trainer_base):
                            [obs_dim, pol_dim, 1, 1, 1])
 
         # Initialize learning data report
-        self.report = report(["episode",
-                              "score",  "smooth_score",
-                              "length", "smooth_length",
-                              "step"])
+        self.report = report(["episode", "step",
+                              "score",   "smooth_score",
+                              "length",  "smooth_length",
+                              "entropy", "smooth_entropy"])
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu, pms.render_every)
@@ -76,6 +76,9 @@ class buffer(trainer_base):
         # Reset environment
         obs = env.reset_all()
 
+        # First computation of entropy
+        entropy = agent.entropy(obs)
+
         # Loop until max episode number is reached
         while (not (self.counter.ep >= self.n_ep_max)):
 
@@ -101,7 +104,7 @@ class buffer(trainer_base):
                                 [ obs,   nxt,   act,   lgp,   rwd,   dne,   stp ])
 
                 # Update counter
-                self.counter.update(rwd)
+                self.counter.update(rwd, entropy)
 
                 # Handle rendering
                 self.renderer.store(env.render(self.renderer.render), env.rnd_style)
@@ -135,6 +138,9 @@ class buffer(trainer_base):
             self.timer_training.tic()
             self.train(agent)
             self.timer_training.toc()
+
+            # Compute entropy
+            entropy = agent.entropy(obs)
 
         # Last printing
         self.print_episode(self.counter, self.report)

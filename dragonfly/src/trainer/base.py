@@ -57,9 +57,9 @@ class trainer_base():
             bst    = counter.best_score
             bst    = f"{bst:.3f}"
             bst_ep = counter.best_ep
-            end    = '\n'
-            if (counter.ep < counter.n_ep_max): end = '\r'
-            print('# Ep #'+str(counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
+            end    = "\n"
+            if (counter.ep < counter.n_ep_max): end = "\r"
+            print("# Ep #"+str(counter.ep)+", avg score = "+str(avg)+", best score = "+str(bst)+" at ep "+str(bst_ep)+"                 ", end=end)
 
     ################################
     ### Report wrappings
@@ -79,6 +79,9 @@ class trainer_base():
         report.append("length",        counter.ep_step[cpu])
         smooth_length = report.avg("length", n_smooth)
         report.append("smooth_length", smooth_length)
+        report.append("entropy",       counter.entropy[cpu])
+        smooth_entropy = report.avg("entropy", n_smooth)
+        report.append("smooth_entropy", smooth_entropy)
 
     # Write learning data report
     def write_report(self, agent, report, path, run):
