@@ -15,7 +15,6 @@
     },
     "agent": {
         "type": "dqn",
-        "target_freq": 10,
         "gamma": 0.99,
         "exploration": {
             "type": "linear",

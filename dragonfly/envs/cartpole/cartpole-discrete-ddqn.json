@@ -14,7 +14,8 @@
         }
     },
     "agent": {
-        "type": "dqn",
+        "type": "ddqn",
+        "tau": 0.02,
         "gamma": 0.99,
         "exploration": {
             "type": "linear",
