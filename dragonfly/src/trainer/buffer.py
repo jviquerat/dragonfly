@@ -54,10 +54,7 @@ class buffer(trainer_base):
         self.renderer = renderer(self.n_cpu, pms.render_every)
 
         # Initialize counter
-        self.counter = counter(self.n_cpu,
-                               self.n_ep_max,
-                               "buffer",
-                               buff_size=self.buff_size)
+        self.counter = counter(self.n_cpu, self.n_ep_max)
 
         # Initialize terminator
         self.terminator = terminator_factory.create(pms.terminator.type,
@@ -80,13 +77,15 @@ class buffer(trainer_base):
         obs = env.reset_all()
 
         # Loop until max episode number is reached
-        while (not self.counter.done_max_ep()):
+        #while (not self.counter.done_max_ep()):
+        while (not (self.counter.ep >= self.n_ep_max)):
 
             # Reset local buffer
             self.buff.reset()
 
             # Loop over buff size
-            while (not self.counter.done_buffer(self.buff)):
+            #while (not self.counter.done_buffer(self.buff)):
+            while (not (self.buff.size() >= self.buff_size)):
 
                 # Get actions
                 self.timer_actions.tic()
