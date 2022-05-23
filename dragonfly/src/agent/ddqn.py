@@ -2,21 +2,22 @@
 from dragonfly.src.agent.base import *
 
 ###############################################
-### DQN agent
-class dqn():
+### DDQN agent
+class ddqn():
     def __init__(self, obs_dim, act_dim, n_cpu, pms):
 
         # Initialize from arguments
-        self.name        = 'dqn'
-        self.act_dim     = act_dim
-        self.obs_dim     = obs_dim
-        self.n_cpu       = n_cpu
-        self.gamma       = pms.gamma
+        self.name    = 'ddqn'
+        self.act_dim = act_dim
+        self.obs_dim = obs_dim
+        self.n_cpu   = n_cpu
+        self.gamma   = pms.gamma
+        self.tau     = pms.tau
 
         # Check n_cpu
         if (n_cpu != 1):
-            error("dqn", "__init__",
-                  "dqn agent does not support n_cpu > 1")
+            error("ddqn", "__init__",
+                  "ddqn agent does not support n_cpu > 1")
 
         # Initialize random limit
         self.eps = decay_factory.create(pms.exploration.type,
@@ -28,13 +29,18 @@ class dqn():
 
         # Build values
         if (pms.value.type != "q_value"):
-            error("dqn", "__init__",
+            error("ddqn", "__init__",
                   "Value type for dqn agent is not q_value")
 
         self.q_val = val_factory.create(pms.value.type,
                                         obs_dim = obs_dim,
                                         act_dim = act_dim,
                                         pms     = pms.value)
+        self.q_tgt = val_factory.create(pms.value.type,
+                                        obs_dim = obs_dim,
+                                        act_dim = act_dim,
+                                        pms     = pms.value)
+        self.q_tgt.net.set_weights(self.q_val.net.get_weights())
 
     # Get actions
     def get_actions(self, obs):
@@ -58,7 +64,7 @@ class dqn():
     # Compute target
     def compute_target(self, obs, nxt, act, rwd, trm):
 
-        tgt = self.q_val.get_values(nxt)
+        tgt = self.q_tgt.get_values(nxt)
         tgt = tf.reduce_max(tgt, axis=1)
         tgt = tf.reshape(tgt, [-1,1])
         tgt = rwd + trm*self.gamma*tgt
@@ -70,7 +76,13 @@ class dqn():
 
         self.q_val.train(obs, act, tgt, size)
 
+        wv = self.q_val.net.get_weights()
+        wt = self.q_tgt.net.get_weights()
+        w  = [self.tau*wvv + (1.0-self.tau)*wtt for wvv, wtt in zip(wv, wt)]
+        self.q_tgt.net.set_weights(w)
+
     # Reset
     def reset(self):
 
         self.q_val.reset()
+        self.q_tgt.reset()
