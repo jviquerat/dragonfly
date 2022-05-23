@@ -40,7 +40,7 @@ def train(json_file):
                                  pms     = pms.agent)
 
     # Intialize averager
-    averager = data_avg(4, pms.n_ep_max, pms.n_avg)
+    averager = data_avg(6, pms.n_ep_max, pms.n_avg)
 
     # Initialize training style
     trainer = trainer_factory.create(pms.trainer.style,

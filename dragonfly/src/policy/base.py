@@ -34,6 +34,10 @@ class base_policy():
     def call_net(self, state):
         raise NotImplementedError
 
+    # Return entropy of policy
+    def policy(self):
+        raise NotImplementedError
+
     # Save network weights
     def save_weights(self):
 

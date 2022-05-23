@@ -79,6 +79,9 @@ class trainer_base():
         report.append("length",        counter.ep_step[cpu])
         smooth_length = report.avg("length", n_smooth)
         report.append("smooth_length", smooth_length)
+        report.append("entropy",       counter.entropy[cpu])
+        smooth_entropy = report.avg("entropy", n_smooth)
+        report.append("smooth_entropy", smooth_entropy)
 
     # Write learning data report
     def write_report(self, agent, report, path, run):

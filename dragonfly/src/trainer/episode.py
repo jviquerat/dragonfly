@@ -105,7 +105,8 @@ class episode(trainer_base):
                                 [ obs,   nxt,   act,   lgp,   rwd,   dne,   stp ])
 
                 # Update counter
-                self.counter.update(rwd)
+                entropy = agent.entropy(obs)
+                self.counter.update(rwd, entropy)
 
                 # Handle rendering
                 self.renderer.store(env.render(self.renderer.render), env.rnd_style)

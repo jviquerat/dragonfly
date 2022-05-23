@@ -99,6 +99,11 @@ class ppo(base_agent):
 
         return tgt, adv
 
+    # Compute entropy
+    def entropy(self, obs):
+
+        return self.policy.entropy(obs)
+
     # Training
     def train(self, btc_obs, btc_act, btc_adv, btc_tgt, btc_lgp, size):
 
