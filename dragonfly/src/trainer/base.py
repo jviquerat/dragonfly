@@ -48,18 +48,18 @@ class trainer_base():
     def print_episode(self, counter, report):
 
         # No initial printing
-        if (counter.get_ep() == 0): return
+        if (counter.ep == 0): return
 
         # Average and print
-        if (counter.get_ep() <= counter.get_n_ep_max()):
+        if (counter.ep <= counter.n_ep_max):
             avg    = report.avg("score", n_smooth)
             avg    = f"{avg:.3f}"
-            bst    = counter.get_best_score()
+            bst    = counter.best_score
             bst    = f"{bst:.3f}"
-            bst_ep = counter.get_best_ep()
+            bst_ep = counter.best_ep
             end    = '\n'
-            if (counter.get_ep() < counter.get_n_ep_max()): end = '\r'
-            print('# Ep #'+str(counter.get_ep())+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
+            if (counter.ep < counter.n_ep_max): end = '\r'
+            print('# Ep #'+str(counter.ep)+', avg score = '+str(avg)+', best score = '+str(bst)+' at ep '+str(bst_ep)+'                 ', end=end)
 
     ################################
     ### Report wrappings

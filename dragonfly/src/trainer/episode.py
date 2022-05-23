@@ -30,11 +30,14 @@ class episode(trainer_base):
         self.btc_frac    = pms.batch_frac
         self.n_epochs    = pms.n_epochs
 
+        # Local variables
+        self.unroll = 0
+
         # Check that n_ep_unroll is a multiple of n_cpu
-        if (n_cpu != 1):
+        if (self.n_ep_unroll%self.n_cpu != 0):
             error("episode",
                   "init",
-                  "episode-based learning does not support parallel envs")
+                  "episode-based learning requires n_ep_unroll proportional to n_cpu")
 
         # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
@@ -55,10 +58,7 @@ class episode(trainer_base):
         self.renderer = renderer(self.n_cpu, pms.render_every)
 
         # Initialize counter
-        self.counter = counter(self.n_cpu,
-                               self.n_ep_max,
-                               "episode",
-                               n_ep_unroll=self.n_ep_unroll)
+        self.counter = counter(self.n_cpu, self.n_ep_max)
 
         # Initialize terminator
         self.terminator = terminator_factory.create(pms.terminator.type,
@@ -81,13 +81,13 @@ class episode(trainer_base):
         obs = env.reset_all()
 
         # Loop until max episode number is reached
-        while (not self.counter.done_max_ep()):
+        while (not (self.counter.ep >= self.n_ep_max)):
 
             # Reset local buffer
             self.buff.reset()
 
             # Loop over training episodes
-            while (not self.counter.done_ep_unroll()):
+            while (not (self.unroll >= self.n_ep_unroll)):
 
                 # Get actions
                 self.timer_actions.tic()
@@ -140,6 +140,9 @@ class episode(trainer_base):
             self.train(agent)
             self.timer_training.toc()
 
+            # Reset unroll
+            self.unroll = 0
+
         # Last printing
         self.print_episode(self.counter, self.report)
 
@@ -160,7 +163,7 @@ class episode(trainer_base):
                 self.print_episode(self.counter, self.report)
                 self.renderer.finish(path, self.counter.ep, cpu)
                 self.counter.reset_ep(cpu)
-                self.counter.unroll += 1
+                self.unroll += 1
 
     # Train
     def train(self, agent):

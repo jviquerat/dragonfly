@@ -6,7 +6,8 @@
     "trainer": {
         "style": "td",
         "mem_size": 10000,
-        "btc_size": 64,
+        "btc_size": 128,
+        "n_stp_unroll": 1,
         "render_every": 500,
         "terminator": {
             "type": "regular"
@@ -14,13 +15,13 @@
     },
     "agent": {
         "type": "dqn",
-        "target_freq": 50,
+        "target_freq": 10,
         "gamma": 0.99,
         "exploration": {
             "type": "linear",
-            "start": 0.5,
+            "start": 0.9,
             "end": 0.01,
-            "n_steps": 20000
+            "n_steps": 10000
         },
         "value": {
             "type": "q_value",
@@ -40,7 +41,7 @@
             "optimizer": {
                 "type": "adam",
                 "lr": 5.0e-4,
-                "grd_clip": 0.5
+                "grd_clip": 0.1
             },
             "loss": {
                 "type": "mse_q"

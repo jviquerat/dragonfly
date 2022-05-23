@@ -20,13 +20,17 @@ class td(trainer_base):
                  pol_dim, n_cpu, n_ep_max, pms):
 
         # Initialize from input
-        self.obs_dim  = obs_dim
-        self.act_dim  = act_dim
-        self.pol_dim  = pol_dim
-        self.n_cpu    = n_cpu
-        self.n_ep_max = n_ep_max
-        self.mem_size = pms.mem_size
-        self.btc_size = pms.btc_size
+        self.obs_dim      = obs_dim
+        self.act_dim      = act_dim
+        self.pol_dim      = pol_dim
+        self.n_cpu        = n_cpu
+        self.n_ep_max     = n_ep_max
+        self.mem_size     = pms.mem_size
+        self.btc_size     = pms.btc_size
+        self.n_stp_unroll = pms.n_stp_unroll
+
+        # Local variables
+        self.unroll = 0
 
         # Check that n_cpu is 1
         if (n_cpu != 1):
@@ -53,10 +57,7 @@ class td(trainer_base):
         self.renderer = renderer(self.n_cpu, pms.render_every)
 
         # Initialize counter
-        self.counter = counter(self.n_cpu,
-                               self.n_ep_max,
-                               "td",
-                               n_stp_unroll=1)
+        self.counter = counter(self.n_cpu, self.n_ep_max)
 
         # Initialize terminator
         self.terminator = terminator_factory.create(pms.terminator.type,
@@ -79,13 +80,13 @@ class td(trainer_base):
         obs = env.reset_all()
 
         # Loop until max episode number is reached
-        while (not self.counter.done_max_ep()):
+        while (not (self.counter.ep >= self.n_ep_max)):
 
             # Reset local buffer
             self.buff.reset()
 
             # Loop over training steps
-            while (not self.counter.done_stp_unroll()):
+            while (not (self.unroll >= self.n_stp_unroll)):
 
                 # Get actions
                 self.timer_actions.tic()
@@ -104,7 +105,9 @@ class td(trainer_base):
 
                 # Update counter
                 self.counter.update(rwd)
-                self.counter.unroll += 1
+
+                # Update unrolling counter
+                self.unroll += 1
 
                 # Handle rendering
                 self.renderer.store(env.render(self.renderer.render), env.rnd_style)
@@ -135,6 +138,9 @@ class td(trainer_base):
             self.timer_training.tic()
             self.train(agent)
             self.timer_training.toc()
+
+            # Reset unroll
+            self.unroll = 0
 
         # Last printing
         self.print_episode(self.counter, self.report)
