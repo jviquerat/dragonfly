@@ -5,7 +5,7 @@
     "n_ep_max": 500,
     "trainer": {
         "style": "td",
-        "mem_size": 10000,
+        "mem_size": 2048,
         "btc_size": 128,
         "n_stp_unroll": 1,
         "render_every": 500,
@@ -15,7 +15,7 @@
     },
     "agent": {
         "type": "ddqn",
-        "tau": 0.02,
+        "rho": 0.02,
         "gamma": 0.99,
         "exploration": {
             "type": "linear",

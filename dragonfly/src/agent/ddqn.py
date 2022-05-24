@@ -1,5 +1,6 @@
 # Custom imports
-from dragonfly.src.agent.base import *
+from dragonfly.src.agent.base   import *
+from dragonfly.src.utils.polyak import *
 
 ###############################################
 ### DDQN agent
@@ -12,7 +13,7 @@ class ddqn():
         self.obs_dim = obs_dim
         self.n_cpu   = n_cpu
         self.gamma   = pms.gamma
-        self.tau     = pms.tau
+        self.rho     = pms.rho
 
         # Check n_cpu
         if (n_cpu != 1):
@@ -41,6 +42,9 @@ class ddqn():
                                         act_dim = act_dim,
                                         pms     = pms.value)
         self.q_tgt.net.set_weights(self.q_val.net.get_weights())
+
+        # polyak averager for q-networks
+        self.polyak = polyak(self.rho)
 
     # Get actions
     def get_actions(self, obs):
@@ -75,11 +79,7 @@ class ddqn():
     def train(self, obs, act, tgt, size):
 
         self.q_val.train(obs, act, tgt, size)
-
-        wv = self.q_val.net.get_weights()
-        wt = self.q_tgt.net.get_weights()
-        w  = [self.tau*wvv + (1.0-self.tau)*wtt for wvv, wtt in zip(wv, wt)]
-        self.q_tgt.net.set_weights(w)
+        self.polyak.average(self.q_val.net, self.q_tgt.net)
 
     # Reset
     def reset(self):
