@@ -1,5 +1,5 @@
 {
-    "env_name": "cartpole:cartpole-continuous-v0",
+    "env_name": "envs:cartpole-continuous-v0",
     "n_avg": 3,
     "n_cpu": 1,
     "n_ep_max": 300,
@@ -40,7 +40,7 @@
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.2,
-                "ent_coef": 0.01
+                "ent_coef": 0.001
             }
         },
         "value": {
