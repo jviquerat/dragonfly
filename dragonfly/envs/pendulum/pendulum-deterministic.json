@@ -1,5 +1,5 @@
 {
-    "env_name": "pendulum:pendulum-deterministic-v0",
+    "env_name": "envs:pendulum-deterministic-v0",
     "n_avg": 3,
     "n_cpu": 1,
     "n_ep_max": 500,
