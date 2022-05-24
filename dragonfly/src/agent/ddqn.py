@@ -26,7 +26,7 @@ class ddqn():
         # Build values
         if (pms.value.type != "q_value"):
             error("ddqn", "__init__",
-                  "Value type for dqn agent is not q_value")
+                  "Value type for ddqn agent is not q_value")
 
         self.q_val = val_factory.create(pms.value.type,
                                         obs_dim = obs_dim,

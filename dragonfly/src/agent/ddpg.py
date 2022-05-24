@@ -11,28 +11,43 @@ class ddpg(base_agent):
         self.act_dim   = act_dim
         self.obs_dim   = obs_dim
         self.n_cpu     = n_cpu
+        self.rho       = pms.rho
 
         # Build policies
         # if (pms.policy.loss.type != "surrogate"):
         #     warning("ppo", "__init__",
         #             "Loss type for ppo agent is not surrogate")
 
-        self.policy = pol_factory.create(pms.policy.type,
-                                         obs_dim = obs_dim,
-                                         act_dim = act_dim,
-                                         pms     = pms.policy)
+        self.p_net = pol_factory.create(pms.policy.type,
+                                        obs_dim = obs_dim,
+                                        act_dim = act_dim,
+                                        pms     = pms.policy)
+        self.p_tgt = pol_factory.create(pms.policy.type,
+                                        obs_dim = obs_dim,
+                                        act_dim = act_dim,
+                                        pms     = pms.policy)
 
         # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
         self.pol_dim = self.policy.store_dim
 
         # Build values
-        # if (pms.value.type != "v_value"):
-        #     warning("ppo", "__init__",
-        #             "Value type for ppo agent is not v_value")
-        # self.v_value = val_factory.create(pms.value.type,
-        #                                   obs_dim = obs_dim,
-        #                                   pms     = pms.value)
+        if (pms.value.type != "q_value"):
+            error("ddpg", "__init__",
+                  "Value type for ddpg agent is not q_value")
+
+        self.q_net = val_factory.create(pms.value.type,
+                                        obs_dim = obs_dim,
+                                        act_dim = act_dim,
+                                        pms     = pms.value)
+        self.q_tgt = val_factory.create(pms.value.type,
+                                        obs_dim = obs_dim,
+                                        act_dim = act_dim,
+                                        pms     = pms.value)
+        self.q_tgt.net.set_weights(self.q_net.net.get_weights())
+
+        # polyak averager for q-networks
+        self.polyak = polyak(self.rho)
 
         # Build advantage
         self.retrn = retrn_factory.create(pms.retrn.type,
