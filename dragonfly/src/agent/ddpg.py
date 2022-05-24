@@ -2,8 +2,8 @@
 from dragonfly.src.agent.base import *
 
 ###############################################
-### TD3 agent
-class td3(base_agent):
+### DDPG agent
+class ddpg(base_agent):
     def __init__(self, obs_dim, act_dim, n_cpu, pms):
 
         # Initialize from arguments
