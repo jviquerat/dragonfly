@@ -14,11 +14,11 @@ class pg():
 
     # Train
     @tf.function
-    def train(self, obs, adv, act, plg, policy):
+    def train(self, obs, adv, act, plg, p):
         with tf.GradientTape() as tape:
 
             # Compute loss
-            pdf     = policy.compute_pdf(obs)
+            pdf     = p.compute_pdf(obs)
             lgp     = pdf.log_prob(act)
             lgp     = tf.multiply(adv, lgp)
             loss_pg =-tf.reduce_mean(lgp)
@@ -33,6 +33,6 @@ class pg():
             loss = loss_pg + self.ent_coef*loss_entropy
 
             # Apply gradients
-            pol_var = policy.trainables
+            pol_var = p.trainables
             grads   = tape.gradient(loss, pol_var)
-        policy.opt.apply_grads(zip(grads, pol_var))
+        p.opt.apply_grads(zip(grads, pol_var))

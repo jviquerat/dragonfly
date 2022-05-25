@@ -15,7 +15,6 @@ class categorical(base_policy):
         self.dim        = self.act_dim
         self.store_dim  = 1
         self.store_type = int
-        self.pdf        = None
 
         # Define and init network
         if (pms.network.heads.final[0] != "softmax"):
@@ -62,11 +61,11 @@ class categorical(base_policy):
     def sample(self, obs):
 
         # Generate pdf
-        self.pdf = self.compute_pdf([obs])
+        pdf = self.compute_pdf([obs])
 
         # Sample actions
-        act = self.pdf.sample(1)
-        lgp = self.pdf.log_prob(act)
+        act = pdf.sample(1)
+        lgp = pdf.log_prob(act)
 
         return act, lgp
 
