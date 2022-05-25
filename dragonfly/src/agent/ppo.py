@@ -52,10 +52,7 @@ class ppo(base_agent):
             act[i,:], lgp[i] = self.p_net.actions(obs[i])
 
         # Reshape actions depending on policy type
-        if (self.p_net.kind == "discrete"):
-            act = np.reshape(act, (-1))
-        if (self.p_net.kind == "continuous"):
-            act = np.reshape(act, (-1,self.pol_dim))
+        act = self.p_net.reshape_np_actions(act)
 
         # Check for NaNs
         if (np.isnan(act).any()):
@@ -76,10 +73,7 @@ class ppo(base_agent):
             act[i,:] = self.p_net.control(obs[i])
 
         # Reshape actions depending on policy type
-        if (self.p_net.kind == "discrete"):
-            act = np.reshape(act, (-1))
-        if (self.p_net.kind == "continuous"):
-            act = np.reshape(act, (-1,self.pol_dim))
+        act = self.p_net.reshape_np_actions(act)
 
         # Check for NaNs
         if (np.isnan(act).any()):
@@ -108,10 +102,7 @@ class ppo(base_agent):
     def train(self, obs, act, adv, tgt, lgp, size):
 
         # Train policy
-        if (self.p_net.kind == "discrete"):
-            act = tf.reshape(act, [-1])
-        if (self.p_net.kind == "continuous"):
-            act = tf.reshape(act, [-1, self.act_dim])
+        act = self.p_net.reshape_tf_actions(act)
         adv = tf.reshape(adv, [-1])
         lgp = tf.reshape(lgp, [-1])
         self.p_net.loss.train(obs, adv, act, lgp, self.p_net)

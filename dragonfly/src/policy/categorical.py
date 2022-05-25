@@ -16,7 +16,6 @@ class categorical(base_policy):
         self.store_dim  = 1
         self.store_type = int
         self.pdf        = None
-        self.kind       = "discrete"
 
         # Define and init network
         if (pms.network.heads.final[0] != "softmax"):
@@ -93,3 +92,13 @@ class categorical(base_policy):
 
         pdf = self.compute_pdf([obs])
         return tf.get_static_value(pdf.entropy())[0][0]
+
+    # Reshape np actions
+    def reshape_np_actions(self, act):
+
+        return np.reshape(act, (-1))
+
+    # Reshape tf actions
+    def reshape_tf_actions(self, act):
+
+        return tf.reshape(act, [-1])
