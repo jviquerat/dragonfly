@@ -14,9 +14,9 @@ class ddpg(base_agent):
         self.rho       = pms.rho
 
         # Build policies
-        # if (pms.policy.loss.type != "surrogate"):
-        #     warning("ppo", "__init__",
-        #             "Loss type for ppo agent is not surrogate")
+        if (pms.policy.type != "deterministic"):
+            error("ppo", "__init__",
+                  "Policy type for ddpg agent is not deterministic")
 
         self.p_net = pol_factory.create(pms.policy.type,
                                         obs_dim = obs_dim,
@@ -26,6 +26,7 @@ class ddpg(base_agent):
                                         obs_dim = obs_dim,
                                         act_dim = act_dim,
                                         pms     = pms.policy)
+        self.p_tgt.net.set_weights(self.p_net.net.get_weights())
 
         # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
@@ -46,12 +47,12 @@ class ddpg(base_agent):
                                         pms     = pms.value)
         self.q_tgt.net.set_weights(self.q_net.net.get_weights())
 
-        # polyak averager for q-networks
+        # polyak averager
         self.polyak = polyak(self.rho)
 
         # Build advantage
-        self.retrn = retrn_factory.create(pms.retrn.type,
-                                          pms = pms.retrn)
+        #self.retrn = retrn_factory.create(pms.retrn.type,
+        #                                  pms = pms.retrn)
 
     # Get actions
     def get_actions(self, obs):
@@ -64,13 +65,10 @@ class ddpg(base_agent):
 
         # Loop over cpus
         for i in range(self.n_cpu):
-            act[i,:], lgp[i] = self.policy.get_actions(obs[i])
+            act[i,:] = self.policy.get_actions(obs[i])
 
         # Reshape actions depending on policy type
-        if (self.policy.kind == "discrete"):
-            act = np.reshape(act, (-1))
-        if (self.policy.kind == "continuous"):
-            act = np.reshape(act, (-1,self.pol_dim))
+        act = np.reshape(act, (-1,self.pol_dim))
 
         # Check for NaNs
         if (np.isnan(act).any()):
@@ -123,13 +121,17 @@ class ddpg(base_agent):
     def train(self, btc_obs, btc_act, btc_adv, btc_tgt, btc_lgp, size):
 
         self.policy.train(btc_obs, btc_adv, btc_act, btc_lgp)
-        self.v_value.train(btc_obs, btc_tgt, size)
+        self.q_net.train(btc_obs, btc_tgt, size)
+
+
 
     # Reset
     def reset(self):
 
-        self.policy.reset()
-        self.v_value.reset()
+        self.p_net.reset()
+        self.q_net.reset()
+        self.p_tgt.net.set_weights(self.p_net.net.get_weights())
+        self.q_tgt.net.set_weights(self.q_net.net.get_weights())
 
     # Save agent parameters
     def save(self, filename):

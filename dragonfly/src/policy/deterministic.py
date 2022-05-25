@@ -15,7 +15,6 @@ class deterministic(base_policy):
         self.dim        = self.act_dim
         self.store_dim  = self.act_dim
         self.store_type = float
-        self.pdf        = None
         self.kind       = "continuous"
 
         # Define and init network
@@ -43,60 +42,35 @@ class deterministic(base_policy):
     # Get actions
     def get_actions(self, obs):
 
-        act, lgp = self.sample(obs)
-        act      = np.reshape(act.numpy(), (self.store_dim))
+        obs = tf.cast(obs, tf.float32)
+        act = self.call_net(obs)
 
-        return act, lgp
-
-    # Control (deterministic actions)
-    def control(self, obs):
-
-        obs    = tf.cast([obs], tf.float32)
-        mu, sg = self.call_net(obs)
-        act    = np.reshape(mu.numpy(), (self.store_dim))
+        noise = tf.random.normal([self.act_dim], 0, 1, tf.float32)
+        act  += noise
+        act   = np.reshape(act.numpy(), (self.store_dim))
 
         return act
 
-    # Sample actions
-    @tf.function
-    def sample(self, obs):
+    # Control (deterministic actions)
+    #def control(self, obs):
 
-        # Generate pdf
-        self.pdf = self.compute_pdf([obs])
+        #obs    = tf.cast([obs], tf.float32)
+        #mu, sg = self.call_net(obs)
+        #act    = np.reshape(mu.numpy(), (self.store_dim))
 
-        # Sample actions
-        act = self.pdf.sample(1)
-        lgp = self.pdf.log_prob(act)
-
-        return act, lgp
-
-    # Compute pdf
-    def compute_pdf(self, obs):
-
-        # Cast
-        obs = tf.cast(obs, tf.float32)
-
-        # Get pdf
-        mu, sg = self.call_net(obs)
-        pdf    = tfd.MultivariateNormalDiag(loc        = mu,
-                                            scale_diag = sg)
-
-        return pdf
+    #    return act
 
     # Networks forward pass
     def call_net(self, state):
 
         out = self.net.call(state)
-        mu  = out[0]
-        sg  = out[1]
 
-        return mu, sg
+        return out
 
     # Compute policy entropy
     def entropy(self, obs):
 
-        pdf = self.compute_pdf([obs])
-        return tf.get_static_value(pdf.entropy())[0]
+        return [0.0]
 
     # Call loss for training
     def train(self, obs, adv, act, lgp):
