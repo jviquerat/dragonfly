@@ -31,6 +31,10 @@ class q_value(base_value):
                                       pms       = pms.optimizer,
                                       grad_vars = self.trainables)
 
+        # Define loss
+        self.loss = loss_factory.create(pms.loss.type,
+                                        pms = pms.loss)
+
     # Get values
     def values(self, x):
 

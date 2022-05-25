@@ -61,24 +61,13 @@ class dqn():
         return tgt
 
     # Training
-    @tf.function
     def train(self, obs, act, tgt, size):
 
-        # Train q network
         tgt = tf.reshape(tgt, [size,-1])
         act = tf.reshape(act, [size,-1])
         act = tf.cast(act, tf.int32)
 
-        with tf.GradientTape() as tape:
-            val  = tf.cast(self.q_net.forward(obs), tf.float32)
-            val  = tf.reshape(val, [size, -1])
-            val  = tf.gather(val, act, axis=1, batch_dims=1)
-            diff = tf.square(tgt - val)
-            loss = tf.reduce_mean(diff)
-
-            val_var = self.q_net.trainables
-            grads   = tape.gradient(loss, val_var)
-        self.q_net.opt.apply_grads(zip(grads, val_var))
+        self.q_net.loss.train(obs, act, tgt, size, self.q_net)
 
     # Reset
     def reset(self):
