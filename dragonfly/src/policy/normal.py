@@ -16,7 +16,6 @@ class normal(base_policy):
         self.store_dim  = self.act_dim
         self.store_type = float
         self.pdf        = None
-        self.kind       = "continuous"
 
         # Define and init network
         if (pms.network.heads.final[0] != "tanh"):
@@ -100,3 +99,13 @@ class normal(base_policy):
 
         pdf = self.compute_pdf([obs])
         return tf.get_static_value(pdf.entropy())[0]
+
+    # Reshape actions
+    def reshape_np_actions(self, act):
+
+        return np.reshape(act, (-1, self.store_dim))
+
+    # Reshape tf actions
+    def reshape_tf_actions(self, act):
+
+        return tf.reshape(act, [-1, self.act_dim])

@@ -16,7 +16,6 @@ class beta(base_policy):
         self.store_dim  = self.act_dim
         self.store_type = float
         self.pdf        = None
-        self.kind       = "continuous"
 
         # Define and init network
         if (pms.network.heads.final[0] != "softplus"):
