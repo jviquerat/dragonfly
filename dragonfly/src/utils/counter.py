@@ -24,7 +24,9 @@ class counter:
         self.entropy    = [0.0   for _ in range(self.n_cpu)]
 
     # Update score and step counter
-    def update(self, rwd, entropy=[0.0]):
+    def update(self, rwd, *args, **kwargs):
+
+        entropy = kwargs.get('entropy', [0.0]*self.n_cpu)
 
         self.score[:]  += rwd[:]
         self.ep_step[:] = [x+1 for x in self.ep_step]

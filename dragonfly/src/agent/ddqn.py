@@ -15,17 +15,12 @@ class ddqn():
         self.gamma   = pms.gamma
         self.rho     = pms.rho
 
-        # Check n_cpu
-        if (n_cpu != 1):
-            error("ddqn", "__init__",
-                  "ddqn agent does not support n_cpu > 1")
-
         # Initialize random limit
         self.eps = decay_factory.create(pms.exploration.type,
                                         pms = pms.exploration)
 
         # pol_dim is the true dimension of the action provided to the env
-        # As dqn is only for discrete actions, it is set to 1
+        # As ddqn is only for discrete actions, it is set to 1
         self.pol_dim = 1
 
         # Build values
@@ -53,13 +48,13 @@ class ddqn():
         # environments. We assume it does and unroll it in a loop
         act = np.zeros([self.n_cpu, self.pol_dim], dtype=int)
 
-        p = random.uniform(0, 1)
-        if (p < self.eps.get()):
-            act = random.randrange(0, self.act_dim)
-        else:
-            obs = tf.cast([obs], tf.float32)
-            val = self.q_val.get_values(obs)
-            act = np.argmax(val)
+        for i in range(self.n_cpu):
+            p = random.uniform(0, 1)
+            if (p < self.eps.get()):
+                act[i] = random.randrange(0, self.act_dim)
+            else:
+                val = self.q_val.get_values(tf.cast([obs[i]], tf.float32))
+                act[i] = np.argmax(val)
 
         act = np.reshape(act, (-1))
 
