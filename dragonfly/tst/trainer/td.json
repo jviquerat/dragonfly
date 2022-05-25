@@ -1,0 +1,50 @@
+{
+    "env_name": "CartPole-v0",
+    "n_avg": 3,
+    "n_cpu": 1,
+    "n_ep_max": 10,
+    "trainer": {
+        "style": "td",
+        "mem_size": 10000,
+        "btc_size": 128,
+        "n_stp_unroll": 1,
+        "render_every": 500,
+        "terminator": {
+            "type": "regular"
+        }
+    },
+    "agent": {
+        "type": "dqn",
+        "gamma": 0.99,
+        "exploration": {
+            "type": "linear",
+            "start": 0.9,
+            "end": 0.01,
+            "n_steps": 10000
+        },
+        "value": {
+            "type": "q_value",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [32,32],
+                    "actv": "swish"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["swish"],
+                    "final": ["linear"]
+                }
+            },
+            "optimizer": {
+                "type": "adam",
+                "lr": 5.0e-4,
+                "grd_clip": 0.1
+            },
+            "loss": {
+                "type": "mse_dqn"
+            }
+        }
+    }
+}
