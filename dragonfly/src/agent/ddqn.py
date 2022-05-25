@@ -86,3 +86,4 @@ class ddqn():
 
         self.q_val.reset()
         self.q_tgt.reset()
+        self.q_tgt.net.set_weights(self.q_val.net.get_weights())
