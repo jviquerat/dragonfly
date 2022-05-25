@@ -100,11 +100,3 @@ class normal(base_policy):
 
         pdf = self.compute_pdf([obs])
         return tf.get_static_value(pdf.entropy())[0]
-
-    # Call loss for training
-    def train(self, obs, adv, act, lgp):
-
-        act = tf.reshape(act, [-1, self.act_dim])
-        adv = tf.reshape(adv, [-1])
-        lgp = tf.reshape(lgp, [-1])
-        return self.loss.train(obs, adv, act, lgp, self)

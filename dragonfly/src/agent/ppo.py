@@ -108,7 +108,10 @@ class ppo(base_agent):
     def train(self, obs, act, adv, tgt, lgp, size):
 
         # Train policy
-        act = tf.reshape(act, [-1])
+        if (self.p_net.kind == "discrete"):
+            act = tf.reshape(act, [-1])
+        if (self.p_net.kind == "continuous"):
+            act = tf.reshape(act, [-1, self.act_dim])
         adv = tf.reshape(adv, [-1])
         lgp = tf.reshape(lgp, [-1])
         self.p_net.loss.train(obs, adv, act, lgp, self.p_net)
