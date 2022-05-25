@@ -44,7 +44,7 @@ class beta(base_policy):
                                         pms = pms.loss)
 
     # Get actions
-    def get_actions(self, obs):
+    def actions(self, obs):
 
         act, lgp = self.sample(obs)
         act      = tf.scalar_mul(2.0,act)
@@ -81,7 +81,7 @@ class beta(base_policy):
         obs = tf.cast(obs, tf.float32)
 
         # Get pdf
-        alpha, beta = self.call_net(obs)
+        alpha, beta = self.forward(obs)
         alpha       = 1.0+tf.scalar_mul(2.0,alpha)
         beta        = 1.0+tf.scalar_mul(2.0,beta)
         pdf         = tfd.Beta(concentration1 = alpha,
@@ -90,7 +90,7 @@ class beta(base_policy):
         return pdf
 
     # Networks forward pass
-    def call_net(self, state):
+    def forward(self, state):
 
         out   = self.net.call(state)
         alpha = out[0]

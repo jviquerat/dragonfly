@@ -24,7 +24,7 @@ def test_v_value():
     # Test action values
     print("Test v_value")
     obs = [[1.0]]
-    val = value.get_values(obs)
+    val = value.values(obs)
     print("Value:", val)
 
     assert(len(val) == 1)

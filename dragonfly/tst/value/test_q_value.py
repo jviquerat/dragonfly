@@ -24,7 +24,7 @@ def test_q_value():
     # Test action values
     print("Test q_value")
     obs = [[1.0]]
-    vals = value.get_values(obs)
+    vals = value.values(obs)
     print("Values:", vals)
 
     assert(len(vals) == 1)

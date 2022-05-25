@@ -3,21 +3,23 @@ from dragonfly.src.value.base import *
 
 ###############################################
 ### v_value class
-### obs_dim : input  dimension
+### inp_dim : input dimension
 ### pms     : parameters
 class v_value(base_value):
-    def __init__(self, obs_dim, pms):
+    def __init__(self, inp_dim, pms):
 
         # Fill structure
-        self.dim = 1
-        self.obs_dim = obs_dim
+        self.inp_dim = inp_dim
+        self.out_dim = 1
 
         # Define and init network
-        # Force linear activation, as this is v-value network
-        pms.network.fnl_actv = "linear"
+        if (pms.network.heads.final[0] != "linear"):
+            warning("v_value", "__init__",
+                    "Chosen final activation for v_value is not linear")
+
         self.net = net_factory.create(pms.network.type,
-                                      inp_dim = obs_dim,
-                                      out_dim = [self.dim],
+                                      inp_dim = self.inp_dim,
+                                      out_dim = [self.out_dim],
                                       pms     = pms.network)
 
         # Define trainables
@@ -33,16 +35,16 @@ class v_value(base_value):
                                         pms = pms.loss)
 
     # Get values
-    def get_values(self, obs):
+    def values(self, x):
 
         # Cast
-        obs = tf.cast(obs, tf.float32)
+        x = tf.cast(x, tf.float32)
 
         # Predict values
-        values = np.array(self.call_net(obs))
-        values = np.reshape(values, (-1,1))
+        v = np.array(self.forward(x))
+        v = np.reshape(v, (-1,self.out_dim))
 
-        return values
+        return v
 
     # Call loss for training
     def train(self, obs, tgt, size):

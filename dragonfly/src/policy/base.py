@@ -15,7 +15,7 @@ class base_policy():
         pass
 
     # Get actions
-    def get_actions(self, obs):
+    def actions(self, obs):
         raise NotImplementedError
 
     # Control (deterministic actions)
@@ -31,11 +31,11 @@ class base_policy():
         raise NotImplementedError
 
     # Networks forward pass
-    def call_net(self, state):
+    def forward(self, state):
         raise NotImplementedError
 
     # Return entropy of policy
-    def policy(self):
+    def entropy(self):
         raise NotImplementedError
 
     # Save network weights
@@ -49,7 +49,7 @@ class base_policy():
         self.net.set_weights(weights)
 
     # Get current learning rate
-    def get_lr(self):
+    def lr(self):
 
         return self.opt.get_lr()
 
