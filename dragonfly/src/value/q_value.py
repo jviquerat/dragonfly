@@ -31,13 +31,6 @@ class q_value(base_value):
                                       pms       = pms.optimizer,
                                       grad_vars = self.trainables)
 
-        # Define loss
-        if (pms.loss.type != "mse_q"):
-            warning("q_value", "__init__",
-                    "Chosen loss for q_value is not mse_q")
-        self.loss = loss_factory.create(pms.loss.type,
-                                        pms = pms.loss)
-
     # Get values
     def values(self, x):
 
@@ -50,10 +43,4 @@ class q_value(base_value):
 
         return v
 
-    # Call loss for training
-    def train(self, obs, act, tgt, size):
 
-        tgt = tf.reshape(tgt, [size,-1])
-        act = tf.reshape(act, [size,-1])
-        act = tf.cast(act, tf.int32)
-        return self.loss.train(obs, act, tgt, size, self)

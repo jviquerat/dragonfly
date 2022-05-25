@@ -41,9 +41,6 @@
                 "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": 0.1
-            },
-            "loss": {
-                "type": "mse_q"
             }
         }
     }
