@@ -64,7 +64,7 @@
                 "grd_clip": 0.1
             },
             "loss": {
-                "type": "mse"
+                "type": "mse_pg"
             }
         },
         "retrn": {

@@ -45,9 +45,3 @@ class v_value(base_value):
         v = np.reshape(v, (-1,self.out_dim))
 
         return v
-
-    # Call loss for training
-    def train(self, obs, tgt, size):
-
-        tgt = tf.reshape(tgt, [-1])
-        return self.loss.train(obs, tgt, size, self)

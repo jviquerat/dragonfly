@@ -43,7 +43,7 @@
                 "grd_clip": 0.1
             },
             "loss": {
-                "type": "mse_q"
+                "type": "mse_dqn"
             }
         }
     }
