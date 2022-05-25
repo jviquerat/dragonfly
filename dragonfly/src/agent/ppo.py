@@ -17,22 +17,22 @@ class ppo(base_agent):
             warning("ppo", "__init__",
                     "Loss type for ppo agent is not surrogate")
 
-        self.policy = pol_factory.create(pms.policy.type,
-                                         obs_dim = obs_dim,
-                                         act_dim = act_dim,
-                                         pms     = pms.policy)
+        self.p_net = pol_factory.create(pms.policy.type,
+                                        obs_dim = obs_dim,
+                                        act_dim = act_dim,
+                                        pms     = pms.policy)
 
         # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
-        self.pol_dim = self.policy.store_dim
+        self.pol_dim = self.p_net.store_dim
 
         # Build values
         if (pms.value.type != "v_value"):
             warning("ppo", "__init__",
                     "Value type for ppo agent is not v_value")
-        self.v_value = val_factory.create(pms.value.type,
-                                          inp_dim = obs_dim,
-                                          pms     = pms.value)
+        self.v_net = val_factory.create(pms.value.type,
+                                        inp_dim = obs_dim,
+                                        pms     = pms.value)
 
         # Build advantage
         self.retrn = retrn_factory.create(pms.retrn.type,
@@ -44,17 +44,17 @@ class ppo(base_agent):
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
         act = np.zeros([self.n_cpu, self.pol_dim],
-                       dtype=self.policy.store_type)
+                       dtype=self.p_net.store_type)
         lgp = np.zeros([self.n_cpu, 1])
 
         # Loop over cpus
         for i in range(self.n_cpu):
-            act[i,:], lgp[i] = self.policy.actions(obs[i])
+            act[i,:], lgp[i] = self.p_net.actions(obs[i])
 
         # Reshape actions depending on policy type
-        if (self.policy.kind == "discrete"):
+        if (self.p_net.kind == "discrete"):
             act = np.reshape(act, (-1))
-        if (self.policy.kind == "continuous"):
+        if (self.p_net.kind == "continuous"):
             act = np.reshape(act, (-1,self.pol_dim))
 
         # Check for NaNs
@@ -69,16 +69,16 @@ class ppo(base_agent):
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
         act = np.zeros([self.n_cpu, self.pol_dim],
-                       dtype=self.policy.store_type)
+                       dtype=self.p_net.store_type)
 
         # Loop over cpus
         for i in range(self.n_cpu):
-            act[i,:] = self.policy.control(obs[i])
+            act[i,:] = self.p_net.control(obs[i])
 
         # Reshape actions depending on policy type
-        if (self.policy.kind == "discrete"):
+        if (self.p_net.kind == "discrete"):
             act = np.reshape(act, (-1))
-        if (self.policy.kind == "continuous"):
+        if (self.p_net.kind == "continuous"):
             act = np.reshape(act, (-1,self.pol_dim))
 
         # Check for NaNs
@@ -91,37 +91,44 @@ class ppo(base_agent):
     def returns(self, obs, nxt, act, rwd, trm, bts):
 
         # Get current and next values
-        crt_val = self.v_value.values(obs)
-        nxt_val = self.v_value.values(nxt)
+        cval = self.v_net.values(obs)
+        nval = self.v_net.values(nxt)
 
         # Compute advantages
-        tgt, adv = self.retrn.compute(rwd, crt_val, nxt_val, trm, bts)
+        tgt, adv = self.retrn.compute(rwd, cval, nval, trm, bts)
 
         return tgt, adv
 
     # Compute entropy
     def entropy(self, obs):
 
-        return self.policy.entropy(obs)
+        return self.p_net.entropy(obs)
 
     # Training
-    def train(self, btc_obs, btc_act, btc_adv, btc_tgt, btc_lgp, size):
+    def train(self, obs, act, adv, tgt, lgp, size):
 
-        self.policy.train(btc_obs, btc_adv, btc_act, btc_lgp)
-        self.v_value.train(btc_obs, btc_tgt, size)
+        # Train policy
+        act = tf.reshape(act, [-1])
+        adv = tf.reshape(adv, [-1])
+        lgp = tf.reshape(lgp, [-1])
+        self.p_net.loss.train(obs, adv, act, lgp, self.p_net)
+
+        # Train v network
+        tgt = tf.reshape(tgt, [-1])
+        self.v_net.loss.train(obs, tgt, size, self.v_net)
 
     # Reset
     def reset(self):
 
-        self.policy.reset()
-        self.v_value.reset()
+        self.p_net.reset()
+        self.v_net.reset()
 
     # Save agent parameters
     def save(self, filename):
 
-        self.policy.save(filename)
+        self.p_net.save(filename)
 
     # Load agent parameters
     def load(self, filename):
 
-        self.policy.load(filename)
+        self.p_net.load(filename)

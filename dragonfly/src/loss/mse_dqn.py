@@ -2,7 +2,7 @@
 import tensorflow as tf
 
 ###############################################
-### MSE loss class for DQN-style
+### MSE loss class for DQN-style q networks
 class mse_dqn():
     def __init__(self, pms):
         pass
@@ -13,7 +13,7 @@ class mse_dqn():
         with tf.GradientTape() as tape:
 
             # Compute loss
-            val  = tf.convert_to_tensor(q.forward(obs))
+            val  = tf.cast(q.forward(obs), tf.float32)
             val  = tf.reshape(val, [btc, -1])
             val  = tf.gather(val, act, axis=1, batch_dims=1)
             diff = tf.square(tgt - val)
