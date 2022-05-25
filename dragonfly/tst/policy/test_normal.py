@@ -24,14 +24,13 @@ def test_normal():
     # Test action values
     print("Test normal policy")
     obs = [[1.0]]
-    act, lgp = policy.get_actions(obs)
+    act, lgp = policy.actions(obs)
     print("Actions:",act)
 
     obs = tf.cast([obs], tf.float32)
-    mu, sg = policy.call_net(obs)
+    mu, sg = policy.forward(obs)
     assert(np.all(np.abs(mu) < 1.0))
     assert(np.all(np.abs(sg) < 1.0))
     assert(np.all(np.abs(sg) > 0.0))
-
 
     print("")

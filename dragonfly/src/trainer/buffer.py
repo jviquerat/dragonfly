@@ -90,7 +90,7 @@ class buffer(trainer_base):
 
                 # Get actions
                 self.timer_actions.tic()
-                act, lgp = agent.get_actions(obs)
+                act, lgp = agent.actions(obs)
                 self.timer_actions.toc()
 
                 # Make one env step
@@ -125,7 +125,7 @@ class buffer(trainer_base):
             names = ["obs", "nxt", "act", "lgp", "rwd", "trm", "bts"]
             data  = self.buff.serialize(names)
             gobs, gnxt, gact, glgp, grwd, gtrm, gbts = (data[name] for name in names)
-            gtgt, gadv = agent.compute_returns(gobs, gnxt, gact, grwd, gtrm, gbts)
+            gtgt, gadv = agent.returns(gobs, gnxt, gact, grwd, gtrm, gbts)
 
             # Store in global buffers
             self.gbuff.store(["obs", "adv", "tgt", "act", "lgp"],

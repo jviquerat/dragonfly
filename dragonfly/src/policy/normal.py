@@ -44,7 +44,7 @@ class normal(base_policy):
                                         pms = pms.loss)
 
     # Get actions
-    def get_actions(self, obs):
+    def actions(self, obs):
 
         act, lgp = self.sample(obs)
         act      = np.reshape(act.numpy(), (self.store_dim))
@@ -55,7 +55,7 @@ class normal(base_policy):
     def control(self, obs):
 
         obs    = tf.cast([obs], tf.float32)
-        mu, sg = self.call_net(obs)
+        mu, sg = self.forward(obs)
         act    = np.reshape(mu.numpy(), (self.store_dim))
 
         return act
@@ -80,14 +80,14 @@ class normal(base_policy):
         obs = tf.cast(obs, tf.float32)
 
         # Get pdf
-        mu, sg = self.call_net(obs)
+        mu, sg = self.forward(obs)
         pdf    = tfd.MultivariateNormalDiag(loc        = mu,
                                             scale_diag = sg)
 
         return pdf
 
     # Networks forward pass
-    def call_net(self, state):
+    def forward(self, state):
 
         out = self.net.call(state)
         mu  = out[0]

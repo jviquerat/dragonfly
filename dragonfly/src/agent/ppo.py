@@ -31,7 +31,7 @@ class ppo(base_agent):
             warning("ppo", "__init__",
                     "Value type for ppo agent is not v_value")
         self.v_value = val_factory.create(pms.value.type,
-                                          obs_dim = obs_dim,
+                                          inp_dim = obs_dim,
                                           pms     = pms.value)
 
         # Build advantage
@@ -39,7 +39,7 @@ class ppo(base_agent):
                                           pms = pms.retrn)
 
     # Get actions
-    def get_actions(self, obs):
+    def actions(self, obs):
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
@@ -49,7 +49,7 @@ class ppo(base_agent):
 
         # Loop over cpus
         for i in range(self.n_cpu):
-            act[i,:], lgp[i] = self.policy.get_actions(obs[i])
+            act[i,:], lgp[i] = self.policy.actions(obs[i])
 
         # Reshape actions depending on policy type
         if (self.policy.kind == "discrete"):
@@ -88,11 +88,11 @@ class ppo(base_agent):
         return act
 
     # Finalize buffers before training
-    def compute_returns(self, obs, nxt, act, rwd, trm, bts):
+    def returns(self, obs, nxt, act, rwd, trm, bts):
 
         # Get current and next values
-        crt_val = self.v_value.get_values(obs)
-        nxt_val = self.v_value.get_values(nxt)
+        crt_val = self.v_value.values(obs)
+        nxt_val = self.v_value.values(nxt)
 
         # Compute advantages
         tgt, adv = self.retrn.compute(rwd, crt_val, nxt_val, trm, bts)

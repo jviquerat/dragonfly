@@ -41,7 +41,7 @@ class categorical(base_policy):
                                         pms = pms.loss)
 
     # Get actions
-    def get_actions(self, obs):
+    def actions(self, obs):
 
         act, lgp = self.sample(obs)
         act      = np.reshape(act.numpy(), (self.store_dim))
@@ -52,7 +52,7 @@ class categorical(base_policy):
     def control(self, obs):
 
         obs   = tf.cast([obs], tf.float32)
-        probs = self.call_net(obs)
+        probs = self.forward(obs)
         act   = tf.argmax(probs[0][0])
         act   = np.reshape(act.numpy(), (self.store_dim))
 
@@ -78,13 +78,13 @@ class categorical(base_policy):
         obs = tf.cast(obs, tf.float32)
 
         # Get pdf
-        probs = self.call_net(obs)
+        probs = self.forward(obs)
         pdf   = tfd.Categorical(probs=probs)
 
         return pdf
 
     # Network forward pass
-    def call_net(self, obs):
+    def forward(self, obs):
 
         return self.net.call(obs)
 

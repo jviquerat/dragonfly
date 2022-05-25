@@ -13,11 +13,11 @@ class base_value():
         pass
 
     # Get values
-    def get_values(self, obs):
+    def values(self, obs):
         raise NotImplementedError
 
     # Network forward pass
-    def call_net(self, state):
+    def forward(self, state):
 
         return self.net.call(state)
 
@@ -32,7 +32,7 @@ class base_value():
         self.net.set_weights(weights)
 
     # Get current learning rate
-    def get_lr(self):
+    def lr(self):
 
         return self.opt.get_lr()
 

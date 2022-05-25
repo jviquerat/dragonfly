@@ -17,7 +17,7 @@ class base_agent():
         pass
 
     # Get actions
-    def get_actions(self, obs):
+    def actions(self, obs):
         raise NotImplementedError
 
     # Reset
