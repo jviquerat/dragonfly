@@ -27,16 +27,10 @@ class td(trainer_base):
         self.n_ep_max     = n_ep_max
         self.mem_size     = pms.mem_size
         self.btc_size     = pms.btc_size
-        self.n_stp_unroll = pms.n_stp_unroll
+        self.n_stp_unroll = pms.n_stp_unroll*n_cpu
 
         # Local variables
         self.unroll = 0
-
-        # Check that n_cpu is 1
-        if (n_cpu != 1):
-            error("td",
-                  "init",
-                  "td learning does not support parallel envs")
 
         # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
@@ -107,7 +101,7 @@ class td(trainer_base):
                 self.counter.update(rwd)
 
                 # Update unrolling counter
-                self.unroll += 1
+                self.unroll += self.n_cpu
 
                 # Handle rendering
                 self.renderer.store(env.render(self.renderer.render), env.rnd_style)
@@ -136,7 +130,8 @@ class td(trainer_base):
 
             # Train agent
             self.timer_training.tic()
-            self.train(agent)
+            for i in range(self.n_stp_unroll):
+                self.train(agent)
             self.timer_training.toc()
 
             # Reset unroll

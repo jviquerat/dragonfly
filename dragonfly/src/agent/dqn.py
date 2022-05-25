@@ -13,11 +13,6 @@ class dqn():
         self.n_cpu       = n_cpu
         self.gamma       = pms.gamma
 
-        # Check n_cpu
-        if (n_cpu != 1):
-            error("dqn", "__init__",
-                  "dqn agent does not support n_cpu > 1")
-
         # Initialize random limit
         self.eps = decay_factory.create(pms.exploration.type,
                                         pms = pms.exploration)
@@ -43,13 +38,13 @@ class dqn():
         # environments. We assume it does and unroll it in a loop
         act = np.zeros([self.n_cpu, self.pol_dim], dtype=int)
 
-        p = random.uniform(0, 1)
-        if (p < self.eps.get()):
-            act = random.randrange(0, self.act_dim)
-        else:
-            obs = tf.cast([obs], tf.float32)
-            val = self.q_val.get_values(obs)
-            act = np.argmax(val)
+        for i in range(self.n_cpu):
+            p = random.uniform(0, 1)
+            if (p < self.eps.get()):
+                act[i] = random.randrange(0, self.act_dim)
+            else:
+                val = self.q_val.get_values(tf.cast([obs[i]], tf.float32))
+                act[i] = np.argmax(val)
 
         act = np.reshape(act, (-1))
 
