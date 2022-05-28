@@ -1,27 +1,27 @@
 # Custom imports
-from dragonfly.src.agent.base   import *
-from dragonfly.src.utils.polyak import *
+from dragonfly.src.agent.base            import *
+from dragonfly.src.terminator.terminator import *
+from dragonfly.src.utils.buff            import *
+from dragonfly.src.utils.counter         import *
+from dragonfly.src.utils.polyak          import *
 
 ###############################################
 ### DDQN agent
 class ddqn():
-    def __init__(self, obs_dim, act_dim, n_cpu, pms):
+    def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
-        self.name    = 'ddqn'
-        self.act_dim = act_dim
-        self.obs_dim = obs_dim
-        self.n_cpu   = n_cpu
-        self.gamma   = pms.gamma
-        self.rho     = pms.rho
+        self.name     = 'ddqn'
+        self.act_dim  = act_dim
+        self.obs_dim  = obs_dim
+        self.n_cpu    = n_cpu
+        self.gamma    = pms.gamma
+        self.rho      = pms.rho
+        self.mem_size = size
 
         # Initialize random limit
         self.eps = decay_factory.create(pms.exploration.type,
                                         pms = pms.exploration)
-
-        # pol_dim is the true dimension of the action provided to the env
-        # As ddqn is only for discrete actions, it is set to 1
-        self.pol_dim = 1
 
         # Build values
         if (pms.value.type != "q_value"):
@@ -41,12 +41,28 @@ class ddqn():
         # polyak averager for q-networks
         self.polyak = polyak(self.rho)
 
+        # Create buffers
+        self.buff = buff(self.n_cpu,
+                        ["obs", "nxt", "act", "rwd", "dne", "stp", "trm"],
+                        [obs_dim, obs_dim, 1, 1, 1, 1, 1])
+        self.gbuff = gbuff(self.mem_size,
+                           ["obs", "act", "tgt"],
+                           [obs_dim, 1, 1])
+
+        # Initialize counter
+        self.counter = counter(self.n_cpu)
+
+        # Initialize terminator
+        self.terminator = terminator_factory.create(pms.terminator.type,
+                                                    n_cpu = self.n_cpu,
+                                                    pms   = pms.terminator)
+
     # Get actions
     def actions(self, obs):
 
         # "obs" possibly contains observations from multiple parallel
         # environments. We assume it does and unroll it in a loop
-        act = np.zeros([self.n_cpu, self.pol_dim], dtype=int)
+        act = np.zeros([self.n_cpu, 1], dtype=int)
 
         for i in range(self.n_cpu):
             p = random.uniform(0, 1)
@@ -70,8 +86,21 @@ class ddqn():
 
         return tgt
 
+    # Prepare training data
+    def prepare_data(self, size):
+
+        names = ["obs", "act", "tgt"]
+        self.data = self.gbuff.get_buffers(names, size)
+        lgt = len(self.data["obs"])
+
+        return lgt
+
     # Training
-    def train(self, obs, act, tgt, size):
+    def train(self, size):
+
+        obs = self.data["obs"][:]
+        act = self.data["act"][:]
+        tgt = self.data["tgt"][:]
 
         # Train q network
         tgt = tf.reshape(tgt, [size,-1])
@@ -86,6 +115,42 @@ class ddqn():
     # Reset
     def reset(self):
 
+        self.counter.reset()
         self.q_net.reset()
         self.q_tgt.reset()
         self.q_tgt.net.set_weights(self.q_net.net.get_weights())
+
+    # Store transition
+    def store(self, obs, act, rwd, nxt, dne):
+
+        stp = self.counter.ep_step
+        self.buff.store(["obs", "act", "rwd", "nxt", "dne", "stp"],
+                        [ obs,   act,   rwd,   nxt,   dne,   stp ])
+        self.counter.update(rwd)
+
+    # Actions to execute before the inner training loop
+    def pre_loop(self):
+
+        self.buff.reset()
+
+    # Actions to execute after the inner training loop
+    def post_loop(self):
+
+        self.terminator.terminate(self.buff)
+        names = ["obs", "nxt", "act", "rwd", "trm"]
+        data  = self.buff.serialize(names)
+        gobs, gnxt, gact, grwd, gtrm = (data[name] for name in names)
+        gtgt = self.target(gobs, gnxt, gact, grwd, gtrm)
+
+        self.gbuff.store(["obs", "tgt", "act"],
+                         [gobs,  gtgt,  gact ])
+
+    # Save parameters
+    def save(self, filename):
+
+        self.q_net.save(filename)
+
+    # Load agent parameters
+    def load(self, filename):
+
+        self.q_net.load(filename)

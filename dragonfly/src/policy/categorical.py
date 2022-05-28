@@ -86,12 +86,6 @@ class categorical(base_policy):
 
         return self.net.call(obs)
 
-    # Compute policy entropy
-    def entropy(self, obs):
-
-        pdf = self.compute_pdf([obs])
-        return tf.get_static_value(pdf.entropy())[0][0]
-
     # Reshape np actions
     def reshape_np_actions(self, act):
 

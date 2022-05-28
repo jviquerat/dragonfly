@@ -19,11 +19,8 @@ def plot_avg(data, filename):
     length_avg  = data[:,10]
     length_p    = data[:,11]
     length_m    = data[:,12]
-    entropy_avg = data[:,16]
-    entropy_p   = data[:,17]
-    entropy_m   = data[:,18]
 
-    fig, ax = plt.subplots(1,3,figsize=(15,5))
+    fig, ax = plt.subplots(1,2,figsize=(10,5))
     fig.suptitle(filename)
 
     ax[0].set_title('score')
@@ -49,18 +46,6 @@ def plot_avg(data, filename):
                        label="+/- std")
     ax[1].grid(True)
     ax[1].legend()
-
-    ax[2].set_title('entropy')
-    ax[2].set_xlabel('episodes')
-    ax[2].plot(entropy_avg,
-               color='black',
-               label='avg')
-    ax[2].fill_between(gen, entropy_p, entropy_m,
-                       alpha=0.4,
-                       color='black',
-                       label="+/- std")
-    ax[2].grid(True)
-    ax[2].legend()
 
     fig.tight_layout()
     fig.savefig(filename+'.png')

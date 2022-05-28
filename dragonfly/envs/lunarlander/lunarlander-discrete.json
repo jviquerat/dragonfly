@@ -9,11 +9,7 @@
         "n_buff": 16,
         "batch_frac": 0.5,
         "n_epochs": 16,
-        "render_every": 100,
-        "terminator": {
-            "type": "bootstrap",
-            "ep_end": 1000
-        }
+        "render_every": 100
     },
     "agent": {
         "type": "ppo",
@@ -73,6 +69,10 @@
             "gae_lambda": 0.99,
             "ret_norm": true,
             "ret_clip": false
+        },
+        "terminator": {
+            "type": "bootstrap",
+            "ep_end": 1000
         }
     }
 }
