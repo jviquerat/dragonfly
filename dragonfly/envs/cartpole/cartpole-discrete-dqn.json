@@ -8,10 +8,7 @@
         "mem_size": 10000,
         "btc_size": 128,
         "n_stp_unroll": 1,
-        "render_every": 500,
-        "terminator": {
-            "type": "regular"
-        }
+        "render_every": 500
     },
     "agent": {
         "type": "dqn",
@@ -45,6 +42,9 @@
             "loss": {
                 "type": "mse_dqn"
             }
+        },
+        "terminator": {
+            "type": "regular"
         }
     }
 }

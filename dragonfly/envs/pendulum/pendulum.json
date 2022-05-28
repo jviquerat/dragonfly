@@ -6,14 +6,10 @@
     "trainer": {
         "style": "buffer",
         "buff_size": 512,
-        "n_buff": 16,
+        "n_buff": 8,
         "batch_frac": 0.5,
         "n_epochs": 16,
-        "render_every": 10000,
-        "terminator": {
-            "type": "bootstrap",
-            "ep_end": 200
-        }
+        "render_every": 10000
     },
     "agent": {
         "type": "ppo",
@@ -73,6 +69,10 @@
             "gae_lambda": 0.99,
             "ret_norm": true,
             "ret_clip": false
+        },
+        "terminator": {
+            "type": "bootstrap",
+            "ep_end": 200
         }
     }
 }

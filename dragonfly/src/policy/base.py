@@ -34,10 +34,6 @@ class base_policy():
     def forward(self, state):
         raise NotImplementedError
 
-    # Return entropy of policy
-    def entropy(self):
-        raise NotImplementedError
-
     # Save network weights
     def save_weights(self):
 

@@ -4,171 +4,152 @@ import numpy as np
 # Custom imports
 from dragonfly.src.core.constants        import *
 from dragonfly.src.trainer.base          import *
-from dragonfly.src.terminator.terminator import *
+from dragonfly.src.envs.par_envs         import *
+from dragonfly.src.agent.agent           import *
 from dragonfly.src.utils.timer           import *
-from dragonfly.src.utils.buff            import *
 from dragonfly.src.utils.report          import *
 from dragonfly.src.utils.renderer        import *
-from dragonfly.src.utils.counter         import *
-from dragonfly.src.utils.error           import *
 
 ###############################################
 ### Class for temporal-difference training
-### pms : parameters
+### env_name  : name of the environment
+### agent_pms : agent parameters
+### path      : path for environment
+### n_cpu     : nb of parallel environments
+### n_ep_max  : max nb of episodes to unroll in a run
+### pms       : parameters
 class td(trainer_base):
-    def __init__(self, obs_dim, act_dim,
-                 pol_dim, n_cpu, n_ep_max, pms):
+    def __init__(self, env_name, agent_pms, path, n_cpu, n_ep_max, pms):
+
+        # Initialize environment
+        self.env = par_envs(env_name, n_cpu, path)
 
         # Initialize from input
-        self.obs_dim      = obs_dim
-        self.act_dim      = act_dim
-        self.pol_dim      = pol_dim
+        self.obs_dim      = self.env.obs_dim
+        self.act_dim      = self.env.act_dim
         self.n_cpu        = n_cpu
         self.n_ep_max     = n_ep_max
         self.mem_size     = pms.mem_size
+        self.n_stp_unroll = pms.n_stp_unroll
         self.btc_size     = pms.btc_size
-        self.n_stp_unroll = pms.n_stp_unroll*n_cpu
 
         # Local variables
         self.unroll = 0
 
-        # pol_dim is the true dimension of the action provided to the env
-        # This allows compatibility between continuous and discrete envs
-        self.buff = buff(self.n_cpu,
-                        ["obs", "nxt", "act", "rwd", "dne", "stp", "trm"],
-                        [obs_dim, obs_dim, pol_dim, 1, 1, 1, 1])
-        self.gbuff = gbuff(self.mem_size,
-                           ["obs", "act", "tgt"],
-                           [obs_dim, pol_dim, 1])
+        # Check that n_stp_unroll is a multiple of n_cpu
+        if (self.n_stp_unroll%self.n_cpu != 0):
+            error("td", "__init__",
+                  "td-based requires n_stp_unroll proportional to n_cpu")
+
+        # Initialize agent
+        self.agent = agent_factory.create(agent_pms.type,
+                                          obs_dim = self.obs_dim,
+                                          act_dim = self.act_dim,
+                                          n_cpu   = self.n_cpu,
+                                          size    = self.mem_size,
+                                          pms     = agent_pms)
 
         # Initialize learning data report
         self.report = report(["episode", "step",
                               "score",  "smooth_score",
-                              "length", "smooth_length",
-                              "entropy", "smooth_entropy"])
+                              "length", "smooth_length"])
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu, pms.render_every)
 
-        # Initialize counter
-        self.counter = counter(self.n_cpu, self.n_ep_max)
-
-        # Initialize terminator
-        self.terminator = terminator_factory.create(pms.terminator.type,
-                                                    n_cpu = self.n_cpu,
-                                                    pms   = pms.terminator)
-
         # Initialize timers
         self.timer_global   = timer("global   ")
-        self.timer_env      = timer("env      ")
-        self.timer_actions  = timer("actions  ")
         self.timer_training = timer("training ")
 
     # Loop
-    def loop(self, path, run, env, agent):
+    def loop(self, path, run):
 
         # Start global timer
         self.timer_global.tic()
 
         # Reset environment
-        obs = env.reset_all()
+        obs = self.env.reset_all()
 
         # Loop until max episode number is reached
-        while (not (self.counter.ep >= self.n_ep_max)):
+        while (not (self.agent.counter.ep >= self.n_ep_max)):
 
-            # Reset local buffer
-            self.buff.reset()
+            # Prepare inner training loop
+            self.agent.pre_loop()
 
             # Loop over training steps
             while (not (self.unroll >= self.n_stp_unroll)):
 
                 # Get actions
-                self.timer_actions.tic()
-                act = agent.actions(obs)
-                self.timer_actions.toc()
+                act = self.agent.actions(obs)
 
                 # Make one env step
-                self.timer_env.tic()
-                nxt, rwd, dne = env.step(act)
-                self.timer_env.toc()
+                nxt, rwd, dne = self.env.step(act)
 
                 # Store transition
-                stp = self.counter.ep_step
-                self.buff.store(["obs", "nxt", "act", "rwd", "dne", "stp"],
-                                [ obs,   nxt,   act,   rwd,   dne,   stp ])
-
-                # Update counter
-                self.counter.update(rwd)
+                self.agent.store(obs, act, rwd, nxt, dne)
 
                 # Update unrolling counter
                 self.unroll += self.n_cpu
 
                 # Handle rendering
-                self.renderer.store(env.render(self.renderer.render), env.rnd_style)
+                self.renderer.store(self.env.render(self.renderer.render),
+                                    self.env.rnd_style)
 
                 # Finish if some episodes are done
-                self.finish_episodes(path, dne)
+                self.finish_episodes(path, run, dne)
 
                 # Update observation
                 obs = nxt
 
                 # Reset only finished environments
-                self.timer_env.tic()
-                env.reset(dne, obs)
-                self.timer_env.toc()
+                self.env.reset(dne, obs)
 
-            # Finalize buffers for training
-            self.terminator.terminate(self.buff)
-            names = ["obs", "nxt", "act", "rwd", "trm"]
-            data  = self.buff.serialize(names)
-            gobs, gnxt, gact, grwd, gtrm = (data[name] for name in names)
-            gtgt = agent.target(gobs, gnxt, gact, grwd, gtrm)
-
-            # Store in global buffers
-            self.gbuff.store(["obs", "tgt", "act"],
-                             [gobs,  gtgt,  gact ])
+            # Finalize inner training loop
+            self.agent.post_loop()
 
             # Train agent
-            self.timer_training.tic()
-            for i in range(self.n_stp_unroll):
-                self.train(agent)
-            self.timer_training.toc()
+            self.train()
 
             # Reset unroll
             self.unroll = 0
 
         # Last printing
-        self.print_episode(self.counter, self.report)
+        self.print_episode()
 
         # Write report data to file
-        self.write_report(agent, self.report, path, run)
+        self.write_report(path, run)
 
         # Close timers and show
         self.timer_global.toc()
         self.timer_global.show()
-        self.timer_env.show()
-        self.timer_actions.show()
+        self.env.timer_env.show()
         self.timer_training.show()
 
     # Finish if some episodes are done
-    def finish_episodes(self, path, done):
+    def finish_episodes(self, path, run, done):
 
         # Loop over environments and finalize/reset
         for cpu in range(self.n_cpu):
             if (done[cpu]):
-                self.store_report(self.counter, self.report, cpu)
-                self.print_episode(self.counter, self.report)
-                self.renderer.finish(path, self.counter.ep, cpu)
-                self.counter.reset_ep(cpu)
+                self.store_report(cpu)
+                self.print_episode()
+                self.renderer.finish(path, self.agent.counter.ep, cpu)
+                best = self.agent.counter.reset_ep(cpu)
+                name = path+"/"+str(run)+"/"+self.agent.name
+                if best: self.agent.save(name)
 
     # Train
-    def train(self, agent):
+    def train(self):
 
-        # Retrieve data
-        names = ["obs", "act", "tgt"]
-        data  = self.gbuff.get_buffers(names, self.btc_size)
-        obs, act, tgt = (data[name] for name in names)
+        self.timer_training.tic()
 
-        if (len(obs) < self.btc_size): return
+        # Loop on unroll steps
+        for i in range(self.n_stp_unroll):
 
-        agent.train(obs, act, tgt, self.btc_size)
+            # Prepare training data
+            lgt = self.agent.prepare_data(self.btc_size)
+            if (lgt < self.btc_size): return
+
+            self.agent.train(self.btc_size)
+
+        self.timer_training.toc()

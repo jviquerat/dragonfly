@@ -24,7 +24,7 @@ class trainer_base():
         pass
 
     # Loop
-    def loop(self, path, run, env, agent):
+    def loop(self, path, run):
         raise NotImplementedError
 
     # Finish if some episodes are done
@@ -32,60 +32,60 @@ class trainer_base():
         raise NotImplementedError
 
     # Train
-    def train(self, agent):
+    def train(self):
         raise NotImplementedError
 
     # Reset
     def reset(self):
 
-        self.buff.reset()
-        self.gbuff.reset()
+        self.agent.reset()
         self.report.reset()
         self.renderer.reset()
-        self.counter.reset()
 
     # Printings at the end of an episode
-    def print_episode(self, counter, report):
+    def print_episode(self):
 
         # No initial printing
-        if (counter.ep == 0): return
+        if (self.agent.counter.ep == 0): return
 
         # Average and print
-        if (counter.ep <= counter.n_ep_max):
-            avg    = report.avg("score", n_smooth)
+        ep       = self.agent.counter.ep
+        n_ep_max = self.n_ep_max
+
+        if (ep <= n_ep_max):
+            avg    = self.report.avg("score", n_smooth)
             avg    = f"{avg:.3f}"
-            bst    = counter.best_score
+            bst    = self.agent.counter.best_score
             bst    = f"{bst:.3f}"
-            bst_ep = counter.best_ep
+            bst_ep = self.agent.counter.best_ep
             end    = "\n"
-            if (counter.ep < counter.n_ep_max): end = "\r"
-            print("# Ep #"+str(counter.ep)+", avg score = "+str(avg)+", best score = "+str(bst)+" at ep "+str(bst_ep)+"                 ", end=end)
+            if (ep < n_ep_max): end = "\r"
+
+            print("# Ep #"+str(ep)+", avg score = "+str(avg)+", best score = "+str(bst)+" at ep "+str(bst_ep)+"                 ", end=end)
 
     ################################
     ### Report wrappings
     ################################
 
     # Store data in report
-    def store_report(self, counter, report, cpu):
+    def store_report(self, cpu):
 
-        n_step = counter.ep_step[cpu]
-        if (counter.ep > 0): n_step += report.get("step")[-1]
+        n_step = self.agent.counter.ep_step[cpu]
+        if (self.agent.counter.ep > 0):
+            n_step += self.report.get("step")[-1]
 
-        report.append("episode",       counter.ep)
-        report.append("step",          n_step)
-        report.append("score",         counter.score[cpu])
-        smooth_score = report.avg("score", n_smooth)
-        report.append("smooth_score",  smooth_score)
-        report.append("length",        counter.ep_step[cpu])
-        smooth_length = report.avg("length", n_smooth)
-        report.append("smooth_length", smooth_length)
-        report.append("entropy",       counter.entropy[cpu])
-        smooth_entropy = report.avg("entropy", n_smooth)
-        report.append("smooth_entropy", smooth_entropy)
+        self.report.append("episode",       self.agent.counter.ep)
+        self.report.append("step",          n_step)
+        self.report.append("score",         self.agent.counter.score[cpu])
+        smooth_score = self.report.avg("score", n_smooth)
+        self.report.append("smooth_score",  smooth_score)
+        self.report.append("length",        self.agent.counter.ep_step[cpu])
+        smooth_length = self.report.avg("length", n_smooth)
+        self.report.append("smooth_length", smooth_length)
 
     # Write learning data report
-    def write_report(self, agent, report, path, run):
+    def write_report(self, path, run):
 
         # Set filename with method name and run number
-        filename = path+'/'+str(run)+'/'+agent.name+'_'+str(run)+'.dat'
-        report.write(filename)
+        filename = path+'/'+str(run)+'/'+self.agent.name+'_'+str(run)+'.dat'
+        self.report.write(filename)

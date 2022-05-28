@@ -8,6 +8,7 @@ import time
 
 # Custom imports
 from dragonfly.src.core.constants import *
+from dragonfly.src.utils.timer    import *
 
 ###############################################
 ### A wrapper class for parallel environments
@@ -53,6 +54,9 @@ class par_envs:
 
         # Handle rendering
         self.rnd_style = self.get_rnd_style()
+
+        # Initialize timer
+        self.timer_env = timer("env      ")
 
     # Reset all environments
     def reset_all(self):
@@ -188,6 +192,8 @@ class par_envs:
     # Take one step in all environments
     def step(self, actions):
 
+        self.timer_env.tic()
+
         # Send
         for cpu in range(self.n_cpu):
             act = actions[cpu]
@@ -211,6 +217,8 @@ class par_envs:
             done    = np.append(done, bool(d))
 
         nxt = np.reshape(nxt, (-1,self.obs_dim))
+
+        self.timer_env.toc()
 
         return nxt, rwd, done
 

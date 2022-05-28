@@ -1,16 +1,20 @@
 # Custom imports
-from dragonfly.src.agent.base import *
+from dragonfly.src.agent.base            import *
+from dragonfly.src.terminator.terminator import *
+from dragonfly.src.utils.buff            import *
+from dragonfly.src.utils.counter         import *
 
 ###############################################
 ### PPO agent
 class ppo(base_agent):
-    def __init__(self, obs_dim, act_dim, n_cpu, pms):
+    def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
         self.name      = 'ppo'
         self.act_dim   = act_dim
         self.obs_dim   = obs_dim
         self.n_cpu     = n_cpu
+        self.size      = size
 
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
@@ -30,6 +34,7 @@ class ppo(base_agent):
         if (pms.value.type != "v_value"):
             warning("ppo", "__init__",
                     "Value type for ppo agent is not v_value")
+
         self.v_net = val_factory.create(pms.value.type,
                                         inp_dim = obs_dim,
                                         pms     = pms.value)
@@ -37,6 +42,23 @@ class ppo(base_agent):
         # Build advantage
         self.retrn = retrn_factory.create(pms.retrn.type,
                                           pms = pms.retrn)
+
+        # Create buffers
+        self.buff = buff(self.n_cpu,
+                         ["obs", "nxt", "act", "lgp",
+                          "rwd", "dne", "stp", "trm", "bts"],
+                         [obs_dim, obs_dim, self.pol_dim, 1, 1, 1, 1, 1, 1])
+        self.gbuff = gbuff(self.size,
+                           ["obs", "act", "adv", "tgt", "lgp"],
+                           [obs_dim, self.pol_dim, 1, 1, 1])
+
+        # Initialize counter
+        self.counter = counter(self.n_cpu)
+
+        # Initialize terminator
+        self.terminator = terminator_factory.create(pms.terminator.type,
+                                                    n_cpu = self.n_cpu,
+                                                    pms   = pms.terminator)
 
     # Get actions
     def actions(self, obs):
@@ -58,7 +80,11 @@ class ppo(base_agent):
         if (np.isnan(act).any()):
             error("ppo", "get_actions", "Detected NaN in generated actions")
 
-        return act, lgp
+        # Store log-prob
+        self.buff.store(["lgp"],
+                        [ lgp ])
+
+        return act
 
     # Control (deterministic actions)
     def control(self, obs):
@@ -93,13 +119,23 @@ class ppo(base_agent):
 
         return tgt, adv
 
-    # Compute entropy
-    def entropy(self, obs):
+    # Prepare training data
+    def prepare_data(self, size):
 
-        return self.p_net.entropy(obs)
+        names = ["obs", "adv", "tgt", "act", "lgp"]
+        self.data = self.gbuff.get_buffers(names, size)
+        lgt = len(self.data["obs"])
+
+        return lgt
 
     # Training
-    def train(self, obs, act, adv, tgt, lgp, size):
+    def train(self, start, end):
+
+        obs = self.data["obs"][start:end]
+        act = self.data["act"][start:end]
+        adv = self.data["adv"][start:end]
+        tgt = self.data["tgt"][start:end]
+        lgp = self.data["lgp"][start:end]
 
         # Train policy
         act = self.p_net.reshape_tf_actions(act)
@@ -108,14 +144,41 @@ class ppo(base_agent):
         self.p_net.loss.train(obs, adv, act, lgp, self.p_net)
 
         # Train v network
+        size = end - start
         tgt = tf.reshape(tgt, [-1])
         self.v_net.loss.train(obs, tgt, size, self.v_net)
 
-    # Reset
+    # Agent reset
     def reset(self):
 
+        self.counter.reset()
         self.p_net.reset()
         self.v_net.reset()
+
+    # Store transition
+    def store(self, obs, act, rwd, nxt, dne):
+
+        stp = self.counter.ep_step
+        self.buff.store(["obs", "act", "rwd", "nxt", "dne", "stp"],
+                        [ obs,   act,   rwd,   nxt,   dne,   stp ])
+        self.counter.update(rwd)
+
+    # Actions to execute before the inner training loop
+    def pre_loop(self):
+
+        self.buff.reset()
+
+    # Actions to execute after the inner training loop
+    def post_loop(self):
+
+        self.terminator.terminate(self.buff)
+        names = ["obs", "nxt", "act", "lgp", "rwd", "trm", "bts"]
+        data  = self.buff.serialize(names)
+        gobs, gnxt, gact, glgp, grwd, gtrm, gbts = (data[name] for name in names)
+        gtgt, gadv = self.returns(gobs, gnxt, gact, grwd, gtrm, gbts)
+
+        self.gbuff.store(["obs", "adv", "tgt", "act", "lgp"],
+                         [gobs,  gadv,  gtgt,  gact,  glgp ])
 
     # Save agent parameters
     def save(self, filename):

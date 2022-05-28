@@ -41,3 +41,14 @@ class base_value():
 
         self.net.reset()
         self.opt.reset()
+
+    # Save
+    def save(self, filename):
+
+        self.net.save_weights(filename)
+
+    # Load
+    def load(self, filename):
+
+        load_status = self.net.load_weights(filename)
+        load_status.assert_consumed()

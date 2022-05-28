@@ -6,14 +6,10 @@
     "trainer": {
         "style": "episode",
         "n_ep_unroll": 1,
-        "n_ep_train": 16,
-        "batch_frac": 0.25,
-        "n_epochs": 8,
-        "render_every": 500,
-        "terminator": {
-            "type": "bootstrap",
-            "ep_end": 200
-        }
+        "n_ep_train": 8,
+        "batch_frac": 0.5,
+        "n_epochs": 16,
+        "render_every": 500
     },
     "agent": {
         "type": "ppo",
@@ -40,7 +36,7 @@
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.2,
-                "ent_coef": 0.01
+                "ent_coef": 0.001
             }
         },
         "value": {
@@ -73,6 +69,10 @@
             "gae_lambda": 0.99,
             "ret_norm": true,
             "ret_clip": false
+        },
+        "terminator": {
+            "type": "bootstrap",
+            "ep_end": 200
         }
     }
 }

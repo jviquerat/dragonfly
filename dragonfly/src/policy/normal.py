@@ -93,12 +93,6 @@ class normal(base_policy):
 
         return mu, sg
 
-    # Compute policy entropy
-    def entropy(self, obs):
-
-        pdf = self.compute_pdf([obs])
-        return tf.get_static_value(pdf.entropy())[0]
-
     # Reshape actions
     def reshape_np_actions(self, act):
 

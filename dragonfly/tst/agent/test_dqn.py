@@ -23,36 +23,28 @@ def test_dqn():
     reader = json_parser()
     reader.read("dragonfly/tst/agent/dqn.json")
 
-    # Initialize environment
-    env = par_envs(reader.pms.env_name, reader.pms.n_cpu, ".")
-
-    # Initialize discrete agent
-    agent = dqn(4, 1, reader.pms.n_cpu, reader.pms.agent)
-
     # Intialize averager
     averager = data_avg(4, reader.pms.n_ep_max, reader.pms.n_avg)
 
-    # Initialize training style
+    # Initialize trainer
     trainer = trainer_factory.create(reader.pms.trainer.style,
-                                     obs_dim  = env.obs_dim,
-                                     act_dim  = env.act_dim,
-                                     pol_dim  = agent.pol_dim,
-                                     n_cpu    = reader.pms.n_cpu,
-                                     n_ep_max = reader.pms.n_ep_max,
-                                     pms=reader.pms.trainer)
+                                     env_name  = reader.pms.env_name,
+                                     agent_pms = reader.pms.agent,
+                                     path      = ".",
+                                     n_cpu     = reader.pms.n_cpu,
+                                     n_ep_max  = reader.pms.n_ep_max,
+                                     pms       = reader.pms.trainer)
 
     print("Test dqn")
     os.makedirs("0/", exist_ok=True)
     os.makedirs("1/", exist_ok=True)
     trainer.reset()
-    agent.reset()
-    trainer.loop(".", 0, env, agent)
+    trainer.loop(".", 0)
     averager.store("0/dqn_0.dat", 0)
     trainer.reset()
-    agent.reset()
-    trainer.loop(".", 1, env, agent)
+    trainer.loop(".", 1)
     averager.store("1/dqn_1.dat", 1)
-    env.close()
+    trainer.env.close()
     averager.average("dqn_avg.dat")
 
     shutil.rmtree("0")
