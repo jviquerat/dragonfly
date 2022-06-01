@@ -107,7 +107,7 @@ class ddqn():
         act = tf.reshape(act, [size,-1])
         act = tf.cast(act, tf.int32)
 
-        self.q_net.loss.train(obs, act, tgt, size, self.q_net)
+        self.q_net.loss.train(obs, act, tgt, self.q_net)
 
         # Update target network
         self.polyak.average(self.q_net.net, self.q_tgt.net)

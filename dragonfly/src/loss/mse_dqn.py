@@ -9,12 +9,12 @@ class mse_dqn():
 
     # Train
     @tf.function
-    def train(self, obs, act, tgt, btc, q):
+    def train(self, obs, act, tgt, q):
         with tf.GradientTape() as tape:
 
             # Compute loss
             val  = tf.cast(q.forward(obs), tf.float32)
-            val  = tf.reshape(val, [btc, -1])
+            val  = tf.reshape(val, [tf.size(tgt), -1])
             val  = tf.gather(val, act, axis=1, batch_dims=1)
             diff = tf.square(tgt - val)
             loss = tf.reduce_mean(diff)

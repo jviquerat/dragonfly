@@ -144,9 +144,8 @@ class ppo(base_agent):
         self.p_net.loss.train(obs, adv, act, lgp, self.p_net)
 
         # Train v network
-        size = end - start
         tgt = tf.reshape(tgt, [-1])
-        self.v_net.loss.train(obs, tgt, size, self.v_net)
+        self.v_net.loss.train(obs, tgt, self.v_net)
 
     # Agent reset
     def reset(self):
