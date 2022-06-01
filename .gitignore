@@ -11,3 +11,4 @@ results
 checkpoint
 *.data*
 *.index
+venv
