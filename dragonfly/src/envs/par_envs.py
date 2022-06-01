@@ -205,6 +205,7 @@ class par_envs:
 
         for p in self.pipes:
             n, r, d = p.recv()
+            n       = self.norm_obs(n)
             nxt     = np.append(nxt, n)
             rwd     = np.append(rwd, r)
             done    = np.append(done, bool(d))
