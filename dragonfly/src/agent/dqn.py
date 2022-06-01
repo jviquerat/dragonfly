@@ -96,7 +96,7 @@ class dqn():
         act = tf.reshape(act, [size,-1])
         act = tf.cast(act, tf.int32)
 
-        self.q_net.loss.train(obs, act, tgt, size, self.q_net)
+        self.q_net.loss.train(obs, act, tgt, self.q_net)
 
     # Reset
     def reset(self):

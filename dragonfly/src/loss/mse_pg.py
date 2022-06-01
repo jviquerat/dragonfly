@@ -9,12 +9,12 @@ class mse_pg():
 
     # Train
     @tf.function
-    def train(self, obs, tgt, btc, v):
+    def train(self, obs, tgt, v):
         with tf.GradientTape() as tape:
 
             # Compute loss
             val  = tf.cast(v.forward(obs), tf.float32)
-            val  = tf.reshape(val, [btc])
+            val  = tf.reshape(val, [tf.size(tgt)])
             diff = tf.square(tgt - val)
             loss = tf.reduce_mean(diff)
 
