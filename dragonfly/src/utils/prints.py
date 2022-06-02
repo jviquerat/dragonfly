@@ -1,3 +1,6 @@
+# Generic imports
+import subprocess
+
 ###############################################
 ### A set of functions to format printings
 
@@ -33,6 +36,8 @@ def disclaimer():
     header()
     liner_simple()
     bold("Dragonfly, a DRL library")
+    liner_simple()
+    git_short_hash()
     header()
 
 ### Print with warning color
@@ -46,3 +51,8 @@ def errr(text):
 ### Print with bold text
 def bold(text):
     print(bld_clr + text + end_clr)
+
+### Print git revision
+def git_short_hash() -> str:
+    hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+    print("Revision "+hash)
