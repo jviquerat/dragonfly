@@ -41,8 +41,18 @@ class categorical(base_policy):
     # Get actions
     def actions(self, obs):
 
+        #print(obs)
+        obs = tf.cast(obs, tf.float32)
+        #print(obs)
+        #print(len(obs))
+        #exit()
+
         act, lgp = self.sample(obs)
-        act      = np.reshape(act.numpy(), (self.store_dim))
+        act      = np.reshape(act.numpy()[0], (-1))
+        lgp      = np.reshape(lgp.numpy()[0], (-1))
+
+        #print(act, lgp)
+        #exit()
 
         return act, lgp
 
@@ -61,23 +71,29 @@ class categorical(base_policy):
     def sample(self, obs):
 
         # Generate pdf
-        pdf = self.compute_pdf([obs])
+        pdf = self.compute_pdf(obs)
+
+        #print(pdf)
+        #exit()
 
         # Sample actions
         act = pdf.sample(1)
         lgp = pdf.log_prob(act)
 
+        #print(act, lgp)
+        #exit()
         return act, lgp
 
     # Compute pdf
     def compute_pdf(self, obs):
 
         # Cast
-        obs = tf.cast(obs, tf.float32)
+        #obs = tf.cast(obs, tf.float32)
 
         # Get pdf
         probs = self.forward(obs)
-        pdf   = tfd.Categorical(probs=probs)
+        #print(probs[0][0])
+        pdf   = tfd.Categorical(probs=probs[0])
 
         return pdf
 

@@ -64,24 +64,26 @@ class ppo(base_agent):
     def actions(self, obs):
 
         # Allocate arrays
-        act = np.zeros([self.n_cpu, self.pol_dim],
-                       dtype=self.p_net.store_type)
-        lgp = np.zeros([self.n_cpu, 1])
+        #act = np.zeros([self.n_cpu, self.pol_dim],
+        #               dtype=self.p_net.store_type)
+        #lgp = np.zeros([self.n_cpu, 1])
 
         # Loop over cpus
-        for i in range(self.n_cpu):
-            act[i,:], lgp[i] = self.p_net.actions(obs[i])
+        #exit()
+        #for i in range(self.n_cpu):
+        #    act[i,:], lgp[i] = self.p_net.actions(obs[i])
+
+        act, lgp = self.p_net.actions(obs)
 
         # Reshape actions depending on policy type
-        act = self.p_net.reshape_np_actions(act)
+        #act = self.p_net.reshape_np_actions(act)
 
         # Check for NaNs
         if (np.isnan(act).any()):
             error("ppo", "get_actions", "Detected NaN in generated actions")
 
         # Store log-prob
-        self.buff.store(["lgp"],
-                        [ lgp ])
+        self.buff.store(["lgp"], [ lgp ])
 
         return act
 
