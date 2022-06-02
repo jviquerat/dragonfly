@@ -3,7 +3,6 @@
         "type": "gae",
         "gamma": 0.99,
         "lambda": 0.98,
-        "ret_norm": false,
-        "ret_clip": false
+        "ret_norm": false
     }
 }

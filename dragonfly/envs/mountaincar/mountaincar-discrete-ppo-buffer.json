@@ -67,8 +67,7 @@
             "type": "gae",
             "gamma": 0.99,
             "gae_lambda": 0.99,
-            "ret_norm": true,
-            "ret_clip": false
+            "ret_norm": true
         },
         "terminator": {
             "type": "bootstrap",

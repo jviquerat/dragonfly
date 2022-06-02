@@ -109,28 +109,6 @@ def test_return():
     print("")
 
     #########################
-    # Test discounted return with normalization and clipping
-    print("Disc. return, normalized, clipped, no bootstrap, no terminal")
-
-    # Modify retrn object
-    retrn.ret_clip = True
-
-    # Compute returns
-    # avg is 2.960298802
-    # std is 1.3792204603784504
-    tgt, ret = retrn.compute(rwd, val, nxt, trm, bts)
-    ret_ref  = np.array([1.407096446,    0.7106189519,
-                         0.007106331643, 0.0, 0.0])
-
-    print("Reference return")
-    print(ret_ref)
-    print("Computed return")
-    print(ret)
-
-    assert(np.all(np.abs(ret-ret_ref)/np.abs(ret_ref + ret_eps) < 1.0e-8))
-    print("")
-
-    #########################
     # Test vanilla advantage
     print("Advantage, no norm, no clip, no bootstrap, no terminal")
 
