@@ -1,17 +1,17 @@
 {
     "env": {
-        "name": "envs:pendulum-deterministic-v0",
+        "name": "Pendulum-v0",
         "obs_clip": true,
         "obs_norm": true,
         "obs_noise": 0.0
     },
     "n_avg": 3,
     "n_cpu": 1,
-    "n_ep_max": 500,
+    "n_ep_max": 800,
     "trainer": {
-        "style": "buffer",
-        "buff_size": 512,
-        "n_buff": 16,
+        "style": "episode",
+        "n_ep_unroll": 1,
+        "n_ep_train": 8,
         "batch_frac": 0.5,
         "n_epochs": 16,
         "render_every": 500

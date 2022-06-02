@@ -22,7 +22,7 @@ def train(json_file):
     base_path = os.path.abspath(os.getcwd())
     res_path  = 'results'
     path_time = time.strftime("%H-%M-%S", time.localtime())
-    path      = res_path+'/'+pms.env_name+'_'+str(path_time)
+    path      = res_path+'/'+pms.env.name+'_'+str(path_time)
 
     # Open repositories
     os.makedirs(res_path, exist_ok=True)
@@ -33,7 +33,7 @@ def train(json_file):
 
     # Initialize trainer
     trainer = trainer_factory.create(pms.trainer.style,
-                                     env_name  = pms.env_name,
+                                     env_pms   = pms.env,
                                      agent_pms = pms.agent,
                                      path      = base_path,
                                      n_cpu     = pms.n_cpu,
@@ -58,5 +58,5 @@ def train(json_file):
     data = averager.average(filename)
 
     # Plot
-    filename = path+'/'+pms.agent.type + ' - ' + pms.env_name
+    filename = path+'/'+pms.agent.type + ' - ' + pms.env.name
     plot_avg(data, filename)
