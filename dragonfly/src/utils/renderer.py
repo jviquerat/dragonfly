@@ -7,9 +7,10 @@ import numpy as np
 ### n_cpu        : nb of parallel environments
 ### renver_every : rendering frequency (in timesteps)
 class renderer:
-    def __init__(self, n_cpu, render_every):
+    def __init__(self, n_cpu, style, render_every):
 
         self.n_cpu        = n_cpu
+        self.style        = style
         self.render_every = render_every
         self.reset()
 
@@ -20,15 +21,13 @@ class renderer:
         self.render = [False for _ in range(self.n_cpu)]
 
     # Store one rendering step for all cpus
-    def store(self, rnd, style):
-
-        self.style = style
+    def store(self, rnd):
 
         # Not all environment render simultaneously
         # We use a list to select those that render and those that don't
         for cpu in range(self.n_cpu):
             if (self.render[cpu]):
-                if (style == 'rgb_array'):
+                if (self.style == 'rgb_array'):
                     img = PIL.Image.fromarray(rnd[cpu])
                     self.rgb[cpu].append(img)
                 #if (style == 'human'):

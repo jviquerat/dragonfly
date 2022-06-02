@@ -55,7 +55,9 @@ class td(trainer_base):
                               "length", "smooth_length"])
 
         # Initialize renderer
-        self.renderer = renderer(self.n_cpu, pms.render_every)
+        self.renderer = renderer(self.n_cpu,
+                                 self.env.rnd_style,
+                                 pms.render_every)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
@@ -92,8 +94,8 @@ class td(trainer_base):
                 self.unroll += self.n_cpu
 
                 # Handle rendering
-                self.renderer.store(self.env.render(self.renderer.render),
-                                    self.env.rnd_style)
+                rnd = self.env.render(self.renderer.render)
+                self.renderer.store(rnd)
 
                 # Finish if some episodes are done
                 self.finish_episodes(path, run, dne)
