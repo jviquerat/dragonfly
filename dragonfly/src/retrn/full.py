@@ -47,7 +47,4 @@ class full():
             std  = np.std(ret)
             ret  = (ret-mean)/(std + ret_eps)
 
-        # Clip if required
-        if self.ret_clip: ret = np.maximum(ret, 0.0)
-
         return tgt, ret
