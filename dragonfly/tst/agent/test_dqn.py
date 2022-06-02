@@ -28,7 +28,7 @@ def test_dqn():
 
     # Initialize trainer
     trainer = trainer_factory.create(reader.pms.trainer.style,
-                                     env_name  = reader.pms.env_name,
+                                     env_pms   = reader.pms.env,
                                      agent_pms = reader.pms.agent,
                                      path      = ".",
                                      n_cpu     = reader.pms.n_cpu,

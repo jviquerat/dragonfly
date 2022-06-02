@@ -13,17 +13,17 @@ from dragonfly.src.utils.renderer        import *
 
 ###############################################
 ### Class for buffer-based training
-### env_name  : name of the environment
+### env_pms   : environment parameters
 ### agent_pms : agent parameters
 ### path      : path for environment
 ### n_cpu     : nb of parallel environments
 ### n_ep_max  : max nb of episodes to unroll in a run
 ### pms       : parameters
 class buffer(trainer_base):
-    def __init__(self, env_name, agent_pms, path, n_cpu, n_ep_max, pms):
+    def __init__(self, env_pms, agent_pms, path, n_cpu, n_ep_max, pms):
 
         # Initialize environment
-        self.env = par_envs(env_name, n_cpu, path)
+        self.env = par_envs(n_cpu, path, env_pms)
 
         # Initialize from input
         self.obs_dim   = self.env.obs_dim

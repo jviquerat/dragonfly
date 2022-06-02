@@ -13,18 +13,23 @@ from dragonfly.src.utils.timer    import *
 ###############################################
 ### A wrapper class for parallel environments
 class par_envs:
-    def __init__(self, env_name, n_cpu, path):
+    def __init__(self, n_cpu, path, pms):
 
         # Init pipes and processes
-        self.n_cpu = n_cpu
-        self.pipes = []
-        self.procs = []
+        self.name      = pms.name
+        self.obs_clip  = pms.obs_clip
+        self.obs_norm  = pms.obs_norm
+        self.obs_noise = pms.obs_noise
+        self.n_cpu     = n_cpu
+        self.pipes     = []
+        self.procs     = []
 
         # Start environments
         for cpu in range(n_cpu):
             p_pipe, c_pipe = mp.Pipe()
             process        = mp.Process(target = worker,
-                                        args   = (env_name, str(cpu), c_pipe, path))
+                                        args   = (self.name, str(cpu),
+                                                  c_pipe, path))
 
             self.pipes.append(p_pipe)
             self.procs.append(process)
@@ -68,8 +73,8 @@ class par_envs:
         # Receive and normalize
         results = np.array([])
         for p in self.pipes:
-            obs = p.recv()
-            obs = self.norm_obs(obs)
+            obs     = p.recv()
+            obs     = self.process_obs(obs)
             results = np.append(results, obs)
 
         return np.reshape(results, (-1,self.obs_dim))
@@ -86,14 +91,42 @@ class par_envs:
         for cpu in range(self.n_cpu):
             if (done[cpu]):
                 obs            = self.pipes[cpu].recv()
-                obs            = self.norm_obs(obs)
+                obs            = self.process_obs(obs)
                 obs_array[cpu] = obs
+
+    # Process observations
+    def process_obs(self, obs):
+        if (self.obs_clip):
+            obs = self.clip_obs(obs)
+        if (self.obs_norm):
+            obs = self.norm_obs(obs)
+        if (self.obs_noise > 0.0):
+            obs = self.noise_obs(obs)
+
+        return obs
+
+    # Clip observations
+    def clip_obs(self, obs):
+
+        for i in range(self.obs_dim):
+            obs[i] = np.clip(obs[i], self.obs_min[i], self.obs_max[i])
+
+        return obs
 
     # Normalize observations
     def norm_obs(self, obs):
 
         for i in range(self.obs_dim):
             obs[i] = (obs[i] - self.obs_avg[i])/self.obs_rng[i]
+
+        return obs
+
+    # Add noise to observations
+    def noise_obs(self, obs):
+
+        noise = np.random.normal(0.0, self.obs_noise, self.obs_dim)
+        for i in range(self.obs_dim):
+            obs[i] += noise[i]
 
         return obs
 
@@ -211,7 +244,7 @@ class par_envs:
 
         for p in self.pipes:
             n, r, d = p.recv()
-            n       = self.norm_obs(n)
+            n       = self.process_obs(n)
             nxt     = np.append(nxt, n)
             rwd     = np.append(rwd, r)
             done    = np.append(done, bool(d))
