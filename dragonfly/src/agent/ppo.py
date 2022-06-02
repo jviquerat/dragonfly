@@ -63,8 +63,7 @@ class ppo(base_agent):
     # Get actions
     def actions(self, obs):
 
-        # "obs" possibly contains observations from multiple parallel
-        # environments. We assume it does and unroll it in a loop
+        # Allocate arrays
         act = np.zeros([self.n_cpu, self.pol_dim],
                        dtype=self.p_net.store_type)
         lgp = np.zeros([self.n_cpu, 1])
@@ -89,8 +88,7 @@ class ppo(base_agent):
     # Control (deterministic actions)
     def control(self, obs):
 
-        # "obs" possibly contains observations from multiple parallel
-        # environments. We assume it does and unroll it in a loop
+        # Allocate arrays
         act = np.zeros([self.n_cpu, self.pol_dim],
                        dtype=self.p_net.store_type)
 
