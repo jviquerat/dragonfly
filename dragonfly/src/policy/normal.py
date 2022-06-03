@@ -44,17 +44,21 @@ class normal(base_policy):
     # Get actions
     def actions(self, obs):
 
+        obs      = tf.cast(obs, tf.float32)
         act, lgp = self.sample(obs)
-        act      = np.reshape(act.numpy(), (self.store_dim))
+        #print(act.numpy()[0])
+        act      = np.reshape(act.numpy()[0], (-1,self.store_dim))
+        #print(act)
+        lgp      = np.reshape(lgp.numpy()[0], (-1))
 
         return act, lgp
 
     # Control (deterministic actions)
     def control(self, obs):
 
-        obs    = tf.cast([obs], tf.float32)
+        obs    = tf.cast(obs, tf.float32)
         mu, sg = self.forward(obs)
-        act    = np.reshape(mu.numpy(), (self.store_dim))
+        act    = np.reshape(mu.numpy()[0][0], (self.store_dim))
 
         return act
 
@@ -63,7 +67,7 @@ class normal(base_policy):
     def sample(self, obs):
 
         # Generate pdf
-        pdf = self.compute_pdf([obs])
+        pdf = self.compute_pdf(obs)
 
         # Sample actions
         act = pdf.sample(1)
@@ -73,9 +77,6 @@ class normal(base_policy):
 
     # Compute pdf
     def compute_pdf(self, obs):
-
-        # Cast
-        obs = tf.cast(obs, tf.float32)
 
         # Get pdf
         mu, sg = self.forward(obs)

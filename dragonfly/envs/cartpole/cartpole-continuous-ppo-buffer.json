@@ -1,12 +1,12 @@
 {
     "env": {
-        "name": "cartpole:cartpole-continuous-v0",
+        "name": "envs.cartpole:cartpole-continuous-v0",
         "obs_clip": true,
         "obs_norm": true,
         "obs_noise": 0.0
     },
     "n_avg": 3,
-    "n_cpu": 1,
+    "n_cpu": 4,
     "n_ep_max": 300,
     "trainer": {
         "style": "buffer",
