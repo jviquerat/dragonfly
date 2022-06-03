@@ -41,28 +41,20 @@ class categorical(base_policy):
     # Get actions
     def actions(self, obs):
 
-        #print(obs)
-        obs = tf.cast(obs, tf.float32)
-        #print(obs)
-        #print(len(obs))
-        #exit()
-
+        obs      = tf.cast(obs, tf.float32)
         act, lgp = self.sample(obs)
         act      = np.reshape(act.numpy()[0], (-1))
         lgp      = np.reshape(lgp.numpy()[0], (-1))
-
-        #print(act, lgp)
-        #exit()
 
         return act, lgp
 
     # Control (deterministic actions)
     def control(self, obs):
 
-        obs   = tf.cast([obs], tf.float32)
+        obs   = tf.cast(obs, tf.float32)
         probs = self.forward(obs)
         act   = tf.argmax(probs[0][0])
-        act   = np.reshape(act.numpy(), (self.store_dim))
+        act   = np.reshape(act.numpy(), (-1))
 
         return act
 
@@ -73,29 +65,17 @@ class categorical(base_policy):
         # Generate pdf
         pdf = self.compute_pdf(obs)
 
-        #print(pdf)
-        #exit()
-
         # Sample actions
         act = pdf.sample(1)
         lgp = pdf.log_prob(act)
 
-        #print(act, lgp)
-        #exit()
         return act, lgp
 
     # Compute pdf
     def compute_pdf(self, obs):
 
-        # Cast
-        #obs = tf.cast(obs, tf.float32)
-
-        # Get pdf
         probs = self.forward(obs)
-        #print(probs[0][0])
-        pdf   = tfd.Categorical(probs=probs[0])
-
-        return pdf
+        return tfd.Categorical(probs=probs[0])
 
     # Network forward pass
     def forward(self, obs):

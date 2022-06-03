@@ -6,14 +6,14 @@
         "obs_noise": 0.0
     },
     "n_avg": 3,
-    "n_cpu": 1,
+    "n_cpu": 2,
     "n_ep_max": 300,
     "trainer": {
         "style": "buffer",
-        "buff_size": 64,
-        "n_buff": 4,
+        "buff_size": 128,
+        "n_buff": 8,
         "batch_frac": 0.5,
-        "n_epochs": 8,
+        "n_epochs": 16,
         "render_every": 500
     },
     "agent": {
