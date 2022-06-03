@@ -13,12 +13,10 @@ class advantage():
         # Set default values
         self.gamma    = 0.99
         self.ret_norm = True
-        self.ret_clip = True
 
         # Check inputs
         if hasattr(pms, "gamma"):    self.gamma    = pms.gamma
         if hasattr(pms, "ret_norm"): self.ret_norm = pms.ret_norm
-        if hasattr(pms, "ret_clip"): self.ret_clip = pms.ret_clip
 
     # Compute advantage
     # rwd : reward array
@@ -45,6 +43,7 @@ class advantage():
         tgt = ret.copy()
 
         # Normalize
-        if self.ret_norm: adv = (adv-np.mean(adv))/(np.std(adv) + ret_eps)
+        if self.ret_norm:
+            adv = (adv-np.mean(adv))/(np.std(adv) + ret_eps)
 
         return tgt, adv

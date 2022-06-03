@@ -6,12 +6,12 @@
         "obs_noise": 0.0
     },
     "n_avg": 3,
-    "n_cpu": 1,
+    "n_cpu": 8,
     "n_ep_max": 300,
     "trainer": {
         "style": "buffer",
-        "buff_size": 128,
-        "n_buff": 16,
+        "buff_size": 256,
+        "n_buff": 1,
         "batch_frac": 0.5,
         "n_epochs": 16,
         "render_every": 500
@@ -23,12 +23,12 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [64,64],
+                    "arch": [64],
                     "actv": "tanh"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[32],[32]],
+                    "arch": [[64],[64]],
                     "actv": ["tanh","tanh"],
                     "final": ["tanh","sigmoid"]
                 }
@@ -39,9 +39,9 @@
                 "grd_clip": 0.1
             },
             "loss": {
-                "type": "surrogate",
-                "pol_clip": 0.2,
-                "ent_coef": 0.001
+                "type": "pg",
+                "pol_clip": 0.1,
+                "ent_coef": 0.01
             }
         },
         "value": {

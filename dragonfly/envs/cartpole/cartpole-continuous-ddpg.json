@@ -1,0 +1,75 @@
+{
+    "env": {
+        "name": "envs.cartpole:cartpole-continuous-v0",
+        "obs_clip": false,
+        "obs_norm": true,
+        "obs_noise": 0.0
+    },
+    "n_avg": 3,
+    "n_cpu": 1,
+    "n_ep_max": 300,
+    "trainer": {
+        "style": "td",
+        "mem_size": 20000,
+        "btc_size": 64,
+        "n_stp_unroll": 1,
+        "render_every": 500
+    },
+    "agent": {
+        "type": "ddpg",
+        "gamma": 0.99,
+        "rho": 0.995,
+        "n_warmup": 2500,
+        "policy": {
+            "type": "deterministic",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [64,64],
+                    "actv": "tanh"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["tanh"],
+                    "final": ["tanh"]
+                }
+            },
+            "optimizer": {
+                "type": "nadam",
+                "lr": 5.0e-4,
+                "grd_clip": 0.1
+            },
+            "loss": {
+                "type": "q_pol"
+            }
+        },
+        "value": {
+            "type": "q_value",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [64,64],
+                    "actv": "swish"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["swish"],
+                    "final": ["linear"]
+                }
+            },
+            "optimizer": {
+                "type": "nadam",
+                "lr": 5.0e-4,
+                "grd_clip": 100.0
+            },
+            "loss": {
+                "type": "mse_ddpg"
+            }
+        },
+        "terminator": {
+            "type": "regular"
+        }
+    }
+}

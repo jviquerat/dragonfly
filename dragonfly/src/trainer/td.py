@@ -30,16 +30,11 @@ class td(trainer_base):
         self.n_cpu        = n_cpu
         self.n_ep_max     = n_ep_max
         self.mem_size     = pms.mem_size
-        self.n_stp_unroll = pms.n_stp_unroll
+        self.n_stp_unroll = pms.n_stp_unroll*n_cpu
         self.btc_size     = pms.btc_size
 
         # Local variables
         self.unroll = 0
-
-        # Check that n_stp_unroll is a multiple of n_cpu
-        if (self.n_stp_unroll%self.n_cpu != 0):
-            error("td", "__init__",
-                  "td-based requires n_stp_unroll proportional to n_cpu")
 
         # Initialize agent
         self.agent = agent_factory.create(agent_pms.type,
@@ -149,9 +144,7 @@ class td(trainer_base):
         for i in range(self.n_stp_unroll):
 
             # Prepare training data
-            lgt = self.agent.prepare_data(self.btc_size)
-            if (lgt < self.btc_size): return
-
+            self.agent.prepare_data(self.btc_size)
             self.agent.train(self.btc_size)
 
         self.timer_training.toc()

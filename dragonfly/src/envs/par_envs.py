@@ -10,6 +10,9 @@ import time
 from dragonfly.src.core.constants import *
 from dragonfly.src.utils.timer    import *
 
+# Set warning levels from gym
+gym.logger.set_level(40)
+
 ###############################################
 ### A wrapper class for parallel environments
 class par_envs:
@@ -310,6 +313,9 @@ def worker(env_name, cpu, pipe, path):
                 # Continuous action space
                 if (type(env.action_space).__name__ == "Box"):
                     act_dim = env.action_space.shape[0]
+                # Discrete observation space
+                if (type(env.observation_space).__name__ == "Discrete"):
+                    obs_dim = env.observation_space.n
                 # Continuous observation space
                 if (type(env.observation_space).__name__ == "Box"):
                     obs_dim = env.observation_space.shape[0]
@@ -340,7 +346,7 @@ def worker(env_name, cpu, pipe, path):
                 pipe.send((obs_min, obs_max, obs_norm))
 
             if command == 'get_rnd_style':
-                rnd_style = env.metadata.get('render.modes')
+                rnd_style = env.metadata.get('render_modes')
                 if "rgb_array" in rnd_style:
                     rnd_style = "rgb_array"
                 else:

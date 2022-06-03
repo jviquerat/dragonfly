@@ -93,11 +93,6 @@ class normal(base_policy):
         return mu, sg
 
     # Reshape actions
-    def reshape_np_actions(self, act):
-
-        return np.reshape(act, (-1, self.store_dim))
-
-    # Reshape tf actions
-    def reshape_tf_actions(self, act):
+    def reshape_actions(self, act):
 
         return tf.reshape(act, [-1, self.act_dim])

@@ -13,12 +13,10 @@ class full():
         # Set default values
         self.gamma    = 0.99
         self.ret_norm = True
-        self.ret_clip = True
 
         # Check inputs
         if hasattr(pms, "gamma"):    self.gamma    = pms.gamma
         if hasattr(pms, "ret_norm"): self.ret_norm = pms.ret_norm
-        if hasattr(pms, "ret_clip"): self.ret_clip = pms.ret_clip
 
     # Compute full return
     # rwd : reward array
@@ -43,8 +41,6 @@ class full():
 
         # Normalize
         if self.ret_norm:
-            mean = np.mean(ret)
-            std  = np.std(ret)
-            ret  = (ret-mean)/(std + ret_eps)
+            ret = (ret-np.mean(ret))/(np.std(ret) + ret_eps)
 
         return tgt, ret

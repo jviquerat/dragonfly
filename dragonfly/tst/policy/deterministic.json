@@ -1,0 +1,26 @@
+{
+    "policy": {
+        "type": "deterministic",
+        "network": {
+            "type": "fc",
+            "trunk": {
+                "arch": [64,64],
+                "actv": "tanh"
+            },
+            "heads": {
+                "nb": 1,
+                "arch": [[]],
+                "actv": ["tanh"],
+                "final": ["tanh"]
+            }
+        },
+        "optimizer": {
+            "type": "nadam",
+            "lr": 5.0e-4,
+            "grd_clip": 0.1
+        },
+        "loss": {
+            "type": "q_pol"
+        }
+    }
+}

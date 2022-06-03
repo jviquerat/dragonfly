@@ -16,6 +16,6 @@ class factory:
             try:
                 raise ValueError(key)
             except ValueError:
-                error("factory", "create", "Unknown key provided")
+                error("factory", "create", "Unknown key provided: "+key)
                 raise
         return creator(**kwargs)

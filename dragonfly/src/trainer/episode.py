@@ -29,7 +29,7 @@ class episode(trainer_base):
         self.act_dim     = self.env.act_dim
         self.n_cpu       = n_cpu
         self.n_ep_max    = n_ep_max
-        self.n_ep_unroll = pms.n_ep_unroll
+        self.n_ep_unroll = pms.n_ep_unroll*n_cpu
         self.n_ep_train  = pms.n_ep_train
         self.btc_frac    = pms.batch_frac
         self.n_epochs    = pms.n_epochs
@@ -37,11 +37,6 @@ class episode(trainer_base):
 
         # Local variables
         self.unroll = 0
-
-        # Check that n_ep_unroll is a multiple of n_cpu
-        if (self.n_ep_unroll%self.n_cpu != 0):
-            error("episode", "__init__",
-                  "ep-based requires n_ep_unroll proportional to n_cpu")
 
         # Initialize agent
         self.agent = agent_factory.create(agent_pms.type,

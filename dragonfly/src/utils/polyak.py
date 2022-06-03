@@ -13,7 +13,7 @@ class polyak:
 
         v = net.get_weights()
         t = tgt.get_weights()
-        w = [self.rho*wvv + (1.0-self.rho)*wtt for wvv, wtt in zip(v, t)]
+        w = [self.rho*wt + (1.0-self.rho)*wv for wt, wv in zip(t, v)]
 
         tgt.set_weights(w)
 

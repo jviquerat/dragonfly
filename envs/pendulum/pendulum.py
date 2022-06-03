@@ -6,7 +6,7 @@ from os import path
 
 class PendulumDeterministic(gym.Env):
     metadata = {
-        'render.modes': ['human', 'rgb_array'],
+        'render_modes': ['human', 'rgb_array'],
         'video.frames_per_second': 30
     }
 

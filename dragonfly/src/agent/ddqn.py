@@ -3,7 +3,6 @@ from dragonfly.src.agent.base            import *
 from dragonfly.src.terminator.terminator import *
 from dragonfly.src.utils.buff            import *
 from dragonfly.src.utils.counter         import *
-from dragonfly.src.utils.polyak          import *
 
 ###############################################
 ### DDQN agent
@@ -11,13 +10,16 @@ class ddqn():
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
-        self.name     = 'ddqn'
-        self.act_dim  = act_dim
-        self.obs_dim  = obs_dim
-        self.n_cpu    = n_cpu
-        self.gamma    = pms.gamma
-        self.rho      = pms.rho
-        self.mem_size = size
+        self.name       = 'ddqn'
+        self.act_dim    = act_dim
+        self.obs_dim    = obs_dim
+        self.n_cpu      = n_cpu
+        self.mem_size   = size
+        self.gamma      = pms.gamma
+        self.tgt_update = pms.tgt_update
+
+        # Local variables
+        self.tgt_step   = 0
 
         # Initialize random limit
         self.eps = decay_factory.create(pms.exploration.type,
@@ -38,16 +40,13 @@ class ddqn():
                                         pms     = pms.value)
         self.q_tgt.net.set_weights(self.q_net.net.get_weights())
 
-        # polyak averager for q-networks
-        self.polyak = polyak(self.rho)
-
         # Create buffers
         self.buff = buff(self.n_cpu,
                         ["obs", "nxt", "act", "rwd", "dne", "stp", "trm"],
                         [obs_dim, obs_dim, 1, 1, 1, 1, 1])
         self.gbuff = gbuff(self.mem_size,
-                           ["obs", "act", "tgt"],
-                           [obs_dim, 1, 1])
+                           ["obs", "nxt", "rwd", "act", "trm"],
+                           [obs_dim, obs_dim, 1, 1, 1])
 
         # Initialize counter
         self.counter = counter(self.n_cpu)
@@ -60,61 +59,64 @@ class ddqn():
     # Get actions
     def actions(self, obs):
 
-        # "obs" possibly contains observations from multiple parallel
-        # environments. We assume it does and unroll it in a loop
         act = np.zeros([self.n_cpu, 1], dtype=int)
 
         for i in range(self.n_cpu):
+            self.eps.decay()
             p = random.uniform(0, 1)
             if (p < self.eps.get()):
                 act[i] = random.randrange(0, self.act_dim)
             else:
-                val = self.q_net.values(tf.cast([obs[i]], tf.float32))
+                cob = tf.cast([obs[i]], tf.float32)
+                val = self.q_net.values(cob)
                 act[i] = np.argmax(val)
 
         act = np.reshape(act, (-1))
 
         return act
 
-    # Compute target
-    def target(self, obs, nxt, act, rwd, trm):
-
-        tgt = self.q_tgt.values(nxt)
-        tgt = tf.reduce_max(tgt, axis=1)
-        tgt = tf.reshape(tgt, [-1,1])
-        tgt = rwd + trm*self.gamma*tgt
-
-        return tgt
-
     # Prepare training data
     def prepare_data(self, size):
 
-        names = ["obs", "act", "tgt"]
-        self.data = self.gbuff.get_buffers(names, size)
-        lgt = len(self.data["obs"])
+        # No update if buffer is not full enough
+        lgt = self.gbuff.length()
+        if (lgt < size): return
 
-        return lgt
+        names = ["obs", "nxt", "rwd", "act", "trm"]
+        self.data = self.gbuff.get_batches(names, size)
 
     # Training
     def train(self, size):
 
-        obs = self.data["obs"][:]
-        act = self.data["act"][:]
-        tgt = self.data["tgt"][:]
+        # No update if buffer is not full enough
+        lgt = self.gbuff.length()
+        if (lgt < size): return lgt
 
-        # Train q network
-        tgt = tf.reshape(tgt, [size,-1])
+        obs = self.data["obs"][:]
+        nxt = self.data["nxt"][:]
+        rwd = self.data["rwd"][:]
+        act = self.data["act"][:]
+        trm = self.data["trm"][:]
+
         act = tf.reshape(act, [size,-1])
+        rwd = tf.reshape(rwd, [size,-1])
+        trm = tf.reshape(trm, [size,-1])
         act = tf.cast(act, tf.int32)
 
-        self.q_net.loss.train(obs, act, tgt, self.q_net)
+        self.q_net.loss.train(obs, nxt, act, rwd, trm,
+                              self.gamma, self.q_net, self.q_tgt)
 
-        # Update target network
-        self.polyak.average(self.q_net.net, self.q_tgt.net)
+        # Update target networks
+        if (self.tgt_step == self.tgt_update):
+            self.q_tgt.net.set_weights(self.q_net.net.get_weights())
+            self.tgt_step  = 0
+        else:
+            self.tgt_step += 1
 
     # Reset
     def reset(self):
 
+        self.tgt_step = 0
         self.counter.reset()
         self.q_net.reset()
         self.q_tgt.reset()
@@ -140,10 +142,9 @@ class ddqn():
         names = ["obs", "nxt", "act", "rwd", "trm"]
         data  = self.buff.serialize(names)
         gobs, gnxt, gact, grwd, gtrm = (data[name] for name in names)
-        gtgt = self.target(gobs, gnxt, gact, grwd, gtrm)
 
-        self.gbuff.store(["obs", "tgt", "act"],
-                         [gobs,  gtgt,  gact ])
+        self.gbuff.store(["obs", "nxt", "rwd", "act", "trm"],
+                         [gobs,  gnxt,  grwd,  gact,  gtrm ])
 
     # Save parameters
     def save(self, filename):

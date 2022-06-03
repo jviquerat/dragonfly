@@ -7,7 +7,7 @@ import numpy as np
 class CartPoleContinuous(gym.Env):
 
     metadata = {
-        'render.modes': ['human', 'rgb_array'],
+        'render_modes': ['human', 'rgb_array'],
         'video.frames_per_second': 50
     }
 

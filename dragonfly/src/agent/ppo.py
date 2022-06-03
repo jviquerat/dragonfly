@@ -112,7 +112,7 @@ class ppo(base_agent):
         lgp = self.data["lgp"][start:end]
 
         # Train policy
-        act = self.p_net.reshape_tf_actions(act)
+        act = self.p_net.reshape_actions(act)
         adv = tf.reshape(adv, [-1])
         lgp = tf.reshape(lgp, [-1])
         self.p_net.loss.train(obs, adv, act, lgp, self.p_net)
