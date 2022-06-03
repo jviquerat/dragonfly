@@ -6,7 +6,7 @@
         "obs_noise": 0.0
     },
     "n_avg": 3,
-    "n_cpu": 4,
+    "n_cpu": 1,
     "n_ep_max": 300,
     "trainer": {
         "style": "buffer",
