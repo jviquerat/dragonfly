@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "cartpole:cartpole-continuous-v0",
+        "name": "envs.cartpole:cartpole-continuous-v0",
         "obs_clip": true,
         "obs_norm": true,
         "obs_noise": 0.0

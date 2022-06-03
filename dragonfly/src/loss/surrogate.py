@@ -23,22 +23,22 @@ class surrogate():
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
-            pdf      = p.compute_pdf(obs)
-            lgp      = pdf.log_prob(act)
-            ratio    = tf.exp(lgp - plg)
+            pdf   = p.compute_pdf(obs)
+            lgp   = pdf.log_prob(act)
+            ratio = tf.exp(lgp - plg)
 
             # Compute actor loss
-            p1       = tf.multiply(adv,ratio)
-            p2       = tf.clip_by_value(ratio,
-                                        1.0-self.pol_clip,
-                                        1.0+self.pol_clip)
-            p2             = tf.multiply(adv,p2)
+            p1 = tf.multiply(adv,ratio)
+            p2 = tf.clip_by_value(ratio,
+                                  1.0-self.pol_clip,
+                                  1.0+self.pol_clip)
+            p2 = tf.multiply(adv,p2)
             loss_surrogate =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss
-            entropy      = pdf.entropy()
-            entropy      = tf.reshape(entropy, [-1])
-            entropy      = tf.reduce_mean(entropy, axis=0)
+            entropy = pdf.entropy()
+            entropy = tf.reshape(entropy, [-1])
+            entropy = tf.reduce_mean(entropy, axis=0)
             loss_entropy =-entropy
 
             # Compute total loss

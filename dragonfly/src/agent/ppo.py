@@ -63,49 +63,23 @@ class ppo(base_agent):
     # Get actions
     def actions(self, obs):
 
-        # "obs" possibly contains observations from multiple parallel
-        # environments. We assume it does and unroll it in a loop
-        act = np.zeros([self.n_cpu, self.pol_dim],
-                       dtype=self.p_net.store_type)
-        lgp = np.zeros([self.n_cpu, 1])
-
-        # Loop over cpus
-        for i in range(self.n_cpu):
-            act[i,:], lgp[i] = self.p_net.actions(obs[i])
-
-        # Reshape actions depending on policy type
-        act = self.p_net.reshape_np_actions(act)
+        # Get actions and associated log-prob
+        act, lgp = self.p_net.actions(obs)
 
         # Check for NaNs
         if (np.isnan(act).any()):
-            error("ppo", "get_actions", "Detected NaN in generated actions")
+            error("ppo", "get_actions",
+                  "Detected NaN in generated actions")
 
         # Store log-prob
-        self.buff.store(["lgp"],
-                        [ lgp ])
+        self.buff.store(["lgp"], [ lgp ])
 
         return act
 
     # Control (deterministic actions)
     def control(self, obs):
 
-        # "obs" possibly contains observations from multiple parallel
-        # environments. We assume it does and unroll it in a loop
-        act = np.zeros([self.n_cpu, self.pol_dim],
-                       dtype=self.p_net.store_type)
-
-        # Loop over cpus
-        for i in range(self.n_cpu):
-            act[i,:] = self.p_net.control(obs[i])
-
-        # Reshape actions depending on policy type
-        act = self.p_net.reshape_np_actions(act)
-
-        # Check for NaNs
-        if (np.isnan(act).any()):
-            error("ppo", "get_actions", "Detected NaN in generated actions")
-
-        return act
+        return self.p_net.control(obs)
 
     # Finalize buffers before training
     def returns(self, obs, nxt, act, rwd, trm, bts):

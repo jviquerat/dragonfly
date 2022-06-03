@@ -16,20 +16,21 @@ def evaluate(net_file, json_file, ns, nw, aw):
     pms    = parser.read(json_file)
 
     # Load environment
-    env = par_envs(pms.env_name, 1, ".")
+    env = par_envs(1, ".", pms.env)
 
     # Set environment control tag to true if possible
     env.set_control()
 
     # Create renderer
-    rnd = renderer(1, 1)
+    rnd = renderer(1, env.rnd_style, 1)
     rnd.render = [True]
 
-    # Create agent
+    # Initialize agent
     agent = agent_factory.create(pms.agent.type,
                                  obs_dim = env.obs_dim,
                                  act_dim = env.act_dim,
                                  n_cpu   = 1,
+                                 size    = 10000,
                                  pms     = pms.agent)
 
     # Load network
@@ -66,8 +67,7 @@ def evaluate(net_file, json_file, ns, nw, aw):
         scr          += rwd[0]
         n            += 1
 
-        env.render(rnd.render)
-        rnd.store(env.render(rnd.render), env.rnd_style)
+        rnd.store(env.render(rnd.render))
         if (term_ns and n >= ns): break
         if (term_dn and dne):     break
 
