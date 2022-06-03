@@ -107,11 +107,19 @@ class rbuff:
 
         return self.dim
 
-    def get_indices(self, size):
+    def get_buffer_indexes(self, size):
 
         end = self.i
         if (    self.full): start = end-size
         if (not self.full): start = max(0, end-size)
+
+        return start, end
+
+    def get_batch_indexes(self):
+
+        start = 0
+        if (    self.full): end = self.size
+        if (not self.full): end = min(self.i, self.size)
 
         return start, end
 
@@ -149,7 +157,7 @@ class gbuff:
                   "Size too large for buffer")
 
         # Start/end indices
-        start, end = self.data[self.names[0]].get_indices(size)
+        start, end = self.data[self.names[0]].get_buffer_indexes(size)
         s          = end-start
 
         # Randomized indices
@@ -162,5 +170,30 @@ class gbuff:
             tmp = self.data[name].buff[p]
             tmp = tf.cast(tmp, tf.float32)
             dim = self.data[name].get_dim()
-            out[name] = tf.reshape(tmp, [s, dim])
+            out[name] = tf.reshape(tmp, [-1, dim])
+
+        return {name : out[name] for name in names}
+
+    def get_batches(self, names, size, shuffle=True):
+
+        if (size > self.size):
+            error("gbuff",
+                  "get_batch",
+                  "Size too large for buffer")
+
+        # Start/end indices
+        start, end = self.data[self.names[0]].get_batch_indexes()
+
+        # Randomized indices
+        p = np.arange(start, end)
+        if (shuffle): p = np.random.permutation(p)[:size]
+
+        # Return shuffled fields
+        out = {}
+        for name in names:
+            tmp = self.data[name].buff[p]
+            tmp = tf.cast(tmp, tf.float32)
+            dim = self.data[name].get_dim()
+            out[name] = tf.reshape(tmp, [-1, dim])
+
         return {name : out[name] for name in names}

@@ -60,8 +60,9 @@ class trainer_base():
             bst_ep = self.agent.counter.best_ep
             end    = "\n"
             if (ep < n_ep_max): end = "\r"
+            stp    = self.agent.counter.step
 
-            print("# Ep #"+str(ep)+", avg score = "+str(avg)+", best score = "+str(bst)+" at ep "+str(bst_ep)+"                 ", end=end)
+            print("# Ep #"+str(ep)+", step = "+str(stp)+", avg score = "+str(avg)+", best score = "+str(bst)+" at ep "+str(bst_ep)+"                 ", end=end)
 
     ################################
     ### Report wrappings
@@ -70,12 +71,8 @@ class trainer_base():
     # Store data in report
     def store_report(self, cpu):
 
-        n_step = self.agent.counter.ep_step[cpu]
-        if (self.agent.counter.ep > 0):
-            n_step += self.report.get("step")[-1]
-
         self.report.append("episode",       self.agent.counter.ep)
-        self.report.append("step",          n_step)
+        self.report.append("step",          self.agent.counter.step)
         self.report.append("score",         self.agent.counter.score[cpu])
         smooth_score = self.report.avg("score", n_smooth)
         self.report.append("smooth_score",  smooth_score)

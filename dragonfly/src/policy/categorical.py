@@ -82,12 +82,7 @@ class categorical(base_policy):
 
         return self.net.call(obs)
 
-    # Reshape np actions
-    def reshape_np_actions(self, act):
-
-        return np.reshape(act, (-1))
-
-    # Reshape tf actions
-    def reshape_tf_actions(self, act):
+    # Reshape actions
+    def reshape_actions(self, act):
 
         return tf.reshape(act, [-1])

@@ -18,11 +18,12 @@
     "agent": {
         "type": "dqn",
         "gamma": 0.99,
+        "tgt_update": 10,
         "exploration": {
             "type": "linear",
             "start": 0.1,
             "end": 0.01,
-            "n_steps": 50000
+            "n_decay": 50000
         },
         "value": {
             "type": "q_value",

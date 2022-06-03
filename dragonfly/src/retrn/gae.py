@@ -14,13 +14,11 @@ class gae():
         self.gamma      = 0.99
         self.gae_lambda = 0.98
         self.ret_norm   = True
-        self.ret_clip   = True
 
         # Check inputs
         if hasattr(pms, "gamma"):      self.gamma      = pms.gamma
         if hasattr(pms, "gae_lambda"): self.gae_lambda = pms.gae_lambda
         if hasattr(pms, "ret_norm"):   self.ret_norm   = pms.ret_norm
-        if hasattr(pms, "ret_clip"):   self.ret_clip   = pms.ret_clip
 
     # Compute GAE
     # rwd : reward array

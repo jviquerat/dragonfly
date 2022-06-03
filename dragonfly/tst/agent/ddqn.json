@@ -19,11 +19,12 @@
         "type": "ddqn",
         "rho": 0.02,
         "gamma": 0.99,
+        "tgt_update": 10,
         "exploration": {
             "type": "linear",
             "start": 0.9,
             "end": 0.01,
-            "n_steps": 10000
+            "n_decay": 10000
         },
         "value": {
             "type": "q_value",

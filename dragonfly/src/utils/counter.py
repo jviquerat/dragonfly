@@ -14,6 +14,7 @@ class counter:
     def reset(self):
 
         self.ep         =  0
+        self.step       =  0
         self.best_ep    =  0
         self.best_score = -1.0e8
         self.ep_step    = [0     for _ in range(self.n_cpu)]
@@ -24,6 +25,7 @@ class counter:
 
         self.score[:]  += rwd[:]
         self.ep_step[:] = [x+1 for x in self.ep_step]
+        self.step      += self.n_cpu
 
     # Reset episode counters and update best values
     def reset_ep(self, cpu):

@@ -10,7 +10,7 @@ class linear():
         # Set values
         self.start    = pms.start
         self.end      = pms.end
-        self.n_steps  = pms.n_steps
+        self.n_decay  = pms.n_decay
 
         # Initialize return values
         self.step     = 0
@@ -19,14 +19,11 @@ class linear():
     # Get current value
     def get(self):
 
-        self.decay()
         return self.val
 
     # Decay
     def decay(self):
 
-        # Check if max step number is reached
-        if (self.step <= self.n_steps):
-            r          = float(self.step/self.n_steps)
-            self.val   = self.start + r*(self.end-self.start)
-            self.step += 1
+        r          = min(float(self.step/self.n_decay), 1.0)
+        self.val   = self.start + r*(self.end-self.start)
+        self.step += 1
