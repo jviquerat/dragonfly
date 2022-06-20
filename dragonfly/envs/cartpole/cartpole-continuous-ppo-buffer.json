@@ -6,7 +6,7 @@
         "obs_noise": 0.0
     },
     "n_avg": 3,
-    "n_cpu": 8,
+    "n_cpu": 1,
     "n_ep_max": 300,
     "trainer": {
         "style": "buffer",
@@ -39,7 +39,7 @@
                 "grd_clip": 0.1
             },
             "loss": {
-                "type": "pg",
+                "type": "surrogate",
                 "pol_clip": 0.1,
                 "ent_coef": 0.01
             }
