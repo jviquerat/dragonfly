@@ -1,6 +1,5 @@
 # Generic imports
-import numpy                as np
-from   copy import deepcopy as cp
+import numpy as np
 
 # Custom imports
 from dragonfly.src.policy.tfd          import *
