@@ -12,8 +12,8 @@ from dragonfly.src.envs.par_envs   import *
 from dragonfly.src.trainer.trainer import *
 
 ###############################################
-### Test dqn agent
-def test_dqn():
+### Test ddpg agent
+def test_ddpg():
 
     # Initial space
     print("")
@@ -40,14 +40,14 @@ def test_dqn():
     os.makedirs("1/", exist_ok=True)
     trainer.reset()
     trainer.loop(".", 0)
-    averager.store("0/ddpg_0.dat", 0)
+    averager.store("0/0.dat", 0)
     trainer.reset()
     trainer.loop(".", 1)
-    averager.store("1/ddpg_1.dat", 1)
+    averager.store("1/1.dat", 1)
     trainer.env.close()
-    averager.average("ddpg_avg.dat")
+    averager.average("avg.dat")
 
     shutil.rmtree("0")
     shutil.rmtree("1")
-    os.remove("ddpg_avg.dat")
+    os.remove("avg.dat")
     print("")
