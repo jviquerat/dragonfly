@@ -2,6 +2,7 @@
 import os
 import sys
 import time
+import shutil
 import numpy as np
 
 # Custom imports
@@ -27,6 +28,9 @@ def train(json_file):
     # Open repositories
     os.makedirs(res_path, exist_ok=True)
     os.makedirs(path,     exist_ok=True)
+
+    # Copy json file to results folder
+    shutil.copyfile(json_file, path+'/params.json')
 
     # Intialize averager
     averager = data_avg(4, pms.n_ep_max, pms.n_avg)
