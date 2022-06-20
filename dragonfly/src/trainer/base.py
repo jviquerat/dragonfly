@@ -84,5 +84,5 @@ class trainer_base():
     def write_report(self, path, run):
 
         # Set filename with method name and run number
-        filename = path+'/'+str(run)+'/'+self.agent.name+'_'+str(run)+'.dat'
+        filename = path+'/'+str(run)+'/'+str(run)+'.dat'
         self.report.write(filename)

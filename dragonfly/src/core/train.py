@@ -20,17 +20,15 @@ def train(json_file):
     pms    = parser.read(json_file)
 
     # Create paths for results and open repositories
-    base_path = os.path.abspath(os.getcwd())
-    res_path  = 'results'
-    path_time = time.strftime("%H-%M-%S", time.localtime())
-    path      = res_path+'/'+pms.env.name+'_'+str(path_time)
-
-    # Open repositories
-    os.makedirs(res_path, exist_ok=True)
-    os.makedirs(path,     exist_ok=True)
+    base_path     = os.path.abspath(os.getcwd())
+    results_path  = 'results'
+    os.makedirs(results_path, exist_ok=True)
+    path          = folder_name(pms)
+    results_path += '/'+path
+    os.makedirs(results_path, exist_ok=True)
 
     # Copy json file to results folder
-    shutil.copyfile(json_file, path+'/params.json')
+    shutil.copyfile(json_file, results_path+'/params.json')
 
     # Intialize averager
     averager = data_avg(4, pms.n_ep_max, pms.n_avg)
@@ -48,19 +46,52 @@ def train(json_file):
     for run in range(pms.n_avg):
         liner()
         print('Avg run #'+str(run))
-        os.makedirs(path+'/'+str(run), exist_ok=True)
+        os.makedirs(results_path+'/'+str(run), exist_ok=True)
         trainer.reset()
-        trainer.loop(path, run)
-        filename = path+'/'+str(run)+'/'+pms.agent.type+'_'+str(run)+'.dat'
+        trainer.loop(results_path, run)
+        filename = results_path+'/'+str(run)+'/'+str(run)+'.dat'
         averager.store(filename, run)
 
     # Close environments
     trainer.env.close()
 
     # Write to file
-    filename = path+'/'+pms.agent.type+'_avg.dat'
+    filename = results_path+'/avg.dat'
     data = averager.average(filename)
 
     # Plot
-    filename = path+'/'+pms.agent.type + ' - ' + pms.env.name
+    filename = results_path+'/'+path
     plot_avg(data, filename)
+
+# Generate results folder name
+def folder_name(pms):
+
+    name_env = True
+    if hasattr(pms, "name_env"): name_env = pms.name_env
+
+    name_agent = True
+    if hasattr(pms, "name_agent"): name_agent = pms.name_agent
+
+    name_tag = ""
+    if hasattr(pms, "name_tag"): name_tag = pms.name_tag
+
+    name_time = False
+    if hasattr(pms, "name_time"): name_time = pms.name_time
+
+    path_time = ""
+    if (name_time):
+        path_time = str(time.strftime("%H-%M-%S", time.localtime()))
+
+    path = ""
+    if (name_env): path += pms.env.name
+    if (name_agent != ""):
+        if (path != ""): path += "_"
+        path += pms.agent.type
+    if (name_tag != ""):
+        if (path != ""): path += "_"
+        path += name_tag
+    if (name_time):
+        if (path != ""): path += "_"
+        path += name_time
+
+    return path
