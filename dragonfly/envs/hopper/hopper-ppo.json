@@ -1,0 +1,86 @@
+{
+    "env": {
+        "name": "Hopper-v4",
+        "obs_clip": false,
+        "obs_norm": true,
+        "obs_max": 10.0,
+        "obs_noise": 0.0
+    },
+    "name_env": true,
+    "name_agent": true,
+    "name_tag": "",
+    "name_time": false,
+    "n_avg": 3,
+    "n_cpu": 1,
+    "n_ep_max": 2000,
+    "trainer": {
+        "style": "buffer",
+        "buff_size": 256,
+        "n_buff": 4,
+        "batch_frac": 0.5,
+        "n_epochs": 16,
+        "render_every": 5000
+    },
+    "agent": {
+        "type": "ppo",
+        "policy": {
+            "type": "normal",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [128],
+                    "actv": "tanh"
+                },
+                "heads": {
+                    "nb": 2,
+                    "arch": [[128],[128]],
+                    "actv": ["tanh","tanh"],
+                    "final": ["tanh","sigmoid"]
+                }
+            },
+            "optimizer": {
+                "type": "nadam",
+                "lr": 1.0e-3,
+                "grd_clip": 0.1
+            },
+            "loss": {
+                "type": "surrogate",
+                "pol_clip": 0.2,
+                "ent_coef": 0.01
+            }
+        },
+        "value": {
+            "type": "v_value",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [128,128],
+                    "actv": "selu"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["selu"],
+                    "final": ["linear"]
+                }
+            },
+            "optimizer": {
+                "type": "nadam",
+                "lr": 5.0e-3,
+                "grd_clip": 0.1
+            },
+            "loss": {
+                "type": "mse_pg"
+            }
+        },
+        "retrn": {
+            "type": "gae",
+            "gamma": 0.99,
+            "gae_lambda": 0.99,
+            "ret_norm": true
+        },
+        "termination": {
+            "type": "regular"
+        }
+    }
+}

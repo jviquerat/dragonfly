@@ -10,5 +10,5 @@ The agent learns to run a car from the bottom of a valley to the top of a hill. 
 Here is a resolution with buffer-based ppo:
 
 <p align="center">
-  <img width="700" alt="" src="ppo_buffer_discrete.png">
+  <img width="700" alt="" src="ppo_buffer.png">
 </p>
