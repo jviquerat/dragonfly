@@ -33,7 +33,7 @@ def test_return():
     retrn = full(reader.pms.retrn)
 
     # Compute returns
-    tgt, ret = retrn.compute(rwd, val, nxt, trm, bts)
+    tgt, ret = retrn.compute(rwd, val, nxt, trm)
     ret_ref  = np.array([4.90099501, 3.940399, 2.9701, 1.99, 1.0])
 
     print("Reference return")
@@ -52,7 +52,7 @@ def test_return():
     trm[2] = 0.0
 
     # Compute returns
-    tgt, ret = retrn.compute(rwd, val, nxt, trm, bts)
+    tgt, ret = retrn.compute(rwd, val, nxt, trm)
     ret_ref  = np.array([ 2.9701, 1.99, 1.0, 1.99, 1.0])
 
     print("Reference return")
@@ -68,10 +68,10 @@ def test_return():
     print("Disc. return, no norm, no clip, with bootstrap, with terminal")
 
     # Modify bts vector
-    bts[2] = 1.0
+    trm[2] = 2.0
 
     # Compute returns
-    tgt, ret = retrn.compute(rwd, val, nxt, trm, bts)
+    tgt, ret = retrn.compute(rwd, val, nxt, trm)
     ret_ref  = np.array([3.940399, 2.9701, 1.99, 1.99, 1.0])
 
     print("Reference return")
@@ -86,9 +86,8 @@ def test_return():
     # Test discounted return with normalization
     print("Disc. return, normalized, no clip, no bootstrap, no terminal")
 
-    # Reset trm and bts vectors
+    # Reset trm vector
     trm[2] = 1.0
-    bts[2] = 0.0
 
     # Modify retrn object
     retrn.ret_norm = True
@@ -96,7 +95,7 @@ def test_return():
     # Compute returns
     # avg is 2.960298802
     # std is 1.3792204603784504
-    tgt, ret = retrn.compute(rwd, val, nxt, trm, bts)
+    tgt, ret = retrn.compute(rwd, val, nxt, trm)
     ret_ref  = np.array([1.407096446,    0.7106189519,
                          0.007106331643,-0.7035124767,-1.421309253])
 
@@ -117,7 +116,7 @@ def test_return():
     retrn = advantage(reader.pms.retrn)
 
     # Compute returns
-    tgt, ret = retrn.compute(rwd, val, nxt, trm, bts)
+    tgt, ret = retrn.compute(rwd, val, nxt, trm)
     ret_ref  = np.array([4.90099501, 3.940399, 2.9701, 1.99, 1.])
     ret_ref -= val
 
@@ -138,7 +137,7 @@ def test_return():
     retrn = gae(reader.pms.retrn)
 
     # Compute returns
-    tgt, ret = retrn.compute(rwd, val, nxt, trm, bts)
+    tgt, ret = retrn.compute(rwd, val, nxt, trm)
     ret_ref  = np.array([1.01167994, 1.07367546,
                          1.12726805, 1.1721996, 0.698])
 

@@ -1,8 +1,5 @@
 # Custom imports
-from dragonfly.src.agent.base            import *
-from dragonfly.src.terminator.terminator import *
-from dragonfly.src.utils.buff            import *
-from dragonfly.src.utils.counter         import *
+from dragonfly.src.agent.base import *
 
 ###############################################
 ### PPO agent
@@ -44,21 +41,21 @@ class ppo(base_agent):
                                           pms = pms.retrn)
 
         # Create buffers
-        self.buff = buff(self.n_cpu,
-                         ["obs", "nxt", "act", "lgp",
-                          "rwd", "dne", "stp", "trm", "bts"],
-                         [obs_dim, obs_dim, self.pol_dim, 1, 1, 1, 1, 1, 1])
-        self.gbuff = gbuff(self.size,
-                           ["obs", "act", "adv", "tgt", "lgp"],
-                           [obs_dim, self.pol_dim, 1, 1, 1])
+        self.lnames = ["obs", "nxt", "act", "lgp", "rwd", "trm"]
+        self.lsizes = [obs_dim, obs_dim, self.pol_dim, 1, 1, 1]
+        self.buff   = buff(self.n_cpu, self.lnames, self.lsizes)
+
+        self.gnames = ["obs", "act", "adv", "tgt", "lgp"]
+        self.gsizes = [obs_dim, self.pol_dim, 1, 1, 1]
+        self.gbuff  = gbuff(self.size, self.gnames, self.gsizes)
 
         # Initialize counter
         self.counter = counter(self.n_cpu)
 
         # Initialize terminator
-        self.terminator = terminator_factory.create(pms.terminator.type,
-                                                    n_cpu = self.n_cpu,
-                                                    pms   = pms.terminator)
+        self.term = termination_factory.create(pms.termination.type,
+                                               n_cpu = self.n_cpu,
+                                               pms   = pms.termination)
 
     # Get actions
     def actions(self, obs):
@@ -72,7 +69,7 @@ class ppo(base_agent):
                   "Detected NaN in generated actions")
 
         # Store log-prob
-        self.buff.store(["lgp"], [ lgp ])
+        self.buff.store(["lgp"], [lgp])
 
         return act
 
@@ -82,22 +79,21 @@ class ppo(base_agent):
         return self.p_net.control(obs)
 
     # Finalize buffers before training
-    def returns(self, obs, nxt, act, rwd, trm, bts):
+    def returns(self, obs, nxt, rwd, trm):
 
         # Get current and next values
         cval = self.v_net.values(obs)
         nval = self.v_net.values(nxt)
 
         # Compute advantages
-        tgt, adv = self.retrn.compute(rwd, cval, nval, trm, bts)
+        tgt, adv = self.retrn.compute(rwd, cval, nval, trm)
 
         return tgt, adv
 
     # Prepare training data
     def prepare_data(self, size):
 
-        names = ["obs", "adv", "tgt", "act", "lgp"]
-        self.data = self.gbuff.get_buffers(names, size)
+        self.data = self.gbuff.get_buffers(self.gnames, size)
         lgt = len(self.data["obs"])
 
         return lgt
@@ -129,11 +125,11 @@ class ppo(base_agent):
         self.v_net.reset()
 
     # Store transition
-    def store(self, obs, act, rwd, nxt, dne):
+    def store(self, obs, nxt, act, rwd, dne):
 
-        stp = self.counter.ep_step
-        self.buff.store(["obs", "act", "rwd", "nxt", "dne", "stp"],
-                        [ obs,   act,   rwd,   nxt,   dne,   stp ])
+        trm = self.term.terminate(dne, self.counter.ep_step)
+        self.buff.store(["obs", "nxt", "act", "rwd", "trm"],
+                        [ obs,   nxt,   act,   rwd,   trm ])
         self.counter.update(rwd)
 
     # Actions to execute before the inner training loop
@@ -142,16 +138,22 @@ class ppo(base_agent):
         self.buff.reset()
 
     # Actions to execute after the inner training loop
-    def post_loop(self):
+    def post_loop(self, style=None):
 
-        self.terminator.terminate(self.buff)
-        names = ["obs", "nxt", "act", "lgp", "rwd", "trm", "bts"]
+        # For buffer-style training, the last step of each buffer
+        # must be bootstraped to mimic a continuing episode
+        if ((style == "buffer") and (self.term.type == "bootstrap")):
+            for i in range(self.n_cpu):
+                done = (self.buff.data["trm"].buff[i][-1] == 0.0)
+                if (not done):
+                    self.buff.data["trm"].buff[i][-1] = 2.0
+
+        names = ["obs", "nxt", "act", "lgp", "rwd", "trm"]
         data  = self.buff.serialize(names)
-        gobs, gnxt, gact, glgp, grwd, gtrm, gbts = (data[name] for name in names)
-        gtgt, gadv = self.returns(gobs, gnxt, gact, grwd, gtrm, gbts)
+        gobs, gnxt, gact, glgp, grwd, gtrm = (data[name] for name in names)
+        gtgt, gadv = self.returns(gobs, gnxt, grwd, gtrm)
 
-        self.gbuff.store(["obs", "adv", "tgt", "act", "lgp"],
-                         [gobs,  gadv,  gtgt,  gact,  glgp ])
+        self.gbuff.store(self.gnames, [gobs, gact, gadv, gtgt, glgp])
 
     # Save agent parameters
     def save(self, filename):

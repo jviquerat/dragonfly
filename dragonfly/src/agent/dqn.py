@@ -1,8 +1,5 @@
 # Custom imports
-from dragonfly.src.agent.base            import *
-from dragonfly.src.terminator.terminator import *
-from dragonfly.src.utils.buff            import *
-from dragonfly.src.utils.counter         import *
+from dragonfly.src.agent.base import *
 
 ###############################################
 ### DQN agent
@@ -30,6 +27,10 @@ class dqn():
             error("dqn", "__init__",
                   "Value type for dqn agent is not q_value")
 
+        if (pms.value.loss.type != "mse_dqn"):
+            error("dqn", "__init__",
+                  "Loss type for dqn agent is not mse_dqn")
+
         self.q_net = val_factory.create(pms.value.type,
                                         inp_dim = obs_dim,
                                         out_dim = act_dim,
@@ -41,20 +42,18 @@ class dqn():
         self.q_tgt.net.set_weights(self.q_net.net.get_weights())
 
         # Create buffers
-        self.buff = buff(self.n_cpu,
-                        ["obs", "nxt", "act", "rwd", "dne", "stp", "trm"],
-                        [obs_dim, obs_dim, 1, 1, 1, 1, 1])
-        self.gbuff = gbuff(self.mem_size,
-                           ["obs", "nxt", "rwd", "act", "trm"],
-                           [obs_dim, obs_dim, 1, 1, 1])
+        self.names = ["obs", "nxt", "act", "rwd", "trm"]
+        self.sizes = [obs_dim, obs_dim, 1, 1, 1]
+        self.buff  = buff(self.n_cpu, self.names, self.sizes)
+        self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
 
         # Initialize counter
         self.counter = counter(self.n_cpu)
 
-        # Initialize terminator
-        self.terminator = terminator_factory.create(pms.terminator.type,
-                                                    n_cpu = self.n_cpu,
-                                                    pms   = pms.terminator)
+        # Initialize termination
+        self.term = termination_factory.create(pms.termination.type,
+                                               n_cpu = self.n_cpu,
+                                               pms   = pms.termination)
 
     # Get actions
     def actions(self, obs):
@@ -82,8 +81,7 @@ class dqn():
         lgt = self.gbuff.length()
         if (lgt < size): return
 
-        names = ["obs", "nxt", "rwd", "act", "trm"]
-        self.data = self.gbuff.get_batches(names, size)
+        self.data = self.gbuff.get_batches(self.names, size)
 
     # Training
     def train(self, size):
@@ -94,8 +92,8 @@ class dqn():
 
         obs = self.data["obs"][:]
         nxt = self.data["nxt"][:]
-        rwd = self.data["rwd"][:]
         act = self.data["act"][:]
+        rwd = self.data["rwd"][:]
         trm = self.data["trm"][:]
 
         act = tf.reshape(act, [size,-1])
@@ -123,11 +121,10 @@ class dqn():
         self.q_tgt.net.set_weights(self.q_net.net.get_weights())
 
     # Store transition
-    def store(self, obs, act, rwd, nxt, dne):
+    def store(self, obs, nxt, act, rwd, dne):
 
-        stp = self.counter.ep_step
-        self.buff.store(["obs", "act", "rwd", "nxt", "dne", "stp"],
-                        [ obs,   act,   rwd,   nxt,   dne,   stp ])
+        trm = self.term.terminate(dne, self.counter.ep_step)
+        self.buff.store(self.names, [obs, nxt, act, rwd, trm])
         self.counter.update(rwd)
 
     # Actions to execute before the inner training loop
@@ -138,13 +135,10 @@ class dqn():
     # Actions to execute after the inner training loop
     def post_loop(self):
 
-        self.terminator.terminate(self.buff)
-        names = ["obs", "nxt", "act", "rwd", "trm"]
-        data  = self.buff.serialize(names)
-        gobs, gnxt, gact, grwd, gtrm = (data[name] for name in names)
+        data = self.buff.serialize(self.names)
+        gobs, gnxt, gact, grwd, gtrm = (data[name] for name in self.names)
 
-        self.gbuff.store(["obs", "nxt", "rwd", "act", "trm"],
-                         [gobs,  gnxt,  grwd,  gact,  gtrm ])
+        self.gbuff.store(self.names, [gobs, gnxt, gact, grwd, gtrm])
 
     # Save parameters
     def save(self, filename):
