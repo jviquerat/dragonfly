@@ -4,7 +4,6 @@ import numpy as np
 
 # Custom imports
 from dragonfly.src.core.constants        import *
-from dragonfly.src.terminator.terminator import *
 from dragonfly.src.utils.timer           import *
 from dragonfly.src.utils.buff            import *
 from dragonfly.src.utils.report          import *

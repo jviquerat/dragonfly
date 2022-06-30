@@ -27,6 +27,10 @@ class par_envs:
         self.pipes     = []
         self.procs     = []
 
+        # Possibly set obs max by hand
+        self.manual_obs_max = 1.0
+        if hasattr(pms, "obs_max"): self.manual_obs_max = pms.obs_max
+
         # Start environments
         for cpu in range(n_cpu):
             p_pipe, c_pipe = mp.Pipe()
@@ -52,10 +56,10 @@ class par_envs:
 
         self.obs_min, self.obs_max, self.obs_norm = self.get_obs_bounds()
         self.obs_min = np.where(self.obs_min < -def_obs_max,
-                                -1.0,
+                                -self.manual_obs_max,
                                 self.obs_min)
         self.obs_max = np.where(self.obs_max >  def_obs_max,
-                                 1.0,
+                                self.manual_obs_max,
                                 self.obs_max)
         self.obs_avg = 0.5*(self.obs_max + self.obs_min)
         self.obs_rng = 0.5*(self.obs_max - self.obs_min)

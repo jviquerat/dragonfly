@@ -24,9 +24,9 @@ class adadelta():
         # Initialize optimizer
         # A fake optimization step is applied so the saved
         # weights and config have the correct sizes
-        self.opt = Adadelta(learning_rate = self.lr,
-                            clipnorm      = self.grd_clip,
-                            rho           = self.rho)
+        self.opt = Adadelta(learning_rate   = self.lr,
+                            global_clipnorm = self.grd_clip,
+                            rho             = self.rho)
         zero_grads = [tf.zeros_like(w) for w in grad_vars]
         self.opt.apply_gradients(zip(zero_grads, grad_vars))
 

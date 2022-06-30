@@ -85,7 +85,7 @@ class episode(trainer_base):
                 nxt, rwd, dne = self.env.step(act)
 
                 # Store transition
-                self.agent.store(obs, act, rwd, nxt, dne)
+                self.agent.store(obs, nxt, act, rwd, dne)
 
                 # Handle rendering
                 rnd = self.env.render(self.renderer.render)

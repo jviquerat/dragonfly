@@ -10,8 +10,8 @@ warnings.filterwarnings('ignore',category=FutureWarning)
 import tensorflow                    as     tf
 import tensorflow.keras              as     tk
 from   tensorflow.keras              import Model
-from   tensorflow.keras.layers       import Dense, BatchNormalization
-from   tensorflow.keras.initializers import Orthogonal, GlorotUniform
+from   tensorflow.keras.layers       import Dense
+from   tensorflow.keras.initializers import Orthogonal, LecunNormal
 
 # Custom imports
 from   dragonfly.src.utils.error     import *
@@ -39,8 +39,8 @@ class fc(Model):
         self.heads.arch     = [[4]]
         self.heads.actv     = ["tanh"]
         self.heads.final    = ["linear"]
-        self.hid_init       = Orthogonal(gain=1.0)
-        self.fnl_init       = Orthogonal(gain=0.01)
+        self.hid_init       = LecunNormal()
+        self.fnl_init       = LecunNormal()
 
         # Check inputs
         if hasattr(pms,       "trunk"): self.trunk       = pms.trunk

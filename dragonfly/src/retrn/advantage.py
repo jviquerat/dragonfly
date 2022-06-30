@@ -23,14 +23,16 @@ class advantage():
     # val : value array
     # nxt : value array shifted by one timestep
     # trm : array of terminal values
-    # bts : array of bootstraping tags
-    def compute(self, rwd, val, nxt, trm, bts):
+    def compute(self, rwd, val, nxt, trm):
 
         # Shortcuts
         gm = self.gamma
 
         # Initialize return and check bootstrapping
-        ret = np.where(bts == 1.0, rwd + gm*nxt, rwd)
+        ret = np.where(trm == 2.0, rwd + gm*nxt, rwd)
+
+        # Remove bootstrap information from trm buffer
+        trm = np.where(trm == 2.0, 0.0, trm)
 
         # Return as discounted sum
         for t in reversed(range(len(ret)-1)):

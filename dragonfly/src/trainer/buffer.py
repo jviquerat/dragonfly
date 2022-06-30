@@ -83,7 +83,7 @@ class buffer(trainer_base):
                 nxt, rwd, dne = self.env.step(act)
 
                 # Store transition
-                self.agent.store(obs, act, rwd, nxt, dne)
+                self.agent.store(obs, nxt, act, rwd, dne)
 
                 # Handle rendering
                 rnd = self.env.render(self.renderer.render)
@@ -99,7 +99,7 @@ class buffer(trainer_base):
                 self.env.reset(dne, obs)
 
             # Finalize inner training loop
-            self.agent.post_loop()
+            self.agent.post_loop(style="buffer")
 
             # Write report data to file
             self.write_report(path, run)

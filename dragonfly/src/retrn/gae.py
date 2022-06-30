@@ -25,19 +25,17 @@ class gae():
     # val : value array
     # nxt : value array shifted by one timestep
     # trm : array of terminal values
-    # bts : array of bootstraping tags
-    def compute(self, rwd, val, nxt, trm, bts):
+    def compute(self, rwd, val, nxt, trm):
 
         # Shortcuts
         gm  = self.gamma
         lbd = self.gae_lambda
 
         # Compute modified terminal signal including bootstrap
-        trb = trm + bts
-        trb = np.clip(trb, 0.0, 1.0)
+        trm = np.clip(trm, 0.0, 1.0)
 
         # Compute deltas
-        buff = zip(rwd, trb, nxt, val)
+        buff = zip(rwd, trm, nxt, val)
         dlt  = [r + gm*t*nv - v for r, t, nv, v in buff]
         dlt  = np.stack(dlt)
 

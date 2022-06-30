@@ -68,7 +68,7 @@
                 "type": "mse_ddpg"
             }
         },
-        "terminator": {
+        "termination": {
             "type": "regular"
         }
     }

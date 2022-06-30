@@ -2,13 +2,13 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.src.core.constants        import *
-from dragonfly.src.trainer.base          import *
-from dragonfly.src.envs.par_envs         import *
-from dragonfly.src.agent.agent           import *
-from dragonfly.src.utils.timer           import *
-from dragonfly.src.utils.report          import *
-from dragonfly.src.utils.renderer        import *
+from dragonfly.src.core.constants  import *
+from dragonfly.src.trainer.base    import *
+from dragonfly.src.envs.par_envs   import *
+from dragonfly.src.agent.agent     import *
+from dragonfly.src.utils.timer     import *
+from dragonfly.src.utils.report    import *
+from dragonfly.src.utils.renderer  import *
 
 ###############################################
 ### Class for temporal-difference training
@@ -83,7 +83,7 @@ class td(trainer_base):
                 nxt, rwd, dne = self.env.step(act)
 
                 # Store transition
-                self.agent.store(obs, act, rwd, nxt, dne)
+                self.agent.store(obs, nxt, act, rwd, dne)
 
                 # Update unrolling counter
                 self.unroll += self.n_cpu

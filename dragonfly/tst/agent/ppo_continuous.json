@@ -74,7 +74,7 @@
             "gae_lambda": 0.99,
             "ret_norm": true
         },
-        "terminator": {
+        "termination": {
             "type": "bootstrap",
             "ep_end": 200
         }
