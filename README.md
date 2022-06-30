@@ -32,7 +32,21 @@ dgf --eval -net <net_file> -json <json_file>
 
 In that case, the environment will just rely on the `done` signal to stop the evaluation. Alternatively, you can provide a `-steps <n>` option, that will override the `done` signal of the environment, and force its execution for `n` steps. Trained agents for standard `gym` environements are available in `dragonfly/envs`.
 
-## Solved environments
+## CFD environments
+
+| Environment | Description | Illustration |
+| :--- | :--- | :---: |
+| `turek-v0` | A drag reduction problem exploiting two synthetic jets on a cylinder immersed in a flow at Re=100. See additional details <a href="dragonfly/envs/turek/README.md">here</a>. | <img width="700" alt="gif" src="dragonfly/envs/turek/good.gif"> |
+
+## Mujoco environments
+
+| Environment | Description | Illustration |
+| :--- | :--- | :---: |
+| `Hopper-v4` | A one-legged humanoid learns to move forward by hopping. See additional details <a href="dragonfly/envs/hopper/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/envs/hopper/good.gif"> |
+| `InvertedDoublePendulum-v4` | A double inverted pendulum to be balanced by the agent. See additional details <a href="dragonfly/envs/inverteddoublependulum/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/envs/inverteddoublependulum/good.gif"> |
+| `Reacher-v4` | An articulated arm must reach a randomly-positionned ball with minimal effort from its two actuators. See additional details <a href="dragonfly/envs/reacher/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/envs/reacher/good.gif"> |
+
+## Gym environments
 
 Below are a few environment solved with the library.
 
@@ -44,3 +58,10 @@ Below are a few environment solved with the library.
 | `LunarLander-v2` | The basic `gym` environment. The agent learns to land on a landing pad using 4 discrete actions. See additional details <a href="dragonfly/envs/lunarlander/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/envs/lunarlander/good.gif"> |
 | `BipedalWalker-v3` | The basic `gym` environment. The agent learns to walk with a bipedal "thing" by applying torque to 4 different joints. See additional details <a href="dragonfly/envs/bipedalwalker/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/envs/bipedalwalker/good.gif"> |
 | `MountainCar-v0` | The basic `gym` environment. The agent learns run a car from the bottom of a valley to the top of a hill. See additional details <a href="dragonfly/envs/mountaincar/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/envs/mountaincar/good.gif"> |
+
+## Custom environments
+
+| Environment | Description | Illustration |
+| :--- | :--- | :---: |
+| `cartpole-continuous-v0` | A continuous version of the basic `gym` environment. See additional details <a href="dragonfly/envs/cartpole-continuous/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/envs/cartpole-continuous/good.gif"> |
+| `pendulum-deterministic-v0` | A ddeterministic version of the basic `gym` environment, using a fixed starting point. See additional details <a href="dragonfly/envs/pendulum-deterministic/README.md">here</a>. | <img width="500" alt="gif" src="dragonfly/envs/pendulum-deterministic/good.gif"> |
