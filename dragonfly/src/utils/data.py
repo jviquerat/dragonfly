@@ -10,21 +10,25 @@ import numpy as np
 class data_avg():
     def __init__(self, n_fields, n_ep, n_avg):
 
-        self.n_ep = n_ep
+        self.n_ep     = n_ep
         self.n_fields = n_fields
         self.ep   = np.zeros((        n_ep            ), dtype=int)
+        self.stp  = np.zeros((        n_ep            ), dtype=int)
         self.data = np.zeros((n_avg,  n_ep,   n_fields), dtype=float)
 
     def store(self, filename, run):
 
-        f  = np.loadtxt(filename)
-        self.ep = f[:self.n_ep, 0]
+        f = np.loadtxt(filename)
+        self.ep  = f[:self.n_ep, 0]
+        self.stp = f[:self.n_ep, 1]
         for field in range(self.n_fields):
             self.data[run,:,field] = f[:self.n_ep,field+2]
 
     def average(self, filename):
 
-        array     = np.vstack(self.ep)
+        array = np.vstack(self.ep)
+        array = np.hstack((array, np.vstack(self.stp)))
+
         for field in range(self.n_fields):
             avg   = np.mean(self.data[:,:,field], axis=0)
             std   = np.std (self.data[:,:,field], axis=0)

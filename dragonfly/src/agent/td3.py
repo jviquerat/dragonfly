@@ -3,29 +3,35 @@ from dragonfly.src.agent.base   import *
 from dragonfly.src.utils.polyak import *
 
 ###############################################
-### DDPG agent
-class ddpg(base_agent):
+### TD3 agent
+class td3(base_agent):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
-        self.name      = 'ddpg'
-        self.act_dim   = act_dim
-        self.obs_dim   = obs_dim
-        self.n_cpu     = n_cpu
-        self.mem_size  = size
-        self.gamma     = pms.gamma
-        self.rho       = pms.rho
-        self.n_warmup  = pms.n_warmup
-        self.n_filling = pms.n_filling
-        self.sigma     = pms.sigma
+        self.name       = 'td3'
+        self.act_dim    = act_dim
+        self.obs_dim    = obs_dim
+        self.n_cpu      = n_cpu
+        self.mem_size   = size
+        self.gamma      = pms.gamma
+        self.rho        = pms.rho
+        self.n_warmup   = pms.n_warmup
+        self.n_filling  = pms.n_filling
+        self.p_update   = pms.p_update
+        self.sigma_act  = pms.sigma_act
+        self.sigma_tgt  = pms.sigma_tgt
+        self.noise_clip = pms.noise_clip
+
+        # Local variables
+        self.p_stp     = 0
 
         # Build policies
         if (pms.policy.type != "deterministic"):
-            error("ddpg", "__init__",
-                  "Policy type for ddpg agent is not deterministic")
+            error("td3", "__init__",
+                  "Policy type for td3 agent is not deterministic")
         if (pms.policy.loss.type != "q_pol"):
-            error("ddpg", "__init__",
-                  "Policy loss type for ddpg agent is not q_pol")
+            error("td3", "__init__",
+                  "Policy loss type for td3 agent is not q_pol")
 
         self.p_net = pol_factory.create(pms.policy.type,
                                         obs_dim = obs_dim,
@@ -43,22 +49,31 @@ class ddpg(base_agent):
 
         # Build values
         if (pms.value.type != "q_value"):
-            error("ddpg", "__init__",
-                  "Value type for ddpg agent is not q_value")
+            error("td3", "__init__",
+                  "Value type for td3 agent is not q_value")
 
-        if (pms.value.loss.type != "mse_ddpg"):
-            error("ddpg", "__init__",
-                  "Loss type for ddpg agent is not mse_ddpg")
+        if (pms.value.loss.type != "mse_td3"):
+            error("td3", "__init__",
+                  "Loss type for td3 agent is not mse_td3")
 
-        self.q_net = val_factory.create(pms.value.type,
+        self.q_net1 = val_factory.create(pms.value.type,
                                         inp_dim = obs_dim+act_dim,
                                         out_dim = 1,
                                         pms     = pms.value)
-        self.q_tgt = val_factory.create(pms.value.type,
+        self.q_net2 = val_factory.create(pms.value.type,
                                         inp_dim = obs_dim+act_dim,
                                         out_dim = 1,
                                         pms     = pms.value)
-        self.q_tgt.net.set_weights(self.q_net.net.get_weights())
+        self.q_tgt1 = val_factory.create(pms.value.type,
+                                        inp_dim = obs_dim+act_dim,
+                                        out_dim = 1,
+                                        pms     = pms.value)
+        self.q_tgt2 = val_factory.create(pms.value.type,
+                                        inp_dim = obs_dim+act_dim,
+                                        out_dim = 1,
+                                        pms     = pms.value)
+        self.q_tgt1.net.set_weights(self.q_net1.net.get_weights())
+        self.q_tgt2.net.set_weights(self.q_net2.net.get_weights())
 
         # Polyak averager
         self.polyak = polyak(self.rho)
@@ -84,7 +99,7 @@ class ddpg(base_agent):
             act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
         else:
             act   = self.p_net.actions(obs)
-            noise = np.random.normal(0.0, self.sigma,
+            noise = np.random.normal(0.0, self.sigma_act,
                                      (self.n_cpu, self.act_dim))
             act  += noise
             act   = np.clip(act, -1.0, 1.0)
@@ -92,7 +107,7 @@ class ddpg(base_agent):
 
         # Check for NaNs
         if (np.isnan(act).any()):
-            error("ddpg", "get_actions",
+            error("td3", "get_actions",
                   "Detected NaN in generated actions")
 
         return act
@@ -100,7 +115,9 @@ class ddpg(base_agent):
     # Control (deterministic actions)
     def control(self, obs):
 
-        return self.p_net.control(obs)
+        act = self.p_net.control(obs)
+
+        return act
 
     # Prepare training data
     def prepare_data(self, size):
@@ -129,26 +146,37 @@ class ddpg(base_agent):
         trm = tf.reshape(trm, [size,-1])
 
         # Train q network
-        self.q_net.loss.train(obs, nxt, act, rwd, trm,
-                              self.gamma, self.p_tgt, self.q_net, self.q_tgt)
+        self.q_net1.loss.train(obs, nxt, act, rwd, trm,
+                               self.gamma, self.sigma_tgt, self.noise_clip,
+                               self.p_tgt, self.q_net1, self.q_tgt1, self.q_tgt2)
+        self.q_net2.loss.train(obs, nxt, act, rwd, trm,
+                               self.gamma, self.sigma_tgt, self.noise_clip,
+                               self.p_tgt, self.q_net2, self.q_tgt1, self.q_tgt2)
 
         # Train policy network
-        self.p_net.loss.train(obs, self.p_net, self.q_net)
+        self.p_stp += 1
+        if (self.p_stp == self.p_update):
+            self.p_stp = 0
+            self.p_net.loss.train(obs, self.p_net, self.q_net1)
 
-        # Update target networks
-        self.polyak.average(self.p_net.net, self.p_tgt.net)
-        self.polyak.average(self.q_net.net, self.q_tgt.net)
+            # Update target networks
+            self.polyak.average(self.p_net.net,  self.p_tgt.net)
+            self.polyak.average(self.q_net1.net, self.q_tgt1.net)
+            self.polyak.average(self.q_net2.net, self.q_tgt2.net)
 
     # Reset
     def reset(self):
 
         self.counter.reset()
         self.p_net.reset()
-        self.q_net.reset()
+        self.q_net1.reset()
+        self.q_net2.reset()
         self.p_tgt.reset()
-        self.q_tgt.reset()
+        self.q_tgt1.reset()
+        self.q_tgt2.reset()
         self.p_tgt.net.set_weights(self.p_net.net.get_weights())
-        self.q_tgt.net.set_weights(self.q_net.net.get_weights())
+        self.q_tgt1.net.set_weights(self.q_net1.net.get_weights())
+        self.q_tgt2.net.set_weights(self.q_net2.net.get_weights())
 
     # Store transition
     def store(self, obs, nxt, act, rwd, dne):

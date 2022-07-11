@@ -16,12 +16,15 @@
         "render_every": 500
     },
     "agent": {
-        "type": "ddpg",
+        "type": "td3",
         "gamma": 0.99,
         "rho": 0.995,
         "n_warmup": 200,
         "n_filling": 100,
-        "sigma": 0.1,
+        "p_update": 2,
+        "sigma_act": 0.1,
+        "sigma_tgt": 0.1,
+        "noise_clip": 0.2,
         "policy": {
             "type": "deterministic",
             "network": {
@@ -67,7 +70,7 @@
                 "grd_clip": 100.0
             },
             "loss": {
-                "type": "mse_ddpg"
+                "type": "mse_td3"
             }
         },
         "termination": {

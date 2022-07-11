@@ -44,6 +44,7 @@ class deterministic(base_policy):
         obs   = tf.cast(obs, tf.float32)
         act   = self.forward(obs)[0]
         act   = np.reshape(act.numpy(), (-1,self.store_dim))
+
         return act
 
     # Control (deterministic actions)
