@@ -15,13 +15,13 @@
     "trainer": {
         "style": "buffer",
         "buff_size": 256,
-        "n_buff": 8,
+        "n_buff": 1,
         "batch_frac": 0.5,
-        "n_epochs": 16,
+        "n_epochs": 1,
         "render_every": 10000
     },
     "agent": {
-        "type": "ppo",
+        "type": "a2c",
         "policy": {
             "type": "normal",
             "network": {
@@ -43,8 +43,7 @@
                 "grd_clip": 0.1
             },
             "loss": {
-                "type": "surrogate",
-                "pol_clip": 0.2,
+                "type": "pg",
                 "ent_coef": 0.01
             }
         },
@@ -75,7 +74,7 @@
         "retrn": {
             "type": "gae",
             "gamma": 0.99,
-            "gae_lambda": 0.99,
+            "lambda": 0.99,
             "ret_norm": true
         },
         "termination": {
