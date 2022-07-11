@@ -13,12 +13,13 @@ plt.rcParams['figure.titleweight'] = 'bold'
 def plot_avg(data, filename):
 
     gen         = data[:,0]
-    score_avg   = data[:,4]
-    score_p     = data[:,5]
-    score_m     = data[:,6]
-    length_avg  = data[:,10]
-    length_p    = data[:,11]
-    length_m    = data[:,12]
+    stp         = data[:,1]
+    score_avg   = data[:,5]
+    score_p     = data[:,6]
+    score_m     = data[:,7]
+    length_avg  = data[:,11]
+    length_p    = data[:,12]
+    length_m    = data[:,13]
 
     fig, ax = plt.subplots(1,2,figsize=(10,5))
     fig.suptitle(filename)
