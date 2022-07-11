@@ -7,11 +7,11 @@
     },
     "n_avg": 3,
     "n_cpu": 1,
-    "n_ep_max": 500,
+    "n_ep_max": 300,
     "trainer": {
         "style": "td",
-        "mem_size": 20000,
-        "btc_size": 64,
+        "mem_size": 10000,
+        "btc_size": 128,
         "n_stp_unroll": 1,
         "render_every": 500
     },
@@ -19,26 +19,28 @@
         "type": "ddpg",
         "gamma": 0.99,
         "rho": 0.995,
-        "n_warmup": 5000,
+        "n_warmup": 2000,
+        "n_filling": 1000,
+        "sigma": 0.1,
         "policy": {
             "type": "deterministic",
             "network": {
                 "type": "fc",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "tanh"
+                    "actv": "selu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["tanh"],
+                    "actv": ["selu"],
                     "final": ["tanh"]
                 }
             },
             "optimizer": {
                 "type": "nadam",
                 "lr": 5.0e-4,
-                "grd_clip": 0.1
+                "grd_clip": null
             },
             "loss": {
                 "type": "q_pol"
@@ -50,26 +52,27 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "swish"
+                    "actv": "selu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["swish"],
+                    "actv": ["selu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
                 "type": "nadam",
                 "lr": 5.0e-4,
-                "grd_clip": 100.0
+                "grd_clip": null
             },
             "loss": {
                 "type": "mse_ddpg"
             }
         },
         "termination": {
-            "type": "regular"
+            "type": "bootstrap",
+            "ep_end": 200
         }
     }
 }
