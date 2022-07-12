@@ -32,12 +32,12 @@ class fc(Model):
 
         # Set default values
         self.trunk          = trunk()
-        self.trunk.arch     = [32,32]
-        self.trunk.actv     = "tanh"
+        self.trunk.arch     = [64]
+        self.trunk.actv     = "relu"
         self.heads          = heads()
         self.heads.nb       = 1
-        self.heads.arch     = [[4]]
-        self.heads.actv     = ["tanh"]
+        self.heads.arch     = [[64]]
+        self.heads.actv     = ["relu"]
         self.heads.final    = ["linear"]
         self.k_init         = "lecun_normal"
 
@@ -51,7 +51,6 @@ class fc(Model):
         if hasattr(pms.heads, "actv"):   self.heads.actv  = pms.heads.actv
         if hasattr(pms.heads, "final"):  self.heads.final = pms.heads.final
         if hasattr(pms,       "k_init"): self.k_init      = pms.k_init
-
 
         # Check that out_dim and heads have same dimension
         if (len(self.out_dim) != pms.heads.nb):

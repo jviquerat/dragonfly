@@ -10,7 +10,7 @@
     "name_tag": "",
     "name_time": false,
     "n_avg": 3,
-    "n_cpu": 1,
+    "n_cpu": 8,
     "n_ep_max": 500,
     "trainer": {
         "style": "buffer",
