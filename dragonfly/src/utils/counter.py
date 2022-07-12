@@ -7,7 +7,7 @@ import numpy as np
 class counter:
     def __init__(self, n_cpu):
 
-        self.n_cpu    = n_cpu
+        self.n_cpu = n_cpu
         self.reset()
 
     # Reset
@@ -25,7 +25,11 @@ class counter:
 
         self.score[:]  += rwd[:]
         self.ep_step[:] = [x+1 for x in self.ep_step]
-        self.step      += self.n_cpu
+
+    # Update global step
+    def update_global_step(self, cpu):
+
+        self.step += self.ep_step[cpu]
 
     # Reset episode counters and update best values
     def reset_ep(self, cpu):

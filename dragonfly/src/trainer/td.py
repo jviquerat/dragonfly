@@ -128,6 +128,7 @@ class td(trainer_base):
         # Loop over environments and finalize/reset
         for cpu in range(self.n_cpu):
             if (done[cpu]):
+                self.agent.counter.update_global_step(cpu)
                 self.store_report(cpu)
                 self.print_episode()
                 self.renderer.finish(path, self.agent.counter.ep, cpu)
