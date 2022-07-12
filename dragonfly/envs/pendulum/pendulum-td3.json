@@ -33,6 +33,7 @@
             "type": "deterministic",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
                     "actv": "selu"
@@ -45,7 +46,7 @@
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
@@ -57,6 +58,7 @@
             "type": "q_value",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
                     "actv": "selu"
@@ -69,7 +71,7 @@
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
