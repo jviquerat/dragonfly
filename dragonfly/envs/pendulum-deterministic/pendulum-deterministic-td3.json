@@ -14,7 +14,7 @@
     "n_ep_max": 300,
     "trainer": {
         "style": "td",
-        "mem_size": 30000,
+        "mem_size": 10000,
         "btc_size": 128,
         "n_stp_unroll": 1,
         "render_every": 500
@@ -23,16 +23,17 @@
         "type": "td3",
         "gamma": 0.99,
         "rho": 0.995,
-        "n_warmup": 2000,
-        "n_filling": 1000,
+        "n_warmup": 400,
+        "n_filling": 0,
         "p_update": 2,
         "sigma_act": 0.1,
-        "sigma_tgt": 0.1,
-        "noise_clip": 0.2,
+        "sigma_tgt": 0.2,
+        "noise_clip": 0.5,
         "policy": {
             "type": "deterministic",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
                     "actv": "selu"
@@ -45,7 +46,7 @@
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
@@ -57,6 +58,7 @@
             "type": "q_value",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
                     "actv": "selu"
@@ -69,7 +71,7 @@
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
