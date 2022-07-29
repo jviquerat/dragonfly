@@ -42,7 +42,7 @@ In that case, the environment will just rely on the `done` signal to stop the ev
 
 | Environment | Description | Illustration |
 | :--- | :--- | :---: |
-| `Hopper-v4` | A one-legged humanoid learns to move forward by hopping. See additional details <a href="dragonfly/envs/hopper/README.md">here</a>. | <img width="300" alt="gif" src="dragonfly/envs/hopper/good.gif"> |
+| `Hopper-v4` | A one-legged humanoid learns to move forward by hopping. See additional details <a href="dragonfly/envs/hopper/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/envs/hopper/good.gif"> |
 | `InvertedDoublePendulum-v4` | A double inverted pendulum to be balanced by the agent. See additional details <a href="dragonfly/envs/inverteddoublependulum/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/envs/inverteddoublependulum/good.gif"> |
 | `Reacher-v4` | An articulated arm must reach a randomly-positionned ball with minimal effort from its two actuators. See additional details <a href="dragonfly/envs/reacher/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/envs/reacher/good.gif"> |
 
