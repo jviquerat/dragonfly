@@ -104,6 +104,9 @@ class td(trainer_base):
             # Finalize inner training loop
             self.agent.post_loop()
 
+            # Write report data to file
+            self.write_report(path, run)
+
             # Train agent
             self.train()
 
@@ -112,9 +115,6 @@ class td(trainer_base):
 
         # Last printing
         self.print_episode()
-
-        # Write report data to file
-        self.write_report(path, run)
 
         # Close timers and show
         self.timer_global.toc()
