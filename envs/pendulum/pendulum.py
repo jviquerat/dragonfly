@@ -65,7 +65,7 @@ class PendulumDeterministic(gym.Env):
     ):
         super().reset(seed=seed)
         high = np.array([np.pi, 1])
-        self.state = np.array([3.14,0.0])
+        self.state = np.array([2.5,0.1])
         self.stp = 0
         #self.state = self.np_random.uniform(low=-high, high=high)
         self.last_u = None
