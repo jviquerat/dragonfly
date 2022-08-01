@@ -81,7 +81,7 @@ class CartPoleContinuous(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             theta_dot = theta_dot + self.tau * thetaacc
             theta = theta + self.tau * theta_dot
 
-        self.state = (x, x_dot, theta, theta_dot)
+        self.state = (x, x_dot[0], theta, theta_dot[0])
 
         done = bool(
             x < -self.x_threshold
