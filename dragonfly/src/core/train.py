@@ -92,6 +92,6 @@ def folder_name(pms):
         path += name_tag
     if (name_time):
         if (path != ""): path += "_"
-        path += name_time
+        path += path_time
 
     return path
