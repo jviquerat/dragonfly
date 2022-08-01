@@ -10,15 +10,15 @@
     "name_tag": "episode_1_cpu",
     "name_time": false,
     "n_avg": 3,
-    "n_cpu": 1,
-    "n_ep_max": 800,
+    "n_cpu": 8,
+    "n_ep_max": 500,
     "trainer": {
         "style": "episode",
         "n_ep_unroll": 1,
-        "n_ep_train": 8,
-        "batch_frac": 0.5,
-        "n_epochs": 16,
-        "render_every": 500
+        "n_ep_train": 10,
+        "batch_frac": 0.25,
+        "n_epochs": 64,
+        "render_every": 5000
     },
     "agent": {
         "type": "ppo",
@@ -26,19 +26,20 @@
             "type": "normal",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64],
-                    "actv": "tanh"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 2,
                     "arch": [[64],[64]],
-                    "actv": ["tanh","tanh"],
+                    "actv": ["relu","relu"],
                     "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": 0.1
             },
@@ -52,14 +53,15 @@
             "type": "v_value",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
