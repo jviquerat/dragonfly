@@ -177,6 +177,8 @@ class td3(base_agent):
         self.p_tgt.net.set_weights(self.p_net.net.get_weights())
         self.q_tgt1.net.set_weights(self.q_net1.net.get_weights())
         self.q_tgt2.net.set_weights(self.q_net2.net.get_weights())
+        self.buff.reset()
+        self.gbuff.reset()
 
     # Store transition
     def store(self, obs, nxt, act, rwd, dne):
