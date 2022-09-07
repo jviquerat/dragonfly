@@ -119,6 +119,9 @@ class dqn():
         self.q_net.reset()
         self.q_tgt.reset()
         self.q_tgt.net.set_weights(self.q_net.net.get_weights())
+        self.buff.reset()
+        self.gbuff.reset()
+        self.eps.reset()
 
     # Store transition
     def store(self, obs, nxt, act, rwd, dne):

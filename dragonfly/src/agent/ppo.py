@@ -123,6 +123,8 @@ class ppo(base_agent):
         self.counter.reset()
         self.p_net.reset()
         self.v_net.reset()
+        self.buff.reset()
+        self.gbuff.reset()
 
     # Store transition
     def store(self, obs, nxt, act, rwd, dne):

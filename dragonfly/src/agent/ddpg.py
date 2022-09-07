@@ -149,6 +149,8 @@ class ddpg(base_agent):
         self.q_tgt.reset()
         self.p_tgt.net.set_weights(self.p_net.net.get_weights())
         self.q_tgt.net.set_weights(self.q_net.net.get_weights())
+        self.buff.reset()
+        self.gbuff.reset()
 
     # Store transition
     def store(self, obs, nxt, act, rwd, dne):
