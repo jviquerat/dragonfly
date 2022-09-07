@@ -11,7 +11,7 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_ep_max": 300,
+    "n_ep_max": 500,
     "trainer": {
         "style": "td",
         "mem_size": 10000,
@@ -22,32 +22,33 @@
     "agent": {
         "type": "dqn",
         "gamma": 0.99,
-        "tgt_update": 200,
+        "tgt_update": 50,
         "exploration": {
             "type": "linear",
-            "start": 0.9,
+            "start": 0.5,
             "end": 0.05,
-            "n_decay": 20000
+            "n_decay": 10000
         },
         "value": {
             "type": "q_value",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [32,32],
-                    "actv": "swish"
+                    "actv": "selu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["swish"],
+                    "actv": ["selu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
-                "grd_clip": 100.0
+                "grd_clip": null
             },
             "loss": {
                 "type": "mse_dqn"
