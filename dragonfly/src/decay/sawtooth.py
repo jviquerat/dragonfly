@@ -14,9 +14,7 @@ class sawtooth():
         self.n_periods = pms.n_periods
 
         # Initialize return values
-        self.step     = 0
-        self.step_tot = 0
-        self.val      = self.start
+        self.reset()
 
     # Get current value
     def get(self):
@@ -37,3 +35,10 @@ class sawtooth():
                 self.step = 0
         else:
             self.val = self.end
+
+    # Reset
+    def reset(self):
+
+        self.step     = 0
+        self.step_tot = 0
+        self.val      = self.start
