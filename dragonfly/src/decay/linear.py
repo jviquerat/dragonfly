@@ -13,8 +13,7 @@ class linear():
         self.n_decay  = pms.n_decay
 
         # Initialize return values
-        self.step     = 0
-        self.val      = self.start
+        self.reset()
 
     # Get current value
     def get(self):
@@ -27,3 +26,9 @@ class linear():
         r          = min(float(self.step/self.n_decay), 1.0)
         self.val   = self.start + r*(self.end-self.start)
         self.step += 1
+
+    # Reset
+    def reset(self):
+
+        self.step = 0
+        self.val  = self.start

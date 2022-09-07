@@ -13,7 +13,7 @@ class exponential():
         self.dcy      = pms.decay
 
         # Initialize return values
-        self.val      = self.start
+        self.reset()
 
     # Get current value
     def get(self):
@@ -24,3 +24,8 @@ class exponential():
     def decay(self):
 
         self.val = max(self.end, self.val*self.dcy)
+
+    # Reset
+    def reset(self):
+
+        self.val = self.start
