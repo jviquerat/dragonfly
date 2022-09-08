@@ -20,6 +20,7 @@ class par_envs:
 
         # Init pipes and processes
         self.name      = pms.name
+        self.act_norm  = True
         self.obs_clip  = pms.obs_clip
         self.obs_norm  = pms.obs_norm
         self.obs_noise = pms.obs_noise
@@ -50,11 +51,13 @@ class par_envs:
         self.obs_dim     = int(obs_dim)
 
         # Handle actions scaling
-        self.act_min, self.act_max, self.act_norm = self.get_act_bounds()
+        self.act_min, self.act_max, act_norm = self.get_act_bounds()
+        if ((not act_norm) and self.act_norm): self.act_norm = False
         self.act_avg = 0.5*(self.act_max + self.act_min)
         self.act_rng = 0.5*(self.act_max - self.act_min)
 
-        self.obs_min, self.obs_max, self.obs_norm = self.get_obs_bounds()
+        self.obs_min, self.obs_max, obs_norm = self.get_obs_bounds()
+        if ((not obs_norm) and self.obs_norm): self.obs_norm = False
         self.obs_min = np.where(self.obs_min < -def_obs_max,
                                 -self.manual_obs_max,
                                 self.obs_min)
@@ -69,6 +72,8 @@ class par_envs:
 
         # Initialize timer
         self.timer_env = timer("env      ")
+
+        print(self.obs_norm)
 
     # Reset all environments
     def reset_all(self):
