@@ -73,8 +73,6 @@ class par_envs:
         # Initialize timer
         self.timer_env = timer("env      ")
 
-        print(self.obs_norm)
-
     # Reset all environments
     def reset_all(self):
 
