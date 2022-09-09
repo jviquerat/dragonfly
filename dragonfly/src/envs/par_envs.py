@@ -293,11 +293,12 @@ def worker(env_name, cpu, pipe, path):
 
             # Execute commands
             if command == 'reset':
-                obs = env.reset()
+                obs, _ = env.reset()
                 pipe.send(obs)
 
             if command == 'step':
-                nxt, rwd, done, _ = env.step(data)
+                nxt, rwd, done, trunc, _ = env.step(data)
+                if ((not done) and trunc): done = True
                 pipe.send((nxt, rwd, done))
 
             if command == 'seed':
