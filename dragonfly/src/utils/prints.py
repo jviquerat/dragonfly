@@ -55,10 +55,10 @@ def bold(text):
 
 ### Print git revision
 def git_short_hash() -> str:
-    path = subprocess.check_output(['which', 'dgf']).decode('ascii').strip()
-    path = os.path.split(path)[0]
-    path = os.path.split(path)[0]
-    path = os.path.split(path)[0]
-    path += '/.git'
-    hash = subprocess.check_output(['git', '--git-dir', path, 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
-    print("Revision "+hash)
+    #path = subprocess.check_output(['which', 'dgf']).decode('ascii').strip()
+    #path = os.path.split(path)[0]
+    #path = os.path.split(path)[0]
+    #path = os.path.split(path)[0]
+    #path += '/.git'
+    #hash = subprocess.check_output(['git', '--git-dir', path, 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+    print("Revision ")#+hash)

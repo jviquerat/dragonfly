@@ -11,7 +11,7 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_ep_max": 2000,
+    "n_ep_max": 4000,
     "trainer": {
         "style": "buffer",
         "buff_size": 2048,
@@ -26,7 +26,7 @@
             "type": "normal",
             "network": {
                 "type": "fc",
-                "k_init": "lecun_normal",
+		"k_init": "lecun_normal",
                 "trunk": {
                     "arch": [128],
                     "actv": "relu"
