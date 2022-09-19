@@ -22,7 +22,7 @@ def evaluate(net_file, json_file, ns, nw, aw):
     env.set_control()
 
     # Create renderer
-    rnd = renderer(1, env.rnd_style, 1)
+    rnd = renderer(1, "rgb_array", 1)
     rnd.render = [True]
 
     # Initialize agent

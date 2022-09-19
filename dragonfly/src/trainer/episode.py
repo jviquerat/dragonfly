@@ -53,7 +53,7 @@ class episode(trainer_base):
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu,
-                                 self.env.rnd_style,
+                                 "rgb_array",
                                  pms.render_every)
 
         # Initialize timers

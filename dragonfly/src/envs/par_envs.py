@@ -67,9 +67,6 @@ class par_envs:
         self.obs_avg = 0.5*(self.obs_max + self.obs_min)
         self.obs_rng = 0.5*(self.obs_max - self.obs_min)
 
-        # Handle rendering
-        self.rnd_style = self.get_rnd_style()
-
         # Initialize timer
         self.timer_env = timer("env      ")
 
@@ -181,17 +178,6 @@ class par_envs:
 
         return obs_min, obs_max, obs_norm
 
-    # Get rendering style
-    def get_rnd_style(self):
-
-        # Send
-        self.pipes[0].send(('get_rnd_style', None))
-
-        # Receive
-        rnd_style = self.pipes[0].recv()
-
-        return rnd_style
-
     # Render environment
     def render(self, render):
 
@@ -202,7 +188,7 @@ class par_envs:
         # Send
         for cpu in range(self.n_cpu):
             if (render[cpu]):
-                self.pipes[cpu].send(('render', self.rnd_style))
+                self.pipes[cpu].send(('render', None))
 
         # Receive
         for cpu in range(self.n_cpu):
@@ -275,7 +261,7 @@ def worker(env_name, cpu, pipe, path):
 
     # Build environment
     try:
-        env = gym.make(env_name)
+        env = gym.make(env_name, render_mode="rgb_array")
     except:
         sys.path.append(path)
         module    = __import__(env_name)
@@ -306,7 +292,7 @@ def worker(env_name, cpu, pipe, path):
                 pipe.send(None)
 
             if command == 'render':
-                pipe.send(env.render(mode=data))
+                pipe.send(env.render())
 
             if command == "get_action_type":
                 if (type(env.action_space).__name__ == "Discrete"):
@@ -352,14 +338,6 @@ def worker(env_name, cpu, pipe, path):
                     obs_max  = 1.0
                     obs_norm = False
                 pipe.send((obs_min, obs_max, obs_norm))
-
-            if command == 'get_rnd_style':
-                rnd_style = env.metadata.get('render_modes')
-                if "rgb_array" in rnd_style:
-                    rnd_style = "rgb_array"
-                else:
-                    rnd_style = "human"
-                pipe.send(rnd_style)
 
             if command == 'close':
                 pipe.send(None)
