@@ -5,17 +5,17 @@
         "obs_norm": true,
         "obs_noise": 0.0
     },
-    "name_env": true,
-    "name_agent": true,
-    "name_tag": "episode_1_cpu",
+    "name_env": false,
+    "name_agent": false,
+    "name_tag": "pendulum_ppo_episode_8_envs",
     "name_time": false,
-    "n_avg": 3,
+    "n_avg": 5,
     "n_cpu": 8,
-    "n_ep_max": 500,
+    "n_ep_max": 1000,
     "trainer": {
         "style": "episode",
         "n_ep_unroll": 1,
-        "n_ep_train": 10,
+        "n_ep_train": 8,
         "batch_frac": 0.25,
         "n_epochs": 64,
         "render_every": 5000

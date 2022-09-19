@@ -39,7 +39,6 @@ def train(json_file):
                                      agent_pms = pms.agent,
                                      path      = base_path,
                                      n_cpu     = pms.n_cpu,
-                                     n_ep_max  = pms.n_ep_max,
                                      pms       = pms.trainer)
 
     # Run

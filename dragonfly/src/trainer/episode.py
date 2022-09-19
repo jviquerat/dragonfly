@@ -16,10 +16,9 @@ from dragonfly.src.utils.renderer        import *
 ### agent_pms : agent parameters
 ### path      : path for environment
 ### n_cpu     : nb of parallel environments
-### n_ep_max  : max nb of episodes to unroll in a run
 ### pms       : parameters
 class episode(trainer_base):
-    def __init__(self, env_pms, agent_pms, path, n_cpu, n_ep_max, pms):
+    def __init__(self, env_pms, agent_pms, path, n_cpu, pms):
 
         # Initialize environment
         self.env = par_envs(n_cpu, path, env_pms)
@@ -28,12 +27,14 @@ class episode(trainer_base):
         self.obs_dim     = self.env.obs_dim
         self.act_dim     = self.env.act_dim
         self.n_cpu       = n_cpu
-        self.n_ep_max    = n_ep_max
         self.n_ep_unroll = pms.n_ep_unroll*n_cpu
         self.n_ep_train  = pms.n_ep_train
         self.btc_frac    = pms.batch_frac
         self.n_epochs    = pms.n_epochs
         self.size        = 1000*self.n_ep_train
+
+        # Check max number of episodes or steps
+        self.set_finish(pms)
 
         # Local variables
         self.unroll = 0
@@ -70,7 +71,7 @@ class episode(trainer_base):
         obs = self.env.reset_all()
 
         # Loop until max episode number is reached
-        while (not (self.agent.counter.ep >= self.n_ep_max)):
+        while (not self.finished(self.agent.counter.ep)):
 
             # Prepare inner training loop
             self.agent.pre_loop()
