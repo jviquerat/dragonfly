@@ -9,9 +9,9 @@
     "name_agent": true,
     "name_tag": "",
     "name_time": false,
-    "n_avg": 3,
+    "n_avg": 2,
     "n_cpu": 1,
-    "n_stp_max": 30000,
+    "n_stp_max": 20000,
     "trainer": {
         "style": "buffer",
         "buff_size": 64,

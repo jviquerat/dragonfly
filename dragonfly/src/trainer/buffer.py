@@ -18,16 +18,16 @@ from dragonfly.src.utils.renderer        import *
 ### path      : path for environment
 ### pms       : parameters
 class buffer(trainer_base):
-    def __init__(self, env_pms, agent_pms, path, pms):
+    def __init__(self, env_pms, agent_pms, path, n_cpu, n_stp_max, pms):
 
         # Initialize environment
-        self.n_cpu = pms.n_cpu
         self.env   = par_envs(n_cpu, path, env_pms)
 
         # Initialize from input
         self.obs_dim   = self.env.obs_dim
         self.act_dim   = self.env.act_dim
-        self.n_stp_max = pms.n_stp_max
+        self.n_cpu     = n_cpu
+        self.n_stp_max = n_stp_max
         self.buff_size = pms.buff_size
         self.n_buff    = pms.n_buff
         self.btc_frac  = pms.batch_frac
@@ -65,7 +65,7 @@ class buffer(trainer_base):
         obs = self.env.reset_all()
 
         # Loop until max episode number is reached
-        while (not self.finished(self.agent.counter.step)):
+        while (self.agent.counter.step < self.n_stp_max):
 
             # Prepare inner training loop
             self.agent.pre_loop()
@@ -119,8 +119,8 @@ class buffer(trainer_base):
         # Loop over environments and finalize/reset
         for cpu in range(self.n_cpu):
             if (done[cpu]):
-                self.agent.counter.update_global_step(cpu)
                 self.store_report(cpu)
+                #self.agent.counter.update_global_step(cpu)
                 self.print_episode()
                 self.renderer.finish(path, self.agent.counter.ep, cpu)
                 best = self.agent.counter.reset_ep(cpu)
