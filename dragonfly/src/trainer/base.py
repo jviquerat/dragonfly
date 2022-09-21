@@ -35,37 +35,6 @@ class trainer_base():
     def train(self):
         raise NotImplementedError
 
-    # Set finishing condition
-    def set_finish(self, pms):
-        self.ep_finish  = False
-        self.stp_finish = False
-        self.n_ep_max   = 0
-        self.n_stp_max  = 0
-
-        if (hasattr(pms, "n_ep_max")):
-            self.ep_finish = True
-            self.n_ep_max  = n_ep_max
-
-        if (hasattr(pms, "n_stp_max")):
-            self.stp_finish = True
-            self.n_stp_max  = n_stp_max
-
-        if (self.stp_finish and self.ep_finish):
-            error(trainer_base, "set_finish", "n_ep_max and n_stp_max options are mutually exclusive")
-
-        if (not self.stp_finish and not self.ep_finish):
-            error(trainer_base, "set_finish", "You must define either n_ep_max or n_stp_max as a finishing criterion")
-
-    # Check if looping is finished
-    def finished(self, value):
-        if self.ep_finish:
-            if (value >= self.n_ep_max): return True
-            else: return False
-
-        if self.stp_finish:
-            if (value >= self.n_stp_max): return True
-            else: return False
-
     # Reset
     def reset(self):
 
@@ -107,9 +76,6 @@ class trainer_base():
         self.report.append("score",         self.agent.counter.score[cpu])
         smooth_score = self.report.avg("score", n_smooth)
         self.report.append("smooth_score",  smooth_score)
-        self.report.append("length",        self.agent.counter.ep_step[cpu])
-        smooth_length = self.report.avg("length", n_smooth)
-        self.report.append("smooth_length", smooth_length)
 
     # Write learning data report
     def write_report(self, path, run):

@@ -31,14 +31,13 @@ def train(json_file):
     shutil.copyfile(json_file, results_path+'/params.json')
 
     # Intialize averager
-    averager = data_avg(4, pms.n_ep_max, pms.n_avg)
+    averager = data_avg(4, pms.n_stp_max, pms.n_avg)
 
     # Initialize trainer
     trainer = trainer_factory.create(pms.trainer.style,
                                      env_pms   = pms.env,
                                      agent_pms = pms.agent,
                                      path      = base_path,
-                                     n_cpu     = pms.n_cpu,
                                      pms       = pms.trainer)
 
     # Run

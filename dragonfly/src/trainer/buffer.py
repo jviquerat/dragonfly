@@ -16,26 +16,23 @@ from dragonfly.src.utils.renderer        import *
 ### env_pms   : environment parameters
 ### agent_pms : agent parameters
 ### path      : path for environment
-### n_cpu     : nb of parallel environments
 ### pms       : parameters
 class buffer(trainer_base):
-    def __init__(self, env_pms, agent_pms, path, n_cpu, pms):
+    def __init__(self, env_pms, agent_pms, path, pms):
 
         # Initialize environment
-        self.env = par_envs(n_cpu, path, env_pms)
+        self.n_cpu = pms.n_cpu
+        self.env   = par_envs(n_cpu, path, env_pms)
 
         # Initialize from input
         self.obs_dim   = self.env.obs_dim
         self.act_dim   = self.env.act_dim
-        self.n_cpu     = n_cpu
+        self.n_stp_max = pms.n_stp_max
         self.buff_size = pms.buff_size
         self.n_buff    = pms.n_buff
         self.btc_frac  = pms.batch_frac
         self.n_epochs  = pms.n_epochs
         self.size      = self.n_buff*self.buff_size
-
-        # Check max number of episodes or steps
-        self.set_finish(pms)
 
         # Initialize agent
         self.agent = agent_factory.create(agent_pms.type,
@@ -47,8 +44,7 @@ class buffer(trainer_base):
 
         # Initialize learning data report
         self.report = report(["episode", "step",
-                              "score",   "smooth_score",
-                              "length",  "smooth_length"])
+                              "score",   "smooth_score"])
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu,
@@ -69,7 +65,7 @@ class buffer(trainer_base):
         obs = self.env.reset_all()
 
         # Loop until max episode number is reached
-        while (not self.finished(self.agent.counter.ep)):
+        while (not self.finished(self.agent.counter.step)):
 
             # Prepare inner training loop
             self.agent.pre_loop()
