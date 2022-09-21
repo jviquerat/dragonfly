@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "Hopper-v4",
+        "name": "InvertedDoublePendulum-v4",
         "obs_clip": false,
         "obs_norm": false,
         "obs_noise": 0.0
