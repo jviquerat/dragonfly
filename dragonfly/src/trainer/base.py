@@ -3,12 +3,13 @@ import math
 import numpy as np
 
 # Custom imports
-from dragonfly.src.core.constants        import *
-from dragonfly.src.utils.timer           import *
-from dragonfly.src.utils.buff            import *
-from dragonfly.src.utils.report          import *
-from dragonfly.src.utils.renderer        import *
-from dragonfly.src.utils.counter         import *
+from dragonfly.src.core.constants import *
+from dragonfly.src.utils.timer    import *
+from dragonfly.src.utils.buff     import *
+from dragonfly.src.utils.report   import *
+from dragonfly.src.utils.renderer import *
+from dragonfly.src.utils.counter  import *
+from dragonfly.src.utils.error    import *
 
 ###############################################
 ### Class for buffer-based training
@@ -48,19 +49,26 @@ class trainer_base():
         if (self.agent.counter.ep == 0): return
 
         # Average and print
-        ep       = self.agent.counter.ep
-        n_ep_max = self.n_ep_max
+        ep        = self.agent.counter.ep
+        stp       = self.agent.counter.step
+        n_stp_max = self.n_stp_max
 
-        if (ep <= n_ep_max):
-            avg    = self.report.avg("score", n_smooth)
-            avg    = f"{avg:.3f}"
-            bst    = self.agent.counter.best_score
-            bst    = f"{bst:.3f}"
-            bst_ep = self.agent.counter.best_ep
-            end    = "\n"
-            if (ep < n_ep_max): end = "\r"
-            stp    = self.agent.counter.step
+        # Retrieve data
+        avg    = self.report.avg("score", n_smooth)
+        avg    = f"{avg:.3f}"
+        bst    = self.agent.counter.best_score
+        bst    = f"{bst:.3f}"
+        bst_ep = self.agent.counter.best_ep
 
+        # Handle no-printing after max step
+        if (stp < n_stp_max-1):
+            end = "\r"
+            self.cnt = 0
+        else:
+            end  = "\n"
+            self.cnt += 1
+
+        if (self.cnt <= 1):
             print("# Ep #"+str(ep)+", step = "+str(stp)+", avg score = "+str(avg)+", best score = "+str(bst)+" at ep "+str(bst_ep)+"                 ", end=end)
 
     ################################
@@ -70,14 +78,13 @@ class trainer_base():
     # Store data in report
     def store_report(self, cpu):
 
-        self.report.append("episode",       self.agent.counter.ep)
-        self.report.append("step",          self.agent.counter.step)
-        self.report.append("score",         self.agent.counter.score[cpu])
-        smooth_score = self.report.avg("score", n_smooth)
-        self.report.append("smooth_score",  smooth_score)
-        self.report.append("length",        self.agent.counter.ep_step[cpu])
-        smooth_length = self.report.avg("length", n_smooth)
-        self.report.append("smooth_length", smooth_length)
+        for i in range(self.agent.counter.ep_step[cpu]):
+            self.report.append("step",    self.agent.counter.step)
+            self.agent.counter.step += 1
+            self.report.append("episode", self.agent.counter.ep)
+            self.report.append("score",   self.agent.counter.score[cpu])
+            smooth_score = self.report.avg("score", n_smooth)
+            self.report.append("smooth_score",  smooth_score)
 
     # Write learning data report
     def write_report(self, path, run):

@@ -16,20 +16,18 @@ from dragonfly.src.utils.renderer        import *
 ### env_pms   : environment parameters
 ### agent_pms : agent parameters
 ### path      : path for environment
-### n_cpu     : nb of parallel environments
-### n_ep_max  : max nb of episodes to unroll in a run
 ### pms       : parameters
 class buffer(trainer_base):
-    def __init__(self, env_pms, agent_pms, path, n_cpu, n_ep_max, pms):
+    def __init__(self, env_pms, agent_pms, path, n_cpu, n_stp_max, pms):
 
         # Initialize environment
-        self.env = par_envs(n_cpu, path, env_pms)
+        self.env   = par_envs(n_cpu, path, env_pms)
 
         # Initialize from input
         self.obs_dim   = self.env.obs_dim
         self.act_dim   = self.env.act_dim
         self.n_cpu     = n_cpu
-        self.n_ep_max  = n_ep_max
+        self.n_stp_max = n_stp_max
         self.buff_size = pms.buff_size
         self.n_buff    = pms.n_buff
         self.btc_frac  = pms.batch_frac
@@ -46,8 +44,7 @@ class buffer(trainer_base):
 
         # Initialize learning data report
         self.report = report(["episode", "step",
-                              "score",   "smooth_score",
-                              "length",  "smooth_length"])
+                              "score",   "smooth_score"])
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu,
@@ -68,7 +65,7 @@ class buffer(trainer_base):
         obs = self.env.reset_all()
 
         # Loop until max episode number is reached
-        while (not (self.agent.counter.ep >= self.n_ep_max)):
+        while (self.agent.counter.step < self.n_stp_max):
 
             # Prepare inner training loop
             self.agent.pre_loop()
@@ -122,7 +119,6 @@ class buffer(trainer_base):
         # Loop over environments and finalize/reset
         for cpu in range(self.n_cpu):
             if (done[cpu]):
-                self.agent.counter.update_global_step(cpu)
                 self.store_report(cpu)
                 self.print_episode()
                 self.renderer.finish(path, self.agent.counter.ep, cpu)

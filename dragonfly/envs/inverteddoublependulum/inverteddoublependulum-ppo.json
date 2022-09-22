@@ -12,7 +12,7 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_ep_max": 2000,
+    "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
         "buff_size": 256,

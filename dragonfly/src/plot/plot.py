@@ -12,41 +12,25 @@ plt.rcParams['figure.titleweight'] = 'bold'
 # Plot averaged fields
 def plot_avg(data, filename):
 
-    gen         = data[:,0]
     stp         = data[:,1]
     score_avg   = data[:,5]
     score_p     = data[:,6]
     score_m     = data[:,7]
-    length_avg  = data[:,11]
-    length_p    = data[:,12]
-    length_m    = data[:,13]
 
-    fig, ax = plt.subplots(1,2,figsize=(10,5))
+    fig, ax = plt.subplots(1,1,figsize=(5,5))
     fig.suptitle(filename)
 
-    ax[0].set_title('score')
-    ax[0].set_xlabel('episodes')
-    ax[0].plot(score_avg,
-               color='blue',
-               label='avg')
-    ax[0].fill_between(gen, score_p, score_m,
-                       alpha=0.4,
-                       color='blue',
-                       label="+/- std")
-    ax[0].grid(True)
-    ax[0].legend()
-
-    ax[1].set_title('length')
-    ax[1].set_xlabel('episodes')
-    ax[1].plot(length_avg,
-               color='red',
-               label='avg', )
-    ax[1].fill_between(gen, length_p, length_m,
-                       alpha=0.4,
-                       color='red',
-                       label="+/- std")
-    ax[1].grid(True)
-    ax[1].legend()
+    ax.set_title('score')
+    ax.set_xlabel('transitions')
+    ax.plot(stp, score_avg,
+            color='blue',
+            label='avg')
+    ax.fill_between(stp, score_p, score_m,
+                    alpha=0.4,
+                    color='blue',
+                    label="+/- std")
+    ax.grid(True)
+    ax.legend()
 
     fig.tight_layout()
     fig.savefig(filename+'.png')
