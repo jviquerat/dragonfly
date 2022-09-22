@@ -87,8 +87,8 @@ class trainer_base():
             self.report.append("smooth_score",  smooth_score)
 
     # Write learning data report
-    def write_report(self, path, run):
+    def write_report(self, path, run, force=False):
 
         # Set filename with method name and run number
         filename = path+'/'+str(run)+'/'+str(run)+'.dat'
-        self.report.write(filename)
+        self.report.write(filename, force)

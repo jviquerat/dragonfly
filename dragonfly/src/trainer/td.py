@@ -33,7 +33,8 @@ class td(trainer_base):
         self.btc_size     = pms.btc_size
 
         # Local variables
-        self.unroll = 0
+        self.freq_report  = int(1000/self.n_stp_unroll)
+        self.unroll       = 0
 
         # Initialize agent
         self.agent = agent_factory.create(agent_pms.type,
@@ -44,13 +45,11 @@ class td(trainer_base):
                                           pms     = agent_pms)
 
         # Initialize learning data report
-        self.report = report(["episode", "step",
-                              "score",  "smooth_score"])
+        self.report = report(self.freq_report,
+                             ["episode", "step", "score", "smooth_score"])
 
         # Initialize renderer
-        self.renderer = renderer(self.n_cpu,
-                                 "rgb_array",
-                                 pms.render_every)
+        self.renderer = renderer(self.n_cpu, "rgb_array", pms.render_every)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
@@ -124,6 +123,9 @@ class td(trainer_base):
 
         # Last printing
         self.print_episode()
+
+        # Last writing
+        self.write_report(path, run, force=True)
 
         # Close timers and show
         self.timer_global.toc()
