@@ -11,7 +11,7 @@
     "name_time": false,
     "n_avg": 5,
     "n_cpu": 8,
-    "n_ep_max": 1000,
+    "n_stp_max": 50000,
     "trainer": {
         "style": "episode",
         "n_ep_unroll": 1,

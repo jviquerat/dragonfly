@@ -24,7 +24,7 @@ def test_ddpg():
     reader.read("dragonfly/tst/agent/ddpg.json")
 
     # Intialize averager
-    averager = data_avg(4, reader.pms.n_ep_max, reader.pms.n_avg)
+    averager = data_avg(2, reader.pms.n_stp_max, reader.pms.n_avg)
 
     # Initialize trainer
     trainer = trainer_factory.create(reader.pms.trainer.style,
@@ -32,7 +32,7 @@ def test_ddpg():
                                      agent_pms = reader.pms.agent,
                                      path      = ".",
                                      n_cpu     = reader.pms.n_cpu,
-                                     n_ep_max  = reader.pms.n_ep_max,
+                                     n_stp_max = reader.pms.n_stp_max,
                                      pms       = reader.pms.trainer)
 
     print("Test ddpg")

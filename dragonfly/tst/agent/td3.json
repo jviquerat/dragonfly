@@ -7,7 +7,7 @@
     },
     "n_avg": 3,
     "n_cpu": 1,
-    "n_ep_max": 10,
+    "n_stp_max": 500,
     "trainer": {
         "style": "td",
         "mem_size": 20000,

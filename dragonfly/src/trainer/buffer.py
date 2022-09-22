@@ -120,7 +120,6 @@ class buffer(trainer_base):
         for cpu in range(self.n_cpu):
             if (done[cpu]):
                 self.store_report(cpu)
-                #self.agent.counter.update_global_step(cpu)
                 self.print_episode()
                 self.renderer.finish(path, self.agent.counter.ep, cpu)
                 best = self.agent.counter.reset_ep(cpu)

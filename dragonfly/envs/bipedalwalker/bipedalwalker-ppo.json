@@ -1,13 +1,17 @@
 {
     "env": {
         "name": "BipedalWalker-v3",
-        "obs_clip": true,
+        "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0
     },
+    "name_env": true,
+    "name_agent": true,
+    "name_tag": "",
+    "name_time": false,
     "n_avg": 2,
     "n_cpu": 1,
-    "n_ep_max": 3000,
+    "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
         "buff_size": 2048,

@@ -11,7 +11,7 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_ep_max": 500,
+    "n_stp_max": 30000,
     "trainer": {
         "style": "td",
         "mem_size": 20000,

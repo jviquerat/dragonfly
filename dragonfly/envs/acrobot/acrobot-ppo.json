@@ -1,7 +1,7 @@
 {
     "env": {
         "name": "Acrobot-v1",
-        "obs_clip": true,
+        "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0
     },
@@ -11,7 +11,7 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_ep_max": 300,
+    "n_stp_max": 50000,
     "trainer": {
         "style": "buffer",
         "buff_size": 64,
