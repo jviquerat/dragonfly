@@ -91,7 +91,14 @@ class td(trainer_base):
                 self.renderer.store(rnd)
 
                 # Finish if some episodes are done
-                self.finish_episodes(path, run, dne)
+                for cpu in range(self.n_cpu):
+                    if (dne[cpu]):
+                        self.store_report(cpu)
+                        self.print_episode()
+                        self.renderer.finish(path, self.agent.counter.ep, cpu)
+                        best = self.agent.counter.reset_ep(cpu)
+                        name = path+"/"+str(run)+"/"+self.agent.name
+                        if best: self.agent.save(name)
 
                 # Update observation
                 obs = nxt
@@ -106,7 +113,11 @@ class td(trainer_base):
             self.write_report(path, run)
 
             # Train agent
-            self.train()
+            self.timer_training.tic()
+            for i in range(self.n_stp_unroll):
+                self.agent.prepare_data(self.btc_size)
+                self.agent.train(self.btc_size)
+            self.timer_training.toc()
 
             # Reset unroll
             self.unroll = 0
@@ -119,30 +130,3 @@ class td(trainer_base):
         self.timer_global.show()
         self.env.timer_env.show()
         self.timer_training.show()
-
-    # Finish if some episodes are done
-    def finish_episodes(self, path, run, done):
-
-        # Loop over environments and finalize/reset
-        for cpu in range(self.n_cpu):
-            if (done[cpu]):
-                self.store_report(cpu)
-                self.print_episode()
-                self.renderer.finish(path, self.agent.counter.ep, cpu)
-                best = self.agent.counter.reset_ep(cpu)
-                name = path+"/"+str(run)+"/"+self.agent.name
-                if best: self.agent.save(name)
-
-    # Train
-    def train(self):
-
-        self.timer_training.tic()
-
-        # Loop on unroll steps
-        for i in range(self.n_stp_unroll):
-
-            # Prepare training data
-            self.agent.prepare_data(self.btc_size)
-            self.agent.train(self.btc_size)
-
-        self.timer_training.toc()

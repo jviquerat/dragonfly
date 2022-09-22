@@ -46,7 +46,7 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
+                "type": "nadam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
