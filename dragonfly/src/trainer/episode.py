@@ -52,9 +52,10 @@ class episode(trainer_base):
                              ["step", "episode", "score", "smooth_score"])
 
         # Initialize renderer
-        self.renderer = renderer(self.n_cpu,
-                                 "rgb_array",
-                                 pms.render_every)
+        self.rnd_style = "rgb_array"
+        if hasattr(pms, "rnd_style"):
+            self.rnd_style = pms.rnd_style
+        self.renderer = renderer(self.n_cpu, self.rnd_style, pms.render_every)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
@@ -88,8 +89,7 @@ class episode(trainer_base):
                 self.agent.store(obs, nxt, act, rwd, dne)
 
                 # Handle rendering
-                rnd = self.env.render(self.renderer.render)
-                self.renderer.store(rnd)
+                self.renderer.store(self.env)
 
                 # Finish if some episodes are done
                 for cpu in range(self.n_cpu):
@@ -98,7 +98,7 @@ class episode(trainer_base):
                                                  self.agent.counter.ep_step[cpu])
                         self.store_report(cpu)
                         self.print_episode()
-                        self.renderer.finish(path, self.agent.counter.ep, cpu)
+                        self.renderer.finish(path, run, self.agent.counter.ep, cpu)
                         best = self.agent.counter.reset_ep(cpu)
                         name = path+"/"+str(run)+"/"+self.agent.name
                         if best: self.agent.save(name)
