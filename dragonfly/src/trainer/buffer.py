@@ -45,7 +45,7 @@ class buffer(trainer_base):
 
         # Initialize learning data report
         self.report = report(self.freq_report,
-                             ["episode", "step", "score", "smooth_score"])
+                             ["step", "episode", "score", "smooth_score"])
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu,
