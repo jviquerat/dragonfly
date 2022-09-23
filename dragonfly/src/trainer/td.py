@@ -31,10 +31,10 @@ class td(trainer_base):
         self.mem_size     = pms.mem_size
         self.n_stp_unroll = pms.n_stp_unroll*n_cpu
         self.btc_size     = pms.btc_size
+        self.freq_report  = int(self.n_stp_max/10)
 
         # Local variables
-        self.freq_report  = int(1000/self.n_stp_unroll)
-        self.unroll       = 0
+        self.unroll = 0
 
         # Initialize agent
         self.agent = agent_factory.create(agent_pms.type,

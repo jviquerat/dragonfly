@@ -33,6 +33,7 @@ class episode(trainer_base):
         self.btc_frac    = pms.batch_frac
         self.n_epochs    = pms.n_epochs
         self.size        = 1000*self.n_ep_train
+        self.freq_report = 10
 
         # Local variables
         self.lengths = np.array([], dtype=int)
@@ -47,8 +48,8 @@ class episode(trainer_base):
                                           pms     = agent_pms)
 
         # Initialize learning data report
-        self.report = report(["episode", "step",
-                              "score",  "smooth_score"])
+        self.report = report(self.freq_report,
+                             ["episode", "step", "score", "smooth_score"])
 
         # Initialize renderer
         self.renderer = renderer(self.n_cpu,
@@ -142,6 +143,9 @@ class episode(trainer_base):
 
         # Last printing
         self.print_episode()
+
+        # Last writing
+        self.write_report(path, run, force=True)
 
         # Close timers and show
         self.timer_global.toc()
