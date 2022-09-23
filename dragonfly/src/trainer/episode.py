@@ -33,6 +33,7 @@ class episode(trainer_base):
         self.btc_frac    = pms.batch_frac
         self.n_epochs    = pms.n_epochs
         self.size        = 1000*self.n_ep_train
+        self.freq_report = 10
 
         # Local variables
         self.lengths = np.array([], dtype=int)
@@ -47,13 +48,14 @@ class episode(trainer_base):
                                           pms     = agent_pms)
 
         # Initialize learning data report
-        self.report = report(["episode", "step",
-                              "score",  "smooth_score"])
+        self.report = report(self.freq_report,
+                             ["step", "episode", "score", "smooth_score"])
 
         # Initialize renderer
-        self.renderer = renderer(self.n_cpu,
-                                 "rgb_array",
-                                 pms.render_every)
+        self.rnd_style = "rgb_array"
+        if hasattr(pms, "rnd_style"):
+            self.rnd_style = pms.rnd_style
+        self.renderer = renderer(self.n_cpu, self.rnd_style, pms.render_every)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
@@ -87,11 +89,20 @@ class episode(trainer_base):
                 self.agent.store(obs, nxt, act, rwd, dne)
 
                 # Handle rendering
-                rnd = self.env.render(self.renderer.render)
-                self.renderer.store(rnd)
+                self.renderer.store(self.env)
 
                 # Finish if some episodes are done
-                self.finish_episodes(path, run, dne)
+                for cpu in range(self.n_cpu):
+                    if (dne[cpu]):
+                        self.lengths = np.append(self.lengths,
+                                                 self.agent.counter.ep_step[cpu])
+                        self.store_report(cpu)
+                        self.print_episode()
+                        self.renderer.finish(path, run, self.agent.counter.ep, cpu)
+                        best = self.agent.counter.reset_ep(cpu)
+                        name = path+"/"+str(run)+"/"+self.agent.name
+                        if best: self.agent.save(name)
+                        self.unroll += 1
 
                 # Update observation
                 obs = nxt
@@ -106,7 +117,26 @@ class episode(trainer_base):
             self.write_report(path, run)
 
             # Train agent
-            self.train()
+            self.timer_training.tic()
+            size     = np.sum(self.lengths[-self.n_ep_train:])
+            btc_size = math.floor(size*self.btc_frac)
+            for epoch in range(self.n_epochs):
+
+                # Prepare training data
+                lgt = self.agent.prepare_data(size)
+
+                # Visit all available history
+                done = False
+                btc  = 0
+                while not done:
+                    start = btc*btc_size
+                    end   = min((btc+1)*btc_size, lgt)
+
+                    self.agent.train(start, end)
+
+                    btc += 1
+                    if (end == lgt): done = True
+            self.timer_training.toc()
 
             # Reset unroll
             self.unroll = 0
@@ -114,53 +144,11 @@ class episode(trainer_base):
         # Last printing
         self.print_episode()
 
+        # Last writing
+        self.write_report(path, run, force=True)
+
         # Close timers and show
         self.timer_global.toc()
         self.timer_global.show()
         self.env.timer_env.show()
         self.timer_training.show()
-
-    # Finish if some episodes are done
-    def finish_episodes(self, path, run, done):
-
-        # Loop over environments and finalize/reset
-        for cpu in range(self.n_cpu):
-            if (done[cpu]):
-                self.lengths = np.append(self.lengths,
-                                         self.agent.counter.ep_step[cpu])
-                self.store_report(cpu)
-                self.print_episode()
-                self.renderer.finish(path, self.agent.counter.ep, cpu)
-                best = self.agent.counter.reset_ep(cpu)
-                name = path+"/"+str(run)+"/"+self.agent.name
-                if best: self.agent.save(name)
-                self.unroll += 1
-
-    # Train
-    def train(self):
-
-        self.timer_training.tic()
-
-        # Retrieve size of training buffer
-        size     = np.sum(self.lengths[-self.n_ep_train:])
-        btc_size = math.floor(size*self.btc_frac)
-
-        # Loop on epochs
-        for epoch in range(self.n_epochs):
-
-            # Prepare training data
-            lgt = self.agent.prepare_data(size)
-
-            # Visit all available history
-            done = False
-            btc  = 0
-            while not done:
-                start = btc*btc_size
-                end   = min((btc+1)*btc_size, lgt)
-
-                self.agent.train(start, end)
-
-                btc += 1
-                if (end == lgt): done = True
-
-        self.timer_training.toc()

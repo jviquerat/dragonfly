@@ -21,7 +21,10 @@ class renderer:
         self.render = [False for _ in range(self.n_cpu)]
 
     # Store one rendering step for all cpus
-    def store(self, rnd):
+    def store(self, env):
+
+        # Call env rendering
+        rnd = env.render(self.render)
 
         # Not all environment render simultaneously
         # We use a list to select those that render and those that don't
@@ -34,13 +37,13 @@ class renderer:
                     # Do nothing
 
     # Finish rendering process, saving to gif
-    def finish(self, path, ep, cpu):
+    def finish(self, path, run, ep, cpu):
 
         # Render if necessary
         if (self.render[cpu]):
             self.render[cpu] = False
             if (self.style == 'rgb_array'):
-                self.rgb[cpu][0].save(path+'/'+str(ep)+'.gif',
+                self.rgb[cpu][0].save(path+'/'+str(run)+'/'+str(ep)+'.gif',
                                       save_all=True,
                                       append_images=self.rgb[cpu][1:],
                                       optimize=False,

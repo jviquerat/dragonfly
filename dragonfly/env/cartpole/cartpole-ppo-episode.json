@@ -75,7 +75,7 @@
         "retrn": {
             "type": "gae",
             "gamma": 0.99,
-            "gae_lambda": 0.99,
+            "gae_lambda": 0.95,
             "ret_norm": true
         },
         "termination": {

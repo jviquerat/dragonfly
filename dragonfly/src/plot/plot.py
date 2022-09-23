@@ -12,7 +12,7 @@ plt.rcParams['figure.titleweight'] = 'bold'
 # Plot averaged fields
 def plot_avg(data, filename):
 
-    stp         = data[:,1]
+    stp         = data[:,0]
     score_avg   = data[:,5]
     score_p     = data[:,6]
     score_m     = data[:,7]

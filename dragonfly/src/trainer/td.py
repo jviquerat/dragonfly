@@ -31,6 +31,7 @@ class td(trainer_base):
         self.mem_size     = pms.mem_size
         self.n_stp_unroll = pms.n_stp_unroll*n_cpu
         self.btc_size     = pms.btc_size
+        self.freq_report  = max(int(self.n_stp_max/(freq_report*self.n_stp_unroll)),1)
 
         # Local variables
         self.unroll = 0
@@ -44,13 +45,14 @@ class td(trainer_base):
                                           pms     = agent_pms)
 
         # Initialize learning data report
-        self.report = report(["episode", "step",
-                              "score",  "smooth_score"])
+        self.report = report(self.freq_report,
+                             ["step", "episode", "score", "smooth_score"])
 
         # Initialize renderer
-        self.renderer = renderer(self.n_cpu,
-                                 "rgb_array",
-                                 pms.render_every)
+        self.rnd_style = "rgb_array"
+        if hasattr(pms, "rnd_style"):
+            self.rnd_style = pms.rnd_style
+        self.renderer = renderer(self.n_cpu, self.rnd_style, pms.render_every)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
@@ -87,11 +89,17 @@ class td(trainer_base):
                 self.unroll += self.n_cpu
 
                 # Handle rendering
-                rnd = self.env.render(self.renderer.render)
-                self.renderer.store(rnd)
+                self.renderer.store(self.env)
 
                 # Finish if some episodes are done
-                self.finish_episodes(path, run, dne)
+                for cpu in range(self.n_cpu):
+                    if (dne[cpu]):
+                        self.store_report(cpu)
+                        self.print_episode()
+                        self.renderer.finish(path, run, self.agent.counter.ep, cpu)
+                        best = self.agent.counter.reset_ep(cpu)
+                        name = path+"/"+str(run)+"/"+self.agent.name
+                        if best: self.agent.save(name)
 
                 # Update observation
                 obs = nxt
@@ -106,7 +114,11 @@ class td(trainer_base):
             self.write_report(path, run)
 
             # Train agent
-            self.train()
+            self.timer_training.tic()
+            for i in range(self.n_stp_unroll):
+                self.agent.prepare_data(self.btc_size)
+                self.agent.train(self.btc_size)
+            self.timer_training.toc()
 
             # Reset unroll
             self.unroll = 0
@@ -114,35 +126,11 @@ class td(trainer_base):
         # Last printing
         self.print_episode()
 
+        # Last writing
+        self.write_report(path, run, force=True)
+
         # Close timers and show
         self.timer_global.toc()
         self.timer_global.show()
         self.env.timer_env.show()
         self.timer_training.show()
-
-    # Finish if some episodes are done
-    def finish_episodes(self, path, run, done):
-
-        # Loop over environments and finalize/reset
-        for cpu in range(self.n_cpu):
-            if (done[cpu]):
-                self.store_report(cpu)
-                self.print_episode()
-                self.renderer.finish(path, self.agent.counter.ep, cpu)
-                best = self.agent.counter.reset_ep(cpu)
-                name = path+"/"+str(run)+"/"+self.agent.name
-                if best: self.agent.save(name)
-
-    # Train
-    def train(self):
-
-        self.timer_training.tic()
-
-        # Loop on unroll steps
-        for i in range(self.n_stp_unroll):
-
-            # Prepare training data
-            self.agent.prepare_data(self.btc_size)
-            self.agent.train(self.btc_size)
-
-        self.timer_training.toc()

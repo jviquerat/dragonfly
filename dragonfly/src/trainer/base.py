@@ -79,16 +79,18 @@ class trainer_base():
     def store_report(self, cpu):
 
         for i in range(self.agent.counter.ep_step[cpu]):
-            self.report.append("step",    self.agent.counter.step)
+            if (self.agent.counter.step%step_report == 0):
+                self.report.append("step",    self.agent.counter.step)
+
+                self.report.append("episode", self.agent.counter.ep)
+                self.report.append("score",   self.agent.counter.score[cpu])
+                smooth_score = self.report.avg("score", n_smooth)
+                self.report.append("smooth_score",  smooth_score)
             self.agent.counter.step += 1
-            self.report.append("episode", self.agent.counter.ep)
-            self.report.append("score",   self.agent.counter.score[cpu])
-            smooth_score = self.report.avg("score", n_smooth)
-            self.report.append("smooth_score",  smooth_score)
 
     # Write learning data report
-    def write_report(self, path, run):
+    def write_report(self, path, run, force=False):
 
         # Set filename with method name and run number
         filename = path+'/'+str(run)+'/'+str(run)+'.dat'
-        self.report.write(filename)
+        self.report.write(filename, force)

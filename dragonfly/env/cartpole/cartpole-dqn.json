@@ -16,7 +16,7 @@
         "style": "td",
         "mem_size": 10000,
         "btc_size": 64,
-        "n_stp_unroll": 1,
+        "n_stp_unroll": 64,
         "render_every": 500
     },
     "agent": {
@@ -46,7 +46,7 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
+                "type": "nadam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },

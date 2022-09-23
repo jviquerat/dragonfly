@@ -6,6 +6,7 @@ import shutil
 import numpy as np
 
 # Custom imports
+from dragonfly.src.core.constants  import *
 from dragonfly.src.utils.json      import *
 from dragonfly.src.utils.data      import *
 from dragonfly.src.utils.prints    import *
@@ -31,7 +32,7 @@ def train(json_file):
     shutil.copyfile(json_file, results_path+'/params.json')
 
     # Intialize averager
-    averager = data_avg(2, pms.n_stp_max, pms.n_avg)
+    averager = data_avg(2, int(pms.n_stp_max/step_report), pms.n_avg)
 
     # Initialize trainer
     trainer = trainer_factory.create(pms.trainer.style,
