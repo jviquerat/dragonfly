@@ -33,7 +33,7 @@ class buffer(trainer_base):
         self.btc_frac    = pms.batch_frac
         self.n_epochs    = pms.n_epochs
         self.size        = self.n_buff*self.buff_size
-        self.freq_report = 10
+        self.freq_report = int(n_stp_max/(freq_report*self.buff_size))
 
         # Initialize agent
         self.agent = agent_factory.create(agent_pms.type,

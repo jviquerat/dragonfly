@@ -31,7 +31,7 @@ class td(trainer_base):
         self.mem_size     = pms.mem_size
         self.n_stp_unroll = pms.n_stp_unroll*n_cpu
         self.btc_size     = pms.btc_size
-        self.freq_report  = int(self.n_stp_max/10)
+        self.freq_report  = int(self.n_stp_max/(freq_report*self.n_stp_unroll))
 
         # Local variables
         self.unroll = 0
