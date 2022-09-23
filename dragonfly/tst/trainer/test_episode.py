@@ -5,6 +5,7 @@ import pytest
 
 # Custom imports
 from dragonfly.tst.tst             import *
+from dragonfly.src.core.constants  import *
 from dragonfly.src.agent.ppo       import *
 from dragonfly.src.utils.json      import *
 from dragonfly.src.utils.data      import *
@@ -24,7 +25,7 @@ def test_episode():
     reader.read("dragonfly/tst/trainer/episode.json")
 
     # Intialize averager
-    averager = data_avg(2, reader.pms.n_stp_max, reader.pms.n_avg)
+    averager = data_avg(2, int(reader.pms.n_stp_max/step_report), reader.pms.n_avg)
 
     # Initialize trainer
     trainer = trainer_factory.create(reader.pms.trainer.style,
