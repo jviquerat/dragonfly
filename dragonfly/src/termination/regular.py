@@ -11,7 +11,7 @@ class regular():
         self.n_cpu = n_cpu
 
     # Terminate buffers
-    def terminate(self, dne, stp):
+    def terminate(self, dne, trc):
 
         trm = np.zeros([self.n_cpu])
 

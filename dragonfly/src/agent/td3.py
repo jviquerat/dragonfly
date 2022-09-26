@@ -181,9 +181,9 @@ class td3(base_agent):
         self.gbuff.reset()
 
     # Store transition
-    def store(self, obs, nxt, act, rwd, dne):
+    def store(self, obs, nxt, act, rwd, trc):
 
-        trm = self.term.terminate(dne, self.counter.ep_step)
+        trm = self.term.terminate(dne, trc)
         self.buff.store(self.names, [obs, nxt, act, rwd, trm])
         self.counter.update(rwd)
 

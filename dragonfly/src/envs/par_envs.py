@@ -234,22 +234,24 @@ class par_envs:
             self.pipes[cpu].send(('step', act))
 
         # Receive
-        nxt  = np.array([])
-        rwd  = np.array([])
-        done = np.array([], dtype=bool)
+        nxt   = np.array([])
+        rwd   = np.array([])
+        done  = np.array([], dtype=bool)
+        trunc = np.array([], dtype=bool)
 
         for p in self.pipes:
-            n, r, d = p.recv()
-            n       = self.process_obs(n)
-            nxt     = np.append(nxt, n)
-            rwd     = np.append(rwd, r)
-            done    = np.append(done, bool(d))
+            n, r, d, t = p.recv()
+            n          = self.process_obs(n)
+            nxt        = np.append(nxt,   n)
+            rwd        = np.append(rwd,   r)
+            done       = np.append(done,  bool(d))
+            trunc      = np.append(trunc, bool(t))
 
         nxt = np.reshape(nxt, (-1,self.obs_dim))
 
         self.timer_env.toc()
 
-        return nxt, rwd, done
+        return nxt, rwd, done, trunc
 
     # Set control to true if possible
     def set_control(self):
@@ -285,7 +287,7 @@ def worker(env_name, cpu, pipe, path):
             if command == 'step':
                 nxt, rwd, done, trunc, _ = env.step(data)
                 if ((not done) and trunc): done = True
-                pipe.send((nxt, rwd, done))
+                pipe.send((nxt, rwd, done, trunc))
 
             if command == 'seed':
                 env.seed(data)
