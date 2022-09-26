@@ -10,6 +10,6 @@ The agent learns to swing a two-links system by applying torque to the central j
 Here is a resolution with dqn and ppo:
 
 <p align="center">
-  <img width="300" alt="" src="ppo.png">
   <img width="300" alt="" src="dqn.png">
+  <img width="300" alt="" src="ppo.png">  
 </p>
