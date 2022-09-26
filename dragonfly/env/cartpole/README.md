@@ -7,14 +7,10 @@ The agent learns to balance a pole fixed to a moving cart, using lateral movemen
   <img width="300" alt="" src="good.gif">
 </p>
 
-Here is a resolution with PPO, using buffer-based training:
+Below are resolutions with DQN, PPO (buffer-based) and PPO (episode-based):
 
 <p align="center">
-  <img width="700" alt="" src="ppo_buffer.png">
-</p>
-
-and using episode-based training:
-
-<p align="center">
-  <img width="700" alt="" src="ppo_episode.png">
+  <img width="300" alt="" src="dqn.png">
+  <img width="300" alt="" src="ppo_buffer.png">
+  <img width="300" alt="" src="ppo_episode.png">
 </p>
