@@ -14,7 +14,7 @@
     "n_stp_max": 20000,
     "trainer": {
         "style": "td",
-        "mem_size": 10000,
+        "mem_size": 20000,
         "btc_size": 128,
         "n_stp_unroll": 1,
         "render_every": 500
@@ -23,7 +23,7 @@
         "type": "td3",
         "gamma": 0.99,
         "rho": 0.995,
-        "n_warmup": 2000,
+        "n_warmup": 1000,
         "n_filling": 1000,
         "p_update": 2,
         "sigma_act": 0.1,
