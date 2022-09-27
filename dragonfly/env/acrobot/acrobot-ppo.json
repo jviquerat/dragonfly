@@ -14,7 +14,7 @@
     "n_stp_max": 50000,
     "trainer": {
         "style": "buffer",
-        "buff_size": 128,
+        "buff_size": 256,
         "n_buff": 1,
         "batch_frac": 0.5,
         "n_epochs": 16,
@@ -65,7 +65,7 @@
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 2.0e-3,
+                "lr": 5.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
