@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "LunarLander-v2",
+        "name": "LunarLanderContinuous-v2",
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0
@@ -9,51 +9,58 @@
     "name_agent": true,
     "name_tag": "",
     "name_time": false,
-    "n_avg": 3,
+    "n_avg": 1,
     "n_cpu": 1,
-    "n_stp_max": 1000000,
+    "n_stp_max": 500000,
     "trainer": {
-        "style": "buffer",
-        "buff_size": 512,
-        "n_buff": 16,
-        "batch_frac": 0.5,
-        "n_epochs": 16,
-        "render_every": 10000
+        "style": "td",
+        "mem_size": 500000,
+        "btc_size": 128,
+        "n_stp_unroll": 50,
+        "render_every": 500
     },
     "agent": {
-        "type": "ppo",
+        "type": "td3",
+        "gamma": 0.99,
+        "rho": 0.995,
+        "n_warmup": 10000,
+        "n_filling": 1000,
+        "p_update": 2,
+        "sigma_act": 0.1,
+        "sigma_tgt": 0.2,
+        "noise_clip": 0.5,
         "policy": {
-            "type": "categorical",
+            "type": "deterministic",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
                 "trunk": {
-                    "arch": [32,32],
-                    "actv": "tanh"
+                    "arch": [256,256],
+                    "actv": "selu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["tanh"],
-                    "final": ["softmax"]
+                    "actv": ["selu"],
+                    "final": ["tanh"]
                 }
             },
             "optimizer": {
                 "type": "nadam",
                 "lr": 5.0e-4,
-                "grd_clip": 0.1
+                "grd_clip": null
             },
             "loss": {
-                "type": "surrogate",
-                "pol_clip": 0.2,
-                "ent_coef": 0.01
+                "type": "q_pol"
             }
         },
         "value": {
-            "type": "v_value",
+            "type": "q_value",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
                 "trunk": {
-                    "arch": [32,32],
+                    "arch": [256,256],
                     "actv": "selu"
                 },
                 "heads": {
@@ -65,21 +72,15 @@
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 5.0e-3,
-                "grd_clip": 0.1
+                "lr": 5.0e-4,
+                "grd_clip": null
             },
             "loss": {
-                "type": "mse_pg"
+                "type": "mse_td3"
             }
         },
-        "retrn": {
-            "type": "gae",
-            "gamma": 0.99,
-            "gae_lambda": 0.99,
-            "ret_norm": true
-        },
         "termination": {
-            "type": "regular"
+            "type": "bootstrap"
         }
     }
 }

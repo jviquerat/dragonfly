@@ -80,8 +80,7 @@
             }
         },
         "termination": {
-            "type": "bootstrap",
-            "ep_end": 1000
+            "type": "bootstrap"
         }
     }
 }

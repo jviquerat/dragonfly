@@ -80,10 +80,10 @@ class td(trainer_base):
                 act = self.agent.actions(obs)
 
                 # Make one env step
-                nxt, rwd, dne = self.env.step(act)
+                nxt, rwd, dne, trc = self.env.step(act)
 
                 # Store transition
-                self.agent.store(obs, nxt, act, rwd, dne)
+                self.agent.store(obs, nxt, act, rwd, dne, trc)
 
                 # Update unrolling counter
                 self.unroll += self.n_cpu

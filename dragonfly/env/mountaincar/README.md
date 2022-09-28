@@ -7,8 +7,8 @@ The agent learns to run a car from the bottom of a valley to the top of a hill. 
   <img width="300" alt="" src="good.gif">
 </p>
 
-Here is a resolution with buffer-based ppo:
+Here is a resolution with ppo:
 
 <p align="center">
-  <img width="700" alt="" src="ppo_buffer.png">
+  <img width="300" alt="" src="ppo.png">
 </p>

@@ -11,7 +11,7 @@ class CartPoleContinuous(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 50}
 
-    def __init__(self):
+    def __init__(self, render_mode: Optional[str] = None):
         self.gravity = 9.8
         self.masscart = 1.0
         self.masspole = 0.1
@@ -107,10 +107,11 @@ class CartPoleContinuous(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             self.steps_beyond_done += 1
             reward = 0.0
 
-        if (self.stp == 199): done = True
+        truncated = False
+        if (self.stp == 199): truncated = True
         self.stp += 1
 
-        return np.array(self.state, dtype=np.float32), reward, done, {}
+        return np.array(self.state, dtype=np.float32), reward, done, truncated, {}
 
     def reset(
         self,
@@ -123,10 +124,7 @@ class CartPoleContinuous(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.state = self.np_random.uniform(low=-0.05, high=0.05, size=(4,))
         self.steps_beyond_done = None
         self.stp = 0
-        if not return_info:
-            return np.array(self.state, dtype=np.float32)
-        else:
-            return np.array(self.state, dtype=np.float32), {}
+        return np.array(self.state, dtype=np.float32), {}
 
     def render(self, mode="human"):
         try:

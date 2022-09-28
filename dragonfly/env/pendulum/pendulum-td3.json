@@ -11,10 +11,10 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 50000,
+    "n_stp_max": 40000,
     "trainer": {
         "style": "td",
-        "mem_size": 10000,
+        "mem_size": 20000,
         "btc_size": 128,
         "n_stp_unroll": 1,
         "render_every": 500
@@ -23,7 +23,7 @@
         "type": "td3",
         "gamma": 0.99,
         "rho": 0.995,
-        "n_warmup": 2000,
+        "n_warmup": 1000,
         "n_filling": 1000,
         "p_update": 2,
         "sigma_act": 0.1,
@@ -46,7 +46,7 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
+                "type": "nadam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
@@ -71,7 +71,7 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
+                "type": "nadam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
@@ -80,8 +80,7 @@
             }
         },
         "termination": {
-            "type": "bootstrap",
-            "ep_end": 200
+            "type": "bootstrap"
         }
     }
 }

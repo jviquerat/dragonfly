@@ -18,7 +18,7 @@ step_report = 10
 
 ### Smoothing horizon for score
 ### The smoothing is made using data from the report
-n_smooth = int(1000/step_report)
+n_smooth = int(5000/step_report)
 
 ### Max value for observations
 def_obs_max = 1.0e8

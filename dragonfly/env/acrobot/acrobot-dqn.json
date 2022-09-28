@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "CartPole-v0",
+        "name": "Acrobot-v1",
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0
@@ -11,10 +11,10 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 20000,
+    "n_stp_max": 50000,
     "trainer": {
         "style": "td",
-        "mem_size": 10000,
+        "mem_size": 25000,
         "btc_size": 64,
         "n_stp_unroll": 64,
         "render_every": 500
@@ -27,7 +27,7 @@
             "type": "linear",
             "start": 0.5,
             "end": 0.05,
-            "n_decay": 10000
+            "n_decay": 25000
         },
         "value": {
             "type": "q_value",

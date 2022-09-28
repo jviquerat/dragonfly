@@ -71,8 +71,7 @@
             }
         },
         "termination": {
-            "type": "bootstrap",
-            "ep_end": 200
+            "type": "bootstrap"
         }
     }
 }
