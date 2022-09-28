@@ -1,8 +1,8 @@
 {
     "env": {
-        "name": "Hopper-v4",
+        "name": "LunarLanderContinuous-v2",
         "obs_clip": false,
-        "obs_norm": false,
+        "obs_norm": true,
         "obs_noise": 0.0
     },
     "name_env": true,
@@ -11,56 +11,51 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 1000000,
+    "n_stp_max": 500000,
     "trainer": {
-        "style": "td",
-        "mem_size": 1000000,
-        "btc_size": 128,
-        "n_stp_unroll": 1,
-        "render_every": 5000
+        "style": "buffer",
+        "buff_size": 2048,
+        "n_buff": 1,
+        "batch_frac": 0.5,
+        "n_epochs": 16,
+        "render_every": 10000
     },
     "agent": {
-        "type": "td3",
-        "gamma": 0.99,
-        "rho": 0.995,
-        "n_warmup": 10000,
-        "n_filling": 1000,
-        "p_update": 2,
-        "sigma_act": 0.1,
-        "sigma_tgt": 0.2,
-        "noise_clip": 0.5,
+        "type": "ppo",
         "policy": {
-            "type": "deterministic",
+            "type": "normal",
             "network": {
                 "type": "fc",
-		"k_init": "lecun_normal",
+                "k_init": "lecun_normal",
                 "trunk": {
-                    "arch": [256,256],
+                    "arch": [128],
                     "actv": "selu"
                 },
                 "heads": {
-                    "nb": 1,
-                    "arch": [[]],
-                    "actv": ["selu"],
-                    "final": ["tanh"]
+                    "nb": 2,
+                    "arch": [[128],[128]],
+                    "actv": ["selu","selu"],
+                    "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
                 "type": "nadam",
                 "lr": 5.0e-4,
-                "grd_clip": null
+                "grd_clip": 0.1
             },
             "loss": {
-                "type": "q_pol"
+                "type": "surrogate",
+                "pol_clip": 0.2,
+                "ent_coef": 0.01
             }
         },
         "value": {
-            "type": "q_value",
+            "type": "v_value",
             "network": {
                 "type": "fc",
-		"k_init": "lecun_normal",
+                "k_init": "lecun_normal",
                 "trunk": {
-                    "arch": [256,256],
+                    "arch": [128,128],
                     "actv": "selu"
                 },
                 "heads": {
@@ -72,12 +67,18 @@
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 5.0e-4,
-                "grd_clip": null
+                "lr": 5.0e-3,
+                "grd_clip": 0.1
             },
             "loss": {
-                "type": "mse_td3"
+                "type": "mse_pg"
             }
+        },
+        "retrn": {
+            "type": "gae",
+            "gamma": 0.99,
+            "gae_lambda": 0.95,
+            "ret_norm": true
         },
         "termination": {
             "type": "bootstrap"
