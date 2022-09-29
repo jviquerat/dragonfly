@@ -1,21 +1,21 @@
 {
     "env": {
-        "name": "envs.cartpole:cartpole-continuous-v0",
+        "name": "dragonfly.custom.cartpole:cartpole-continuous-v0",
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0
     },
     "name_env": true,
     "name_agent": true,
-    "name_tag": "grd_1",
+    "name_tag": "",
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 30000,
+    "n_stp_max": 20000,
     "trainer": {
         "style": "td",
         "mem_size": 20000,
-        "btc_size": 64,
+        "btc_size": 128,
         "n_stp_unroll": 1,
         "render_every": 500
     },
@@ -23,26 +23,29 @@
         "type": "ddpg",
         "gamma": 0.99,
         "rho": 0.995,
-        "n_warmup": 2500,
+        "n_warmup": 5000,
+        "n_filling": 3000,
+        "sigma": 0.1,
         "policy": {
             "type": "deterministic",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "tanh"
+                    "actv": "selu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["tanh"],
+                    "actv": ["selu"],
                     "final": ["tanh"]
                 }
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 1.0e-4,
-                "grd_clip": 0.1
+                "lr": 5.0e-4,
+                "grd_clip": null
             },
             "loss": {
                 "type": "q_pol"
@@ -52,29 +55,29 @@
             "type": "q_value",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "swish"
+                    "actv": "selu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["swish"],
+                    "actv": ["selu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 1.0e-3,
-                "grd_clip": 10000.0
+                "lr": 5.0e-4,
+                "grd_clip": null
             },
             "loss": {
                 "type": "mse_ddpg"
             }
         },
         "termination": {
-            "type": "bootstrap",
-            "ep_end": 200
+            "type": "bootstrap"
         }
     }
 }

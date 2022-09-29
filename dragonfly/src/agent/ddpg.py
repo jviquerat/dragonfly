@@ -19,6 +19,9 @@ class ddpg(base_agent):
         self.n_filling = pms.n_filling
         self.sigma     = pms.sigma
 
+        # Local variables
+        self.step = 0
+
         # Build policies
         if (pms.policy.type != "deterministic"):
             error("ddpg", "__init__",
@@ -69,9 +72,6 @@ class ddpg(base_agent):
         self.buff  = buff(self.n_cpu, self.names, self.sizes)
         self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
 
-        # Initialize counter
-        self.counter = counter(self.n_cpu)
-
         # Initialize termination
         self.term = termination_factory.create(pms.termination.type,
                                                n_cpu = self.n_cpu,
@@ -80,7 +80,7 @@ class ddpg(base_agent):
     # Get actions
     def actions(self, obs):
 
-        if (self.counter.step < self.n_warmup):
+        if (self.step < self.n_warmup):
             act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
         else:
             act   = self.p_net.actions(obs)
@@ -89,6 +89,8 @@ class ddpg(base_agent):
             act  += noise
             act   = np.clip(act, -1.0, 1.0)
         act = act.astype(np.float32)
+
+        self.step += 1
 
         # Check for NaNs
         if (np.isnan(act).any()):
@@ -142,7 +144,6 @@ class ddpg(base_agent):
     # Reset
     def reset(self):
 
-        self.counter.reset()
         self.p_net.reset()
         self.q_net.reset()
         self.p_tgt.reset()
@@ -157,7 +158,6 @@ class ddpg(base_agent):
 
         trm = self.term.terminate(dne, trc)
         self.buff.store(self.names, [obs, nxt, act, rwd, trm])
-        self.counter.update(rwd)
 
     # Actions to execute before the inner training loop
     def pre_loop(self):

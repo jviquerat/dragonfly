@@ -23,7 +23,8 @@ class td3(base_agent):
         self.noise_clip = pms.noise_clip
 
         # Local variables
-        self.p_stp     = 0
+        self.step   = 0
+        self.p_step = 0
 
         # Build policies
         if (pms.policy.type != "deterministic"):
@@ -84,9 +85,6 @@ class td3(base_agent):
         self.buff  = buff(self.n_cpu, self.names, self.sizes)
         self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
 
-        # Initialize counter
-        self.counter = counter(self.n_cpu)
-
         # Initialize termination
         self.term = termination_factory.create(pms.termination.type,
                                                n_cpu = self.n_cpu,
@@ -95,7 +93,7 @@ class td3(base_agent):
     # Get actions
     def actions(self, obs):
 
-        if (self.counter.step < self.n_warmup):
+        if (self.step < self.n_warmup):
             act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
         else:
             act   = self.p_net.actions(obs)
@@ -104,6 +102,8 @@ class td3(base_agent):
             act  += noise
             act   = np.clip(act, -1.0, 1.0)
         act = act.astype(np.float32)
+
+        self.step += 1
 
         # Check for NaNs
         if (np.isnan(act).any()):
@@ -154,9 +154,9 @@ class td3(base_agent):
                                self.p_tgt, self.q_net2, self.q_tgt1, self.q_tgt2)
 
         # Train policy network
-        self.p_stp += 1
-        if (self.p_stp == self.p_update):
-            self.p_stp = 0
+        self.p_step += 1
+        if (self.p_step == self.p_update):
+            self.p_step = 0
             self.p_net.loss.train(obs, self.p_net, self.q_net1)
 
             # Update target networks
@@ -167,7 +167,6 @@ class td3(base_agent):
     # Reset
     def reset(self):
 
-        self.counter.reset()
         self.p_net.reset()
         self.q_net1.reset()
         self.q_net2.reset()
@@ -185,7 +184,6 @@ class td3(base_agent):
 
         trm = self.term.terminate(dne, trc)
         self.buff.store(self.names, [obs, nxt, act, rwd, trm])
-        self.counter.update(rwd)
 
     # Actions to execute before the inner training loop
     def pre_loop(self):

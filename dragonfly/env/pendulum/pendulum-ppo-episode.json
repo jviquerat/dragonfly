@@ -5,12 +5,12 @@
         "obs_norm": true,
         "obs_noise": 0.0
     },
-    "name_env": false,
-    "name_agent": false,
-    "name_tag": "pendulum_ppo_episode_8_envs",
+    "name_env": true,
+    "name_agent": true,
+    "name_tag": "",
     "name_time": false,
     "n_avg": 5,
-    "n_cpu": 8,
+    "n_cpu": 1,
     "n_stp_max": 50000,
     "trainer": {
         "style": "episode",

@@ -1,14 +1,5 @@
-# Generic imports
-import numpy as np
-
 # Custom imports
-from dragonfly.src.core.constants        import *
-from dragonfly.src.trainer.base          import *
-from dragonfly.src.envs.par_envs         import *
-from dragonfly.src.agent.agent           import *
-from dragonfly.src.utils.timer           import *
-from dragonfly.src.utils.report          import *
-from dragonfly.src.utils.renderer        import *
+from dragonfly.src.trainer.base import *
 
 ###############################################
 ### Class for episode-based training
@@ -47,6 +38,9 @@ class episode(trainer_base):
                                           size    = self.size,
                                           pms     = agent_pms)
 
+        # Initialize counter
+        self.counter = counter(self.n_cpu)
+
         # Initialize learning data report
         self.report = report(self.freq_report,
                              ["step", "episode", "score", "smooth_score"])
@@ -70,8 +64,11 @@ class episode(trainer_base):
         # Reset environment
         obs = self.env.reset_all()
 
+        # Reset counter
+        self.counter.reset()
+
         # Loop until max episode number is reached
-        while (self.agent.counter.step < self.n_stp_max):
+        while (self.counter.step < self.n_stp_max):
 
             # Prepare inner training loop
             self.agent.pre_loop()
@@ -88,6 +85,9 @@ class episode(trainer_base):
                 # Store transition
                 self.agent.store(obs, nxt, act, rwd, dne, trc)
 
+                # Update counter
+                self.counter.update(rwd)
+
                 # Handle rendering
                 self.renderer.store(self.env)
 
@@ -95,11 +95,11 @@ class episode(trainer_base):
                 for cpu in range(self.n_cpu):
                     if (dne[cpu]):
                         self.lengths = np.append(self.lengths,
-                                                 self.agent.counter.ep_step[cpu])
+                                                 self.counter.ep_step[cpu])
                         self.store_report(cpu)
                         self.print_episode()
-                        self.renderer.finish(path, run, self.agent.counter.ep, cpu)
-                        best = self.agent.counter.reset_ep(cpu)
+                        self.renderer.finish(path, run, self.counter.ep, cpu)
+                        best = self.counter.reset_ep(cpu)
                         name = path+"/"+str(run)+"/"+self.agent.name
                         if best: self.agent.save(name)
                         self.unroll += 1

@@ -49,9 +49,6 @@ class a2c(base_agent):
         self.gsizes = [obs_dim, self.pol_dim, 1, 1]
         self.gbuff  = gbuff(self.size, self.gnames, self.gsizes)
 
-        # Initialize counter
-        self.counter = counter(self.n_cpu)
-
         # Initialize terminator
         self.term = termination_factory.create(pms.termination.type,
                                                n_cpu = self.n_cpu,
@@ -115,7 +112,6 @@ class a2c(base_agent):
     # Agent reset
     def reset(self):
 
-        self.counter.reset()
         self.p_net.reset()
         self.v_net.reset()
         self.buff.reset()
@@ -127,7 +123,6 @@ class a2c(base_agent):
         trm = self.term.terminate(dne, trc)
         self.buff.store(["obs", "nxt", "act", "rwd", "trm"],
                         [ obs,   nxt,   act,   rwd,   trm ])
-        self.counter.update(rwd)
 
     # Actions to execute before the inner training loop
     def pre_loop(self):

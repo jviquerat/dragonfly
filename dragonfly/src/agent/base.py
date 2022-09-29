@@ -11,7 +11,6 @@ from dragonfly.src.core.constants          import *
 from dragonfly.src.utils.error             import *
 from dragonfly.src.termination.termination import *
 from dragonfly.src.utils.buff              import *
-from dragonfly.src.utils.counter           import *
 
 ###############################################
 ### Base agent
