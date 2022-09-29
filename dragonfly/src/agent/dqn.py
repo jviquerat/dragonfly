@@ -47,9 +47,6 @@ class dqn():
         self.buff  = buff(self.n_cpu, self.names, self.sizes)
         self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
 
-        # Initialize counter
-        self.counter = counter(self.n_cpu)
-
         # Initialize termination
         self.term = termination_factory.create(pms.termination.type,
                                                n_cpu = self.n_cpu,
@@ -115,7 +112,6 @@ class dqn():
     def reset(self):
 
         self.tgt_step = 0
-        self.counter.reset()
         self.q_net.reset()
         self.q_tgt.reset()
         self.q_tgt.net.set_weights(self.q_net.net.get_weights())
@@ -128,7 +124,6 @@ class dqn():
 
         trm = self.term.terminate(dne, trc)
         self.buff.store(self.names, [obs, nxt, act, rwd, trm])
-        self.counter.update(rwd)
 
     # Actions to execute before the inner training loop
     def pre_loop(self):

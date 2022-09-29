@@ -5,6 +5,8 @@ import numpy as np
 # Custom imports
 from dragonfly.src.core.constants import *
 from dragonfly.src.utils.timer    import *
+from dragonfly.src.envs.par_envs  import *
+from dragonfly.src.agent.agent    import *
 from dragonfly.src.utils.buff     import *
 from dragonfly.src.utils.report   import *
 from dragonfly.src.utils.renderer import *
@@ -46,19 +48,19 @@ class trainer_base():
     def print_episode(self):
 
         # No initial printing
-        if (self.agent.counter.ep == 0): return
+        if (self.counter.ep == 0): return
 
         # Average and print
-        ep        = self.agent.counter.ep
-        stp       = self.agent.counter.step
+        ep        = self.counter.ep
+        stp       = self.counter.step
         n_stp_max = self.n_stp_max
 
         # Retrieve data
         avg    = self.report.avg("score", n_smooth)
         avg    = f"{avg:.3f}"
-        bst    = self.agent.counter.best_score
+        bst    = self.counter.best_score
         bst    = f"{bst:.3f}"
-        bst_ep = self.agent.counter.best_ep
+        bst_ep = self.counter.best_ep
 
         # Handle no-printing after max step
         if (stp < n_stp_max-1):
@@ -78,15 +80,15 @@ class trainer_base():
     # Store data in report
     def store_report(self, cpu):
 
-        for i in range(self.agent.counter.ep_step[cpu]):
-            if (self.agent.counter.step%step_report == 0):
-                self.report.append("step",    self.agent.counter.step)
+        for i in range(self.counter.ep_step[cpu]):
+            if (self.counter.step%step_report == 0):
+                self.report.append("step",    self.counter.step)
 
-                self.report.append("episode", self.agent.counter.ep)
-                self.report.append("score",   self.agent.counter.score[cpu])
+                self.report.append("episode", self.counter.ep)
+                self.report.append("score",   self.counter.score[cpu])
                 smooth_score = self.report.avg("score", n_smooth)
                 self.report.append("smooth_score",  smooth_score)
-            self.agent.counter.step += 1
+            self.counter.step += 1
 
     # Write learning data report
     def write_report(self, path, run, force=False):
