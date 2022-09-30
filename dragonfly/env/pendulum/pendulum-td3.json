@@ -36,17 +36,17 @@
                 "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["tanh"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
@@ -61,17 +61,17 @@
                 "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },

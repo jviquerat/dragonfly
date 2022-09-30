@@ -11,7 +11,7 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 500000,
+    "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
         "buff_size": 2048,
@@ -28,19 +28,19 @@
                 "type": "fc",
                 "k_init": "lecun_normal",
                 "trunk": {
-                    "arch": [128],
+                    "arch": [64],
                     "actv": "selu"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[128],[128]],
+                    "arch": [[32],[32]],
                     "actv": ["selu","selu"],
                     "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
                 "type": "nadam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -55,7 +55,7 @@
                 "type": "fc",
                 "k_init": "lecun_normal",
                 "trunk": {
-                    "arch": [128,128],
+                    "arch": [64,64],
                     "actv": "selu"
                 },
                 "heads": {
