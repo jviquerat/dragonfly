@@ -7,10 +7,10 @@ The agent learns to balance a pole fixed to a moving cart, using lateral movemen
   <img width="300" alt="" src="good.gif">
 </p>
 
-Below are resolutions with DQN, PPO (buffer-based) and PPO (episode-based):
+Below are resolutions with DQN, A2C and PPO:
 
 <p align="center">
   <img width="300" alt="" src="dqn.png">
-  <img width="300" alt="" src="ppo_buffer.png">
-  <img width="300" alt="" src="ppo_episode.png">
+  <img width="300" alt="" src="a2c.png">
+  <img width="300" alt="" src="ppo.png">
 </p>

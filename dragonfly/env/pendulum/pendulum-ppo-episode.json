@@ -66,8 +66,8 @@
                 }
             },
             "optimizer": {
-                "type": "nadam",
-                "lr": 2.0e-3,
+                "type": "adam",
+                "lr": 1.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -77,12 +77,11 @@
         "retrn": {
             "type": "gae",
             "gamma": 0.99,
-            "gae_lambda": 0.99,
+            "gae_lambda": 0.95,
             "ret_norm": true
         },
         "termination": {
-            "type": "bootstrap",
-            "ep_end": 200
+            "type": "bootstrap"
         }
     }
 }
