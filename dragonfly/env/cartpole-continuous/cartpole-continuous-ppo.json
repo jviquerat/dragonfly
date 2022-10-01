@@ -18,7 +18,7 @@
         "n_buff": 1,
         "batch_frac": 0.5,
         "n_epochs": 16,
-        "render_every": 500
+        "render_every": 5000
     },
     "agent": {
         "type": "ppo",
@@ -54,12 +54,12 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
