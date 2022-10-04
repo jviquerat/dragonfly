@@ -33,14 +33,14 @@
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[32],[32]],
+                    "arch": [[64],[64]],
                     "actv": ["relu","relu"],
                     "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-4,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -56,18 +56,18 @@
                 "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
-                "lr": 1.0e-3,
+                "type": "adam",
+                "lr": 2.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
