@@ -2,7 +2,7 @@
     "env": {
         "name": "Hopper-v4",
         "obs_clip": false,
-        "obs_norm": false,
+        "obs_norm": true,
         "obs_noise": 0.0
     },
     "name_env": true,
@@ -26,14 +26,14 @@
             "type": "normal",
             "network": {
                 "type": "fc",
-		"k_init": "lecun_normal",
+		            "k_init": "lecun_normal",
                 "trunk": {
-                    "arch": [128],
+                    "arch": [64],
                     "actv": "relu"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[128],[128]],
+                    "arch": [[64],[64]],
                     "actv": ["relu","relu"],
                     "final": ["tanh","sigmoid"]
                 }
@@ -55,7 +55,7 @@
                 "type": "fc",
                 "k_init": "lecun_normal",
                 "trunk": {
-                    "arch": [128,128],
+                    "arch": [64,64],
                     "actv": "relu"
                 },
                 "heads": {
@@ -67,7 +67,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-3,
+                "lr": 1.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -81,8 +81,7 @@
             "ret_norm": true
         },
         "termination": {
-            "type": "bootstrap",
-            "ep_end": 1000
+            "type": "bootstrap"
         }
     }
 }

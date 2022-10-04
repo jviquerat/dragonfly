@@ -58,10 +58,3 @@ Below are a few environment solved with the library.
 | `LunarLanderContinuous-v2` | The basic `gym` environment. The agent learns to land on a landing pad using 4 continuous actions. See additional details <a href="dragonfly/env/lunarlandercontinuous/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/lunarlandercontinuous/good.gif"> |
 | `BipedalWalker-v3` | The basic `gym` environment. The agent learns to walk with a bipedal "thing" by applying torque to 4 different joints. See additional details <a href="dragonfly/env/bipedalwalker/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/bipedalwalker/good.gif"> |
 | `MountainCar-v0` | The basic `gym` environment. The agent learns run a car from the bottom of a valley to the top of a hill. See additional details <a href="dragonfly/env/mountaincar/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/mountaincar/good.gif"> |
-
-## Custom environments
-
-| Environment | Description | Illustration |
-| :--- | :--- | :---: |
-| `cartpole-continuous-v0` | A continuous version of the basic `gym` environment. See additional details <a href="dragonfly/env/cartpole-continuous/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/cartpole-continuous/good.gif"> |
-| `pendulum-deterministic-v0` | A ddeterministic version of the basic `gym` environment, using a fixed starting point. See additional details <a href="dragonfly/env/pendulum-deterministic/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/pendulum-deterministic/good.gif"> |
