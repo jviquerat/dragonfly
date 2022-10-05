@@ -10,5 +10,5 @@ The agent must learn to balance a double inverted pendulum with an intermediate 
 Using PPO:
 
 <p align="center">
-  <img width="700" alt="" src="ppo_buffer.png">
+  <img width="300" alt="" src="ppo.png">
 </p>
