@@ -1,6 +1,6 @@
 ## `inverteddoublependulum-v4` (continuous)
 
-The agent must learn to balance a double inverted pendulum with an intermediate joint. This results are still highly suboptimal.
+The agent must learn to balance a double inverted pendulum with an intermediate joint.
 
 <p align="center">
   <img width="300" alt="" src="bad.gif">
