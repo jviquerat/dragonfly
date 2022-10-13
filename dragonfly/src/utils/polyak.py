@@ -11,9 +11,7 @@ class polyak:
     # Update network by polyak average
     def average(self, net, tgt):
 
-        v = net.get_weights()
-        t = tgt.get_weights()
-        w = [self.rho*wt + (1.0-self.rho)*wv for wt, wv in zip(t, v)]
-
-        tgt.set_weights(w)
+        for wv, wt in zip(net.weights, tgt.weights):
+            w = self.rho*wt + (1.0-self.rho)*wv
+            wt.assign(w)
 
