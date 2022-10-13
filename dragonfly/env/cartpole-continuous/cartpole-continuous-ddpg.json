@@ -23,8 +23,8 @@
         "type": "ddpg",
         "gamma": 0.99,
         "rho": 0.995,
-        "n_warmup": 5000,
-        "n_filling": 3000,
+        "n_warmup": 2000,
+        "n_filling": 1000,
         "sigma": 0.1,
         "policy": {
             "type": "deterministic",
@@ -33,17 +33,17 @@
                 "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["tanh"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
@@ -58,17 +58,17 @@
                 "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },

@@ -7,6 +7,9 @@ A weird one-legged humanoid learns to move forward using three joint torques. Re
   <img width="300" alt="" src="good.gif">
 </p>
 
+Resolution with PPO and TD3:
+
 <p align="center">
-  <img width="700" alt="" src="td3.png">
+  <img width="300" alt="" src="ppo.png">
+  <img width="300" alt="" src="td3.png">
 </p>

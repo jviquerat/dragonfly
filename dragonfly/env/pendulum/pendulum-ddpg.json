@@ -11,10 +11,10 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 50000,
+    "n_stp_max": 40000,
     "trainer": {
         "style": "td",
-        "mem_size": 10000,
+        "mem_size": 20000,
         "btc_size": 128,
         "n_stp_unroll": 1,
         "render_every": 500
@@ -23,7 +23,7 @@
         "type": "ddpg",
         "gamma": 0.99,
         "rho": 0.995,
-        "n_warmup": 2000,
+        "n_warmup": 1000,
         "n_filling": 1000,
         "sigma": 0.1,
         "policy": {
@@ -32,17 +32,17 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["tanh"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
@@ -56,17 +56,17 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },

@@ -9,7 +9,7 @@
     "name_agent": true,
     "name_tag": "",
     "name_time": false,
-    "n_avg": 2,
+    "n_avg": 3,
     "n_cpu": 1,
     "n_stp_max": 1000000,
     "trainer": {
@@ -23,8 +23,8 @@
         "type": "td3",
         "gamma": 0.99,
         "rho": 0.995,
-        "n_warmup": 10000,
-        "n_filling": 1000,
+        "n_warmup": 20000,
+        "n_filling": 10000,
         "p_update": 2,
         "sigma_act": 0.1,
         "sigma_tgt": 0.2,
@@ -34,18 +34,18 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [128,128],
-                    "actv": "selu"
+                    "arch": [256,256],
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["tanh"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
@@ -58,18 +58,18 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [128,128],
-                    "actv": "selu"
+                    "arch": [256,256],
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },
@@ -78,8 +78,7 @@
             }
         },
         "termination": {
-            "type": "bootstrap",
-            "ep_end": 1600
+            "type": "bootstrap"
         }
     }
 }

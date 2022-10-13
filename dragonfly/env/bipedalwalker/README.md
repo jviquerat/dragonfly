@@ -1,20 +1,15 @@
 ## `bipedalwalker-v3` (continuous)
 
-The agent learns to walk with a bipedal "thing" by applying torque to 4 different joints, the goal being to walk to the end of the path (the gif on the right comes from TD3).
+The agent learns to walk with a bipedal "thing" by applying torque to 4 different joints, the goal being to walk to the end of the path. Below are exploitations runs from PPO (left, score 280) and TD3 (right, score 313):
 
 <p align="center">
-  <img width="300" alt="" src="bad.gif">
-  <img width="300" alt="" src="good.gif">
+  <img width="300" alt="" src="good_ppo.gif">
+  <img width="300" alt="" src="good_td3.gif">
 </p>
 
-Resolution with PPO:
+Resolution with PPO and TD3:
 
 <p align="center">
-  <img width="700" alt="" src="ppo_buffer.png">
-</p>
-
-Resolution with TD3:
-
-<p align="center">
-  <img width="700" alt="" src="td3.png">
+  <img width="300" alt="" src="ppo.png">
+  <img width="300" alt="" src="td3.png">
 </p>

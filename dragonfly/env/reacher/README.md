@@ -9,5 +9,5 @@ A robotic arm learns to reach a randomly-positionned ball using two actuators. T
 Using PPO:
 
 <p align="center">
-  <img width="700" alt="" src="ppo_buffer.png">
+  <img width="300" alt="" src="ppo.png">
 </p>
