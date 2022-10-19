@@ -37,6 +37,7 @@ In that case, the environment will just rely on the `done` signal to stop the ev
 | Environment | Description | Illustration |
 | :--- | :--- | :---: |
 | `turek-v0` | A drag reduction problem exploiting two synthetic jets on a cylinder immersed in a flow at Re=100. See additional details <a href="dragonfly/env/turek/README.md">here</a>. | <img width="400" alt="gif" src="dragonfly/env/turek/good.gif"> |
+| `shkadov-v0` | A control problem with multiple jets trying to damp instabilities on a falling liquid film. See additional details <a href="dragonfly/env/shkadov/README.md">here</a>. | <img width="400" alt="gif" src="dragonfly/env/shkadov/good.gif"> |
 
 ## Mujoco environments
 
