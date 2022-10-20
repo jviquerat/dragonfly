@@ -27,7 +27,7 @@
         "n_filling": 1000,
         "alpha": 0.5,
         "policy": {
-            "type": "tanh_normal",
+            "type": "normal",
             "network": {
                 "type": "fc",
                 "trunk": {
@@ -44,7 +44,7 @@
             "optimizer": {
                 "type": "adam",
                 "lr": 5.0e-4,
-                "grd_clip": 0.1
+                "grd_clip": null
             },
             "loss": {
                 "type": "q_pol_sac"
