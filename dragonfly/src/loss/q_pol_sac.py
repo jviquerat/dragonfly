@@ -4,20 +4,23 @@ import tensorflow as tf
 import numpy as np
 
 ###############################################
-### Q-policy loss class for DDPG policy update
-class q_pol():
+### Q-policy loss class for SAC policy update
+class q_pol_sac():
     def __init__(self, pms):
         pass
 
     # Train
     @tf.function
-    def train(self, obs, p, q):
+    def train(self, obs, p, q1, q2, alpha):
         with tf.GradientTape() as tape:
 
             # Compute loss
-            act  = p.forward(obs)
+            act, lgp  = p.sample(obs)
             cct  = tf.concat([obs,act], axis=-1)
-            tgt  = q.forward(cct)
+            tgt1 = q1.forward(cct)
+            tgt2 = q2.forward(cct)
+            tgt  = tf.minimum(tgt1, tgt2)
+            tgt  = tgt - alpha*lgp
             loss =-tf.reduce_mean(tgt)
 
             # Apply gradients

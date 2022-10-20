@@ -2,25 +2,24 @@
 import tensorflow as tf
 
 ###############################################
-### MSE loss class for TD3-style q networks
-class mse_td3():
+### MSE loss class for SAC-style q networks
+class mse_sac():
     def __init__(self, pms):
         pass
 
     # Train
     @tf.function
-    def train(self, obs, nxt, act, rwd, trm, gamma, sigma, clp, pt, q, qt1, qt2):
+    def train(self, obs, nxt, act, rwd, trm, gamma, alpha, p, q, qt1, qt2):
         with tf.GradientTape() as tape:
 
             # Compute target
-            nac  = pt.forward(nxt)
-            nse  = tf.random.normal(tf.shape(nac), 0.0, sigma, tf.float32)
-            nse  = tf.clip_by_value(nse, -clp, clp)
-            nac  = tf.clip_by_value(nac+nse, -1.0, 1.0)
+            nac, lgp = p.sample(nxt)
             nct  = tf.concat([nxt, nac], axis=-1)
             tgt1 = qt1.forward(nct)
             tgt2 = qt2.forward(nct)
             tgt  = tf.minimum(tgt1, tgt2)
+            tgt  = tgt - alpha*lgp
+
             tgt  = tf.reshape(tgt, [-1,1])
             trm  = tf.clip_by_value(trm, 0.0, 1.0)
             tgt  = rwd + trm*gamma*tgt

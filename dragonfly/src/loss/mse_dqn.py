@@ -13,7 +13,7 @@ class mse_dqn():
         with tf.GradientTape() as tape:
 
             # Compute target
-            tgt = qt.forward(nxt)[0]
+            tgt = qt.forward(nxt)
             tgt = tf.reduce_max(tgt, axis=1)
             tgt = tf.reshape(tgt, [-1,1])
             trm = tf.clip_by_value(trm, 0.0, 1.0)

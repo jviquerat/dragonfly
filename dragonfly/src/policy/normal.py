@@ -69,7 +69,9 @@ class normal(base_policy):
 
         # Sample actions
         act = pdf.sample(1)
+        act = tf.reshape(act, [-1,self.store_dim])
         lgp = pdf.log_prob(act)
+        lgp = tf.reshape(lgp, [-1,1])
 
         return act, lgp
 

@@ -1,0 +1,82 @@
+{
+    "env": {
+        "name": "dragonfly.custom.cartpole:cartpole-continuous-v0",
+        "obs_clip": false,
+        "obs_norm": true,
+        "obs_noise": 0.0
+    },
+    "name_env": true,
+    "name_agent": true,
+    "name_tag": "",
+    "name_time": false,
+    "n_avg": 3,
+    "n_cpu": 1,
+    "n_stp_max": 20000,
+    "trainer": {
+        "style": "td",
+        "mem_size": 20000,
+        "btc_size": 128,
+        "n_stp_unroll": 1,
+        "render_every": 500
+    },
+    "agent": {
+        "type": "sac",
+        "gamma": 0.99,
+        "rho": 0.995,
+        "n_warmup": 2000,
+        "n_filling": 1000,
+        "alpha": 0.2,
+        "policy": {
+            "type": "normal",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [64],
+                    "actv": "relu"
+                },
+                "heads": {
+                    "nb": 2,
+                    "arch": [[64],[64]],
+                    "actv": ["relu","relu"],
+                    "final": ["tanh","sigmoid"]
+                }
+            },
+            "optimizer": {
+                "type": "adam",
+                "lr": 5.0e-4,
+                "grd_clip": 0.1
+            },
+            "loss": {
+                "type": "q_pol_sac"
+            }
+        },
+        "value": {
+            "type": "q_value",
+            "network": {
+                "type": "fc",
+                "k_init": "lecun_normal",
+                "trunk": {
+                    "arch": [64,64],
+                    "actv": "relu"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["relu"],
+                    "final": ["linear"]
+                }
+            },
+            "optimizer": {
+                "type": "adam",
+                "lr": 5.0e-4,
+                "grd_clip": null
+            },
+            "loss": {
+                "type": "mse_sac"
+            }
+        },
+        "termination": {
+            "type": "bootstrap"
+        }
+    }
+}

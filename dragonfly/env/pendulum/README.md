@@ -7,9 +7,10 @@ The agent learns to balance a 1-bar pendulum vertically, using limited torque fo
   <img width="300" alt="" src="good.gif">
 </p>
 
-Solved with PPO (left) and TD3 (right)
+Solved with PPO (left), TD3 (center) and SAC (right)
 
 <p align="center">
   <img width="300" alt="" src="ppo.png">
   <img width="300" alt="" src="td3.png">
+  <img width="300" alt="" src="sac.png">
 </p>

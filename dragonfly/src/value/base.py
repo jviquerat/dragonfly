@@ -19,7 +19,7 @@ class base_value():
     # Network forward pass
     def forward(self, state):
 
-        return self.net.call(state)
+        return self.net.call(state)[0]
 
     # Save network weights
     def save_weights(self):

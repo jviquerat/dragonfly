@@ -13,9 +13,9 @@ class mse_ddpg():
         with tf.GradientTape() as tape:
 
             # Compute target
-            nac = pt.forward(nxt)[0]
+            nac = pt.forward(nxt)
             nct = tf.concat([nxt, nac], axis=-1)
-            tgt = qt.forward(nct)[0]
+            tgt = qt.forward(nct)
             tgt = tf.reshape(tgt, [-1,1])
             trm = tf.clip_by_value(trm, 0.0, 1.0)
             tgt = rwd + trm*gamma*tgt
