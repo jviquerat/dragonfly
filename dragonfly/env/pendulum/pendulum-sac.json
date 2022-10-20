@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "dragonfly.custom.cartpole:cartpole-continuous-v0",
+        "name": "Pendulum-v1",
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0
@@ -11,7 +11,7 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 20000,
+    "n_stp_max": 100000,
     "trainer": {
         "style": "td",
         "mem_size": 20000,
@@ -23,7 +23,7 @@
         "type": "sac",
         "gamma": 0.99,
         "rho": 0.995,
-        "n_warmup": 2000,
+        "n_warmup": 1000,
         "n_filling": 1000,
         "alpha": 0.2,
         "policy": {

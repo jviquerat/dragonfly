@@ -14,13 +14,10 @@ class sac(base_agent):
         self.n_cpu      = n_cpu
         self.mem_size   = size
         self.gamma      = pms.gamma
+        self.alpha      = pms.alpha
         self.rho        = pms.rho
         self.n_warmup   = pms.n_warmup
         self.n_filling  = pms.n_filling
-        self.p_update   = pms.p_update
-        self.sigma_act  = pms.sigma_act
-        self.sigma_tgt  = pms.sigma_tgt
-        self.noise_clip = pms.noise_clip
 
         # Local variables
         self.step = 0
@@ -85,7 +82,8 @@ class sac(base_agent):
     def actions(self, obs):
 
         if (self.step < self.n_warmup):
-            act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
+            act = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
+            act = act.astype(np.float32)
         else:
             act, _ = self.p_net.actions(obs)
 
@@ -133,14 +131,15 @@ class sac(base_agent):
 
         # Train q network
         self.q_net1.loss.train(obs, nxt, act, rwd, trm,
-                               self.gamma, self.sigma_tgt, self.noise_clip,
-                               self.p_tgt, self.q_net1, self.q_tgt1, self.q_tgt2)
+                               self.gamma, self.alpha, self.p_net,
+                               self.q_net1, self.q_tgt1, self.q_tgt2)
         self.q_net2.loss.train(obs, nxt, act, rwd, trm,
-                               self.gamma, self.sigma_tgt, self.noise_clip,
-                               self.p_tgt, self.q_net2, self.q_tgt1, self.q_tgt2)
+                               self.gamma, self.alpha, self.p_net,
+                               self.q_net2, self.q_tgt1, self.q_tgt2)
 
         # Train policy network
-        self.p_net.loss.train(obs, self.p_net, self.q_net1)
+        self.p_net.loss.train(obs, self.p_net, self.q_net1,
+                              self.q_net2, self.alpha)
 
         # Update target networks
         self.polyak.average(self.q_net1.net, self.q_tgt1.net)
