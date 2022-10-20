@@ -3,7 +3,7 @@ from dragonfly.src.agent.base   import *
 from dragonfly.src.utils.polyak import *
 
 ###############################################
-### sAC agent
+### SAC agent
 class sac(base_agent):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
@@ -138,8 +138,7 @@ class sac(base_agent):
                                self.q_net2, self.q_tgt1, self.q_tgt2)
 
         # Train policy network
-        self.p_net.loss.train(obs, self.p_net, self.q_net1,
-                              self.q_net2, self.alpha)
+        self.p_net.loss.train(obs, self.p_net, self.q_net1, self.q_net2, self.alpha)
 
         # Update target networks
         self.polyak.average(self.q_net1.net, self.q_tgt1.net)

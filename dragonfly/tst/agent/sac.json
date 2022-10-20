@@ -5,17 +5,13 @@
         "obs_norm": true,
         "obs_noise": 0.0
     },
-    "name_env": true,
-    "name_agent": true,
-    "name_tag": "",
-    "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 100000,
+    "n_stp_max": 500,
     "trainer": {
         "style": "td",
         "mem_size": 20000,
-        "btc_size": 128,
+        "btc_size": 64,
         "n_stp_unroll": 1,
         "render_every": 500
     },
@@ -23,8 +19,8 @@
         "type": "sac",
         "gamma": 0.99,
         "rho": 0.995,
-        "n_warmup": 1000,
-        "n_filling": 1000,
+        "n_warmup": 200,
+        "n_filling": 100,
         "alpha": 0.2,
         "policy": {
             "type": "tanh_normal",
@@ -54,29 +50,28 @@
             "type": "q_value",
             "network": {
                 "type": "fc",
-                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "relu"
+                    "actv": "swish"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["relu"],
+                    "actv": ["swish"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "adam",
+                "type": "nadam",
                 "lr": 5.0e-4,
-                "grd_clip": null
+                "grd_clip": 100.0
             },
             "loss": {
                 "type": "mse_sac"
             }
         },
         "termination": {
-            "type": "bootstrap"
+            "type": "regular"
         }
     }
 }
