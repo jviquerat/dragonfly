@@ -14,10 +14,9 @@ class mse_sac():
 
             # Compute target
             nac, lgp = p.sample(nxt)
-            #nac  = tf.reshape(nac, [-1,1])
             nct  = tf.concat([nxt, nac], axis=-1)
-            tgt1 = qt1.forward(nct)[0]
-            tgt2 = qt2.forward(nct)[0]
+            tgt1 = qt1.forward(nct)
+            tgt2 = qt2.forward(nct)
             tgt  = tf.minimum(tgt1, tgt2)
             tgt  = tgt - alpha*lgp
 

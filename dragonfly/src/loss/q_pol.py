@@ -15,9 +15,9 @@ class q_pol():
         with tf.GradientTape() as tape:
 
             # Compute loss
-            act  = p.forward(obs)[0]
+            act  = p.forward(obs)
             cct  = tf.concat([obs,act], axis=-1)
-            tgt  = q.forward(cct)[0]
+            tgt  = q.forward(cct)
             loss =-tf.reduce_mean(tgt)
 
             # Apply gradients

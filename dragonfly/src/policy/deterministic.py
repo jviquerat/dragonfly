@@ -59,6 +59,6 @@ class deterministic(base_policy):
     # Networks forward pass
     def forward(self, state):
 
-        out = self.net.call(state)
+        out = self.net.call(state)[0]
 
         return out

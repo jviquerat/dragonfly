@@ -13,13 +13,13 @@ class mse_td3():
         with tf.GradientTape() as tape:
 
             # Compute target
-            nac  = pt.forward(nxt)[0]
+            nac  = pt.forward(nxt)
             nse  = tf.random.normal(tf.shape(nac), 0.0, sigma, tf.float32)
             nse  = tf.clip_by_value(nse, -clp, clp)
             nac  = tf.clip_by_value(nac+nse, -1.0, 1.0)
             nct  = tf.concat([nxt, nac], axis=-1)
-            tgt1 = qt1.forward(nct)[0]
-            tgt2 = qt2.forward(nct)[0]
+            tgt1 = qt1.forward(nct)
+            tgt2 = qt2.forward(nct)
             tgt  = tf.minimum(tgt1, tgt2)
             tgt  = tf.reshape(tgt, [-1,1])
             trm  = tf.clip_by_value(trm, 0.0, 1.0)
