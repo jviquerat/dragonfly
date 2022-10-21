@@ -27,7 +27,7 @@ dgf --train <json_file>
 To evaluate a trained agent, you will need a trained agent saved with `tf` format, as well as a `.json` case file. Then, just run:
 
 ``` 
-dgf --eval -net <net_file> -json <json_file>
+dgf --eval -net <net_file> -json <json_file> -steps <n_steps_control> -warmup <n_steps_warmup> <warmup_control_value>
 ```
 
 In that case, the environment will just rely on the `done` signal to stop the evaluation. Alternatively, you can provide a `-steps <n>` option, that will override the `done` signal of the environment, and force its execution for `n` steps. Trained agents for standard `gym` environements are available in `dragonfly/env`.

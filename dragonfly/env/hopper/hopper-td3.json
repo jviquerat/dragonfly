@@ -35,7 +35,7 @@
                 "type": "fc",
 		            "k_init": "lecun_normal",
                 "trunk": {
-                    "arch": [256,256],
+                    "arch": [128,128],
                     "actv": "relu"
                 },
                 "heads": {
