@@ -23,6 +23,7 @@ class adam():
         # weights and config have the correct sizes
         self.opt = Adam(learning_rate   = self.lr,
                         global_clipnorm = self.grd_clip)
+
         zero_grads = [tf.zeros_like(w) for w in grad_vars]
         self.opt.apply_gradients(zip(zero_grads, grad_vars))
 

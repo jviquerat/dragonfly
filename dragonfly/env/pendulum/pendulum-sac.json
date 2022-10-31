@@ -25,7 +25,14 @@
         "rho": 0.995,
         "n_warmup": 1000,
         "n_filling": 1000,
-        "alpha": 0.1,
+        "alpha": {
+            "value": 0.1,
+            "optimizer": {
+                "type": "adam",
+                "lr": 1.0e-4,
+                "grd_clip": null
+            }
+        },
         "policy": {
             "type": "tanh_normal",
             "network": {
