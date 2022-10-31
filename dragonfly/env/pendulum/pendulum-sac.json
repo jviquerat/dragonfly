@@ -27,7 +27,7 @@
         "n_filling": 1000,
         "alpha": 0.1,
         "policy": {
-            "type": "normal",
+            "type": "tanh_normal",
             "network": {
                 "type": "fc",
                 "trunk": {
