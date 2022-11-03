@@ -44,8 +44,7 @@ In that case, the environment will just rely on the `done` signal to stop the ev
 | Environment | Description | Illustration |
 | :--- | :--- | :---: |
 | `Hopper-v4` | A one-legged humanoid learns to move forward by hopping. See additional details <a href="dragonfly/env/hopper/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/hopper/good.gif"> |
-| `InvertedDoublePendulum-v4` | A double inverted pendulum to be balanced by the agent. See additional details <a href="dragonfly/env/inverteddoublependulum/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/inverteddoublependulum/good.gif"> |
-| `Reacher-v4` | An articulated arm must reach a randomly-positionned ball with minimal effort from its two actuators. See additional details <a href="dragonfly/env/reacher/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/reacher/good.gif"> |
+| `Ant-v4` | A quadrupedal ant learns to move forward. See additional details <a href="dragonfly/env/ant/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/ant/good.gif"> |
 | `Swimmer-v4` | An articulated worm learns to swim on the ground. See additional details <a href="dragonfly/env/swimmer/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/swimmer/good.gif"> |
 
 ## Gym environments
