@@ -26,6 +26,10 @@ class episode(trainer_base):
         self.size        = 1000*self.n_ep_train
         self.freq_report = 10
 
+        # Optional monitoring
+        self.monitoring = False
+        if hasattr(pms, "monitoring"):  self.monitoring = pms.monitoring
+
         # Local variables
         self.lengths = np.array([], dtype=int)
         self.unroll  = 0
@@ -84,6 +88,7 @@ class episode(trainer_base):
 
                 # Store transition
                 self.agent.store(obs, nxt, act, rwd, dne, trc)
+                self.monitor(path, run, obs, act)
 
                 # Update counter
                 self.counter.update(rwd)
