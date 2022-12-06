@@ -25,6 +25,10 @@ class buffer(trainer_base):
         self.size        = self.n_buff*self.buff_size
         self.freq_report = max(int(n_stp_max/(freq_report*self.buff_size)),1)
 
+        # Optional monitoring
+        self.monitoring = False
+        if hasattr(pms, "monitoring"):  self.monitoring = pms.monitoring
+
         # Initialize agent
         self.agent = agent_factory.create(agent_pms.type,
                                           obs_dim = self.obs_dim,
@@ -79,6 +83,7 @@ class buffer(trainer_base):
 
                 # Store transition
                 self.agent.store(obs, nxt, act, rwd, dne, trc)
+                self.monitor(path, run, obs, act)
 
                 # Update counter
                 self.counter.update(rwd)

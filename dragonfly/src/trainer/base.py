@@ -1,5 +1,7 @@
 # Generic imports
+import os
 import math
+import shutil
 import numpy as np
 
 # Custom imports
@@ -36,6 +38,25 @@ class trainer_base():
     # Train
     def train(self):
         raise NotImplementedError
+
+    # Monitor transition
+    def monitor(self, path, run, obs, act):
+        if self.monitoring:
+            # Handle folder
+            fpath = path+"/"+str(run)+"/actions"
+            if ((self.counter.step == 0)):
+                if (os.path.exists(fpath)): shutil.rmtree(fpath)
+                os.makedirs(fpath)
+
+            # Write actions
+            s = str(self.counter.ep_step[0])
+            for i in range(act.size):
+                s += " "
+                s += str(act.flatten()[i])
+            s += "\n"
+            filename = fpath+"/"+str(self.counter.ep)+"_act.dat"
+            with open(filename, "a") as f:
+                f.write(s)
 
     # Reset
     def reset(self):
