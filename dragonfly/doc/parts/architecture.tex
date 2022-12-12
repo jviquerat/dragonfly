@@ -1,0 +1,71 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Library architecture}
+\label{section:architecture}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Factory pattern}
+\label{section:factory}
+
+The library is mostly based on a factory pattern, which is used to return objects from given classes from a string representation:
+
+\begin{minted}{python}
+class factory:
+    def __init__(self):
+        self.keys = {}
+
+    def register(self, key, creator):
+        self.keys[key] = creator
+
+    def create(self, key, **kwargs):
+        creator = self.keys.get(key)
+        if not creator:
+            try:
+                raise ValueError(key)
+            except ValueError:
+                error("factory", "create", "Unknown key provided: "+key)
+                raise
+        return creator(**kwargs)
+\end{minted}
+
+For each type of object (agents, losses, etc), a factory is instantiated, and the different corresponding classes are registered using the \codeinline{register} member:
+
+\begin{minted}{python}
+agent_factory = factory()
+
+agent_factory.register("a2c",  a2c)
+agent_factory.register("ppo",  ppo)
+agent_factory.register("dqn",  dqn)
+agent_factory.register("ddpg", ddpg)
+agent_factory.register("td3",  td3)
+agent_factory.register("sac",  sac)
+\end{minted}
+
+Then, generating an object of a given type (here an agent) from a string representation is a fairly simple task (additional parameters for the constructor of the object can also be passed):
+
+\begin{minted}{python}
+self.agent = agent_factory.create(agent_pms.type,
+                                  obs_dim = self.obs_dim,
+                                  act_dim = self.act_dim,
+                                  n_cpu   = self.n_cpu,
+                                  size    = self.size,
+                                  pms     = agent_pms)
+\end{minted}
+
+This design allows to modify an existing algorithm by simply replacing a building block by another directly in the \codeinline{.json} configuration file. Examples are given in section \textcolor{red}{to complete}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{General overview}
+\label{section:general_overview}
+
+The global architecture of the library is summed up below:
+
+\input{fig/architecture}
+
+The training is driven by a \codeinline{.json} file that provides all the informations required to set the different classes and train the agent. The training procedure is handled by a \codeinline{trainer} object, which in turn initializes the \codeinline{environment} and the \codeinline{agent}, as well as several other objects helpful for the logging, rendering, etc. The \codeinline{environment} class can then spin up different parallel versions of itself to accelerate training (this part is handled using the \codeinline{multiprocessing} library), while the agent generates the instances that are required for its training, such as policies, values and buffers. These elements rely on a lower level of objects that are networks, optimizers and losses. The whole training procedure can be automatically performed several times to obtain averaged quantities of interest.

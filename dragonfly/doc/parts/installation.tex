@@ -1,0 +1,75 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Installation and usage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Requirements}
+
+As of today, the library is tested against python \codeinline{3.8.7} on ubuntu \codeinline{20.04} and osx \codeinline{12.5}. The main required packages versions are the following:
+
+\begin{minted}{python}
+tensorflow==2.9.1
+gym==0.26.0
+mujoco==2.2.0
+numpy==1.22.4
+\end{minted}
+
+The full list of required packages can be found in \codeinline{dragonfly/requirements.txt}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Installation}
+
+Clone the repository locally, then install it using \codeinline{pip}:
+
+\begin{minted}{python}
+git clone git@github.com:jviquerat/dragonfly.git
+cd dragonfly
+pip install -e .
+\end{minted}
+
+Once installed, the different tasks can be run directly from the command line through the \codeinline{dgf} executable (see next section).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Usage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Training mode}
+
+The training mode relies on the use of a \codeinline{.json} file for the description of the agent and its training mode (see section \textcolor{red}{to complete} for a complete description of the json parameter files):
+
+\begin{minted}{python}
+dgf --train <filename>.json
+\end{minted}
+
+The completion of a training phase will produce a \codeinline{results/} repository in the current folder, in which training data and saved models will be stored (see section \textcolor{red}{to complete} for a description of the saved data). It will also produce a plot of the average and standard deviation of the score against training steps. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Exploitation mode}
+
+The exploitation mode requires the same \codeinline{.json} file used for training, as well as a model file. Model files are saved regularly during the training phase, and their saving/loading rely on the tensorflow \codeinline{save_weights} and \codeinline{load_weights} interfaces. The syntax to exploit a saved model is the following:
+
+\begin{minted}{python}
+dgf --eval -net <path/to/network/model> -json <filename>.json 
+\end{minted}
+
+In that case, the environment will just rely on the \codeinline{done} signal to stop the evaluation. Alternatively, you can provide a \codeinline{-steps <n_steps>} option, that will override the done signal of the environment, and force its execution for \codeinline{n_steps} steps:
+
+\begin{minted}{python}
+dgf --eval -net <path/to/network/model> -json <filename>.json -steps <n_steps>
+\end{minted}
+
+It is also possible to add a warmup phase, during which default control values are passed to the environment:
+
+\begin{minted}{python}
+dgf --eval -net ... -warmup <n_steps_warmup> <default_control_values>
+\end{minted}

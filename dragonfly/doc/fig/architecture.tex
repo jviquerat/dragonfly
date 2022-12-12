@@ -1,0 +1,80 @@
+\begin{center}
+\begin{tikzpicture}[node distance=0.75cm and 1cm]
+	\tikzstyle{fonts} 	=[	font=\tiny]
+	\tikzstyle{box}	=[	rectangle, rounded corners, thick, text centered, fonts,
+					minimum width=1.2cm, minimum height=0.5cm]
+	\tikzstyle{dashed} =[	dash pattern=on 2pt]
+	\tikzstyle{bbox}	=[	box, draw=blue1, fill=blue4]
+	\tikzstyle{obox}	=[	box, draw=orange1, fill=orange4]
+	\tikzstyle{pbox}	=[	box, draw=purple1, fill=purple4]
+	\tikzstyle{gbox}	=[	box, draw=gray1, fill=gray4]
+	\tikzstyle{tbox}	=[	box, draw=teal, fill=teal!20!white]
+	
+	\node[bbox] (main) at (0,0) {\textbf{main.py}};
+	\node[pbox, above=of main] (json) {json};
+	
+	\node[gbox, below=of main] (averager) {averager};
+	\node[tbox, right=of averager, minimum height=6.25cm, minimum width=9.5cm, yshift=0.6cm, xshift=-0.6cm] (average) {};
+	\node[fonts, color=teal, above=of average, yshift=-0.8cm] {averaging procedure};
+	
+	\node[bbox, right=of main] (trainer) {trainer};
+	\node[obox, right=of trainer, minimum height=5cm, xshift=-0.4cm, yshift=-1cm, minimum width=2cm] (loop) {};
+	\node[fonts, color=orange1, above=of loop, yshift=-0.8cm] {training loop};
+	
+	\node[bbox, right=of trainer, yshift=1cm] (env) {env};
+	\node[gbox, right=of env, minimum height=1.6cm, minimum width=4.3cm, xshift=-0.3cm, dashed] (parallel) {};
+	\node[fonts, color=gray1, above=of parallel, yshift=-0.8cm] {parallel workers};
+	\node[bbox, right=of env, yshift=0.4cm, xshift=-0.12cm] (worker1) {worker};
+	\node[bbox, right=of worker1, xshift=-0.85cm] (worker2) {worker};
+	\node[bbox, right=of worker2, xshift=-0.85cm] (worker3) {worker};
+	\node[bbox, below=of worker1, yshift=0.5cm] (worker4) {worker};
+	\node[bbox, below=of worker2, yshift=0.5cm] (worker5) {worker};
+	\node[bbox, below=of worker3, yshift=0.5cm] (worker6) {worker};
+	
+	\node[bbox, right=of trainer] (agent) {agent};	
+	\node[gbox, right=of agent, minimum height=3cm, minimum width=2cm, xshift=-0.3cm, yshift=-2cm] (all_agent) {};
+	\node[bbox, right=of agent, xshift=0.1cm, yshift=-1cm] (policies) {policies};
+	\node[bbox, right=of agent, xshift=0.1cm, yshift=-2cm] (values) {values};
+	\node[bbox, right=of agent, xshift=0.1cm, yshift=-3cm] (buffers) {buffers};
+	
+	\node[gbox, right=of all_agent, minimum height=3cm, minimum width=2cm, xshift=-0.75cm, yshift=0cm] (net_opt_loss) {};
+	\node[bbox, right=of policies, xshift=0.05cm, yshift=0cm] (networks) {networks};
+	\node[bbox, right=of values, xshift=0.05cm, yshift=0cm] (optimizers) {optimizers};
+	\node[bbox, right=of buffers, xshift=0.05cm, yshift=0cm] (losses) {losses};
+	
+	\node[gbox, right=of trainer, yshift=-1cm] (renderer) {renderer};
+	\node[bbox, right=of trainer, yshift=-2cm] (counter) {counter};
+	\node[gbox, right=of trainer, yshift=-3cm] (report) {report};
+	
+	\node[below=of report, yshift=-0.1cm] (file) {\includegraphics[width=0.5cm]{img/file.png}};
+	\node[fonts, below=of file, yshift=0.8cm] {single-training data files};
+	\node[] at ($(averager |- file)$) (file_avg) {\includegraphics[width=0.5cm]{img/file.png}};
+	\node[fonts, below=of file_avg, yshift=0.8cm] {averaged data file};
+	
+	\draw[arrow] (json.south) -- (main.north);
+	\draw[arrow] (main.east) -- (trainer.west);
+	\draw[arrow] (trainer.east) to[out=0,in=180] (counter.west);
+	\draw[arrow] (trainer.east) to [out=0,in=180] (env.west);
+	\draw[arrow] (trainer.east) to [out=0,in=180] (agent.west);
+	\draw[arrow] (trainer.east) to[out=0,in=180] (report.west);
+	\draw[arrow] (trainer.east) to[out=0,in=180] (renderer.west);
+	\draw[arrow, <->, dashed] (env.east) -- (parallel.west);
+	\draw[arrow, <->] (agent.east) to [out=0,in=180] (policies.west);
+	\draw[arrow, <->] (agent.east) to [out=0,in=180] (values.west);
+	\draw[arrow, <->] (agent.east) to [out=0,in=180] (buffers.west);
+	\draw[arrow, <->] (agent.east) to [out=0,in=0] (env.east);
+	\draw[arrow, <->] (agent.east) to [out=0,in=0] (env.east);
+	\draw[arrow, <->] (policies.east) to [out=0,in=180] (networks.west);
+	\draw[arrow, <->] (policies.east) to [out=0,in=180] (optimizers.west);
+	\draw[arrow, <->] (policies.east) to [out=0,in=180] (losses.west);
+	\draw[arrow, <->] (values.east) to [out=0,in=180] (networks.west);
+	\draw[arrow, <->] (values.east) to [out=0,in=180] (optimizers.west);
+	\draw[arrow, <->] (values.east) to [out=0,in=180] (losses.west);
+	\draw[arrow] (counter.south) -- (report.north);
+	\draw[arrow] (report.south) -- (file.north);
+	\draw[arrow] (main.south) -- (averager.north);
+	\draw[arrow] (averager.east) -- ($(average.west |- averager)$);
+	\draw[arrow] (averager.south) -- (file_avg.north);
+	
+\end{tikzpicture}
+\end{center}
