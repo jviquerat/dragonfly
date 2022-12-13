@@ -1,0 +1,42 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Environments}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Required interface}
+
+The present library relies on the \textsc{gym} interface proposed in the release \codeinline{0.26.2}:
+
+\begin{minted}{python}
+class custom_env(gym.Env):
+	def __init__(self):
+        		...
+	def step(self, action):
+        		...
+		return obs, rwd, terminated, truncated, info
+	def reset(self):
+        		...
+		return obs
+	def render(self):
+		...
+\end{minted}
+
+\warning{Any environment proposed to the library must follow this interface.} The \codeinline{terminated} boolean indicates that environment reached a premature terminal state, while the \codeinline{truncated} boolean is used to indicate that a time limit was reached. This distinction is particularly important for the use of bootstrapping (see section \textcolor{red}{complete}). While in the \gym interface, both booleans cannot be simultaneously \codeinline{true}, in the library the \codeinline{terminated} flag is also set to \codeinline{true} when \codeinline{truncated} is \codeinline{true}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Custom environments}
+
+While it is possible to register a custom environment using the \gym registration mechanisms to be able to generate them directly through \codeinline{gym.make()}, it is not mandatory to do it to use them with the library. By simply putting the \codeinline{.json} parameter file in the same folder as your main environment file, and by naming the environment file with the environment name, the library should be able to find it.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Rendering modes}
+
+\textcolor{red}{add a word on rendering modes}

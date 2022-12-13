@@ -64,8 +64,119 @@ This design allows to modify an existing algorithm by simply replacing a buildin
 \section{General overview}
 \label{section:general_overview}
 
-The global architecture of the library is summed up below:
+The global architecture of the library is summed up in figure \ref{fig:architecture}. The training is driven by a \codeinline{.json} file that provides all the informations required to set the different classes and train the agent. The training procedure is handled by a \codeinline{trainer} object, which in turn initializes the \codeinline{environment} and the \codeinline{agent}, as well as several other objects helpful for the logging, rendering, etc. The \codeinline{environment} class can then spin up different parallel versions of itself to accelerate training (this part is handled using the \codeinline{multiprocessing} library), while the agent generates the instances that are required for its training, such as policies, values and buffers. These elements rely on a lower level of objects that are networks, optimizers and losses. The whole training procedure can be automatically performed several times to obtain averaged quantities of interest.
 
 \input{fig/architecture}
 
-The training is driven by a \codeinline{.json} file that provides all the informations required to set the different classes and train the agent. The training procedure is handled by a \codeinline{trainer} object, which in turn initializes the \codeinline{environment} and the \codeinline{agent}, as well as several other objects helpful for the logging, rendering, etc. The \codeinline{environment} class can then spin up different parallel versions of itself to accelerate training (this part is handled using the \codeinline{multiprocessing} library), while the agent generates the instances that are required for its training, such as policies, values and buffers. These elements rely on a lower level of objects that are networks, optimizers and losses. The whole training procedure can be automatically performed several times to obtain averaged quantities of interest.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Parameter files}
+\label{section:parameter_files}
+
+Parameters for training are provided under the \codeinline{.json} format to the library, using the following general architecture:
+
+\begin{minted}[fontsize=\scriptsize]{json}
+{
+	"env": {...},
+	"naming": {...},
+	"n_avg": 5,
+	"n_cpu": 1,
+	"n_stp_max": 100000,
+	"trainer": {...},
+	"agent": {...}
+}
+\end{minted}
+
+Please note that most of the following parameters don't have default values and must therefore be provided in the parameter file.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Generic parameters}
+\label{section:generic_parameters}
+
+The following parameters must be provided regardless of the chosen trainer, environment or agent:
+
+\begin{enumerate}
+	\item The \codeinline{n_avg} key indicates the number of times the full training of the agent will be performed. This is used to obtain averaged training scores, as shown previously in figure \ref{fig:training_score};
+	\item The \codeinline{n_cpu} key corresponds to the number of parallel environments that will be used to collect samples. \warning{Depending on the chosen \codeinline{trainer}, this option will have different behaviors:} please refer to section \textcolor{red}{link to trainer section};
+	\item The \codeinline{n_stp_max} key indicates the maximal number of steps that will be performed overall, regardless of the number of parallel environments. Please note that running environments will \emph{not} be interrupted if the \codeinline{n_stp_max} is exceeded: the trainer will wait until the next training stage to terminate.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Environment parameters}
+\label{section:env_parameters}
+
+The \codeinline{env} key allows to provide the environment name, as well as optional normalization, clipping and noising of the observations:
+
+\begin{minted}[fontsize=\scriptsize]{json}
+"env": {
+	"name": "CartPole-v0",
+	"obs_clip": false,
+	"obs_norm": true,
+	"obs_noise": 0.0
+}
+\end{minted}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Naming parameters}
+\label{section:naming_parameters}
+
+The \codeinline{naming} key is used to determine the way results folder will be named. This is particularly useful when multiple runs of the same environment are training using different options:
+
+\begin{minted}[fontsize=\scriptsize]{json}
+"naming": {
+	"env": true,
+	"agent": true,
+	"tag": "test",
+	"time": false,
+}
+\end{minted}
+
+The \codeinline{env} and \codeinline{agent} options will respectively add the names of the environment and the agent to the folder name. The \codeinline{tag} option will add any provided string (here \codeinline{test}) to the folder name. Finally, setting \codeinline{time} to \codeinline{true} will add the launching time to the name of the folder. All these optional strings are separated by underscores.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Trainer parameters}
+\label{section:trainer_parameters}
+
+The \codeinline{trainer} options define how the agent will be trained. Three different types of training are proposed:
+
+\begin{enumerate}
+	\item \codeinline{episode}: episode-based training for online agents. This is the regular training mode for online agents, collecting a defined amount of full episodes before training. ;
+	\item \codeinline{buffer}: buffer-based training for online agents. This option allows to use fixed-length buffers instead of requiring full episodes. This is particularly useful when using a large amount of parallel environments, as it is not necessary to wait for the termination of all environments before launching a training. See section \textcolor{red}{to complete} for more informations;
+	\item \codeinline{td}: temporal difference-based training for offline agents. This is the regular training mode of offline agents, performing by default one update after each transition.
+\end{enumerate}
+
+The specific options of each training mode are specified in section \textcolor{red}{to complete}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Agent parameters}
+\label{section:agent_parameters}
+
+Although the content of the \codeinline{agent} key obviously depends on the type of the selected agent, we hereafter provide an example for the \ppo agent, providing a general idea of the structure. Many examples of parameter files for the \textsc{gym} environments can be found in the \codeinline{dragonfly/env/} folder, using different agents and different training styles.
+
+\begin{minted}[fontsize=\scriptsize]{json}
+"agent": {
+	"type": "ppo",
+	"policy": {
+		"type": "normal",
+		"network": {...},
+		"optimizer": {...},
+		"loss": {...},
+	},
+	"value": {
+		"type": "v_value",
+		"network": {...},
+		"optimizer": {...},
+		"loss": {...},
+	},
+	"retrn": {...},
+	"termination": {...}
+}
+\end{minted}
+
+As can be seen, the \codeinline{type} of agent is provided first, after what, in this case, the details of the \codeinline{policy} and the \codeinline{value} structures (\textit{i.e.} the network architecture, the optimizer options as well as the loss to use) are provided. Then, the \codeinline{retrn} details, detailing the type of return vector to compute, are given. Finally, the \codeinline{termination} informations, indicating how episodes must be terminated, are provided. The specificities of all these classes are provided later in this document.

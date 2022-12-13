@@ -308,7 +308,7 @@
 
 % Redefine \emph and \complete
 \renewcommand{\emph}[1]{\textbf{\textcolor{bluegray1}{#1}}}
-\newcommand{\complete}[1]{\textbf{\textcolor{red}{#1}}}
+\newcommand{\warning}[1]{\textbf{\textcolor{red}{#1}}}
   
 % A remark environment
 \newenvironment{remark}{\medskip\itshape\noindent\small \textbf{Remark}:}{\medskip}
@@ -320,6 +320,15 @@
 \newcommand{\eg}{\textit{e.g.}\;}								% e.g. notation
 \newcommand{\ie}{\textit{i.e.}\;}									% i.e. notation
 \newcommand{\etal}{\textit{et al.}\;}								% et. al. notation
+
+% Algorithms
+\newcommand{\ppo}{\textsc{ppo}\;}
+\newcommand{\dqn}{\textsc{dqn}\;}
+\newcommand{\td}{\textsc{td3}\;}
+\newcommand{\sac}{\textsc{sac}\;}
+\newcommand{\ddpg}{\textsc{ddpg}\;}
+
+\newcommand{\gym}{\textsc{gym}\;}
 
 % Fancy page style for books
 \fancypagestyle{plain}{

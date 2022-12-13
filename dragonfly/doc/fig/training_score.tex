@@ -1,0 +1,34 @@
+%%%%%%%%%%%%
+%%%%%%%%%%%%
+\begin{figure}
+\centering
+%%%%%%%%%%%%
+\begin{tikzpicture}[	trim axis left, trim axis right, font=\footnotesize,
+				upper/.style={	name path=upper, smooth, draw=none},
+				lower/.style={	name path=lower, smooth, draw=none},]
+	\begin{axis}[	xmin=0, xmax=1000000, scale=0.75,
+				ymin=-1000, ymax=6000,
+				scaled x ticks=false,
+				xtick={0,250000,500000,750000,1000000},
+				xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
+				ytick={-1000,0,2000,4000,6000},
+				yticklabels={$-1k$,$0$,$2k$,$4k$,$6k$},
+				legend cell align=left, legend pos=south east,
+				legend style={nodes={scale=0.8, transform shape}},
+				grid=major, xlabel=transitions, ylabel=score]
+				
+		\legend{\sac}
+		
+		\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant/sac.dat};
+		\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant/sac.dat}; 
+		\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+		\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant/sac.dat}; 
+			
+	\end{axis}
+\end{tikzpicture}
+%%%%%%%%%%%%
+\caption{\textbf{Example of score report outputted after training} of the \sac algorithm on the \codeinline{ant-v4} environment from the \codeinline{mujoco} package.} 
+\label{fig:training_score}
+\end{figure} 
+%%%%%%%%%%%%
+%%%%%%%%%%%%
