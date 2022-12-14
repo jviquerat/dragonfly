@@ -60,6 +60,7 @@
 \usepackage{titlesec}	 							% alternative section titles
 \usepackage{color} 									% for custom chapter titles
 \usepackage{textcomp} 								% To fix single quotes
+\usepackage{xspace} 								% To handle trailing spaces
 
 %%%%%%%%%%%%%%%%%%%%%%%% 
 % Code typesetting packages
@@ -322,13 +323,15 @@
 \newcommand{\etal}{\textit{et al.}\;}								% et. al. notation
 
 % Algorithms
-\newcommand{\ppo}{\textsc{ppo}\;}
-\newcommand{\dqn}{\textsc{dqn}\;}
-\newcommand{\td}{\textsc{td3}\;}
-\newcommand{\sac}{\textsc{sac}\;}
-\newcommand{\ddpg}{\textsc{ddpg}\;}
+\newcommand{\vpg}{\textsc{vpg}\xspace}
+\newcommand{\atc}{\textsc{a2c}\xspace}
+\newcommand{\ppo}{\textsc{ppo}\xspace}
+\newcommand{\dqn}{\textsc{dqn}\xspace}
+\newcommand{\td}{\textsc{td3}\xspace}
+\newcommand{\sac}{\textsc{sac}\xspace}
+\newcommand{\ddpg}{\textsc{ddpg}\xspace}
 
-\newcommand{\gym}{\textsc{gym}\;}
+\newcommand{\gym}{\textsc{gym}\xspace}
 
 % Fancy page style for books
 \fancypagestyle{plain}{
