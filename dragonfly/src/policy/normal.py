@@ -46,8 +46,8 @@ class normal(base_policy):
 
         obs      = tf.cast(obs, tf.float32)
         act, lgp = self.sample(obs)
-        act      = np.reshape(act.numpy()[0], (-1,self.store_dim))
-        lgp      = np.reshape(lgp.numpy()[0], (-1))
+        act      = np.reshape(act.numpy(), (-1,self.store_dim))
+        lgp      = np.reshape(lgp.numpy(), (-1))
 
         return act, lgp
 
@@ -56,7 +56,7 @@ class normal(base_policy):
 
         obs    = tf.cast(obs, tf.float32)
         mu, sg = self.forward(obs)
-        act    = np.reshape(mu.numpy()[0], (-1,self.store_dim))
+        act    = np.reshape(mu.numpy(), (-1,self.store_dim))
 
         return act
 
