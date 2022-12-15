@@ -62,13 +62,14 @@ def evaluate(net_file, json_file, ns, nw, aw):
         # Loop with neutral action
         for i in range(nw):
             obs, rwd, dne, trc = env.step(act)
+            rnd.store(env)
 
     # Unroll
     while True:
         act                = agent.control(obs)
         obs, rwd, dne, trc = env.step(act)
-        scr               += rwd[0]
-        n                 += 1
+        scr += rwd[0]
+        n   += 1
 
         rnd.store(env)
         if (term_ns and n >= ns): break
