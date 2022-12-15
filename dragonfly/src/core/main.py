@@ -50,12 +50,22 @@ def main():
             n_steps = int(args[args.index("-steps")+1])
 
         n_warmup = 0
-        a_warmup = None
+        a_warmup = []
         if ("-warmup" in args):
             if ("-steps" not in args):
                 error()
-            n_warmup = int(args[args.index("-warmup")+1])
-            a_warmup = args[args.index("-warmup")+2]
+            wi       = args.index("-warmup")
+            n_warmup = int(args[wi+1])
+            done = False
+            i    = 2
+            while (not done):
+                if (wi+i == len(args)): done = True
+                else:
+                    a  = args[wi+i]
+                    if (a[0] == "-"): done = True
+                    else:
+                        a_warmup.append(a)
+                        i += 1
 
         evaluate(net_file, json_file, n_steps, n_warmup, a_warmup)
         return

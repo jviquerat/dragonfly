@@ -56,7 +56,10 @@ def evaluate(net_file, json_file, ns, nw, aw):
     if (nw > 0):
         # Retrieve action type
         t  = env.get_action_type()
-        if (t == "continuous"): act = [[float(aw)]]
+        if (t == "continuous"):
+            act = []
+            for a in aw: act.append(float(a))
+            act = [act]
         if (t == "discrete"):   act = [[int(aw)]]
 
         # Loop with neutral action
