@@ -77,13 +77,13 @@ class td(trainer_base):
             while (not (self.unroll >= self.n_stp_unroll)):
 
                 # Get actions
-                act, lgp = self.agent.actions(obs)
+                act = self.agent.actions(obs)
 
                 # Make one env step
                 nxt, rwd, dne, trc = self.env.step(act)
 
                 # Store transition
-                self.agent.store(obs, nxt, act, rwd, dne, trc, lgp)
+                self.agent.store(obs, nxt, act, rwd, dne, trc)
                 self.monitor(path, run, obs, act)
 
                 # Update counter

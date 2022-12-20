@@ -15,7 +15,8 @@ class sac(base_agent):
         self.n_cpu      = n_cpu
         self.mem_size   = size
         self.gamma      = pms.gamma
-        self.alpha      = [tf.Variable(pms.alpha.value)]
+        self.alpha0     = pms.alpha.value
+        self.alpha      = [tf.Variable(self.alpha0)]
         self.tgt_H      =-act_dim
         self.rho        = pms.rho
         self.n_warmup   = pms.n_warmup
@@ -103,7 +104,10 @@ class sac(base_agent):
             error("sac", "get_actions",
                   "Detected NaN in generated actions")
 
-        return act, lgp
+        # Store log-prob
+        self.buff.store(["lgp"], [lgp])
+
+        return act
 
     # Control (deterministic actions)
     def control(self, obs):
@@ -157,6 +161,8 @@ class sac(base_agent):
 
         # Train alpha
         self.alpha_loss.train(lgp, self.alpha, self.tgt_H, self.alpha_opt)
+        with open("alpha", "a") as f:
+            f.write(str(self.step)+" "+str(self.alpha[0].numpy())+"\n")
 
     # Reset
     def reset(self):
@@ -170,12 +176,15 @@ class sac(base_agent):
         self.q_tgt2.net.set_weights(self.q_net2.net.get_weights())
         self.buff.reset()
         self.gbuff.reset()
+        self.alpha = [tf.Variable(self.alpha0)]
+        self.alpha_opt.reset()
+        self.step = 0
 
     # Store transition
-    def store(self, obs, nxt, act, rwd, dne, trc, lgp):
+    def store(self, obs, nxt, act, rwd, dne, trc):
 
         trm = self.term.terminate(dne, trc)
-        self.buff.store(self.names, [obs, nxt, act, rwd, trm, lgp])
+        self.buff.store(self.names, [obs, nxt, act, rwd, trm])
 
     # Actions to execute before the inner training loop
     def pre_loop(self):

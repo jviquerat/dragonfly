@@ -11,10 +11,10 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 20000,
+    "n_stp_max": 50000,
     "trainer": {
         "style": "td",
-        "mem_size": 20000,
+        "mem_size": 50000,
         "btc_size": 64,
         "n_stp_unroll": 1,
         "render_every": 500
@@ -29,12 +29,12 @@
             "value": 0.1,
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-4,
+                "lr": 1.0e-5,
                 "grd_clip": null
             }
         },
         "policy": {
-            "type": "tanh_normal",
+            "type": "normal",
             "network": {
                 "type": "fc",
                 "trunk": {
