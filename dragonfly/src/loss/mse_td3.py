@@ -14,7 +14,7 @@ class mse_td3():
 
             # Compute target
             nac  = pt.forward(nxt)
-            nse  = tf.random.normal(tf.shape(nac), 0.0, sigma, tf.float32)
+            nse  = tf.random.normal(tf.shape(nac), 0.0, sigma)
             nse  = tf.clip_by_value(nse, -clp, clp)
             nac  = tf.clip_by_value(nac+nse, -1.0, 1.0)
             nct  = tf.concat([nxt, nac], axis=-1)
@@ -27,7 +27,7 @@ class mse_td3():
 
             # Compute loss
             oac  = tf.concat([obs, act], axis=-1)
-            val  = tf.cast(q.forward(oac), tf.float32)
+            val  = q.forward(oac)
             val  = tf.reshape(val, [-1,1])
             diff = tf.square(tgt - val)
             loss = tf.reduce_mean(diff)

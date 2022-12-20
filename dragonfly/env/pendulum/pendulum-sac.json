@@ -15,7 +15,7 @@
     "trainer": {
         "style": "td",
         "mem_size": 20000,
-        "btc_size": 128,
+        "btc_size": 64,
         "n_stp_unroll": 1,
         "render_every": 500
     },
@@ -25,7 +25,7 @@
         "rho": 0.995,
         "n_warmup": 1000,
         "n_filling": 1000,
-        "alpha": 0.5,
+        "alpha": 0.1,
         "policy": {
             "type": "normal",
             "network": {
@@ -43,7 +43,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
@@ -68,7 +68,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
