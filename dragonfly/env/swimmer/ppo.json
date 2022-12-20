@@ -9,7 +9,7 @@
     "name_agent": true,
     "name_tag": "",
     "name_time": false,
-    "n_avg": 3,
+    "n_avg": 5,
     "n_cpu": 1,
     "n_stp_max": 1000000,
     "trainer": {
@@ -17,7 +17,7 @@
         "buff_size": 2048,
         "n_buff": 1,
         "batch_frac": 0.25,
-        "n_epochs": 64,
+        "n_epochs": 32,
         "render_every": 5000
     },
     "agent": {
@@ -26,6 +26,7 @@
             "type": "normal",
             "network": {
                 "type": "fc",
+		"k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64],
                     "actv": "relu"
@@ -52,6 +53,7 @@
             "type": "v_value",
             "network": {
                 "type": "fc",
+		"k_init": "lecun_normal", 
                 "trunk": {
                     "arch": [64,64],
                     "actv": "relu"

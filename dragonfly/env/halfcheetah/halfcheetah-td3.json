@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "Ant-v4",
+        "name": "HalfCheetah-v4",
         "obs_clip": false,
         "obs_norm": false,
         "obs_noise": 0.0
@@ -20,35 +20,38 @@
         "render_every": 500000
     },
     "agent": {
-        "type": "sac",
+        "type": "td3",
         "gamma": 0.99,
         "rho": 0.995,
         "n_warmup": 10000,
         "n_filling": 1000,
-	"alpha": 0.2,
+        "p_update": 2,
+        "sigma_act": 0.1,
+        "sigma_tgt": 0.2,
+        "noise_clip": 0.5,
         "policy": {
-	    "type": "tanh_normal",
+            "type": "deterministic",
             "network": {
                 "type": "fc",
-                "k_init": "lecun_normal",
+		"k_init": "lecun_normal",
                 "trunk": {
-                    "arch": [256],
+                    "arch": [256,256],
                     "actv": "relu"
                 },
                 "heads": {
-                    "nb": 2,
-                    "arch": [[256],[256]],
-                    "actv": ["relu","relu"],
-                    "final": ["tanh","sigmoid"]
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["relu"],
+                    "final": ["tanh"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
-                "type": "q_pol_sac"
+                "type": "q_pol"
             }
         },
         "value": {
@@ -69,15 +72,15 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
-                "type": "mse_sac"
+                "type": "mse_td3"
             }
         },
         "termination": {
-            "type": "bootstrap"
+            "type": "regular"
         }
     }
 }

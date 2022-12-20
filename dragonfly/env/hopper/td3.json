@@ -9,7 +9,7 @@
     "name_agent": true,
     "name_tag": "",
     "name_time": false,
-    "n_avg": 3,
+    "n_avg": 5,
     "n_cpu": 1,
     "n_stp_max": 1000000,
     "trainer": {
@@ -33,9 +33,9 @@
             "type": "deterministic",
             "network": {
                 "type": "fc",
-		            "k_init": "lecun_normal",
+		"k_init": "lecun_normal",
                 "trunk": {
-                    "arch": [128,128],
+                    "arch": [256,256],
                     "actv": "relu"
                 },
                 "heads": {
@@ -58,7 +58,7 @@
             "type": "q_value",
             "network": {
                 "type": "fc",
-		            "k_init": "lecun_normal",
+		"k_init": "lecun_normal",
                 "trunk": {
                     "arch": [256,256],
                     "actv": "relu"

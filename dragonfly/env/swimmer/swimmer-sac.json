@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "Ant-v4",
+        "name": "Swimmer-v4",
         "obs_clip": false,
         "obs_norm": false,
         "obs_noise": 0.0
@@ -21,7 +21,7 @@
     },
     "agent": {
         "type": "sac",
-        "gamma": 0.99,
+        "gamma": 0.9995,
         "rho": 0.995,
         "n_warmup": 10000,
         "n_filling": 1000,

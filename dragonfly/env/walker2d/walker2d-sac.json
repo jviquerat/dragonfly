@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "Ant-v4",
+        "name": "Walker2d-v4",
         "obs_clip": false,
         "obs_norm": false,
         "obs_noise": 0.0
@@ -27,7 +27,7 @@
         "n_filling": 1000,
 	"alpha": 0.2,
         "policy": {
-	    "type": "tanh_normal",
+	    "type": "normal",
             "network": {
                 "type": "fc",
                 "k_init": "lecun_normal",
@@ -44,7 +44,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
@@ -69,7 +69,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {

@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "Ant-v4",
+        "name": "HalfCheetah-v4",
         "obs_clip": false,
         "obs_norm": false,
         "obs_noise": 0.0
@@ -44,7 +44,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
@@ -69,7 +69,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
