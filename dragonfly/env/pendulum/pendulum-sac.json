@@ -2,7 +2,7 @@
     "env": {
         "name": "Pendulum-v1",
         "obs_clip": false,
-        "obs_norm": true,
+        "obs_norm": false,
         "obs_noise": 0.0
     },
     "name_env": true,
@@ -25,9 +25,9 @@
         "rho": 0.995,
         "n_warmup": 1000,
         "n_filling": 1000,
-        "alpha": 0.1,
+        "alpha": 0.01,
         "policy": {
-            "type": "normal",
+            "type": "tanh_normal",
             "network": {
                 "type": "fc",
                 "trunk": {
