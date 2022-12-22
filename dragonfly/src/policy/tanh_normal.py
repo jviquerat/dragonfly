@@ -10,13 +10,21 @@ class tanh_normal(normal):
 
         super().__init__(obs_dim, act_dim, pms)
 
-    # Compute pdf
-    def compute_pdf(self, obs):
+    # Sample actions
+    @tf.function
+    def sample(self, obs):
 
-        # Get pdf
+        # Reparameterization trick
+        pdf = self.compute_pdf(obs)
         mu, sg = self.forward(obs)
-        nrm    = tfd.MultivariateNormalDiag(loc        = mu,
-                                            scale_diag = sg)
-        pdf    = tfd.TransformedDistribution(nrm, tfp.bijectors.Tanh())
+        act = pdf.sample(1)
+        act = tf.reshape(act, [-1,self.store_dim])
+        lgp = pdf.log_prob(act)
+        lgp = tf.reshape(lgp, [-1,1])
+        tanh_act = tf.tanh(act)
 
-        return pdf
+        # Log-prob of reparameterized action
+        sth = tf.math.log(1.0 - tf.square(tanh_act) + 1.0e-8)
+        lgp = lgp - tf.reduce_sum(sth)
+
+        return tanh_act, lgp

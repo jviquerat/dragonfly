@@ -26,6 +26,9 @@ class sac(base_agent):
         if (pms.policy.loss.type != "q_pol_sac"):
             error("sac", "__init__",
                   "Policy loss type for sac agent is not q_pol_sac")
+        if (pms.policy.type != "tanh_normal"):
+            error("sac", "__init__",
+                  "Policy type for sac agent is not tanh_normal")
 
         self.p_net = pol_factory.create(pms.policy.type,
                                         obs_dim = obs_dim,

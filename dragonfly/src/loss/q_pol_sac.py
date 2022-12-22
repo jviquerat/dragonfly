@@ -16,23 +16,8 @@ class q_pol_sac():
     def train(self, obs, p, q1, q2, alpha):
         with tf.GradientTape() as tape:
 
-            # Reparameterization trick
-            mu, sg = p.forward(obs)
-            nm     = tf.random.normal(tf.shape(mu), 0.0, 1.0)
-            act    = mu + sg*nm
-
-            # Real distribution
-            dn  = tfd.MultivariateNormalDiag(loc        = mu,
-                                             scale_diag = sg)
-            lgp = dn.log_prob(act)
-            lgp = tf.reshape(lgp, [-1,1])
-
-            # Log-prob of reparameterized action
-            act = tf.tanh(act)
-            sth = tf.math.log(1.0 - tf.square(act))
-            lgp = lgp - tf.reduce_sum(sth)
-
             # Compute loss
+            act, lgp = p.sample(obs)
             cct  = tf.concat([obs,act], axis=-1)
             tgt1 = q1.forward(cct)
             tgt2 = q2.forward(cct)
