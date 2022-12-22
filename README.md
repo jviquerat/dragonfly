@@ -41,21 +41,14 @@ In that case, the environment will just rely on the `done` signal to stop the ev
 
 ## Mujoco environments
 
-| Environment | Description | Illustration |
-| :--- | :--- | :---: |
-| `Hopper-v4` | A one-legged humanoid learns to move forward by hopping. See additional details <a href="dragonfly/env/hopper/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/hopper/good.gif"> |
-| `Ant-v4` | A quadrupedal ant learns to move forward. See additional details <a href="dragonfly/env/ant/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/ant/good.gif"> |
-| `Swimmer-v4` | An articulated worm learns to swim on the ground. See additional details <a href="dragonfly/env/swimmer/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/swimmer/good.gif"> |
+| [**`Hopper-v4`**](dragonfly/env/hopper/README.md)       | [**`Ant-v4`**](dragonfly/env/ant/README.md)           | [**`Swimmer-v4`**](dragonfly/env/hopper/README.md)       |
+| :-----------------------------------------------------: | :---------------------------------------------------: | :-----------------------------------------------------: |
+| <img height="250" alt="gif" src="dragonfly/env/hopper/good.gif"> | <img height="250" alt="gif" src="dragonfly/env/ant/good.gif"> | <img height="250" alt="gif" src="dragonfly/env/swimmer/good.gif">                |
 
 ## Gym environments
 
-Below are a few environment solved with the library.
-
-| Environment | Description | Illustration |
-| :--- | :--- | :---: |
-| `CartPole-v0` | The basic `gym` environment. The agent learns to balance a pole fixed to a moving cart, using discrete lateral movements of the cart. See additional details <a href="dragonfly/env/cartpole/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/cartpole/good.gif"> |
-| `Pendulum-v0` | The basic `gym` environment. The agent learns to balance a 1-bar pendulum vertically, using limited torque force. See additional details <a href="dragonfly/env/pendulum/README.md">here</a>.  | <img width="250" alt="gif" src="dragonfly/env/pendulum/good.gif"> |
-| `Acrobot-v1` | The basic `gym` environment. The agent learns to swing a two-links system up to a certain height. See additional details <a href="dragonfly/env/acrobot/README.md">here</a>.  | <img width="250" alt="gif" src="dragonfly/env/acrobot/good.gif">
-| `LunarLanderContinuous-v2` | The basic `gym` environment. The agent learns to land on a landing pad using 4 continuous actions. See additional details <a href="dragonfly/env/lunarlandercontinuous/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/lunarlandercontinuous/good.gif"> |
-| `BipedalWalker-v3` | The basic `gym` environment. The agent learns to walk with a bipedal "thing" by applying torque to 4 different joints. See additional details <a href="dragonfly/env/bipedalwalker/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/bipedalwalker/good_td3.gif"> |
-| `MountainCar-v0` | The basic `gym` environment. The agent learns run a car from the bottom of a valley to the top of a hill. See additional details <a href="dragonfly/env/mountaincar/README.md">here</a>. | <img width="250" alt="gif" src="dragonfly/env/mountaincar/good.gif"> |
+| [**`Cartpole-v0`**](dragonfly/env/cartpole/README.md)   | [**`Pendulum-v0`**](dragonfly/env/pendulum/README.md)   | [**`Acrobot-v1`**](dragonfly/env/acrobot/README.md)       |
+| :-----------------------------------------------------: | :-----------------------------------------------------: | :-----------------------------------------------------: |
+| <img height="200" alt="gif" src="dragonfly/env/cartpole/good.gif">  | <img height="200" alt="gif" src="dragonfly/env/pendulum/good.gif">            | <img height="200" alt="gif" src="dragonfly/env/acrobot/good.gif">                |
+| [**`LunarLanderContinuous-v2`**](dragonfly/env/lunarlandercontinuous/README.md) | [**`BipedalWalker-v3`**](dragonfly/env/bipedalwalker/README.md)   | [**`MountainCar-v0`**](dragonfly/env/mountaincar/README.md)       |
+| <img height="200" alt="gif" src="dragonfly/env/lunarlandercontinuous/good.gif"> | <img height="200" alt="gif" src="dragonfly/env/bipedalwalker/good_td3.gif">            | <img height="200" alt="gif" src="dragonfly/env/mountaincar/good.gif">                |
