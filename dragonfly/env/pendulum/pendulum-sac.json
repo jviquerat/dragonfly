@@ -2,7 +2,7 @@
     "env": {
         "name": "Pendulum-v1",
         "obs_clip": false,
-        "obs_norm": false,
+        "obs_norm": true,
         "obs_noise": 0.0
     },
     "name_env": true,

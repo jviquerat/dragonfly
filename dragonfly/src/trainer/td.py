@@ -24,7 +24,7 @@ class td(trainer_base):
         self.btc_size     = pms.btc_size
         self.freq_report  = max(int(self.n_stp_max/(freq_report*self.n_stp_unroll)),1)
 
-        # Optional monitoring
+        # Optional parameters
         self.monitoring = False
         if hasattr(pms, "monitoring"):  self.monitoring = pms.monitoring
 
