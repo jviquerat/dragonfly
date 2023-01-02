@@ -167,6 +167,8 @@ class td3(base_agent):
     # Reset
     def reset(self):
 
+        self.step = 0
+        self.p_step = 0
         self.p_net.reset()
         self.q_net1.reset()
         self.q_net2.reset()

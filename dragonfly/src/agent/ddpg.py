@@ -144,6 +144,7 @@ class ddpg(base_agent):
     # Reset
     def reset(self):
 
+        self.step = 0
         self.p_net.reset()
         self.q_net.reset()
         self.p_tgt.reset()
