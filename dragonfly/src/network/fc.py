@@ -39,18 +39,20 @@ class fc(Model):
         self.heads.arch     = [[64]]
         self.heads.actv     = ["relu"]
         self.heads.final    = ["linear"]
-        self.k_init         = "lecun_normal"
+        self.k_init         = Orthogonal(gain=1.0)
+        self.k_init_final   = Orthogonal(gain=0.01)
 
         # Check inputs
-        if hasattr(pms,       "trunk"):  self.trunk       = pms.trunk
-        if hasattr(pms.trunk, "arch"):   self.trunk.arch  = pms.trunk.arch
-        if hasattr(pms.trunk, "actv"):   self.trunk.actv  = pms.trunk.actv
-        if hasattr(pms,       "heads"):  self.heads       = pms.heads
-        if hasattr(pms.heads, "nb"):     self.heads.nb    = pms.heads.nb
-        if hasattr(pms.heads, "arch"):   self.heads.arch  = pms.heads.arch
-        if hasattr(pms.heads, "actv"):   self.heads.actv  = pms.heads.actv
-        if hasattr(pms.heads, "final"):  self.heads.final = pms.heads.final
-        if hasattr(pms,       "k_init"): self.k_init      = pms.k_init
+        if hasattr(pms,       "trunk"):        self.trunk        = pms.trunk
+        if hasattr(pms.trunk, "arch"):         self.trunk.arch   = pms.trunk.arch
+        if hasattr(pms.trunk, "actv"):         self.trunk.actv   = pms.trunk.actv
+        if hasattr(pms,       "heads"):        self.heads        = pms.heads
+        if hasattr(pms.heads, "nb"):           self.heads.nb     = pms.heads.nb
+        if hasattr(pms.heads, "arch"):         self.heads.arch   = pms.heads.arch
+        if hasattr(pms.heads, "actv"):         self.heads.actv   = pms.heads.actv
+        if hasattr(pms.heads, "final"):        self.heads.final  = pms.heads.final
+        if hasattr(pms,       "k_init"):       self.k_init       = pms.k_init
+        if hasattr(pms,       "k_init_final"): self.k_init_final = pms.k_init_final
 
         # Check that out_dim and heads have same dimension
         if (len(self.out_dim) != pms.heads.nb):
@@ -73,7 +75,7 @@ class fc(Model):
                                       kernel_initializer = self.k_init,
                                       activation         = self.heads.actv[h]))
             self.net.append(Dense(self.out_dim[h],
-                                  kernel_initializer = self.k_init,
+                                  kernel_initializer = self.k_init_final,
                                   activation         = self.heads.final[h]))
 
         # Initialize weights
