@@ -14,7 +14,7 @@
     "n_stp_max": 100000,
     "trainer": {
         "style": "buffer",
-        "buff_size": 1600,
+        "buff_size": 2000,
         "n_buff": 1,
         "batch_frac": 0.25,
         "n_epochs": 64,
@@ -26,7 +26,6 @@
             "type": "normal",
             "network": {
                 "type": "fc",
-                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64],
                     "actv": "relu"
@@ -38,6 +37,7 @@
                     "final": ["tanh","sigmoid"]
                 }
             },
+            "stddev_gen": "regular",
             "optimizer": {
                 "type": "adam",
                 "lr": 5.0e-4,
@@ -53,7 +53,6 @@
             "type": "v_value",
             "network": {
                 "type": "fc",
-                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
                     "actv": "relu"
