@@ -15,15 +15,27 @@ class normal(base_policy):
         self.dim        = self.act_dim
         self.store_dim  = self.act_dim
         self.store_type = float
+        self.stddev_gen = "regular"
 
-        # Define and init network
+        # Optional stddev generation method
+        if hasattr(pms, "stddev_gen"): self.stddev_gen = pms.stddev_gen
+        self.stddev_log_clip = -20.0
+
+        # Check parameters
         if (pms.network.heads.final[0] != "tanh"):
             warning("normal", "__init__",
                     "Final activation for mean network of normal policy is not tanh")
-        if (pms.network.heads.final[1] != "sigmoid"):
-            warning("normal", "__init__",
-                    "Final activation for dev network of normal policy is not sigmoid")
 
+        if (self.stddev_gen == "regular"):
+            if (pms.network.heads.final[1] != "sigmoid"):
+                warning("normal", "__init__",
+                        "Final activation for dev network of normal policy is not sigmoid")
+        if (self.stddev_gen == "log"):
+            if (pms.network.heads.final[1] != "linear"):
+                warning("normal", "__init__",
+                        "Final activation for dev network of normal policy is not linear")
+
+        # Define and init network
         self.net = net_factory.create(pms.network.type,
                                       inp_dim = obs_dim,
                                       out_dim = [self.dim,self.dim],
@@ -88,9 +100,15 @@ class normal(base_policy):
     # Networks forward pass
     def forward(self, state):
 
-        out = self.net.call(state)
-        mu  = out[0]
-        sg  = out[1]
+        out    = self.net.call(state)
+        mu     = out[0]
+
+        if (self.stddev_gen == "regular"):
+            sg = out[1]
+        if (self.stddev_gen == "log"):
+            log_sg = out[1]
+            log_sg = tf.clip_by_value(log_sg, self.stddev_log_clip, 0.0)
+            sg     = tf.exp(log_sg)
 
         return mu, sg
 
