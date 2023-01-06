@@ -11,26 +11,9 @@ This chapter contains experiments on several technical details of algorithms. Mo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Standard deviation}
 
-When using the normal law policy with on-policy algorithms such as \ppo, several options exist to generate the standard deviation vector:
-
-\begin{enumerate}
-	\item The policy network can output either the standard deviation or its logarithm;
-	\item The standard deviation can be state-dependant (output of the policy network), or state-independent (a simple variable vector).
-\end{enumerate}
-
-These two questions are benchmarked in the following subsections.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{State-dependent case}
-
-Here, the policy network is composed of a common trunk (one layer of size 64) followed two branches (each with one layer of size 64). The branch for the mean value ends with a $\tanh$ activation function, while the branch for the standard deviation ends either with a sigmoid activation (direct output of standard deviation) or a linear activation (output of the log of the standard deviation). In the latter case, the output is clipped to $[-20,0]$ before being exponentiated, meaning the standard deviation is roughly in $[\num{2e-9},1]$. The mean value being constrained in $[-1,1]$ by the $\tanh$ activation, this ensures a proper exploration of the domain, the actions being mapped to the physical bounds of the problem afterward. In figure \ref{fig:normal_stddev}, we compare the performance of the two approaches on several standard \gym environments.
+When using the normal law policy with on-policy algorithms such as \ppo, several options exist to generate the standard deviation vector, the policy network can output either the standard deviation or its logarithm. The impact of this choice is explored in this section. Here, the policy network is composed of a common trunk (one layer of size 64) followed two branches (each with one layer of size 64). The branch for the mean value ends with a $\tanh$ activation function, while the branch for the standard deviation ends either with a sigmoid activation (direct output of standard deviation) or a linear activation (output of the log of the standard deviation). In the latter case, the output is clipped to $[-20,0]$ before being exponentiated, meaning the standard deviation is roughly in $[\num{2e-9},1]$. The mean value being constrained in $[-1,1]$ by the $\tanh$ activation, this ensures a proper exploration of the domain, the actions being mapped to the physical bounds of the problem afterward. In figure \ref{fig:normal_stddev}, we compare the performance of the two approaches on several standard \gym and \mujoco environments. It appears that, overall, the regular approach performs best on most environments except \codeinline{pendulum-v1}.
 
 \input{fig/stddev/normal_stddev}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{State-independent case}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

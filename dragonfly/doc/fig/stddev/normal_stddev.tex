@@ -21,10 +21,10 @@
 				
 			\legend{regular, log}
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_regular_pendulum.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_regular_pendulum.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/ppo.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/pendulum/ppo.dat}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/stddev/normal_stddev_regular_pendulum.dat};
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/pendulum/ppo.dat};
 		
 			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_log_pendulum.dat};
 			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_log_pendulum.dat}; 
@@ -55,10 +55,10 @@
 				
 			\legend{regular, log}
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_regular_lunarlander.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_regular_lunarlander.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/lunarlander/ppo.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/lunarlander/ppo.dat}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/stddev/normal_stddev_regular_lunarlander.dat};
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/lunarlander/ppo.dat};
 		
 			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_log_lunarlander.dat};
 			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_log_lunarlander.dat}; 
@@ -94,10 +94,10 @@
 				
 			\legend{regular, log}
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_regular_bipedalwalker.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_regular_bipedalwalker.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/bipedalwalker/ppo.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/bipedalwalker/ppo.dat}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/stddev/normal_stddev_regular_bipedalwalker.dat};
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/bipedalwalker/ppo.dat};
 		
 			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_log_bipedalwalker.dat};
 			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_log_bipedalwalker.dat}; 
@@ -134,10 +134,10 @@
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
 			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/hopper/ppo.dat};
 		
-			%\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_log_lunarlander.dat};
-			%\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_log_lunarlander.dat}; 
-			%\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			%\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/stddev/normal_stddev_log_lunarlander.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_log_hopper.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_log_hopper.dat}; 
+			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/stddev/normal_stddev_log_hopper.dat}; 
 			
 		\end{axis}
 	\end{tikzpicture}
@@ -157,13 +157,13 @@
 					upper/.style={	name path=upper, smooth, draw=none},
 					lower/.style={	name path=lower, smooth, draw=none},]
 		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
-					ymin=0, ymax=2000,
+					ymin=-1000, ymax=2000,
 					scaled x ticks=false,
 					xtick={0,250000,500000,750000,1000000},
 					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
-					ytick={0,1000,2000},
-					yticklabels={$0$,$1k$,$2k$},
-					legend cell align=left, legend pos=south east,
+					ytick={-1000,0,1000,2000},
+					yticklabels={$-1k$,$0$,$1k$,$2k$},
+					legend cell align=left, legend pos=north west,
 					legend style={nodes={scale=0.8, transform shape}},
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel=score]
@@ -175,10 +175,10 @@
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
 			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant/ppo.dat};
 		
-			%\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_log_bipedalwalker.dat};
-			%\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_log_bipedalwalker.dat}; 
-			%\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			%\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/stddev/normal_stddev_log_bipedalwalker.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_log_ant.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_log_ant.dat}; 
+			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/stddev/normal_stddev_log_ant.dat}; 
 			
 		\end{axis}
 	\end{tikzpicture}
@@ -192,13 +192,13 @@
 					upper/.style={	name path=upper, smooth, draw=none},
 					lower/.style={	name path=lower, smooth, draw=none},]
 		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
-					ymin=0, ymax=3000,
+					ymin=-500, ymax=3000,
 					scaled x ticks=false,
 					xtick={0,250000,500000,750000,1000000},
 					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
 					ytick={0,1000,2000,3000},
 					yticklabels={$0$,$1k$,$2k$,$3k$},
-					legend cell align=left, legend pos=south east,
+					legend cell align=left, legend pos=north west,
 					legend style={nodes={scale=0.8, transform shape}},
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel={}]
@@ -210,10 +210,10 @@
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
 			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/halfcheetah/ppo.dat};
 		
-			%\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_log_lunarlander.dat};
-			%\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_log_lunarlander.dat}; 
-			%\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			%\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/stddev/normal_stddev_log_lunarlander.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/stddev/normal_stddev_log_halfcheetah.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/stddev/normal_stddev_log_halfcheetah.dat};
+			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/stddev/normal_stddev_log_halfcheetah.dat}; 
 			
 		\end{axis}
 	\end{tikzpicture}
