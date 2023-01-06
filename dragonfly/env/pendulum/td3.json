@@ -11,13 +11,13 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 20000,
+    "n_stp_max": 100000,
     "trainer": {
         "style": "td",
-        "mem_size": 20000,
+        "mem_size": 100000,
         "btc_size": 64,
         "n_stp_unroll": 1,
-        "render_every": 500
+        "render_every": 50000
     },
     "agent": {
         "type": "td3",
@@ -33,7 +33,6 @@
             "type": "deterministic",
             "network": {
                 "type": "fc",
-                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
                     "actv": "relu"
@@ -58,7 +57,6 @@
             "type": "q_value",
             "network": {
                 "type": "fc",
-                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
                     "actv": "relu"

@@ -8,39 +8,38 @@
 	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
 					upper/.style={	name path=upper, smooth, draw=none},
 					lower/.style={	name path=lower, smooth, draw=none},]
-		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
-					ymin=-1000, ymax=6000,
+		\begin{axis}[	xmin=0, xmax=50000, scale=0.7,
+					ymin=0, ymax=250,
 					scaled x ticks=false,
-					xtick={0,250000,500000,750000,1000000},
-					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
-					ytick={-1000,0,2000,4000,6000},
-					yticklabels={$-1k$,$0$,$2k$,$4k$,$6k$},
+					xtick={0,10000,20000,30000,40000,50000},
+					xticklabels={$0$,$10k$,$20k$,$30k$,$40k$,$50k$},
+					ytick={0,100,200,6000},
 					legend cell align=left, legend pos=south east,
 					legend style={nodes={scale=0.8, transform shape}},
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel=score]
 				
-			\legend{\sac, \ppo}
+			\legend{\ppo, \atc, \dqn}
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant/sac.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant/sac.dat}; 
-			\addplot [fill=orange3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=orange1, thick, smooth] 		table[x index=0,y index=5] {fig/mujoco/ant/sac.dat};
-		
-	%		\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant/td3.dat};
-	%		\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant/td3.dat}; 
-	%		\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-	%		\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant/td3.dat};
-		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant/ppo.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant/ppo.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/cartpole/ppo.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/cartpole/ppo.dat}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant/ppo.dat}; 
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/cartpole/ppo.dat}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/cartpole/a2c.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/cartpole/a2c.dat}; 
+			\addplot [fill=bluegray3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=bluegray1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/cartpole/a2c.dat}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/cartpole/dqn.dat };
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/cartpole/dqn.dat}; 
+			\addplot [fill=purple3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=purple1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/cartpole/dqn.dat}; 
 			
 		\end{axis}
 	\end{tikzpicture}
-	\caption{\codeinline{ant-v4}}
-	\label{fig:mujoco_ant}
+	\caption{\codeinline{cartpole-v0}}
+	\label{fig:gym_cartpole}
 \end{subfigure} \qquad \qquad
 %%%%%%%%%%%%
 \begin{subfigure}[t]{.3\textwidth}
@@ -48,39 +47,43 @@
 	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
 					upper/.style={	name path=upper, smooth, draw=none},
 					lower/.style={	name path=lower, smooth, draw=none},]
-		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
-					ymin=-500, ymax=10000,
+		\begin{axis}[	xmin=0, xmax=100000, scale=0.7,
+					ymin=-1400, ymax=0,
 					scaled x ticks=false, scaled y ticks=false,
-					xtick={0,250000,500000,750000,1000000},
-					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
-					ytick={0,2000,4000,6000,8000, 10000},
-					yticklabels={$0$,$2k$,$4k$,$6k$,$8k$, $10k$},
+					xtick={0,25000,50000,75000,100000},
+					xticklabels={$0$,$25k$,$50k$,$75k$,$100k$},
+					ytick={-1400,-1200,-1000,-800,-600,-400,-200,0},
 					legend cell align=left, legend pos=south east,
 					legend style={nodes={scale=0.8, transform shape}},
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel={}]
 				
-			\legend{\sac, \ppo}
+			\legend{\atc, \ppo, \ddpg, \tdt}
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/a2c.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/pendulum/a2c.dat}; 
+			\addplot [fill=bluegray3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=bluegray1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/pendulum/a2c.dat};
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/halfcheetah/sac.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/halfcheetah/sac.dat}; 
-			\addplot [fill=orange3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=orange1, thick, smooth] 		table[x index=0,y index=5] {fig/mujoco/halfcheetah/sac.dat};
-		
-	%		\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant/td3.dat};
-	%		\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant/td3.dat}; 
-	%		\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-	%		\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant/td3.dat};
-		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/halfcheetah/ppo.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/halfcheetah/ppo.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/ppo.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/pendulum/ppo.dat}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/halfcheetah/ppo.dat}; 
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/pendulum/ppo.dat};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/ddpg.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/pendulum/ddpg.dat}; 
+			\addplot [fill=red3, opacity=0.5, forget plot]	 	fill between[of=upper and lower];
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/pendulum/ddpg.dat}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/td3.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/pendulum/td3.dat}; 
+			\addplot [fill=teal3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/pendulum/td3.dat}; 
 			
 		\end{axis}
 	\end{tikzpicture}
-	\caption{\codeinline{halfcheetah-v4}}
-	\label{fig:mujoco_halfcheetah}
+	\caption{\codeinline{pendulum-v1}}
+	\label{fig:gym_pendulum}
 \end{subfigure}
 
 \medskip
@@ -167,7 +170,7 @@
 	\label{fig:mujoco_humanoid}
 \end{subfigure}
 %%%%%%%%%%%%
-\caption{\textbf{Performance comparison on the \mujoco benchmark.}} 
+\caption{\textbf{Performance comparison on the \gym benchmark.}} 
 \label{fig:mujoco}
 \end{figure} 
 %%%%%%%%%%%%
