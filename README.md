@@ -44,6 +44,8 @@ In that case, the environment will just rely on the `done` signal to stop the ev
 | **`Hopper-v4`**                                         | **`Ant-v4`**                                          | **`Swimmer-v4`**                                        |
 | :-----------------------------------------------------: | :---------------------------------------------------: | :-----------------------------------------------------: |
 | <img height="250" alt="gif" src="dragonfly/env/hopper/good.gif"> | <img height="250" alt="gif" src="dragonfly/env/ant/good.gif"> | <img height="250" alt="gif" src="dragonfly/env/swimmer/good.gif"> |
+| **`HalfCheetah-v4`**                                    | **`Walker2d-v4`**                                     | **`Humanoid-v4`**                                       |
+| <img height="250" alt="gif" src="dragonfly/env/halfcheetah/good.gif"> | <img height="250" alt="gif" src="dragonfly/msc/logo.png"> | <img height="250" alt="gif" src="dragonfly/msc/logo.png"> |
 
 ## Gym environments
 
