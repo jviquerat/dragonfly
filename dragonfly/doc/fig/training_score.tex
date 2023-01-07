@@ -22,8 +22,8 @@
 		
 		\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant/sac.dat};
 		\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant/sac.dat}; 
-		\addplot [fill=orange3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-		\addplot[draw=orange1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant/sac.dat}; 
+		\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+		\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant/sac.dat}; 
 			
 	\end{axis}
 \end{tikzpicture}
