@@ -1,5 +1,5 @@
 # Generic imports
-import numpy as np
+import tensorflow as tf
 
 ###############################################
 ### Polyak averager for neural networks
@@ -9,6 +9,7 @@ class polyak:
         self.rho = rho
 
     # Update network by polyak average
+    @tf.function
     def average(self, net, tgt):
 
         for wv, wt in zip(net.weights, tgt.weights):
