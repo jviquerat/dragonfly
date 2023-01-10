@@ -9,6 +9,7 @@ class polyak:
         self.rho = rho
 
     # Update network by polyak average
+    @tf.function
     def average(self, net, tgt):
 
         for wv, wt in zip(net.weights, tgt.weights):
