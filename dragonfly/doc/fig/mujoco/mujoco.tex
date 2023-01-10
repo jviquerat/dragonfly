@@ -219,28 +219,27 @@
 					upper/.style={	name path=upper, smooth, draw=none},
 					lower/.style={	name path=lower, smooth, draw=none},]
 		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
-					ymin=0, ymax=6000,
+					ymin=0, ymax=300,
 					scaled x ticks=false, scaled y ticks=false,
 					xtick={0,250000,500000,750000,1000000},
 					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
-					ytick={0,2000,4000,6000},
-					yticklabels={$0$,$2k$,$4k$,$6k$},
+					ytick={0,100,200,300},
 					legend cell align=left, legend pos=south east,
 					legend style={nodes={scale=0.8, transform shape}},
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel={}]
 				
-			\legend{\ppo, \sac}
+			\legend{\ppo}
 			
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/humanoid/ppo.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/humanoid/ppo.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/swimmer/ppo.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/swimmer/ppo.dat}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/humanoid/ppo.dat}; 
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/swimmer/ppo.dat}; 
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/humanoid/sac.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/humanoid/sac.dat}; 
-			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=blue1, thick, smooth] 		table[x index=0,y index=5] {fig/mujoco/humanoid/sac.dat};
+%			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/humanoid/sac.dat};
+%			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/humanoid/sac.dat}; 
+%			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+%			\addplot[draw=blue1, thick, smooth] 		table[x index=0,y index=5] {fig/mujoco/humanoid/sac.dat};
 		
 	%		\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant/td3.dat};
 	%		\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant/td3.dat}; 
@@ -249,8 +248,8 @@
 			
 		\end{axis}
 	\end{tikzpicture}
-	\caption{\codeinline{humanoid-v4}}
-	\label{fig:mujoco_humanoid}
+	\caption{\codeinline{swimmer-v4}}
+	\label{fig:mujoco_swimmer}
 \end{subfigure}
 %%%%%%%%%%%%
 \caption{\textbf{Performance comparison on the \mujoco benchmark.}} 
