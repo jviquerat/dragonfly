@@ -1,5 +1,5 @@
 # Generic imports
-import numpy as np
+import tensorflow as tf
 
 ###############################################
 ### Polyak averager for neural networks
