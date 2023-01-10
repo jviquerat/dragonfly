@@ -17,7 +17,7 @@
         "mem_size": 50000,
         "btc_size": 64,
         "n_stp_unroll": 1,
-        "render_every": 500
+        "render_every": 50000
     },
     "agent": {
         "type": "dqn",

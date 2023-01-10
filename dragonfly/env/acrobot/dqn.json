@@ -14,10 +14,10 @@
     "n_stp_max": 50000,
     "trainer": {
         "style": "td",
-        "mem_size": 25000,
+        "mem_size": 50000,
         "btc_size": 64,
-        "n_stp_unroll": 64,
-        "render_every": 500
+        "n_stp_unroll": 1,
+        "render_every": 50000
     },
     "agent": {
         "type": "dqn",
@@ -27,13 +27,12 @@
             "type": "linear",
             "start": 0.5,
             "end": 0.05,
-            "n_decay": 25000
+            "n_decay": 10000
         },
         "value": {
             "type": "q_value",
             "network": {
                 "type": "fc",
-                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [32,32],
                     "actv": "selu"
