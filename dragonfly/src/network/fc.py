@@ -11,7 +11,7 @@ import tensorflow                    as     tf
 import tensorflow.keras              as     tk
 from   tensorflow.keras              import Model
 from   tensorflow.keras.layers       import Dense
-from   tensorflow.keras.initializers import Orthogonal, LecunNormal
+from   tensorflow.keras.initializers import Orthogonal, LecunNormal, GlorotUniform
 
 # Custom imports
 from   dragonfly.src.utils.error     import *
