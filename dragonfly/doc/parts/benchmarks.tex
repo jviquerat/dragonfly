@@ -21,6 +21,8 @@ The \gym library regroups several game-like environments that can be used for fa
 The \mujoco locomotion benchmark consists of several locomotion problems where humanoids and other sorts of multipedal beasts learn to walk \cite{mujoco}. \warning{The goal here is not to obtain the best performance on this benchmark}, but only to check that the implementations (mostly \tdt and \sac) are in line with the OpenAI benchmark results \url{https://spinningup.openai.com/en/latest/spinningup/bench.html}. For this reason, the same set of hyperparameters is used. Exceptions are:
 
 \begin{enumerate}
+	\item The standard deviations for \ppo are state-based;
+	\item The standard deviations for \sac are not generated through their log value;
 	\item \codeinline{swimmer-v4} is known to be difficult to solve. \ppo can solve it with $\gamma = 0.9995$ instead of the standard $\gamma = 0.99$ (see \url{https://rl-vs.github.io/rlvs2021/pg-pitfalls.html} at around 45 minutes of the video).
 \end{enumerate}
 
