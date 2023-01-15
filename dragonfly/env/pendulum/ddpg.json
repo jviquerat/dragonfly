@@ -11,13 +11,13 @@
     "name_time": false,
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 40000,
+    "n_stp_max": 100000,
     "trainer": {
         "style": "td",
-        "mem_size": 20000,
-        "btc_size": 128,
+        "mem_size": 100000,
+        "btc_size": 64,
         "n_stp_unroll": 1,
-        "render_every": 500
+        "render_every": 50000
     },
     "agent": {
         "type": "ddpg",
@@ -43,7 +43,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
@@ -67,7 +67,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {

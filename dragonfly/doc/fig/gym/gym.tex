@@ -1,0 +1,269 @@
+%%%%%%%%%%%%
+%%%%%%%%%%%%
+\begin{figure}
+\centering
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=50000, scale=0.7,
+					ymin=0, ymax=220,
+					scaled x ticks=false,
+					xtick={0,10000,20000,30000,40000,50000},
+					xticklabels={$0$,$10k$,$20k$,$30k$,$40k$,$50k$},
+					ytick={0,100,200,6000},
+					legend cell align=left, legend pos=south east,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel=score]
+				
+			\legend{\dqn, \atc, \ppo}
+
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/cartpole/dqn.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/cartpole/dqn.dat}; 
+			\addplot [fill=purple3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=purple1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/cartpole/dqn.dat};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/cartpole/a2c.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/cartpole/a2c.dat}; 
+			\addplot [fill=bluegray3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=bluegray1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/cartpole/a2c.dat}; 
+			
+ 			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/cartpole/ppo.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/cartpole/ppo.dat}; 
+			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/cartpole/ppo.dat}; 
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{cartpole-v0}}
+	\label{fig:gym_cartpole}
+\end{subfigure} \qquad \qquad
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=100000, scale=0.7,
+					ymin=-1400, ymax=0,
+					scaled x ticks=false, scaled y ticks=false,
+					xtick={0,25000,50000,75000,100000},
+					xticklabels={$0$,$25k$,$50k$,$75k$,$100k$},
+					ytick={-1400,-1200,-1000,-800,-600,-400,-200,0},
+					legend cell align=left, legend pos=south east,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel={}]
+				
+			\legend{\atc, \ppo, \ddpg, \tdt, \sac}
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/a2c.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/pendulum/a2c.dat}; 
+			\addplot [fill=bluegray3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=bluegray1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/pendulum/a2c.dat};
+		
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/ppo.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/pendulum/ppo.dat}; 
+			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/pendulum/ppo.dat};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/ddpg.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/pendulum/ddpg.dat}; 
+			\addplot [fill=red3, opacity=0.5, forget plot]	 	fill between[of=upper and lower];
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/pendulum/ddpg.dat}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/td3.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/pendulum/td3.dat}; 
+			\addplot [fill=teal3, opacity=0.5, forget plot]	fill between[of=upper and lower];
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/pendulum/td3.dat}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/sac.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/pendulum/sac.dat}; 
+			\addplot [fill=blue3, opacity=0.5, forget plot]	fill between[of=upper and lower];
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/pendulum/sac.dat}; 
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{pendulum-v1}}
+	\label{fig:gym_pendulum}
+\end{subfigure}
+%%%%%%%%%%%%
+
+\medskip
+\medskip
+
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=50000, scale=0.7,
+					ymin=-550, ymax=-50,
+					scaled x ticks=false,
+					xtick={0,10000,20000,30000,40000,50000},
+					xticklabels={$0$,$10k$,$20k$,$30k$,$40k$,$50k$},
+					ytick={-500,-400,-300,-200,-100},
+					legend cell align=left, legend pos=south east,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel=score]
+				
+			\legend{\dqn, \atc, \ppo}
+		
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/acrobot/dqn.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/acrobot/dqn.dat}; 
+			\addplot [fill=purple3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=purple1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/acrobot/dqn.dat}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/acrobot/a2c.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/acrobot/a2c.dat}; 
+			\addplot [fill=bluegray3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=bluegray1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/acrobot/a2c.dat}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/acrobot/ppo.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/acrobot/ppo.dat}; 
+			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/acrobot/ppo.dat}; 
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{acrobot-v1}}
+	\label{fig:gym_acrobot}
+\end{subfigure} \qquad \qquad
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
+					ymin=-350, ymax=350,
+					scaled x ticks=false,
+					xtick={0,250000,500000,750000,1000000},
+					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
+					ytick={-300,-200,-100,0,100,200,300},
+					legend cell align=left, legend pos=south east,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel=score]
+				
+			\legend{\ppo, \ddpg, \tdt}
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/lunarlander/ppo.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/lunarlander/ppo.dat}; 
+			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/lunarlander/ppo.dat}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/lunarlander/ddpg.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/lunarlander/ddpg.dat}; 
+			\addplot [fill=red3, opacity=0.5, forget plot]	 	fill between[of=upper and lower];
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/lunarlander/ddpg.dat}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/lunarlander/td3.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/lunarlander/td3.dat}; 
+			\addplot [fill=teal3, opacity=0.5, forget plot]	fill between[of=upper and lower];
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/lunarlander/td3.dat}; 
+		
+%			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/acrobot/dqn.dat};
+%			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/acrobot/dqn.dat}; 
+%			\addplot [fill=purple3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+%			\addplot[draw=purple1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/acrobot/dqn.dat}; 
+%			
+%			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/acrobot/a2c.dat};
+%			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/acrobot/a2c.dat}; 
+%			\addplot [fill=bluegray3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+%			\addplot[draw=bluegray1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/acrobot/a2c.dat}; 
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{lunarlandercontinuous-v2}}
+	\label{fig:gym_lunarlander}
+\end{subfigure}
+%%%%%%%%%%%%
+
+\medskip
+\medskip
+
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=200000, scale=0.7,
+					ymin=-220, ymax=-100,
+					scaled x ticks=false, scaled y ticks=false,
+					xtick={0,50000,100000,150000,200000},
+					xticklabels={$0$,$50k$,$100k$,$150k$,$200k$},
+					ytick={-200,-150,-100},
+					legend cell align=left, legend pos=south east,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel={}]
+				
+			\legend{\dqn, \atc, \ppo}
+
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/mountaincar/dqn.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/mountaincar/dqn.dat}; 
+			\addplot [fill=purple3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=purple1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/mountaincar/dqn.dat}; 
+
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/mountaincar/a2c.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/mountaincar/a2c.dat}; 
+			\addplot [fill=bluegray3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=bluegray1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/mountaincar/a2c.dat}; 
+
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/mountaincar/ppo.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/mountaincar/ppo.dat}; 
+			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/mountaincar/ppo.dat}; 
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{mountaincar-v0}}
+	\label{fig:gym_mountaincar}
+\end{subfigure} \qquad \qquad
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
+					ymin=-150, ymax=350,
+					scaled x ticks=false,
+					xtick={0,250000,500000,750000,1000000},
+					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
+					ytick={-100,0,100,200,300},
+					legend cell align=left, legend pos=south east,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel={}]
+				
+			\legend{\ppo, \tdt} 
+
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/bipedalwalker/ppo.dat };
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/bipedalwalker/ppo.dat}; 
+			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/bipedalwalker/ppo.dat}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/bipedalwalker/td3.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/bipedalwalker/td3.dat}; 
+			\addplot [fill=teal3, opacity=0.5, forget plot]	fill between[of=upper and lower];
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/bipedalwalker/td3.dat}; 
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{bipedalwalker-v3}}
+	\label{fig:gym_bipedal}
+\end{subfigure}
+%%%%%%%%%%%%
+\caption{\textbf{Performance comparison on the \gym benchmark.}} 
+\label{fig:gym}
+\end{figure} 
+%%%%%%%%%%%%
+%%%%%%%%%%%%

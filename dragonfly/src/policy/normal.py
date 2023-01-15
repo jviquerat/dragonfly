@@ -10,35 +10,35 @@ class normal(base_policy):
     def __init__(self, obs_dim, act_dim, pms):
 
         # Fill structure
-        self.act_dim    = act_dim
-        self.obs_dim    = obs_dim
-        self.dim        = self.act_dim
-        self.store_dim  = self.act_dim
-        self.store_type = float
-        self.stddev_gen = "regular"
+        self.act_dim     = act_dim
+        self.obs_dim     = obs_dim
+        self.dim         = self.act_dim
+        self.store_dim   = self.act_dim
+        self.store_type  = float
+        self.stddev_gen  = "regular"
 
         # Optional stddev generation method
-        if hasattr(pms, "stddev_gen"): self.stddev_gen = pms.stddev_gen
+        if hasattr(pms, "stddev_gen"): self.stddev_gen   = pms.stddev_gen
         self.stddev_log_clip = -20.0
 
         # Check parameters
         if (pms.network.heads.final[0] != "tanh"):
             warning("normal", "__init__",
-                    "Final activation for mean network of normal policy is not tanh")
+                    "Final activation for mean of policy is not tanh")
 
         if (self.stddev_gen == "regular"):
             if (pms.network.heads.final[1] != "sigmoid"):
                 warning("normal", "__init__",
-                        "Final activation for dev network of normal policy is not sigmoid")
+                        "Final activation for stddev of policy is not sigmoid")
         if (self.stddev_gen == "log"):
             if (pms.network.heads.final[1] != "linear"):
                 warning("normal", "__init__",
-                        "Final activation for dev network of normal policy is not linear")
+                        "Final activation for stddev of policy is not linear")
 
         # Define and init network
         self.net = net_factory.create(pms.network.type,
                                       inp_dim = obs_dim,
-                                      out_dim = [self.dim,self.dim],
+                                      out_dim = [self.dim, self.dim],
                                       pms     = pms.network)
 
         # Define trainables
