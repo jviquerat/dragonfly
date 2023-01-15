@@ -1,7 +1,7 @@
 {
     "env": {
         "name": "Humanoid-v4",
-        "obs_clip": true,
+        "obs_clip": false,
         "obs_norm": false,
         "obs_noise": 0.0
     },
@@ -25,12 +25,11 @@
         "rho": 0.995,
         "n_warmup": 10000,
         "n_filling": 1000,
-	"alpha": 0.2,
+	      "alpha": 0.2,
         "policy": {
-	    "type": "normal",
+	          "type": "tanh_normal",
             "network": {
                 "type": "fc",
-                "k_init": "lecun_normal",
                 "trunk": {
                     "arch": [256],
                     "actv": "relu"
@@ -55,7 +54,6 @@
             "type": "q_value",
             "network": {
                 "type": "fc",
-		"k_init": "lecun_normal",
                 "trunk": {
                     "arch": [256,256],
                     "actv": "relu"

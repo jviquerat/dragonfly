@@ -26,7 +26,6 @@
             "type": "normal",
             "network": {
                 "type": "fc",
-		"k_init": "lecun_normal",
                 "trunk": {
                     "arch": [64],
                     "actv": "relu"
@@ -53,7 +52,6 @@
             "type": "v_value",
             "network": {
                 "type": "fc",
-		"k_init": "lecun_normal", 
                 "trunk": {
                     "arch": [64,64],
                     "actv": "relu"
