@@ -33,7 +33,6 @@
             "type": "deterministic",
             "network": {
                 "type": "fc",
-		"k_init": "lecun_normal",
                 "trunk": {
                     "arch": [256,256],
                     "actv": "selu"
@@ -58,7 +57,6 @@
             "type": "q_value",
             "network": {
                 "type": "fc",
-		"k_init": "lecun_normal",
                 "trunk": {
                     "arch": [256,256],
                     "actv": "selu"
