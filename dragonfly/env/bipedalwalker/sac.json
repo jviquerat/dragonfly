@@ -1,15 +1,15 @@
 {
     "env": {
-        "name": "Hopper-v4",
+        "name": "BipedalWalker-v3",
         "obs_clip": false,
-        "obs_norm": false,
+        "obs_norm": true,
         "obs_noise": 0.0
     },
     "name_env": true,
     "name_agent": true,
     "name_tag": "",
     "name_time": false,
-    "n_avg": 5,
+    "n_avg": 3,
     "n_cpu": 1,
     "n_stp_max": 1000000,
     "trainer": {
@@ -43,7 +43,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-4,
                 "grd_clip": null
             },
             "loss": {
@@ -67,7 +67,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-4,
                 "grd_clip": null
             },
             "loss": {
