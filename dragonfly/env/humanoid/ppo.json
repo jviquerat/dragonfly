@@ -1,8 +1,8 @@
 {
     "env": {
-        "name": "Hopper-v4",
-        "obs_clip": false,
-        "obs_norm": false,
+        "name": "Humanoid-v4",
+        "obs_clip": true,
+        "obs_norm": true,
         "obs_noise": 0.0
     },
     "name_env": true,
@@ -13,30 +13,26 @@
     "n_cpu": 1,
     "n_stp_max": 1000000,
     "trainer": {
-        "style": "td",
-        "mem_size": 1000000,
-        "btc_size": 128,
-        "n_stp_unroll": 1,
-        "render_every": 500000
+        "style": "buffer",
+        "buff_size": 2048,
+        "n_buff": 1,
+        "batch_frac": 0.25,
+        "n_epochs": 8,
+        "render_every": 5000
     },
     "agent": {
-        "type": "sac",
-        "gamma": 0.99,
-        "rho": 0.995,
-        "n_warmup": 10000,
-        "n_filling": 1000,
-	      "alpha": 0.2,
+        "type": "ppo",
         "policy": {
-	          "type": "tanh_normal",
+            "type": "normal",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [256],
+                    "arch": [64],
                     "actv": "relu"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[256],[256]],
+                    "arch": [[64],[64]],
                     "actv": ["relu","relu"],
                     "final": ["tanh","sigmoid"]
                 }
@@ -44,18 +40,20 @@
             "optimizer": {
                 "type": "adam",
                 "lr": 5.0e-4,
-                "grd_clip": null
+                "grd_clip": 0.1
             },
             "loss": {
-                "type": "q_pol_sac"
+                "type": "surrogate",
+                "pol_clip": 0.2,
+                "ent_coef": 0.01
             }
         },
         "value": {
-            "type": "q_value",
+            "type": "v_value",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [256,256],
+                    "arch": [64,64],
                     "actv": "relu"
                 },
                 "heads": {
@@ -67,12 +65,18 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
-                "grd_clip": null
+                "lr": 1.0e-3,
+                "grd_clip": 0.1
             },
             "loss": {
-                "type": "mse_sac"
+                "type": "mse_pg"
             }
+        },
+        "retrn": {
+            "type": "gae",
+            "gamma": 0.99,
+            "gae_lambda": 0.95,
+            "ret_norm": true
         },
         "termination": {
             "type": "bootstrap"

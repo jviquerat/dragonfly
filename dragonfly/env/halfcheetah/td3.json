@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "InvertedDoublePendulum-v4",
+        "name": "HalfCheetah-v4",
         "obs_clip": false,
         "obs_norm": false,
         "obs_noise": 0.0
@@ -9,15 +9,15 @@
     "name_agent": true,
     "name_tag": "",
     "name_time": false,
-    "n_avg": 3,
+    "n_avg": 5,
     "n_cpu": 1,
-    "n_ep_max": 2000,
+    "n_stp_max": 1000000,
     "trainer": {
         "style": "td",
         "mem_size": 1000000,
         "btc_size": 128,
         "n_stp_unroll": 1,
-        "render_every": 5000
+        "render_every": 500000
     },
     "agent": {
         "type": "td3",
@@ -35,18 +35,18 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [256,256],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["tanh"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
-                "lr": 5.0e-4,
+                "type": "adam",
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
@@ -59,18 +59,18 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [256,256],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
-                "lr": 5.0e-4,
+                "type": "adam",
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
@@ -78,8 +78,7 @@
             }
         },
         "termination": {
-            "type": "bootstrap",
-            "ep_end": 1000
+            "type": "regular"
         }
     }
 }
