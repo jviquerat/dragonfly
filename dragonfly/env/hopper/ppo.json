@@ -9,7 +9,7 @@
     "name_agent": true,
     "name_tag": "",
     "name_time": false,
-    "n_avg": 3,
+    "n_avg": 5,
     "n_cpu": 1,
     "n_stp_max": 1000000,
     "trainer": {

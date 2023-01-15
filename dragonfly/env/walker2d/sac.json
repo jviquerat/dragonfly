@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "InvertedDoublePendulum-v4",
+        "name": "Walker2d-v4",
         "obs_clip": false,
         "obs_norm": false,
         "obs_noise": 0.0
@@ -9,48 +9,45 @@
     "name_agent": true,
     "name_tag": "",
     "name_time": false,
-    "n_avg": 3,
+    "n_avg": 5,
     "n_cpu": 1,
-    "n_ep_max": 2000,
+    "n_stp_max": 1000000,
     "trainer": {
         "style": "td",
         "mem_size": 1000000,
         "btc_size": 128,
         "n_stp_unroll": 1,
-        "render_every": 5000
+        "render_every": 500000
     },
     "agent": {
-        "type": "td3",
+        "type": "sac",
         "gamma": 0.99,
         "rho": 0.995,
         "n_warmup": 10000,
         "n_filling": 1000,
-        "p_update": 2,
-        "sigma_act": 0.1,
-        "sigma_tgt": 0.2,
-        "noise_clip": 0.5,
+	      "alpha": 0.2,
         "policy": {
-            "type": "deterministic",
+	          "type": "tanh_normal",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [256,256],
-                    "actv": "selu"
+                    "arch": [256],
+                    "actv": "relu"
                 },
                 "heads": {
-                    "nb": 1,
-                    "arch": [[]],
-                    "actv": ["selu"],
-                    "final": ["tanh"]
+                    "nb": 2,
+                    "arch": [[256],[256]],
+                    "actv": ["relu","relu"],
+                    "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
-                "lr": 5.0e-4,
+                "type": "adam",
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
-                "type": "q_pol"
+                "type": "q_pol_sac"
             }
         },
         "value": {
@@ -59,27 +56,26 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [256,256],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
-                "lr": 5.0e-4,
+                "type": "adam",
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
-                "type": "mse_td3"
+                "type": "mse_sac"
             }
         },
         "termination": {
-            "type": "bootstrap",
-            "ep_end": 1000
+            "type": "bootstrap"
         }
     }
 }
