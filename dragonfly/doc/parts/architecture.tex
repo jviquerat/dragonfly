@@ -145,7 +145,7 @@ The \codeinline{env} and \codeinline{agent} options will respectively add the na
 The \codeinline{trainer} options define how the agent will be trained. Three different types of training are proposed:
 
 \begin{enumerate}
-	\item \codeinline{episode}: episode-based training for online agents. This is the regular training mode for online agents, collecting a defined amount of full episodes before training. ;
+	\item \codeinline{episode}: episode-based training for online agents. This is the regular training mode for online agents, collecting a defined amount of full episodes before training;
 	\item \codeinline{buffer}: buffer-based training for online agents. This option allows to use fixed-length buffers instead of requiring full episodes. This is particularly useful when using a large amount of parallel environments, as it is not necessary to wait for the termination of all environments before launching a training. See section \textcolor{red}{to complete} for more informations;
 	\item \codeinline{td}: temporal difference-based training for offline agents. This is the regular training mode of offline agents, performing by default one update after each transition.
 \end{enumerate}

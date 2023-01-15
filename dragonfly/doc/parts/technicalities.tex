@@ -1,0 +1,86 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Technicalities}
+
+This chapter regroups several technical notes on the implementations and algorithms.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Expected grad-log-probability lemma}
+
+Suppose a random variable $x$ following a parameterized p.d.f. $\pi_\theta$. Then the expected value of the gradient of its log-probability is equal to $0$:
+
+\begin{equation}
+\label{eq:eglp}
+	\expect{x \sim \pi_\theta} \left[ \nabla_\theta \log \pi_\theta(x) \right] = 0.
+\end{equation}
+
+The proof starts with the simple following statement:
+
+\begin{equation*}
+	\int_x \pi_\theta(x) = 1,
+\end{equation*}
+
+and therefore:
+
+\begin{equation*}
+	\nabla_\theta \int_x \pi_\theta(x) = 0.
+\end{equation*}
+
+Then, using the log-prob trick:
+
+\begin{equation*}
+\begin{aligned}
+	\nabla_\theta \int_x \pi_\theta(x) 	&= \int_x \nabla_\theta \pi_\theta(x)\\
+								&= \int_x \pi_\theta(x) \nabla_\theta \log \pi_\theta(x)\\
+								&= \expect{x \sim \pi_\theta} \left[ \nabla_\theta \log \pi_\theta(x) \right],
+\end{aligned}
+\end{equation*}
+
+which is therefore equal to $0$.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Log-probability of squashed gaussian in soft actor-critic}
+
+In the \sac algorithm, the infinite support Gaussian p.d.f. $\bm{\mu}(\bm{u})$ with $\bm{u} \in \mathbb{R}^d$ is squashed using the hyperbolic tangent function, leading to actions $\bm{a} = \tanh (\bm{u}) \in [-1,1]^d$. If $\bm{u}$ is a random variable following p.d.f. $\bm{\mu}$, and $\bm{a} = h(\bm{u})$ with $h$ bijective and differentiable, then $\bm{a}$ is a random variable following p.d.f. $\bm{\pi}$:
+
+\begin{equation*}
+	\bm{\pi}(\bm{a}) = \bm{\mu}\left( h^{-1}(\bm{a}) \right) \left| \det \left( \left. \frac{dh^{-1}(\bm{z})}{d\bm{z}} \right|_{\bm{z} = \bm{a}} \right) \right|.
+\end{equation*}
+
+Here, $\bm{a} = \tanh (\bm{u})$ leads to:
+
+\begin{equation*}
+	\left. \frac{d\tanh^{-1}(\bm{z})}{d\bm{z}} \right|_{\bm{z} = \bm{a}} = \text{diag} \left( \frac{1}{1-a_i^2} \right)_{i\in[1,N]} = \text{diag} \left( \frac{1}{1-\tanh^2(u_i)} \right)_{i\in[1,N]},
+\end{equation*}
+
+and therefore:
+
+\begin{equation}
+\label{eq:sac_squashed_gaussian}
+	\bm{\pi}(\bm{a}) = \bm{\mu}\left( \bm{u} \right) \prod_{i=1}^{N} \frac{1}{1 - \tanh^2(u_i)}.
+\end{equation}
+
+The log-probability is easily computed:
+
+\begin{equation}
+\label{eq:sac_squashed_gaussian_logprob}
+	\log \bm{\pi}(\bm{a}) = \log \bm{\mu}\left( \bm{u} \right) - \sum_{i=1}^{N} \log \left( 1 - \tanh^2(u_i) \right).
+\end{equation}
+
+Although easy to implement, numerical evaluation of expression (\ref{eq:sac_squashed_gaussian_logprob}) can lead to undefined values for large absolute values of $u_i$. The OpenAI implementation \cite{spinningup} proposes another form of this expression that leads to improved numerical stability\footnote{\url{https://github.com/openai/spinningup/blob/master/spinup/algos/tf1/sac/core.py} line 54}:
+
+\begin{equation}
+\label{eq:logprob_openai}
+\begin{aligned}
+	\log \left( 1 - \tanh^2(u) \right) 	&= \log \left( \frac{4}{\left(\exp^u + \exp^{-u}\right)^2} \right)\\
+							&= 2 \left( \log(2) - \log \left( \exp^u + \exp^{-u} \right) \right)\\
+							&= 2 \left( \log(2) - u - \log \left( 1 + \exp^{-2u} \right) \right)\\
+							&= 2 \left( \log(2) - u - \text{softplus} (-2u) \right).
+\end{aligned}
+\end{equation}
