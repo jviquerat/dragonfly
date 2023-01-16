@@ -55,4 +55,3 @@ class tanh_normal(normal):
         lgp  = pdf.log_prob(act)
         lgp += self.tanh_lgp(act)
         return lgp
-
