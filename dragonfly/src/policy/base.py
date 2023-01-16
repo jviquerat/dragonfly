@@ -25,6 +25,14 @@ class base_policy():
     def compute_pdf(self, obs):
         raise NotImplementedError
 
+    # Compute log_prob
+    def log_prob(self, obs, act):
+        raise NotImplementedError
+
+    # Compute entropy
+    def entropy(self, obs):
+        raise NotImplementedError
+
     # Reshape actions for training
     def reshape_actions(self, act):
         raise NotImplementedError

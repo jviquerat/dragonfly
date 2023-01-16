@@ -97,6 +97,17 @@ class normal(base_policy):
 
         return pdf
 
+    # Compute log_prob
+    def log_prob(self, obs, act):
+
+        pdf = self.compute_pdf(obs)
+        return pdf.log_prob(act)
+
+    # Compute entropy
+    def entropy(self, obs):
+
+        return self.compute_pdf(obs).entropy()
+
     # Networks forward pass
     def forward(self, state):
 

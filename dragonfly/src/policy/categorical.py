@@ -77,6 +77,17 @@ class categorical(base_policy):
         probs = self.forward(obs)
         return tfd.Categorical(probs=probs[0])
 
+    # Compute log_prob
+    def log_prob(self, obs, act):
+
+        pdf = self.compute_pdf(obs)
+        return pdf.log_prob(act)
+
+    # Compute entropy
+    def entropy(self, obs):
+
+        return self.compute_pdf(obs).entropy()
+
     # Network forward pass
     def forward(self, obs):
 
