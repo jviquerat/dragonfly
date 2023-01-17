@@ -10,7 +10,7 @@
     "name_tag": "",
     "name_time": false,
     "n_avg": 3,
-    "n_cpu": 1,
+    "n_cpu": 4,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
@@ -27,12 +27,12 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [128],
+                    "arch": [64],
                     "actv": "relu"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[128],[128]],
+                    "arch": [[64],[64]],
                     "actv": ["relu","relu"],
                     "final": ["tanh","sigmoid"]
                 }
@@ -54,7 +54,7 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [128,128],
+                    "arch": [64,64],
                     "actv": "relu"
                 },
                 "heads": {
@@ -66,7 +66,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-3,
+                "lr": 2.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
