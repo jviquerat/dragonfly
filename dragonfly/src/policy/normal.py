@@ -116,6 +116,7 @@ class normal(base_policy):
 
         if (self.stddev_gen == "regular"):
             sg = out[1]
+            sg = tf.clip_by_value(sg, 1.0e-8, 1.0)
         if (self.stddev_gen == "log"):
             log_sg = out[1]
             log_sg = tf.clip_by_value(log_sg, self.stddev_log_clip, 0.0)

@@ -35,7 +35,7 @@ class surrogate():
             loss_surrogate =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss
-            loss_entropy = tf.reduce_mean(-lgp)
+            loss_entropy =-tf.reduce_mean(lgp)
 
             # Compute total loss
             loss = loss_surrogate + self.ent_coef*loss_entropy
