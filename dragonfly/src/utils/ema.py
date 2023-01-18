@@ -1,8 +1,29 @@
 # Generic imports
 import numpy as np
 
-# Custom imports
-from dragonfly.src.utils.ema import *
+###############################################
+### Exponential moving average class
+class ema:
+    def __init__(self, alpha, n_layers=1):
+        self.alpha    = alpha
+        self.n_layers = n_layers
+        self.y        = np.zeros(n_layers)
+
+    ### Add a value to the buffer
+    def add(self, value):
+        v = value
+        for i in range(self.n_layers):
+            if (i>0): v = self.y[i-1]
+            self.y[i] = self.alpha*v + (1.0-self.alpha)*self.y[i]
+
+    ### Add a chunk of data to the buffer
+    def add_buffer(self, array):
+        for i in range(len(array)):
+            self.add(array[i])
+
+    ### Return average
+    def avg(self):
+        return self.y[-1]
 
 ###############################################
 ### Report buffer, used to store learning metrics
@@ -20,16 +41,13 @@ class report:
 
         self.count = 0
         self.data  = {}
-        self.davg  = {}
         for name in self.names:
             self.data[name] = []
-            self.davg[name]  = ema(0.01,10)
 
     # Append data to the report
     def append(self, name, value):
 
         self.data[name].append(value)
-        self.davg[name].add(value)
 
     # Get data from the report
     def get(self, name):
@@ -39,8 +57,7 @@ class report:
     # Return an average of n last values of given field
     def avg(self, name, n):
 
-        return self.davg[name].avg()
-    #return np.mean(self.data[name][-n:])
+        return np.mean(self.data[name][-n:])
 
     # Write report
     def write(self, filename, force=False):
