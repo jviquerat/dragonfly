@@ -40,7 +40,6 @@ class report:
     def avg(self, name, n):
 
         return self.davg[name].avg()
-    #return np.mean(self.data[name][-n:])
 
     # Write report
     def write(self, filename, force=False):

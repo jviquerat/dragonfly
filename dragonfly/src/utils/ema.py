@@ -8,13 +8,18 @@ class ema:
         self.alpha    = alpha
         self.n_layers = n_layers
         self.y        = np.zeros(n_layers)
+        self.first    = True
 
     ### Add a value to the buffer
     def add(self, value):
         v = value
-        for i in range(self.n_layers):
-            if (i>0): v = self.y[i-1]
-            self.y[i] = self.alpha*v + (1.0-self.alpha)*self.y[i]
+        if (self.first):
+            self.y[:]  = value
+            self.first = False
+        else:
+            for i in range(self.n_layers):
+                if (i>0): v = self.y[i-1]
+                self.y[i] = self.alpha*v + (1.0-self.alpha)*self.y[i]
 
     ### Add a chunk of data to the buffer
     def add_buffer(self, array):
