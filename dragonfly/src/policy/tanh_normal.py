@@ -15,18 +15,22 @@ class tanh_normal(normal):
     def sample(self, obs):
 
         # Reparameterization trick
-        mu, sg   = self.forward(obs)
-        act      = mu + tf.random.normal(tf.shape(mu))*sg
-        act      = tf.reshape(act, [-1,self.store_dim])
-        tanh_act = tf.tanh(act)
-
-        lgp =-0.5*(((act - mu)/(sg + 1.0e-8))**2 + 2.0*tf.math.log(sg) + tf.math.log(2.0*np.pi))
-        lgp = tf.reduce_sum(lgp, axis=1)
+        mu, sg = self.forward(obs)
+        pdf    = tfd.MultivariateNormalDiag(loc        = mu,
+                                            scale_diag = sg)
+        act = pdf.sample(1)
+        act = tf.reshape(act, [-1,self.store_dim])
+        lgp = pdf.log_prob(act)
         lgp = tf.reshape(lgp, [-1,1])
 
-        # Log-prob of reparameterized action
-        #sth = tf.math.log(1.0 - tf.square(tanh_act) + 1.0e-8)
-        sth  = 2.0*(np.log(2.0) - act - tf.nn.softplus(-2.0*act)) # from openai implementation
+        tanh_act = tf.tanh(act)
+
+        # Compute log-prob of reparameterized action
+        # Regular version, possibly numerically unstable
+        # sth = tf.math.log(1.0 - tf.square(tanh_act) + 1.0e-8)
+
+        # OpenAI version, numerically stable
+        sth  = 2.0*(np.log(2.0) - act - tf.nn.softplus(-2.0*act))
         sth  = tf.reduce_sum(sth, axis=1)
         sth  = tf.reshape(sth, [-1,1])
         lgp -= sth
