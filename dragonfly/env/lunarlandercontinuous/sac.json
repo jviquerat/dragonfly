@@ -25,7 +25,7 @@
         "rho": 0.995,
         "n_warmup": 10000,
         "n_filling": 1000,
-	      "alpha": 0.2,
+	      "alpha": 0.1,
         "policy": {
 	          "type": "tanh_normal",
             "network": {
