@@ -1,28 +1,12 @@
-# Generic imports
-import os
-import warnings
-
-# Filter warning messages
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '10'
-warnings.filterwarnings('ignore',category=FutureWarning)
-
-# Tensorflow imports
-import tensorflow                    as     tf
-import tensorflow.keras              as     tk
-from   tensorflow.keras              import Model
-from   tensorflow.keras.layers       import Dense
-from   tensorflow.keras.initializers import Orthogonal, LecunNormal, GlorotUniform
-
 # Custom imports
-from   dragonfly.src.utils.error     import *
-from   dragonfly.src.network.tree    import *
+from  dragonfly.src.network.base import *
 
 ###############################################
 ### Fully-connected network class
 ### inp_dim  : dimension of input  layer
 ### out_dim  : dimension of output layer
 ### pms      : network parameters
-class fc(Model):
+class fc(base_network):
     def __init__(self, inp_dim, out_dim, pms):
         super().__init__()
 
