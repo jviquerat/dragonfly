@@ -14,10 +14,10 @@
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
-        "buff_size": 2000,
+        "buff_size": 4000,
         "n_buff": 1,
-        "batch_frac": 0.5,
-        "n_epochs": 16,
+        "batch_frac": 0.25,
+        "n_epochs": 32,
         "render_every": 10000
     },
     "agent": {
@@ -28,12 +28,12 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64],
-                    "actv": "relu"
+                    "actv": "tanh"
                 },
                 "heads": {
                     "nb": 2,
                     "arch": [[64],[64]],
-                    "actv": ["relu","relu"],
+                    "actv": ["tanh","tanh"],
                     "final": ["tanh","sigmoid"]
                 }
             },

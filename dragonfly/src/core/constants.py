@@ -20,5 +20,5 @@ step_report = 10
 ### The smoothing is made using data from the report
 n_smooth = int(5000/step_report)
 
-### Max value for observations
+### Max value to test for +/-inf observations bounds
 def_obs_max = 1.0e8

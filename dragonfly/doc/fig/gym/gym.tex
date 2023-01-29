@@ -65,7 +65,7 @@
 			\addplot [fill=bluegray3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
 			\addplot[draw=bluegray1, thick, smooth] 		table[x index=0,y index=5] {fig/gym/pendulum/a2c.dat};
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/ppo.dat};
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/pendulum/ppo.dat };
 			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/pendulum/ppo.dat}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
 			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/pendulum/ppo.dat};
@@ -249,7 +249,7 @@
 			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/bipedalwalker/ddpg.dat};
 			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/bipedalwalker/ddpg.dat}; 
 			\addplot [fill=red3, opacity=0.5, forget plot]	 	fill between[of=upper and lower];
-			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/bipedalwalker/ddpg.dat }; 
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/bipedalwalker/ddpg.dat}; 
 			
 			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/bipedalwalker/td3.dat};
 			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/bipedalwalker/td3.dat}; 
