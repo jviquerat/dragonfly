@@ -27,7 +27,7 @@ class adam():
         self.opt.apply_gradients(zip(zero_grads, grad_vars))
 
         # Save weights and config
-        self.init_weights = self.opt.get_weights()
+        self.init_weights = self.opt.variables()
         self.config       = self.opt.get_config()
 
     # Get current learning rate

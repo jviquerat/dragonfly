@@ -1,6 +1,7 @@
 # Custom imports
-from dragonfly.src.agent.base   import *
-from dragonfly.src.utils.polyak import *
+from dragonfly.src.agent.base     import *
+from dragonfly.src.utils.polyak   import *
+from dragonfly.src.loss.alpha_sac import *
 
 ###############################################
 ### SAC agent
@@ -14,10 +15,22 @@ class sac(base_agent):
         self.n_cpu      = n_cpu
         self.mem_size   = size
         self.gamma      = pms.gamma
-        self.alpha      = pms.alpha
         self.rho        = pms.rho
         self.n_warmup   = pms.n_warmup
         self.n_filling  = pms.n_filling
+
+        if (pms.alpha.type == "auto"):
+            self.alpha_type = "auto"
+            self.log_alpha0 = tf.math.log(pms.alpha.value)
+            self.log_alpha  = [tf.Variable(self.log_alpha0)]
+            self.tgt_H      =-act_dim
+            self.alpha_loss = alpha_sac(None)
+            self.alpha_opt  = opt_factory.create(pms.alpha.optimizer.type,
+                                                 pms = pms.alpha.optimizer,
+                                                 grad_vars = self.log_alpha)
+        if (pms.alpha.type == "constant"):
+            self.alpha_type = "constant"
+            self.alpha      = pms.alpha.value
 
         # Local variables
         self.step = 0
@@ -71,8 +84,8 @@ class sac(base_agent):
         self.polyak = polyak(self.rho)
 
         # Create buffers
-        self.names = ["obs", "nxt", "act", "rwd", "trm"]
-        self.sizes = [obs_dim, obs_dim, self.pol_dim, 1, 1]
+        self.names = ["obs", "nxt", "act", "rwd", "trm", "lgp"]
+        self.sizes = [obs_dim, obs_dim, self.pol_dim, 1, 1, 1]
         self.buff  = buff(self.n_cpu, self.names, self.sizes)
         self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
 
@@ -91,8 +104,9 @@ class sac(base_agent):
         if (self.step < self.n_warmup):
             act = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
             act = act.astype(np.float32)
+            lgp = [0.0]
         else:
-            act, _ = self.p_net.actions(obs)
+            act, lgp = self.p_net.actions(obs)
 
         self.step += 1
 
@@ -101,6 +115,9 @@ class sac(base_agent):
             error("sac", "get_actions",
                   "Detected NaN in generated actions")
         self.timer_actions.toc()
+
+        # Store log-prob
+        self.buff.store(["lgp"], [lgp])
 
         return act
 
@@ -132,25 +149,33 @@ class sac(base_agent):
         act = self.data["act"][:]
         rwd = self.data["rwd"][:]
         trm = self.data["trm"][:]
+        lgp = self.data["lgp"][:]
 
         act = tf.reshape(act, [size,-1])
         rwd = tf.reshape(rwd, [size,-1])
         trm = tf.reshape(trm, [size,-1])
+        lgp = tf.reshape(lgp, [size,-1])
 
         # Train q network
+        alpha = tf.exp(self.log_alpha[0])
         self.q_net1.loss.train(obs, nxt, act, rwd, trm,
-                               self.gamma, self.alpha, self.p_net,
+                               self.gamma, alpha, self.p_net,
                                self.q_net1, self.q_tgt1, self.q_tgt2)
         self.q_net2.loss.train(obs, nxt, act, rwd, trm,
-                               self.gamma, self.alpha, self.p_net,
+                               self.gamma, alpha, self.p_net,
                                self.q_net2, self.q_tgt1, self.q_tgt2)
 
         # Train policy network
-        self.p_net.loss.train(obs, self.p_net, self.q_net1, self.q_net2, self.alpha)
+        self.p_net.loss.train(obs, self.p_net, self.q_net1, self.q_net2, alpha)
 
         # Update target networks
         self.polyak.average(self.q_net1.net, self.q_tgt1.net)
         self.polyak.average(self.q_net2.net, self.q_tgt2.net)
+
+        # Train alpha
+        self.alpha_loss.train(lgp, self.log_alpha, self.tgt_H, self.alpha_opt)
+        with open("alpha.dat", "a") as f:
+            f.write(str(self.step)+" "+str(alpha.numpy())+"\n")
 
     # Reset
     def reset(self):
@@ -165,6 +190,9 @@ class sac(base_agent):
         self.q_tgt2.net.set_weights(self.q_net2.net.get_weights())
         self.buff.reset()
         self.gbuff.reset()
+
+        self.log_alpha  = [tf.Variable(self.log_alpha0)]
+        self.alpha_opt.reset()
 
     # Store transition
     def store(self, obs, nxt, act, rwd, dne, trc):
@@ -181,9 +209,9 @@ class sac(base_agent):
     def post_loop(self):
 
         data = self.buff.serialize(self.names)
-        gobs, gnxt, gact, grwd, gtrm = (data[name] for name in self.names)
+        gobs, gnxt, gact, grwd, gtrm, glgp = (data[name] for name in self.names)
 
-        self.gbuff.store(self.names, [gobs, gnxt, gact, grwd, gtrm])
+        self.gbuff.store(self.names, [gobs, gnxt, gact, grwd, gtrm, glgp])
 
     # Save agent parameters
     def save(self, filename):
