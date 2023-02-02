@@ -45,6 +45,15 @@ The idea is to introduce a warmup phase at the beginning of training, where only
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Adam $\epsilon$ value}
+
+Some people claim that using higher-than-default Adam $\epsilon$ parameter is supposed to help regularize learning. Yet it was not found to be a critical choice in \cite{andrychowicz2020}, and in our case we even found that it could be detrimental (see figure \ref{fig:adam_epsilon}).
+
+\input{fig/adam_epsilon/ppo_adam_epsilon}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{SNN}
 
 Test self-normalizing neural networks, combining selu activation with normal initialization and alpha dropout (see paper)
