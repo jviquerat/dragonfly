@@ -36,6 +36,15 @@ In figure \ref{fig:initializer}, we check the impact of the kernel initializatio
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Value network warmup with \ppo}
+
+The idea is to introduce a warmup phase at the beginning of training, where only the critic trains but not the actor (here for $20k$ steps). As shown in figure \ref{fig:ppo_value_warmup}, it does seem to help a little, but it is not a gamechanger.
+
+\include{fig/ppo_value_warmup/ppo_value_warmup}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{SNN}
 
 Test self-normalizing neural networks, combining selu activation with normal initialization and alpha dropout (see paper)
