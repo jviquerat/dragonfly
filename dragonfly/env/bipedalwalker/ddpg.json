@@ -15,39 +15,39 @@
     "trainer": {
         "style": "td",
         "mem_size": 1000000,
-        "btc_size": 100,
+        "btc_size": 128,
         "n_stp_unroll": 1,
-        "render_every": 500000
+        "render_every": 50000
     },
     "agent": {
-        "type": "sac",
+        "type": "ddpg",
         "gamma": 0.99,
         "rho": 0.995,
         "n_warmup": 10000,
         "n_filling": 1000,
-	"alpha": 0.01,
+        "sigma": 0.1,
         "policy": {
-	    "type": "tanh_normal",
+            "type": "deterministic",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [256],
+                    "arch": [256,256],
                     "actv": "relu"
                 },
                 "heads": {
-                    "nb": 2,
-                    "arch": [[256],[256]],
-                    "actv": ["relu","relu"],
-                    "final": ["tanh","sigmoid"]
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["relu"],
+                    "final": ["tanh"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-4,
                 "grd_clip": null
             },
             "loss": {
-                "type": "q_pol_sac"
+                "type": "q_pol"
             }
         },
         "value": {
@@ -67,11 +67,11 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-4,
                 "grd_clip": null
             },
             "loss": {
-                "type": "mse_sac"
+                "type": "mse_ddpg"
             }
         },
         "termination": {
