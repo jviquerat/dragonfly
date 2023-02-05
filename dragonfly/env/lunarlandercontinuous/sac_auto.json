@@ -27,11 +27,11 @@
         "n_filling": 1000,
         "alpha": {
             "type": "auto",
-            "value": 0.1,
+            "value": 1.0,
             "optimizer": {
                 "type": "adam",
-                "lr": 2.0e-4,
-                "grd_clip": 0.1
+                "lr": 1.0e-5,
+                "grd_clip": null
             }
         },
         "policy": {

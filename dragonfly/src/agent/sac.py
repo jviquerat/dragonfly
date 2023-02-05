@@ -19,18 +19,18 @@ class sac(base_agent):
         self.n_warmup   = pms.n_warmup
         self.n_filling  = pms.n_filling
 
-        if (pms.alpha.type == "auto"):
-            self.alpha_type = "auto"
-            self.log_alpha0 = tf.math.log(pms.alpha.value)
-            self.log_alpha  = [tf.Variable(self.log_alpha0)]
-            self.tgt_H      =-act_dim
-            self.alpha_loss = alpha_sac(None)
-            self.alpha_opt  = opt_factory.create(pms.alpha.optimizer.type,
-                                                 pms = pms.alpha.optimizer,
-                                                 grad_vars = self.log_alpha)
-        if (pms.alpha.type == "constant"):
-            self.alpha_type = "constant"
-            self.alpha      = pms.alpha.value
+        #if (pms.alpha.type == "auto"):
+        #    self.alpha_type = "auto"
+        self.log_alpha0 = tf.math.log(pms.alpha.value)
+        self.log_alpha  = [tf.Variable(self.log_alpha0)]
+        self.tgt_H      =-0.5*act_dim
+        self.alpha_loss = alpha_sac(None)
+        self.alpha_opt  = opt_factory.create(pms.alpha.optimizer.type,
+                                             pms = pms.alpha.optimizer,
+                                             grad_vars = self.log_alpha)
+        #if (pms.alpha.type == "constant"):
+        #    self.alpha_type = "constant"
+        #    self.alpha      = pms.alpha.value
 
         # Local variables
         self.step = 0
@@ -165,17 +165,18 @@ class sac(base_agent):
                                self.gamma, alpha, self.p_net,
                                self.q_net2, self.q_tgt1, self.q_tgt2)
 
+        # Train alpha
+        self.alpha_loss.train(lgp, self.log_alpha, self.tgt_H, self.alpha_opt)
+        with open("alpha.dat", "a") as f:
+            f.write(str(self.step)+" "+str(alpha.numpy())+"\n")
+
         # Train policy network
+        alpha = tf.exp(self.log_alpha[0])
         self.p_net.loss.train(obs, self.p_net, self.q_net1, self.q_net2, alpha)
 
         # Update target networks
         self.polyak.average(self.q_net1.net, self.q_tgt1.net)
         self.polyak.average(self.q_net2.net, self.q_tgt2.net)
-
-        # Train alpha
-        self.alpha_loss.train(lgp, self.log_alpha, self.tgt_H, self.alpha_opt)
-        with open("alpha.dat", "a") as f:
-            f.write(str(self.step)+" "+str(alpha.numpy())+"\n")
 
     # Reset
     def reset(self):

@@ -15,7 +15,8 @@ class alpha_sac():
         with tf.GradientTape() as tape:
 
             # Compute loss
-            tgt  =-log_alpha[0]*(lgp + target)
+            alpha = tf.exp(log_alpha[0])
+            tgt  =-alpha*tf.stop_gradient(lgp + target)
             loss = tf.reduce_mean(tgt)
 
             # Apply gradients
