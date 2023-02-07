@@ -4,6 +4,7 @@ import sys
 # Custom imports
 from dragonfly.src.core.train    import *
 from dragonfly.src.core.evaluate import *
+from dragonfly.src.core.average  import *
 from dragonfly.src.utils.prints  import *
 
 def error():
@@ -13,7 +14,8 @@ def error():
     dgf --eval -net    <net_file>
                -json   <json_file>
                -steps  <n_steps> (optional)
-               -warmup <n_warmup> <a_warmup> (optional, requires -steps option)""")
+               -warmup <n_warmup> <a_warmup> (optional, requires -steps option)
+    dgf --avg  <dat_file> ... <dat_file>""")
 
 def main():
 
@@ -69,6 +71,15 @@ def main():
 
         evaluate(net_file, json_file, n_steps, n_warmup, a_warmup)
         return
+
+    # Averaging mode
+    if ("--avg" in args):
+        new_line()
+        liner_simple()
+        bold('Average mode')
+
+        dat_args = args[args.index("--avg")+1:]
+        average(dat_args)
 
 if __name__ == "__main__":
     main()
