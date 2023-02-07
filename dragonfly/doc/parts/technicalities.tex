@@ -88,6 +88,41 @@ Although easy to implement, numerical evaluation of expression (\ref{eq:sac_squa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Cross-entropy and KL divergence}
+
+The Kullback-Leibler distance, also called KL divergence or relative entropy, measures the distance between two distributions $f$ and $g$. For a random variable $X = (x_1, ..., x_n)$ defined on a support $\chi$, the KL divergence is defined as:
+
+\begin{equation}
+\label{eq:kl_div}
+\begin{aligned}
+	\mathcal{D}(f,g) 	&= \expect{x \sim f} \left[ \log \frac{f(x)}{g(x)} \right]\\
+					&= \int_{x} f(x) \log f(x) - \int_{x} f(x) \log g(x)
+\end{aligned}
+\end{equation}
+
+The first term of second line in (\ref{eq:kl_div}) is the opposite of the entropy of $f$, denoted $\mathcal{H}(f)$:
+
+\begin{equation}
+\label{eq:entropy}
+\begin{aligned}
+	\mathcal{H}(f) 	&= - \expect{x \sim f} \left[ \log f(x) \right]\\
+				&= - \int_{x} f(x) \log f(x).
+\end{aligned}
+\end{equation}
+
+Minimizing the KL distance between a target distribution $f$ and a parameterized distribution $g_\theta$ is equivalent to minimize their cross-entropy $\mathcal{H} (f,g_\theta)$:
+
+\begin{equation}
+\label{eq:cross_entropy}
+\begin{aligned}
+	\mathcal{H}(f,g_\theta) 	&= \mathcal{H}(f) + \mathcal{D}(f,g_\theta)\\
+						&= - \int_{x} f(x) \log g_\theta(x).
+\end{aligned}
+\end{equation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Bellman equation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
