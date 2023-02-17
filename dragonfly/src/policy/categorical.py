@@ -78,6 +78,7 @@ class categorical(base_policy):
         return tfd.Categorical(probs=probs[0])
 
     # Network forward pass
+    @tf.function
     def forward(self, obs):
 
         return self.net.call(obs)

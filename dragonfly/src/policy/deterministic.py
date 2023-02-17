@@ -57,6 +57,7 @@ class deterministic(base_policy):
         return act
 
     # Networks forward pass
+    @tf.function
     def forward(self, state):
 
         out = self.net.call(state)[0]

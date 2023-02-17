@@ -98,6 +98,7 @@ class normal(base_policy):
         return pdf
 
     # Networks forward pass
+    @tf.function
     def forward(self, state):
 
         out    = self.net.call(state)
