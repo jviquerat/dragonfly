@@ -60,6 +60,6 @@ def git_short_hash() -> str:
                                    shell=False,
                                    stdout=subprocess.PIPE)
         hash = process.communicate()[0].decode('ascii').strip()
+        print("Revision "+str(hash))
     except Exception as e:
         pass
-    print("Revision "+str(hash))
