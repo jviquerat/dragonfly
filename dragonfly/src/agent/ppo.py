@@ -54,10 +54,14 @@ class ppo(base_agent):
                                                n_cpu = self.n_cpu,
                                                pms   = pms.termination)
 
+        # Initialize timer
+        self.timer_actions = timer("actions  ")
+
     # Get actions
     def actions(self, obs):
 
         # Get actions and associated log-prob
+        self.timer_actions.tic()
         act, lgp = self.p_net.actions(obs)
 
         # Check for NaNs
@@ -67,6 +71,7 @@ class ppo(base_agent):
 
         # Store log-prob
         self.buff.store(["lgp"], [lgp])
+        self.timer_actions.toc()
 
         return act
 

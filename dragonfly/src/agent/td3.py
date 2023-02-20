@@ -90,9 +90,13 @@ class td3(base_agent):
                                                n_cpu = self.n_cpu,
                                                pms   = pms.termination)
 
+        # Initialize timer
+        self.timer_actions = timer("actions  ")
+
     # Get actions
     def actions(self, obs):
 
+        self.timer_actions.tic()
         if (self.step < self.n_warmup):
             act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
         else:
@@ -109,6 +113,7 @@ class td3(base_agent):
         if (np.isnan(act).any()):
             error("td3", "get_actions",
                   "Detected NaN in generated actions")
+        self.timer_actions.toc()
 
         return act
 

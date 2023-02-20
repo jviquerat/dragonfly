@@ -54,16 +54,21 @@ class a2c(base_agent):
                                                n_cpu = self.n_cpu,
                                                pms   = pms.termination)
 
+        # Initialize timer
+        self.timer_actions = timer("actions  ")
+
     # Get actions
     def actions(self, obs):
 
         # Get actions and associated log-prob
+        self.timer_actions.tic()
         act, lgp = self.p_net.actions(obs)
 
         # Check for NaNs
         if (np.isnan(act).any()):
             error("a2c", "get_actions",
                   "Detected NaN in generated actions")
+        self.timer_actions.toc()
 
         return act
 

@@ -137,4 +137,5 @@ class td(trainer_base):
         self.timer_global.toc()
         self.timer_global.show()
         self.env.timer_env.show()
+        self.agent.timer_actions.show()
         self.timer_training.show()
