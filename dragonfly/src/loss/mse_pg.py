@@ -13,8 +13,7 @@ class mse_pg():
         with tf.GradientTape() as tape:
 
             # Compute loss
-            val  = tf.cast(v.forward(obs), tf.float32)
-            val  = tf.reshape(val, [tf.size(tgt)])
+            val  = tf.reshape(v.forward(obs), [tf.size(tgt)])
             diff = tf.square(tgt - val)
             loss = tf.reduce_mean(diff)
 

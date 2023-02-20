@@ -37,9 +37,6 @@ class v_value(base_value):
     # Get values
     def values(self, x):
 
-        # Cast
-        x = tf.cast(x, tf.float32)
-
         # Predict values
         v = np.array(self.forward(x))
         v = np.reshape(v, (-1,self.out_dim))

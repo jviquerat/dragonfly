@@ -56,7 +56,6 @@ class normal(base_policy):
     # Get actions
     def actions(self, obs):
 
-        obs      = tf.cast(obs, tf.float32)
         act, lgp = self.sample(obs)
         act      = np.reshape(act.numpy(), (-1,self.store_dim))
         lgp      = np.reshape(lgp.numpy(), (-1))
@@ -66,7 +65,6 @@ class normal(base_policy):
     # Control (deterministic actions)
     def control(self, obs):
 
-        obs    = tf.cast(obs, tf.float32)
         mu, sg = self.forward(obs)
         act    = np.reshape(mu.numpy(), (-1,self.store_dim))
 
