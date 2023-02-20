@@ -52,9 +52,13 @@ class dqn():
                                                n_cpu = self.n_cpu,
                                                pms   = pms.termination)
 
+        # Initialize timer
+        self.timer_actions = timer("actions  ")
+
     # Get actions
     def actions(self, obs):
 
+        self.timer_actions.tic()
         act = np.zeros([self.n_cpu, 1], dtype=int)
 
         for i in range(self.n_cpu):
@@ -68,6 +72,7 @@ class dqn():
                 act[i] = np.argmax(val)
 
         act = np.reshape(act, (-1))
+        self.timer_actions.toc()
 
         return act
 

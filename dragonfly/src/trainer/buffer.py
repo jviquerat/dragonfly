@@ -11,7 +11,7 @@ class buffer(trainer_base):
     def __init__(self, env_pms, agent_pms, path, n_cpu, n_stp_max, pms):
 
         # Initialize environment
-        self.env   = par_envs(n_cpu, path, env_pms)
+        self.env = par_envs(n_cpu, path, env_pms)
 
         # Initialize from input
         self.obs_dim     = self.env.obs_dim
@@ -144,4 +144,5 @@ class buffer(trainer_base):
         self.timer_global.toc()
         self.timer_global.show()
         self.env.timer_env.show()
+        self.agent.timer_actions.show()
         self.timer_training.show()
