@@ -2,6 +2,9 @@
 import os
 import subprocess
 
+# Custom improts
+from dragonfly.src.envs.mpi import *
+
 ###############################################
 ### A set of functions to format printings
 
@@ -13,53 +16,63 @@ bld_clr = '\033[1m'
 
 ### New line
 def new_line():
-    print("")
+    if (mpi.rank == 0):
+        print("")
 
 ### Header
 def header():
-    print("#################################")
+    if (mpi.rank == 0):
+        print("#################################")
 
 ### Liner
 def liner():
-    new_line()
-    print("###", end=" ")
+    if (mpi.rank == 0):
+        new_line()
+        print("###", end=" ")
 
 ### Liner with no newline
 def liner_simple():
-    print("###", end=" ")
+    if (mpi.rank == 0):
+        print("###", end=" ")
 
 ### Spacer
 def spacer():
-    print("#", end=" ")
+    if (mpi.rank == 0):
+        print("#", end=" ")
 
 ### Dragonfly disclaimer
 def disclaimer():
-    header()
-    liner_simple()
-    bold("Dragonfly, a DRL library")
-    liner_simple()
-    git_short_hash()
-    header()
+    if (mpi.rank == 0):
+        header()
+        liner_simple()
+        bold("Dragonfly, a DRL library")
+        liner_simple()
+        git_short_hash()
+        header()
 
 ### Print with warning color
 def warn(text):
-    print(wrn_clr + text + end_clr)
+    if (mpi.rank == 0):
+        print(wrn_clr + text + end_clr)
 
 ### Print with error color
 def errr(text):
-    print(err_clr + text + end_clr)
+    if (mpi.rank == 0):
+        print(err_clr + text + end_clr)
 
 ### Print with bold text
 def bold(text):
-    print(bld_clr + text + end_clr)
+    if (mpi.rank == 0):
+        print(bld_clr + text + end_clr)
 
 ### Print git revision
 def git_short_hash() -> str:
-    try:
-        process = subprocess.Popen(['git', 'rev-parse', '--short', 'HEAD'],
-                                   shell=False,
-                                   stdout=subprocess.PIPE)
-        hash = process.communicate()[0].decode('ascii').strip()
-        print("Revision "+str(hash))
-    except Exception as e:
-        pass
+    if (mpi.rank == 0):
+        try:
+            process = subprocess.Popen(['git', 'rev-parse', '--short', 'HEAD'],
+                                       shell=False,
+                                       stdout=subprocess.PIPE)
+            hash = process.communicate()[0].decode('ascii').strip()
+            print("Revision "+str(hash))
+        except Exception as e:
+            pass

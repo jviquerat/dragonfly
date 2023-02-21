@@ -2,8 +2,7 @@
 import os
 import sys
 import gym
-import numpy           as np
-import multiprocessing as mp
+import numpy as np
 import time
 
 # Custom imports
@@ -16,48 +15,45 @@ gym.logger.set_level(40)
 ###############################################
 ### A wrapper class for parallel environments
 class par_envs:
-    def __init__(self, n_cpu, path, pms):
+    def __init__(self, path, pms):
 
-        # Init pipes and processes
+        # Default parameters
         self.name      = pms.name
         self.act_norm  = True
-        self.obs_clip  = pms.obs_clip
-        self.obs_norm  = pms.obs_norm
-        self.obs_noise = pms.obs_noise
-        self.n_cpu     = n_cpu
-        self.pipes     = []
-        self.procs     = []
+        self.obs_norm  = True
+        self.obs_clip  = False
+        self.obs_noise = False
+
+        if hasattr(pms, "act_norm"):  self.act_norm = pms.act_norm
+        if hasattr(pms, "obs_norm"):  self.obs_norm = pms.obs_norm
+        if hasattr(pms, "obs_clip"):  self.obs_clip = pms.obs_clip
+        if hasattr(pms, "obs_noise"): self.obs_norm = pms.obs_noise
+
+        # Generate workers
+        self.worker = worker(self.name, mpi.rank, path)
+
+        # Set all slaves to wait for instructions
+        if (mpi.rank != 0):
+            self.worker.work()
+
+        # Desactivate act_norm for discrete environments
+        if (self.get_action_type() == "discrete"):
+            self.act_norm = False
 
         # Possibly set obs max by hand
         self.manual_obs_max = 1.0
         if hasattr(pms, "obs_max"): self.manual_obs_max = pms.obs_max
 
-        # Start environments
-        for cpu in range(n_cpu):
-            p_pipe, c_pipe = mp.Pipe()
-            process        = mp.Process(target = worker,
-                                        args   = (self.name, str(cpu),
-                                                  c_pipe, path))
-
-            self.pipes.append(p_pipe)
-            self.procs.append(process)
-
-            process.daemon = True
-            process.start()
-
         # Handle action and observation dimensions
-        act_dim, obs_dim = self.get_dims()
-        self.act_dim     = int(act_dim)
-        self.obs_dim     = int(obs_dim)
+        self.get_dims()
 
-        # Handle actions scaling
-        self.act_min, self.act_max, act_norm = self.get_act_bounds()
-        if ((not act_norm) and self.act_norm): self.act_norm = False
+        # Handle actions bounds
+        self.get_act_bounds()
         self.act_avg = 0.5*(self.act_max + self.act_min)
         self.act_rng = 0.5*(self.act_max - self.act_min)
 
-        self.obs_min, self.obs_max, obs_norm = self.get_obs_bounds()
-        if ((not obs_norm) and self.obs_norm): self.obs_norm = False
+        # Handle observations bounds
+        self.get_obs_bounds()
         self.obs_min = np.where(self.obs_min < -def_obs_max,
                                 -self.manual_obs_max,
                                 self.obs_min)
@@ -70,36 +66,190 @@ class par_envs:
         # Initialize timer
         self.timer_env = timer("env      ")
 
+    # Take one step in all environments
+    def step(self, actions):
+
+        self.timer_env.tic()
+
+        # Send
+        data = [('step', None)]*mpi.size
+        for p in range(mpi.size):
+            act = actions[p]
+            if (self.act_norm):
+                act = np.clip(act,-1.0,1.0)
+                for i in range(self.act_dim):
+                    act[i] = self.act_rng[i]*act[i] + self.act_avg[i]
+            data[p] = ('step', act)
+        mpi.comm.scatter(data, root=0)
+
+        # Main process executing
+        n, r, d, t = self.worker.step(data[0][1])
+
+        # Receive
+        nxt   = np.empty((mpi.size, self.obs_dim))
+        rwd   = np.empty((mpi.size))
+        done  = np.empty((mpi.size))
+        trunc = np.empty((mpi.size))
+
+        data  = mpi.comm.gather((n, r, d, t), root=0)
+
+        for p in range(mpi.size):
+            vals       = data[p]
+            n, r, d, t = vals[0], vals[1], vals[2], vals[3]
+            n          = self.process_obs(n)
+            nxt  [p]   = np.reshape(n, (self.obs_dim))
+            rwd  [p]   = r
+            done [p]   = bool(d)
+            trunc[p]   = bool(t)
+
+        self.timer_env.toc()
+
+        return nxt, rwd, done, trunc
+
     # Reset all environments
     def reset_all(self):
 
         # Send
-        for p in self.pipes:
-            p.send(('reset', None))
+        data = [('reset', True) for i in range(mpi.size)]
+        mpi.comm.scatter(data, root=0)
+
+        # Main process executing
+        obs = self.worker.reset(data[0][1])
 
         # Receive and normalize
-        results = np.array([])
-        for p in self.pipes:
-            obs     = p.recv()
-            obs     = self.process_obs(obs)
-            results = np.append(results, obs)
+        results = np.empty((mpi.size, self.obs_dim))
+        data    = mpi.comm.gather((obs), root=0)
+        for p in range(mpi.size):
+            results[p] = self.process_obs(data[p])
 
-        return np.reshape(results, (-1,self.obs_dim))
+        return results
 
     # Reset based on a done array
     def reset(self, done, obs_array):
 
         # Send
-        for cpu in range(self.n_cpu):
-            if (done[cpu]):
-                self.pipes[cpu].send(('reset', None))
+        data = [('reset', True) for i in range(mpi.size)]
+        for p in range(mpi.size):
+            data[p] = ('reset', done[p])
+        mpi.comm.scatter(data, root=0)
+
+        # Main process executing
+        obs = self.worker.reset(data[0][1])
 
         # Receive and normalize
-        for cpu in range(self.n_cpu):
-            if (done[cpu]):
-                obs            = self.pipes[cpu].recv()
-                obs            = self.process_obs(obs)
-                obs_array[cpu] = obs
+        data = mpi.comm.gather(obs, root=0)
+        for p in range(mpi.size):
+            if (done[p]):
+                obs_array[p] = self.process_obs(data[p])
+
+    # Check action type
+    def get_action_type(self):
+
+        # Discrete action type
+        if (type(self.worker.env.action_space).__name__ == "Discrete"):
+            t = "discrete"
+        # Continuous action type
+        if (type(self.worker.env.action_space).__name__ == "Box"):
+            t = "continuous"
+
+        return t
+
+    # Get environment dimensions
+    def get_dims(self):
+
+        # Discrete action space
+        if (type(self.worker.env.action_space).__name__ == "Discrete"):
+            self.act_dim = int(self.worker.env.action_space.n)
+        # Continuous action space
+        if (type(self.worker.env.action_space).__name__ == "Box"):
+            self.act_dim = int(self.worker.env.action_space.shape[0])
+        # Discrete observation space
+        if (type(self.worker.env.observation_space).__name__ == "Discrete"):
+            self.obs_dim = int(self.worker.env.observation_space.n)
+        # Continuous observation space
+        if (type(self.worker.env.observation_space).__name__ == "Box"):
+            self.obs_dim = int(self.worker.env.observation_space.shape[0])
+
+    # Get action boundaries
+    def get_act_bounds(self):
+
+        # Continuous action space
+        if (type(self.worker.env.action_space).__name__ == "Box"):
+            self.act_min  = self.worker.env.action_space.low
+            self.act_max  = self.worker.env.action_space.high
+        # Discrete action space
+        if (type(self.worker.env.action_space).__name__ == "Discrete"):
+            self.act_min  = 1.0
+            self.act_max  = 1.0
+
+    # Get observations boundaries
+    def get_obs_bounds(self):
+
+        # Continuous observation space
+        if (type(self.worker.env.observation_space).__name__ == "Box"):
+            self.obs_min  = self.worker.env.observation_space.low
+            self.obs_max  = self.worker.env.observation_space.high
+        # Discrete observation space ?
+        else:
+            self.obs_min  = 1.0
+            self.obs_max  = 1.0
+
+    # Render environment
+    def render(self, render):
+
+        # Not all environments will render simultaneously
+        # We use a list to store those that render and those that don't
+        rnd = [[] for _ in range(mpi.size)]
+
+        # Send
+        data = [('render',False) for i in range(mpi.size)]
+        for cpu in range(mpi.size):
+            if (render[cpu]):
+                data[cpu] = ('render',True)
+        mpi.comm.scatter(data, root=0)
+
+        # Main process executing
+        r = self.worker.render(data[0][1])
+
+        # Receive
+        data = mpi.comm.gather(r, root=0)
+        for cpu in range(mpi.size):
+            if (render[cpu]):
+                rnd[cpu] = data[cpu]
+
+        return rnd
+
+    # Render environment
+    def render_single(self, cpu):
+
+        # Send
+        data      = [('render',False) for i in range(mpi.size)]
+        data[cpu] = ('render',True)
+        mpi.comm.scatter(data, root=0)
+
+        # Main process executing
+        r = self.worker.render(data[0][1])
+
+        # Receive
+        data = mpi.comm.gather(r, root=0)
+        rgb = data[cpu]
+
+        return rgb
+
+    # Close
+    def close(self):
+
+        data = [('close',None) for i in range(mpi.size)]
+        data = mpi.comm.scatter(data, root=0)
+
+        # Main process executing
+        self.worker.close()
+
+    # Set control to true if possible
+    def set_control(self):
+
+        if (hasattr(self.worker.env, 'control')):
+            self.worker.env.control = True
 
     # Process observations
     def process_obs(self, obs):
@@ -123,7 +273,6 @@ class par_envs:
     # Normalize observations
     def norm_obs(self, obs):
 
-        #for i in range(self.obs_dim):
         obs -= self.obs_avg
         obs /= self.obs_rng
 
@@ -138,213 +287,69 @@ class par_envs:
 
         return obs
 
-    # Check action type
-    def get_action_type(self):
+# Worker class for slave processes
+class worker():
+    def __init__(self, env_name, cpu, path):
 
-        self.pipes[0].send(('get_action_type', None))
-        t = self.pipes[0].recv()
-        return t
+        # Build environment
+        try:
+            self.env = gym.make(env_name, render_mode="rgb_array")
+        except:
+            sys.path.append(path)
+            module    = __import__(env_name)
+            env_build = getattr(module, env_name)
+            try:
+                self.env = env_build(cpu)
+            except:
+                self.env = env_build()
 
-    # Get environment dimensions
-    def get_dims(self):
+    # Working function for slaves
+    def work(self):
+        while True:
+            data    = None
+            data    = mpi.comm.scatter(data, root=0)
+            command = data[0]
+            data    = data[1]
 
-        # Send
-        self.pipes[0].send(('get_dims', None))
+            # Execute commands
+            if command == 'step':
+                nxt, rwd, done, trunc = self.step(data)
+                mpi.comm.gather((nxt, rwd, done, trunc), root=0)
 
-        # Receive
-        results = np.array([])
-        results = np.append(results, self.pipes[0].recv())
+            if command == 'reset':
+                obs = self.reset(data)
+                mpi.comm.gather((obs), root=0)
 
-        return results
+            if command == 'render':
+                rnd = self.render(data)
+                mpi.comm.gather((rnd), root=0)
 
-    # Get action boundaries
-    def get_act_bounds(self):
+            if command == 'close':
+                self.close()
+                mpi.finalize()
+                break
 
-        # Send
-        self.pipes[0].send(('get_act_bounds', None))
-
-        # Receive
-        act_min, act_max, act_norm = self.pipes[0].recv()
-
-        return act_min, act_max, act_norm
-
-    # Get observations boundaries
-    def get_obs_bounds(self):
-
-        # Send
-        self.pipes[0].send(('get_obs_bounds', None))
-
-        # Receive
-        obs_min, obs_max, obs_norm = self.pipes[0].recv()
-
-        return obs_min, obs_max, obs_norm
-
-    # Render environment
-    def render(self, render):
-
-        # Not all environments will render simultaneously
-        # We use a list to store those that render and those that don't
-        rnd = [[] for _ in range(self.n_cpu)]
-
-        # Send
-        for cpu in range(self.n_cpu):
-            if (render[cpu]):
-                self.pipes[cpu].send(('render', None))
-
-        # Receive
-        for cpu in range(self.n_cpu):
-            if (render[cpu]):
-                rnd[cpu] = self.pipes[cpu].recv()
-
-        return rnd
-
-    # Render environment
-    def render_single(self, cpu):
-
-        # Send
-        self.pipes[cpu].send(('render', None))
-
-        # Receive
-        rgb = self.pipes[cpu].recv()
-
-        return rgb
-
-    # Close
-    def close(self):
-
-        # Close all envs
-        for p in self.pipes:
-            p.send(('close', None))
-        for p in self.procs:
-            p.terminate()
-            p.join()
-
-    # Take one step in all environments
-    def step(self, actions):
-
-        self.timer_env.tic()
-
-        # Send
-        act = actions
-        if (self.act_norm):
-            act = np.clip(act,-1.0,1.0)
-            act = self.act_rng*act + self.act_avg
-
-        for cpu in range(self.n_cpu):
-            self.pipes[cpu].send(('step', act[cpu]))
-
-        # Receive
-        nxt   = np.empty((self.n_cpu,self.obs_dim))
-        rwd   = np.empty((self.n_cpu))
-        done  = np.empty((self.n_cpu))
-        trunc = np.empty((self.n_cpu))
-
-        for p in range(self.n_cpu):
-            n, r, d, t = self.pipes[p].recv()
-            n          = self.process_obs(n)
-            nxt[p]     = n
-            rwd[p]     = r
-            done[p]    = bool(d)
-            trunc[p]   = bool(t)
-
-        self.timer_env.toc()
+    # Stepping
+    def step(self, data):
+        nxt, rwd, done, trunc, _ = self.env.step(data)
+        if ((not done) and trunc): done = True
 
         return nxt, rwd, done, trunc
 
-    # Set control to true if possible
-    def set_control(self):
+    # Resetting
+    def reset(self, data):
+        if data: obs, _ = self.env.reset()
+        else: obs = None
 
-        self.pipes[0].send(('set_control', None))
+        return obs
 
-# Target function for process
-def worker(env_name, cpu, pipe, path):
+    # Rendering
+    def render(self, data):
+        rnd = None
+        if (data): rnd = self.env.render()
 
-    # Build environment
-    try:
-        env = gym.make(env_name, render_mode="rgb_array")
-    except:
-        sys.path.append(path)
-        module    = __import__(env_name)
-        env_build = getattr(module, env_name)
-        try:
-            env = env_build(cpu)
-        except:
-            env = env_build()
+        return rnd
 
-    # Run
-    try:
-        while True:
-            # Receive command
-            command, data = pipe.recv()
-
-            # Execute commands
-            if command == 'reset':
-                obs, _ = env.reset()
-                pipe.send(obs)
-
-            if command == 'step':
-                nxt, rwd, done, trunc, _ = env.step(data)
-                if ((not done) and trunc): done = True
-                pipe.send((nxt, rwd, done, trunc))
-
-            if command == 'seed':
-                env.seed(data)
-                pipe.send(None)
-
-            if command == 'render':
-                pipe.send(env.render())
-
-            if command == "get_action_type":
-                if (type(env.action_space).__name__ == "Discrete"):
-                    pipe.send("discrete")
-                if (type(env.action_space).__name__ == "Box"):
-                    pipe.send("continuous")
-
-            if command == 'get_dims':
-                # Discrete action space
-                if (type(env.action_space).__name__ == "Discrete"):
-                    act_dim = env.action_space.n
-                # Continuous action space
-                if (type(env.action_space).__name__ == "Box"):
-                    act_dim = env.action_space.shape[0]
-                # Discrete observation space
-                if (type(env.observation_space).__name__ == "Discrete"):
-                    obs_dim = env.observation_space.n
-                # Continuous observation space
-                if (type(env.observation_space).__name__ == "Box"):
-                    obs_dim = env.observation_space.shape[0]
-                pipe.send((act_dim, obs_dim))
-
-            if command == 'get_act_bounds':
-                # Continuous action space
-                if (type(env.action_space).__name__ == "Box"):
-                    act_min  = env.action_space.low
-                    act_max  = env.action_space.high
-                    act_norm = True
-                if (type(env.action_space).__name__ == "Discrete"):
-                    act_min  = 1.0
-                    act_max  = 1.0
-                    act_norm = False
-                pipe.send((act_min, act_max, act_norm))
-
-            if (command == 'get_obs_bounds'):
-                # Continuous observation space
-                if (type(env.observation_space).__name__ == "Box"):
-                    obs_min  = env.observation_space.low
-                    obs_max  = env.observation_space.high
-                    obs_norm = True
-                else:
-                    obs_min  = 1.0
-                    obs_max  = 1.0
-                    obs_norm = False
-                pipe.send((obs_min, obs_max, obs_norm))
-
-            if command == 'close':
-                pipe.send(None)
-                break
-
-            if command == 'set_control':
-                if (hasattr(env,'control')):
-                    env.control = True
-    finally:
-        env.close()
+    # Closing
+    def close(self):
+        self.env.close()

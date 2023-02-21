@@ -6,20 +6,18 @@ from dragonfly.src.trainer.base import *
 ### env_pms   : environment parameters
 ### agent_pms : agent parameters
 ### path      : path for environment
-### n_cpu     : nb of parallel environments
 ### pms       : parameters
 class episode(trainer_base):
-    def __init__(self, env_pms, agent_pms, path, n_cpu, n_stp_max, pms):
+    def __init__(self, env_pms, agent_pms, path, n_stp_max, pms):
 
         # Initialize environment
-        self.env = par_envs(n_cpu, path, env_pms)
+        self.env = par_envs(path, env_pms)
 
         # Initialize from input
         self.obs_dim     = self.env.obs_dim
         self.act_dim     = self.env.act_dim
-        self.n_cpu       = n_cpu
         self.n_stp_max   = n_stp_max
-        self.n_ep_unroll = pms.n_ep_unroll*n_cpu
+        self.n_ep_unroll = pms.n_ep_unroll*(mpi.size)
         self.n_ep_train  = pms.n_ep_train
         self.btc_frac    = pms.batch_frac
         self.n_epochs    = pms.n_epochs
@@ -38,12 +36,12 @@ class episode(trainer_base):
         self.agent = agent_factory.create(agent_pms.type,
                                           obs_dim = self.obs_dim,
                                           act_dim = self.act_dim,
-                                          n_cpu   = self.n_cpu,
+                                          n_cpu   = mpi.size,
                                           size    = self.size,
                                           pms     = agent_pms)
 
         # Initialize counter
-        self.counter = counter(self.n_cpu)
+        self.counter = counter(mpi.size)
 
         # Initialize learning data report
         self.report = report(self.freq_report,
@@ -53,7 +51,7 @@ class episode(trainer_base):
         self.rnd_style = "rgb_array"
         if hasattr(pms, "rnd_style"):
             self.rnd_style = pms.rnd_style
-        self.renderer = renderer(self.n_cpu, self.rnd_style, pms.render_every)
+        self.renderer = renderer(mpi.size, self.rnd_style, pms.render_every)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
@@ -97,7 +95,7 @@ class episode(trainer_base):
                 self.renderer.store(self.env)
 
                 # Finish if some episodes are done
-                for cpu in range(self.n_cpu):
+                for cpu in range(mpi.size):
                     if (dne[cpu]):
                         self.lengths = np.append(self.lengths,
                                                  self.counter.ep_step[cpu])
