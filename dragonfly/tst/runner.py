@@ -29,7 +29,6 @@ def runner(json_file, agent_type):
                                      env_pms   = reader.pms.env,
                                      agent_pms = reader.pms.agent,
                                      path      = ".",
-                                     n_cpu     = reader.pms.n_cpu,
                                      n_stp_max = reader.pms.n_stp_max,
                                      pms       = reader.pms.trainer)
 

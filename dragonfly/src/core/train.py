@@ -6,6 +6,7 @@ import shutil
 import numpy as np
 
 # Custom imports
+from dragonfly.src.envs.mpi        import *
 from dragonfly.src.core.constants  import *
 from dragonfly.src.utils.json      import *
 from dragonfly.src.utils.data      import *
@@ -39,7 +40,6 @@ def train(json_file):
                                      env_pms   = pms.env,
                                      agent_pms = pms.agent,
                                      path      = base_path,
-                                     n_cpu     = pms.n_cpu,
                                      n_stp_max = pms.n_stp_max,
                                      pms       = pms.trainer)
 
@@ -63,6 +63,9 @@ def train(json_file):
     # Plot
     filename = results_path+'/'+path
     plot_avg(data, filename)
+
+    # Finalize main process
+    mpi.finalize()
 
 # Generate results folder name
 def folder_name(pms):

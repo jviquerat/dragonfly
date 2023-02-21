@@ -36,6 +36,7 @@ line-profiler==3.5.1
 llvmlite==0.39.1
 Markdown==3.3.4
 matplotlib==3.4.2
+mpi4py==3.1.4
 mujoco==2.2.0
 mujoco-py==2.1.2.14
 numba==0.56.2
