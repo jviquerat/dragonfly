@@ -123,8 +123,9 @@ class par_envs:
     # Normalize observations
     def norm_obs(self, obs):
 
-        for i in range(self.obs_dim):
-            obs[i] = (obs[i] - self.obs_avg[i])/self.obs_rng[i]
+        #for i in range(self.obs_dim):
+        obs -= self.obs_avg
+        obs /= self.obs_rng
 
         return obs
 
@@ -224,30 +225,33 @@ class par_envs:
         self.timer_env.tic()
 
         # Send
-        for cpu in range(self.n_cpu):
-            act = actions[cpu]
-            if (self.act_norm):
-                act = np.clip(act,-1.0,1.0)
-                for i in range(self.act_dim):
-                    act[i] = self.act_rng[i]*act[i] + self.act_avg[i]
+        act = actions
+        if (self.act_norm):
+            act = np.clip(act,-1.0,1.0)
+            act = self.act_rng*act + self.act_avg
 
-            self.pipes[cpu].send(('step', act))
+        for cpu in range(self.n_cpu):
+            self.pipes[cpu].send(('step', act[cpu]))
 
         # Receive
-        nxt   = np.array([])
-        rwd   = np.array([])
-        done  = np.array([], dtype=bool)
-        trunc = np.array([], dtype=bool)
+        nxt   = np.empty((self.n_cpu,self.obs_dim))
+        rwd   = np.empty((self.n_cpu))
+        done  = np.empty((self.n_cpu))
+        trunc = np.empty((self.n_cpu))
 
-        for p in self.pipes:
-            n, r, d, t = p.recv()
+        for p in range(self.n_cpu):
+            n, r, d, t = self.pipes[p].recv()
             n          = self.process_obs(n)
-            nxt        = np.append(nxt,   n)
-            rwd        = np.append(rwd,   r)
-            done       = np.append(done,  bool(d))
-            trunc      = np.append(trunc, bool(t))
+            nxt[p]     = n
+            rwd[p]     = r
+            done[p]    = bool(d)
+            trunc[p]   = bool(t)
+            #nxt        = np.append(nxt,   n)
+            #rwd        = np.append(rwd,   r)
+            #done       = np.append(done,  bool(d))
+            #trunc      = np.append(trunc, bool(t))
 
-        nxt = np.reshape(nxt, (-1,self.obs_dim))
+        #nxt = np.reshape(nxt, (-1,self.obs_dim))
 
         self.timer_env.toc()
 
