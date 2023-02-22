@@ -246,12 +246,6 @@ class par_envs:
             rwd[p]     = r
             done[p]    = bool(d)
             trunc[p]   = bool(t)
-            #nxt        = np.append(nxt,   n)
-            #rwd        = np.append(rwd,   r)
-            #done       = np.append(done,  bool(d))
-            #trunc      = np.append(trunc, bool(t))
-
-        #nxt = np.reshape(nxt, (-1,self.obs_dim))
 
         self.timer_env.toc()
 
