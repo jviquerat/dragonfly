@@ -10,7 +10,7 @@
     "name_tag": "",
     "name_time": false,
     "n_avg": 3,
-    "n_cpu": 7,
+    "n_cpu": 1,
     "n_stp_max": 100000,
     "trainer": {
         "style": "buffer",
@@ -28,12 +28,12 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64],
-                    "actv": "tanh"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 2,
                     "arch": [[64],[64]],
-                    "actv": ["tanh","tanh"],
+                    "actv": ["relu","relu"],
                     "final": ["tanh","sigmoid"]
                 }
             },
