@@ -37,7 +37,6 @@
                     "final": ["tanh","sigmoid"]
                 }
             },
-            "stddev_gen": "regular",
             "optimizer": {
                 "type": "adam",
                 "lr": 5.0e-4,
@@ -80,7 +79,7 @@
             "ret_norm": true
         },
         "termination": {
-            "type": "bootstrap"
+            "type": "regular"
         }
     }
 }

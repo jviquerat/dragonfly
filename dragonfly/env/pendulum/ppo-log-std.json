@@ -37,7 +37,6 @@
                     "final": ["linear","sigmoid"]
                 }
             },
-            "stddev_gen": "regular",
             "optimizer": {
                 "type": "adam",
                 "lr": 5.0e-4,
