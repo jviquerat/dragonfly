@@ -38,7 +38,7 @@
                     "nb": 2,
                     "arch": [[256],[256]],
                     "actv": ["relu","relu"],
-                    "final": ["tanh","sigmoid"]
+                    "final": ["linear","sigmoid"]
                 }
             },
             "optimizer": {
