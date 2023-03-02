@@ -19,7 +19,9 @@ class normal_log_std(normal):
 
         # Bounds for log std
         self.std_log_max = 2.0
-        self.std_log_min =-4.0
+        self.std_log_min =-5.0
+        if hasattr(pms, "std_log_max"): self.std_log_max = pms.std_log_max
+        if hasattr(pms, "std_log_min"): self.std_log_min = pms.std_log_min
 
         # Check parameters
         if (pms.network.heads.final[0] != "linear"):
