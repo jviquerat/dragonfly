@@ -18,10 +18,12 @@ class normal_log_std(normal):
         self.store_type  = float
 
         # Bounds for log std
-        self.std_log_max = 2.0
-        self.std_log_min =-5.0
-        if hasattr(pms, "std_log_max"): self.std_log_max = pms.std_log_max
-        if hasattr(pms, "std_log_min"): self.std_log_min = pms.std_log_min
+        self.std_log_max   = 2.0
+        self.std_log_min   =-5.0
+        self.std_log_start = 1.0
+        if hasattr(pms, "std_log_max"):   self.std_log_max   = pms.std_log_max
+        if hasattr(pms, "std_log_min"):   self.std_log_min   = pms.std_log_min
+        if hasattr(pms, "std_log_start"): self.std_log_start = pms.std_log_start
 
         # Check parameters
         if (pms.network.heads.final[0] != "linear"):
@@ -57,7 +59,10 @@ class normal_log_std(normal):
         out    = self.net.call(state)
         mu     = out[0]
         log_sg = out[1]
-        log_sg = self.std_log_min + log_sg*(self.std_log_max - self.std_log_min)
-        sg     = tf.exp(log_sg)
+
+        up   = self.std_log_start + log_sg*(self.std_log_max-self.std_log_start)
+        down = self.std_log_start + log_sg*(self.std_log_start-self.std_log_min)
+        res  = tf.where(log_sg > 0.0, up, down)
+        sg   = tf.exp(res)
 
         return mu, sg

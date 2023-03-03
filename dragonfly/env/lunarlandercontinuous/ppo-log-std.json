@@ -16,7 +16,7 @@
         "style": "buffer",
         "buff_size": 4000,
         "n_buff": 1,
-        "batch_frac": 0.25,
+        "batch_frac": 0.5,
         "n_epochs": 32,
         "render_every": 10000
     },
@@ -24,6 +24,9 @@
         "type": "ppo",
         "policy": {
             "type": "normal_log_std",
+            "std_log_min":-5.0,
+            "std_log_max": 1.0,
+            "std_log_start": 0.0,
             "network": {
                 "type": "fc",
                 "trunk": {
@@ -34,12 +37,12 @@
                     "nb": 2,
                     "arch": [[64],[64]],
                     "actv": ["tanh","tanh"],
-                    "final": ["linear","sigmoid"]
+                    "final": ["tanh","tanh"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -79,7 +82,7 @@
             "ret_norm": true
         },
         "termination": {
-            "type": "bootstrap"
+            "type": "regular"
         }
     }
 }
