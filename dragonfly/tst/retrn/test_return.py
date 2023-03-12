@@ -138,8 +138,8 @@ def test_return():
 
     # Compute returns
     tgt, ret = retrn.compute(rwd, val, nxt, trm)
-    ret_ref  = np.array([1.01167994, 1.07367546,
-                         1.12726805, 1.1721996, 0.698])
+    ret_ref  = np.array([0.39323576, 0.43623558,
+                         0.47024900, 0.49500000, 0.0])
 
     print("Reference return")
     print(ret_ref)

@@ -31,18 +31,20 @@ class gae():
         gm  = self.gamma
         lbd = self.gae_lambda
 
-        # Compute modified terminal signal including bootstrap
-        trm = np.clip(trm, 0.0, 1.0)
+        # Initialize return and check bootstrapping
+        ret = np.where(trm == 2.0, rwd + gm*nxt, rwd)
 
-        # Compute deltas
-        buff = zip(rwd, trm, nxt, val)
-        dlt  = [r + gm*t*nv - v for r, t, nv, v in buff]
-        dlt  = np.stack(dlt)
+        # Remove bootstrap information from trm buffer
+        trm = np.where(trm == 2.0, 0.0, trm)
+
+        # Compute TD residual
+        dlt    = np.zeros_like(ret)
+        dlt[:] = ret[:] + gm*trm[:]*nxt[:] - val[:]
 
         # Compute advantages
-        adv = dlt.copy()
+        adv = np.zeros_like(dlt)
         for t in reversed(range(len(adv)-1)):
-            adv[t] += trm[t]*gm*lbd*adv[t+1]
+            adv[t] = dlt[t] + trm[t]*gm*lbd*adv[t+1]
 
         # Compute targets
         tgt  = adv.copy()
