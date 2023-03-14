@@ -4,14 +4,13 @@
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0,
-	"obs_max": 10.0
+	      "obs_max": 10.0
     },
     "name_env": true,
     "name_agent": true,
     "name_tag": "",
     "name_time": false,
     "n_avg": 5,
-    "n_cpu": 1,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",

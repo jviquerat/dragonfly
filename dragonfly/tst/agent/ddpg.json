@@ -6,7 +6,6 @@
         "obs_noise": 0.0
     },
     "n_avg": 3,
-    "n_cpu": 1,
     "n_stp_max": 500,
     "trainer": {
         "style": "td",
