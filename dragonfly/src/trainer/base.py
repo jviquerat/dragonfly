@@ -5,15 +5,15 @@ import shutil
 import numpy as np
 
 # Custom imports
-from dragonfly.src.core.constants import *
-from dragonfly.src.utils.timer    import *
-from dragonfly.src.envs.par_envs  import *
-from dragonfly.src.agent.agent    import *
-from dragonfly.src.utils.buff     import *
-from dragonfly.src.utils.report   import *
-from dragonfly.src.utils.renderer import *
-from dragonfly.src.utils.counter  import *
-from dragonfly.src.utils.error    import *
+from dragonfly.src.core.constants    import *
+from dragonfly.src.utils.timer       import *
+from dragonfly.src.envs.environments import *
+from dragonfly.src.agent.agent       import *
+from dragonfly.src.utils.buff        import *
+from dragonfly.src.utils.report      import *
+from dragonfly.src.utils.renderer    import *
+from dragonfly.src.utils.counter     import *
+from dragonfly.src.utils.error       import *
 
 ###############################################
 ### Class for buffer-based training

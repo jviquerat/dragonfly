@@ -11,7 +11,7 @@ class buffer(trainer_base):
     def __init__(self, env_pms, agent_pms, path, n_stp_max, pms):
 
         # Initialize environment
-        self.env = par_envs(path, env_pms)
+        self.env = environments(path, env_pms)
 
         # Initialize from input
         self.obs_dim     = self.env.obs_dim
