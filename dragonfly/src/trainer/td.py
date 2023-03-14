@@ -21,6 +21,10 @@ class td(trainer_base):
         self.n_stp_unroll = pms.n_stp_unroll*mpi.size
         self.btc_size     = pms.btc_size
         self.freq_report  = max(int(self.n_stp_max/(freq_report*self.n_stp_unroll)),1)
+        self.update_type = "offline"
+
+        # Optional modification of default args
+        if hasattr(pms, "update"): self.update_type = pms.update
 
         # Optional parameters
         self.monitoring = False
@@ -36,6 +40,10 @@ class td(trainer_base):
                                           n_cpu   = mpi.size,
                                           size    = self.mem_size,
                                           pms     = agent_pms)
+
+        # Initialize update
+        self.update = update_factory.create(self.update_type)
+
         # Initialize counter
         self.counter = counter(mpi.size)
 
@@ -117,9 +125,11 @@ class td(trainer_base):
 
             # Train agent
             self.timer_training.tic()
-            for i in range(self.n_stp_unroll):
-                self.agent.prepare_data(self.btc_size)
-                self.agent.train(self.btc_size)
+            self.update.update(self.agent, self.btc_size, self.n_stp_unroll)
+
+            # for i in range(self.n_stp_unroll):
+            #     self.agent.prepare_data(self.btc_size)
+            #     self.agent.train(self.btc_size)
             self.timer_training.toc()
 
             # Reset unroll

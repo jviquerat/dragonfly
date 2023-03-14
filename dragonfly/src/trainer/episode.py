@@ -23,6 +23,10 @@ class episode(trainer_base):
         self.n_epochs    = pms.n_epochs
         self.size        = 1000*self.n_ep_train
         self.freq_report = 10
+        self.update_type = "online"
+
+        # Optional modification of default args
+        if hasattr(pms, "update"): self.update_type = pms.update
 
         # Optional monitoring
         self.monitoring = False
@@ -39,6 +43,9 @@ class episode(trainer_base):
                                           n_cpu   = mpi.size,
                                           size    = self.size,
                                           pms     = agent_pms)
+
+        # Initialize update
+        self.update = update_factory.create(self.update_type)
 
         # Initialize counter
         self.counter = counter(mpi.size)
