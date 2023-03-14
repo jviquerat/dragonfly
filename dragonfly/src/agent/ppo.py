@@ -119,6 +119,34 @@ class ppo(base_agent):
         tgt = tf.reshape(tgt, [-1])
         self.v_net.loss.train(obs, tgt, self.v_net)
 
+    # Training
+    def train_actor(self, start, end):
+
+        obs = self.data["obs"][start:end]
+        act = self.data["act"][start:end]
+        adv = self.data["adv"][start:end]
+        tgt = self.data["tgt"][start:end]
+        lgp = self.data["lgp"][start:end]
+
+        # Train policy
+        act = self.p_net.reshape_actions(act)
+        adv = tf.reshape(adv, [-1])
+        lgp = tf.reshape(lgp, [-1])
+        self.p_net.loss.train(obs, adv, act, lgp, self.p_net)
+
+    # Training
+    def train_critic(self, start, end):
+
+        obs = self.data["obs"][start:end]
+        act = self.data["act"][start:end]
+        adv = self.data["adv"][start:end]
+        tgt = self.data["tgt"][start:end]
+        lgp = self.data["lgp"][start:end]
+
+        # Train v network
+        tgt = tf.reshape(tgt, [-1])
+        self.v_net.loss.train(obs, tgt, self.v_net)
+
     # Agent reset
     def reset(self):
 

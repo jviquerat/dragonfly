@@ -122,8 +122,8 @@ class buffer(trainer_base):
             # Train agent
             self.timer_training.tic()
             btc_size = math.floor(self.size*self.btc_frac)
-            self.update.update(self.agent,
-                               self.size, btc_size, self.n_epochs)
+            self.update.update(self.agent, self.n_buff,
+                               self.buff_size, btc_size, self.n_epochs)
 
             # for epoch in range(self.n_epochs):
             #     # Prepare training data
