@@ -23,10 +23,14 @@ class buffer(trainer_base):
         self.n_epochs    = pms.n_epochs
         self.size        = self.n_buff*self.buff_size
         self.freq_report = max(int(n_stp_max/(freq_report*self.buff_size)),1)
+        self.update_type = "online"
+
+        # Optional modification of default args
+        if hasattr(pms, "update"): self.update_type = pms.update
 
         # Optional monitoring
         self.monitoring = False
-        if hasattr(pms, "monitoring"):  self.monitoring = pms.monitoring
+        if hasattr(pms, "monitoring"): self.monitoring = pms.monitoring
 
         # Initialize agent
         self.agent = agent_factory.create(agent_pms.type,
@@ -35,6 +39,9 @@ class buffer(trainer_base):
                                           n_cpu   = mpi.size,
                                           size    = self.size,
                                           pms     = agent_pms)
+
+        # Initialize update
+        self.update = update_factory.create(self.update_type)
 
         # Initialize counter
         self.counter = counter(mpi.size)
@@ -115,22 +122,24 @@ class buffer(trainer_base):
             # Train agent
             self.timer_training.tic()
             btc_size = math.floor(self.size*self.btc_frac)
-            for epoch in range(self.n_epochs):
+            self.update.update(self.agent,
+                               self.size, btc_size, self.n_epochs)
 
-                # Prepare training data
-                lgt = self.agent.prepare_data(self.size)
+            # for epoch in range(self.n_epochs):
+            #     # Prepare training data
+            #     lgt = self.agent.prepare_data(self.size)
 
-                # Visit all available history
-                done = False
-                btc  = 0
-                while not done:
-                    start = btc*btc_size
-                    end   = min((btc+1)*btc_size, lgt)
+            #     # Visit all available history
+            #     done = False
+            #     btc  = 0
+            #     while not done:
+            #         start = btc*btc_size
+            #         end   = min((btc+1)*btc_size, lgt)
 
-                    self.agent.train(start, end)
+            #         self.agent.train(start, end)
 
-                    btc += 1
-                    if (end == lgt): done = True
+            #         btc += 1
+            #         if (end == lgt): done = True
             self.timer_training.toc()
 
         # Last printing

@@ -9,6 +9,7 @@ from dragonfly.src.core.constants    import *
 from dragonfly.src.utils.timer       import *
 from dragonfly.src.envs.environments import *
 from dragonfly.src.agent.agent       import *
+from dragonfly.src.update.update     import *
 from dragonfly.src.utils.buff        import *
 from dragonfly.src.utils.report      import *
 from dragonfly.src.utils.renderer    import *
