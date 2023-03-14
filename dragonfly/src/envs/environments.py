@@ -6,15 +6,13 @@ import numpy as np
 import time
 
 # Custom imports
+from dragonfly.src.envs.worker    import *
 from dragonfly.src.core.constants import *
 from dragonfly.src.utils.timer    import *
 
-# Set warning levels from gym
-gym.logger.set_level(40)
-
 ###############################################
 ### A wrapper class for parallel environments
-class par_envs:
+class environments:
     def __init__(self, path, pms):
 
         # Default parameters
@@ -286,70 +284,3 @@ class par_envs:
             obs[i] += noise[i]
 
         return obs
-
-# Worker class for slave processes
-class worker():
-    def __init__(self, env_name, cpu, path):
-
-        # Build environment
-        try:
-            self.env = gym.make(env_name, render_mode="rgb_array")
-        except:
-            sys.path.append(path)
-            module    = __import__(env_name)
-            env_build = getattr(module, env_name)
-            try:
-                self.env = env_build(cpu)
-            except:
-                self.env = env_build()
-
-    # Working function for slaves
-    def work(self):
-        while True:
-            data    = None
-            data    = mpi.comm.scatter(data, root=0)
-            command = data[0]
-            data    = data[1]
-
-            # Execute commands
-            if command == 'step':
-                nxt, rwd, done, trunc = self.step(data)
-                mpi.comm.gather((nxt, rwd, done, trunc), root=0)
-
-            if command == 'reset':
-                obs = self.reset(data)
-                mpi.comm.gather((obs), root=0)
-
-            if command == 'render':
-                rnd = self.render(data)
-                mpi.comm.gather((rnd), root=0)
-
-            if command == 'close':
-                self.close()
-                mpi.finalize()
-                break
-
-    # Stepping
-    def step(self, data):
-        nxt, rwd, done, trunc, _ = self.env.step(data)
-        if ((not done) and trunc): done = True
-
-        return nxt, rwd, done, trunc
-
-    # Resetting
-    def reset(self, data):
-        if data: obs, _ = self.env.reset()
-        else: obs = None
-
-        return obs
-
-    # Rendering
-    def render(self, data):
-        rnd = None
-        if (data): rnd = self.env.render()
-
-        return rnd
-
-    # Closing
-    def close(self):
-        self.env.close()
