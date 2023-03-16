@@ -9,114 +9,108 @@ This chapter contains experiments on several technical details of algorithms. Mo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Standard deviation generation for normal law (revision \codeinline{04cb588})}
-
-When using the normal law policy with on-policy algorithms such as \ppo, several options exist to generate the standard deviation vector, the policy network can output either the standard deviation or its logarithm. The impact of this choice is explored in this section. Here, the policy network is composed of a common trunk (one layer of size 64) followed two branches (each with one layer of size 64). The branch for the mean value ends with a $\tanh$ activation function, while the branch for the standard deviation ends either with a sigmoid activation (direct output of standard deviation) or a linear activation (output of the log of the standard deviation). In the latter case, the output is clipped to $[-20,0]$ before being exponentiated, meaning the standard deviation is roughly in $[\num{2e-9},1]$. The mean value being constrained in $[-1,1]$ by the $\tanh$ activation, this ensures a proper exploration of the domain, the actions being mapped to the physical bounds of the problem afterward. In figure \ref{fig:normal_stddev}, we compare the performance of the two approaches on several standard \gym and \mujoco environments. It appears in figure \ref{fig:normal_stddev} that, overall, the regular approach performs best on most environments except \codeinline{pendulum-v1}.
-
-\input{fig/stddev/normal_stddev}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Adam/Nadam comparison (revision \codeinline{04cb588})}
-
-A few tests to check if Nadam brings something over Adam when using \ppo. In figure \ref{fig:optimizer}, we check combinations of Adam and Nadam for actor and critic. Overall, choosing Adam for both actor and critic seems to be a good default choice.
-
-\input{fig/optimizer/optimizer}
+%\section{Standard deviation generation for normal law (revision \codeinline{04cb588})}
+%
+%When using the normal law policy with on-policy algorithms such as \ppo, several options exist to generate the standard deviation vector, the policy network can output either the standard deviation or its logarithm. The impact of this choice is explored in this section. Here, the policy network is composed of a common trunk (one layer of size 64) followed two branches (each with one layer of size 64). The branch for the mean value ends with a $\tanh$ activation function, while the branch for the standard deviation ends either with a sigmoid activation (direct output of standard deviation) or a linear activation (output of the log of the standard deviation). In the latter case, the output is clipped to $[-20,0]$ before being exponentiated, meaning the standard deviation is roughly in $[\num{2e-9},1]$. The mean value being constrained in $[-1,1]$ by the $\tanh$ activation, this ensures a proper exploration of the domain, the actions being mapped to the physical bounds of the problem afterward. In figure \ref{fig:normal_stddev}, we compare the performance of the two approaches on several standard \gym and \mujoco environments. It appears in figure \ref{fig:normal_stddev} that, overall, the regular approach performs best on most environments except \codeinline{pendulum-v1}.
+%
+%\input{fig/stddev/normal_stddev}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Initializers (revision \codeinline{04cb588})}
-
-In figure \ref{fig:initializer}, we check the impact of the kernel initializations on the performance using \ppo. It does not seem to make much of a difference, although Lecun normal exhibits a slightly slower convergence.
-
-\input{fig/initialization/initialization}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Value network warmup with \ppo}
-
-The idea is to introduce a warmup phase at the beginning of training, where only the critic trains but not the actor (here for $20k$ steps). As shown in figure \ref{fig:ppo_value_warmup}, it does seem to help a little, but it is not a gamechanger.
-
-\include{fig/ppo_value_warmup/ppo_value_warmup}
+%\section{Initializers (revision \codeinline{04cb588})}
+%
+%In figure \ref{fig:initializer}, we check the impact of the kernel initializations on the performance using \ppo. It does not seem to make much of a difference, although Lecun normal exhibits a slightly slower convergence.
+%
+%\input{fig/initialization/initialization}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Adam $\epsilon$ value}
-
-Some people claim that using higher-than-default Adam $\epsilon$ parameter is supposed to help regularize learning. Yet it was not found to be a critical choice in \cite{andrychowicz2020}, and in our case we even found that it could be detrimental (see figure \ref{fig:adam_epsilon}).
-
-\input{fig/adam_epsilon/ppo_adam_epsilon}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{SNN}
-
-Test self-normalizing neural networks, combining selu activation with normal initialization and alpha dropout (see paper)
+%\section{Value network warmup with \ppo}
+%
+%The idea is to introduce a warmup phase at the beginning of training, where only the critic trains but not the actor (here for $20k$ steps). As shown in figure \ref{fig:ppo_value_warmup}, it does seem to help a little, but it is not a gamechanger.
+%
+%\input{fig/ppo_value_warmup/ppo_value_warmup}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Early stopping using KL-divergence with \ppo}
+%\section{Adam $\epsilon$ value}
+%
+%Some people claim that using higher-than-default Adam $\epsilon$ parameter is supposed to help regularize learning. Yet it was not found to be a critical choice in \cite{andrychowicz2020}, and in our case we even found that it could be detrimental (see figure \ref{fig:adam_epsilon}).
+%
+%\input{fig/adam_epsilon/ppo_adam_epsilon}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Activation function}
-
-tanh, relu, selu, gelu, swish, mish
+%\section{SNN}
+%
+%Test self-normalizing neural networks, combining selu activation with normal initialization and alpha dropout (see paper)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Clipped normal against squashed normal with \ppo}
+%\section{Early stopping using KL-divergence with \ppo}
 
-Must use linear/softplus activation and remove the action clipping and rescaling
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Activation function}
+%
+%tanh, relu, selu, gelu, swish, mish
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Clipped normal against squashed normal with \ppo}
+%
+%Must use linear/softplus activation and remove the action clipping and rescaling
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Bootstrapping}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Time-awareness}
+We compare performance on the \ppo algorithm with and without the use of bootstrapping in figure \ref{fig:bootstrap}. There is a clear advantage in using bootstrapping in terms of learning speed and final performance. It is interesting to see that bootstrapping induces an initial lowering in score in the first steps of the \codeinline{lunarlandercontinuous-v2} environment, which also happens repeatedly in figure \ref{fig:gae_lunarlander}. This behavior remains to be explored.
+
+\input{fig/bootstrap/bootstrap}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Random initial state}
+\section{Value of \gae $\lambda$}
+
+We compare the performance of \ppo + \gae with different values of the $\lambda$ parameter in figure \ref{fig:ppo_gae}. The usual range proposed in the original paper \cite{gae} is between $0.90$ and $0.99$. Details on the \gae derivation are provided in section \ref{section:gae}.
+
+\input{fig/gae/gae}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Time-awareness}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Value of GAE $\lambda$}
+%\section{Random initial state}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Exploration in \tdt and \sac}
+%\section{Exploration in \tdt and \sac}
 
-Compare exploration rates on \codeinline{lunarlandercontinuous} for example
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{\sac without reparameterization trick}
+%Compare exploration rates on \codeinline{lunarlandercontinuous} for example
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Target network in \dqn}
-
-\dqn with and without target network
+%\section{\sac without reparameterization trick}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Cheating with off-policy \ppo}
+%\section{Target network in \dqn}
+%
+%\dqn with and without target network

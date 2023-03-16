@@ -126,10 +126,6 @@ class td(trainer_base):
             # Train agent
             self.timer_training.tic()
             self.update.update(self.agent, self.btc_size, self.n_stp_unroll)
-
-            # for i in range(self.n_stp_unroll):
-            #     self.agent.prepare_data(self.btc_size)
-            #     self.agent.train(self.btc_size)
             self.timer_training.toc()
 
             # Reset unroll
