@@ -32,11 +32,11 @@ class full():
         ret = np.where(trm == 2.0, rwd + gm*nxt, rwd)
 
         # Remove bootstrap information from trm buffer
-        trm = np.where(trm == 2.0, 0.0, trm)
+        tmn = np.where(trm == 2.0, 0.0, trm)
 
         # Return as discounted sum
         for t in reversed(range(len(ret)-1)):
-            ret[t] += trm[t]*gm*ret[t+1]
+            ret[t] += tmn[t]*gm*ret[t+1]
 
         # Compute targets
         tgt = ret.copy()
