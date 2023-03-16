@@ -9,7 +9,7 @@
     "name_agent": true,
     "name_tag": "",
     "name_time": false,
-    "n_avg": 3,
+    "n_avg": 5,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
@@ -74,11 +74,11 @@
         "retrn": {
             "type": "gae",
             "gamma": 0.99,
-            "gae_lambda": 0.95,
+            "gae_lambda": 0.98,
             "ret_norm": true
         },
         "termination": {
-            "type": "regular"
+            "type": "bootstrap"
         }
     }
 }

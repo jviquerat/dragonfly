@@ -16,7 +16,7 @@ def evaluate(net_file, json_file, ns, nw, aw):
     pms    = parser.read(json_file)
 
     # Load environment
-    env = environments(1, ".", pms.env)
+    env = environments(".", pms.env)
 
     # Set environment control tag to true if possible
     env.set_control()

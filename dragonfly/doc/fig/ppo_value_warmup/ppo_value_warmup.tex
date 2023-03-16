@@ -21,10 +21,10 @@
 				
 			\legend{\ppo, \ppo + warmup}
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/lunarlander/ppo.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/lunarlander/ppo.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/ppo_value_warmup/ppo_lunarlander.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/ppo_value_warmup/ppo_lunarlander.dat}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/lunarlander/ppo.dat}; 
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/ppo_value_warmup/ppo_lunarlander.dat}; 
 			
 			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/ppo_value_warmup/warmup_lunarlander_20k.dat};
 			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/ppo_value_warmup/warmup_lunarlander_20k.dat}; 
@@ -55,10 +55,10 @@
 				
 			\legend{\ppo, \ppo + warmup}
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gym/bipedalwalker/ppo.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gym/bipedalwalker/ppo.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/ppo_value_warmup/ppo_bipedalwalker.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/ppo_value_warmup/ppo_bipedalwalker.dat}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gym/bipedalwalker/ppo.dat}; 
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/ppo_value_warmup/ppo_bipedalwalker.dat}; 
 			
 			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/ppo_value_warmup/warmup_bipedalwalker_20k.dat};
 			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/ppo_value_warmup/warmup_bipedalwalker_20k.dat}; 

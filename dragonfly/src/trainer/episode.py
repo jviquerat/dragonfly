@@ -130,22 +130,8 @@ class episode(trainer_base):
             self.timer_training.tic()
             size     = np.sum(self.lengths[-self.n_ep_train:])
             btc_size = math.floor(size*self.btc_frac)
-            for epoch in range(self.n_epochs):
-
-                # Prepare training data
-                lgt = self.agent.prepare_data(size)
-
-                # Visit all available history
-                done = False
-                btc  = 0
-                while not done:
-                    start = btc*btc_size
-                    end   = min((btc+1)*btc_size, lgt)
-
-                    self.agent.train(start, end)
-
-                    btc += 1
-                    if (end == lgt): done = True
+            self.update.update(self.agent,
+                               size, btc_size, self.n_epochs)
             self.timer_training.toc()
 
             # Reset unroll

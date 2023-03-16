@@ -123,9 +123,65 @@ Minimizing the KL distance between a target distribution $f$ and a parameterized
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{The Bellman equation}
+\section{Generalized advantage estimate}
+\label{section:gae}
+
+This section presents a light approach of the \gae, which is used by default for policy gradient methods in the library (it heavily borrows from Julien Vitay's explanation, see \url{https://julien-vitay.net/deeprl/3.2-ActorCritic.html} section 5.0.3). First, let's remind that the policy gradient can take the following general form:
+
+\begin{equation}
+	\nabla_\theta J(\theta) = \expect{(s_t,a_t) \sim \pi_\theta} \left[ \nabla_\theta \log \pi_\theta (s_t,a_t) \psi_t \right],
+\end{equation}
+
+where $\psi_t$ can be any of the following:
+
+\begin{enumerate}
+	\item $\psi_t = \sum_{t=0}^T r_t = G_\tau$, the full trajectory return;
+	\item $\psi_t = \sum_{t=t}^T r_t = G_t$, the return taken from current step;
+	\item $\psi_t = Q(s_t, a_t)$, the Q-value function;
+	\item $\psi_t = A(s_t, a_t)$, the advantage function;
+	\item $\psi_t = r_t + \gamma V(s_{t+1}) - V(s_t)$, the one-step TD residual;
+	\item $\psi_t = r_t + \gamma r_{t+1} + ... + \gamma^n V(s_{t+n}) - V(s_t)$, the $n$-step TD residual;
+\end{enumerate}
+
+In order to build the GAE, we define the a class of advantage function estimators based on TD residuals:
+
+\begin{equation}
+	A^{(n)}_t = r_t + \gamma r_{t+1} + ... + \gamma^n V(s_{t+n}) - V(s_t),
+\end{equation}
+
+so $A^{(1)}_t$ is the standard one-step TD residual, etc. The tradeoff is that, for small values of $n$, $A^{(n)}_t$ will have large bias and small variance, while for large values of $n$, it will have low bias but high variance. We can show that $A^{(n)}$ can be expressed in terms of the temporal residual $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$ only:
+
+\begin{equation}
+\begin{aligned}
+	A^{(n)}_t 	&= r_t + \gamma r_{t+1} + ... + \gamma^n V(s_{t+n}) - V(s_t)\\
+			&= r_t + \textcolor{red}{\gamma V(s_{t+1})} - V(s_t) + \textcolor{red}{\gamma} \left( r_{t+1} + \gamma V(s_{t+2}) \textcolor{red}{- V(s_{t+1})} \right) + ...\\
+			&= \delta_{t} + \gamma \delta_{t+1} + ...\\
+			&= \sum_{l=0}^{n-1} \gamma^l \delta_{t+l}
+\end{aligned}
+\end{equation}
+
+Then, the \gae advantage estimate is defined as a combination of the $A^{(n)}_t$. Let's try to recover the original expression:
+
+\begin{equation}
+\label{eq:gae}
+\begin{aligned}
+	A^{\gae}_t 	&= (1-\lambda) \left( A^{(1)}_t + \lambda A^{(2)}_t + ... + \lambda^{n-1} A^{(n)}_t \right)\\
+				&= (1-\lambda) \left( \delta_t + \lambda(\delta_t + \gamma \delta_{t+1}) + ... + \lambda^{n-1} (\delta_t + \gamma \delta_{t+1} + ... + \gamma^{n-1} \delta_{t+n-1}) \right)\\
+				&= (1-\lambda) \left( \delta_t (1 + ... + \lambda^{n-1}) + \gamma \lambda \delta_{t+1} (1 + ... + \lambda^{n-2}) + ... + \gamma^{n-1} \lambda^{n-1} \delta_{t+n-1} \right)\\
+				&= (1-\lambda) \left( \frac{1 - \lambda^n}{1 - \lambda} \delta_t + \frac{1 - \lambda^{n-1}}{1 - \lambda} \gamma \lambda \delta_{t+1} + ... + \gamma^{n-1} \lambda^{n-1} \delta_{t+n-1} \right)\\
+				&= \left(1-\lambda^{n} \right) \delta_t + \gamma \lambda \left(1-\lambda^{n-1} \right) \delta_{t+1} + ... + \gamma^{n-1} \lambda^{n-1} \delta_{t+n-1}\\
+				&= \sum_{l=0}^{n-1} (\gamma \lambda)^l (1 - \lambda^{n-l}) \delta_{t+l}.
+\end{aligned}
+\end{equation}
+
+We see that $A^{\gae}_t \underset{n \rightarrow \infty}{\longrightarrow} \sum_{l=0}^{n-1} (\gamma \lambda)^l \delta_{t+l}$, which is the expression proposed in the original paper. Yet, for finite-length episodes, this expression seems inaccurate.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Importance sampling and its relation to surrogate loss}
+%\section{The Bellman equation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Importance sampling and its relation to surrogate loss}
