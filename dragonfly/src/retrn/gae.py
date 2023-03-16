@@ -35,16 +35,16 @@ class gae():
         ret = np.where(trm == 2.0, rwd + gm*nxt, rwd)
 
         # Remove bootstrap information from trm buffer
-        trm = np.where(trm == 2.0, 0.0, trm)
+        tmn = np.where(trm == 2.0, 0.0, trm)
 
         # Compute TD residual
         dlt    = np.zeros_like(ret)
-        dlt[:] = ret[:] + gm*trm[:]*nxt[:] - val[:]
+        dlt[:] = ret[:] + gm*tmn[:]*nxt[:] - val[:]
 
         # Compute advantages
         adv = np.zeros_like(dlt)
         for t in reversed(range(len(adv)-1)):
-            adv[t] = dlt[t] + trm[t]*gm*lbd*adv[t+1]
+            adv[t] = dlt[t] + tmn[t]*gm*lbd*adv[t+1]
 
         # Compute targets
         tgt  = adv.copy()
