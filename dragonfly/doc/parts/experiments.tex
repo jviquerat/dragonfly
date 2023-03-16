@@ -54,6 +54,22 @@ Some people claim that using higher-than-default Adam $\epsilon$ parameter is su
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\ppo against \textsc{pgmu}}
+
+We test \ppo against a "new method" called policy gradient with mixed updates. The key ingredients are:
+
+\begin{itemize}
+	\item \ppo base
+	\item Online updates for actor but offline updates for critic, with re-use of a certain amount of the most recent samples
+	\item Critic warmup
+	\item Bootstrapping end of episodes
+\end{itemize}
+
+\include{fig/pgmu/pgmu}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{SNN}
 
 Test self-normalizing neural networks, combining selu activation with normal initialization and alpha dropout (see paper)

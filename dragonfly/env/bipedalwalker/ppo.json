@@ -13,6 +13,7 @@
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
+        "update": "online",
         "buff_size": 4000,
         "n_buff": 1,
         "batch_frac": 0.5,
@@ -78,7 +79,7 @@
             "ret_norm": true
         },
         "termination": {
-            "type": "regular"
+            "type": "bootstrap"
         }
     }
 }

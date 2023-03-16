@@ -121,25 +121,10 @@ class buffer(trainer_base):
 
             # Train agent
             self.timer_training.tic()
-            btc_size = math.floor(self.size*self.btc_frac)
+            btc_size = math.floor(self.buff_size*self.btc_frac)
             self.update.update(self.agent, self.n_buff,
                                self.buff_size, btc_size, self.n_epochs)
 
-            # for epoch in range(self.n_epochs):
-            #     # Prepare training data
-            #     lgt = self.agent.prepare_data(self.size)
-
-            #     # Visit all available history
-            #     done = False
-            #     btc  = 0
-            #     while not done:
-            #         start = btc*btc_size
-            #         end   = min((btc+1)*btc_size, lgt)
-
-            #         self.agent.train(start, end)
-
-            #         btc += 1
-            #         if (end == lgt): done = True
             self.timer_training.toc()
 
         # Last printing
@@ -154,3 +139,6 @@ class buffer(trainer_base):
         self.env.timer_env.show()
         self.agent.timer_actions.show()
         self.timer_training.show()
+
+        # Reset update
+        self.update.reset()

@@ -4,6 +4,9 @@ class offline():
     def __init__(self):
         pass
 
+    def reset(self):
+        pass
+
     # Update
     def update(self, agent, btc_size, n_stp):
 

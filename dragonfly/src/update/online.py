@@ -4,8 +4,11 @@ class online():
     def __init__(self):
         pass
 
+    def reset(self):
+        pass
+
     # Update
-    def update(self, agent, size, btc_size, n_epochs):
+    def update(self, agent, n_buff, size, btc_size, n_epochs):
 
         for epoch in range(n_epochs):
             # Prepare training data
