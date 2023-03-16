@@ -9,6 +9,8 @@ from dragonfly.src.loss.surrogate import *
 from dragonfly.src.loss.pg        import *
 from dragonfly.src.loss.q_pol     import *
 from dragonfly.src.loss.q_pol_sac import *
+from dragonfly.src.loss.surrogate_pgmu import *
+from dragonfly.src.loss.mse_pgmu import *
 
 # Declare factory
 loss_factory = factory()
@@ -23,3 +25,5 @@ loss_factory.register("surrogate", surrogate)
 loss_factory.register("pg",        pg)
 loss_factory.register("q_pol",     q_pol)
 loss_factory.register("q_pol_sac", q_pol_sac)
+loss_factory.register("surrogate_pgmu", surrogate_pgmu)
+loss_factory.register("mse_pgmu", mse_pgmu)
