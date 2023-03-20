@@ -5,9 +5,9 @@ import numpy as np
 from dragonfly.src.core.constants import *
 
 ###############################################
-### Class for generalized advantage estimate
+### Class for corrected generalized advantage estimate
 ### pms : parameters
-class gae():
+class cgae():
     def __init__(self, pms):
 
         # Set default values
@@ -20,7 +20,7 @@ class gae():
         if hasattr(pms, "gae_lambda"): self.gae_lambda = pms.gae_lambda
         if hasattr(pms, "ret_norm"):   self.ret_norm   = pms.ret_norm
 
-    # Compute GAE
+    # Compute CGAE
     # rwd : reward array
     # val : value array
     # nxt : value array shifted by one timestep
@@ -44,8 +44,12 @@ class gae():
         # Compute advantages
         n   = len(dlt)
         adv = np.zeros_like(dlt)
+        crc = np.zeros_like(dlt)
         for t in reversed(range(n-1)):
             adv[t] = dlt[t] + tmn[t]*gm*lbd*adv[t+1]
+            crc[t] = dlt[t] + tmn[t]*gm*crc[t+1]
+
+        adv[:] -= (lbd**n)*crc[:]
 
         # Compute targets
         tgt  = adv.copy()

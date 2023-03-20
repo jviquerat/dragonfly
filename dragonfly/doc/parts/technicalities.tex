@@ -166,15 +166,48 @@ Then, the \gae advantage estimate is defined as a combination of the $A^{(n)}_t$
 \label{eq:gae}
 \begin{aligned}
 	A^{\gae}_t 	&= (1-\lambda) \left( A^{(1)}_t + \lambda A^{(2)}_t + ... + \lambda^{n-1} A^{(n)}_t \right)\\
-				&= (1-\lambda) \left( \delta_t + \lambda(\delta_t + \gamma \delta_{t+1}) + ... + \lambda^{n-1} (\delta_t + \gamma \delta_{t+1} + ... + \gamma^{n-1} \delta_{t+n-1}) \right)\\
-				&= (1-\lambda) \left( \delta_t (1 + ... + \lambda^{n-1}) + \gamma \lambda \delta_{t+1} (1 + ... + \lambda^{n-2}) + ... + \gamma^{n-1} \lambda^{n-1} \delta_{t+n-1} \right)\\
+				&= (1-\lambda) \left( \delta_t + \lambda \left( \delta_t + \gamma \delta_{t+1} \right) + ... + \lambda^{n-1} \left( \delta_t + \gamma \delta_{t+1} + ... + \gamma^{n-1} \delta_{t+n-1} \right) \right)\\
+				&= (1-\lambda) \left( \delta_t \left(1 + ... + \lambda^{n-1} \right) + \gamma \lambda \delta_{t+1} \left(1 + ... + \lambda^{n-2} \right) + ... + \gamma^{n-1} \lambda^{n-1} \delta_{t+n-1} \right)\\
 				&= (1-\lambda) \left( \frac{1 - \lambda^n}{1 - \lambda} \delta_t + \frac{1 - \lambda^{n-1}}{1 - \lambda} \gamma \lambda \delta_{t+1} + ... + \gamma^{n-1} \lambda^{n-1} \delta_{t+n-1} \right)\\
-				&= \left(1-\lambda^{n} \right) \delta_t + \gamma \lambda \left(1-\lambda^{n-1} \right) \delta_{t+1} + ... + \gamma^{n-1} \lambda^{n-1} \delta_{t+n-1}\\
-				&= \sum_{l=0}^{n-1} (\gamma \lambda)^l (1 - \lambda^{n-l}) \delta_{t+l}.
+				&= \left(1-\lambda^{n} \right) \delta_t + \gamma \lambda \left(1-\lambda^{n-1} \right) \delta_{t+1} + ... + \gamma^{n-1} \lambda^{n-1} (1 - \lambda) \delta_{t+n-1}\\
+				&= \sum_{l=0}^{n-1} (\gamma \lambda)^l \left(1 - \lambda^{n-l}\right) \delta_{t+l}\\
+				&= \sum_{l=0}^{n-1} \gamma^l \left(\lambda^l - \lambda^n\right) \delta_{t+l}.
 \end{aligned}
 \end{equation}
 
-We see that $A^{\gae}_t \underset{n \rightarrow \infty}{\longrightarrow} \sum_{l=0}^{n-1} (\gamma \lambda)^l \delta_{t+l}$, which is the expression proposed in the original paper. Yet, for finite-length episodes, this expression seems inaccurate.
+We see that 
+
+\begin{equation}
+	A^{\gae}_t \underset{n \rightarrow \infty}{\longrightarrow} A^{\gae}_{t, \infty} = \sum_{l=0}^{n-1} (\gamma \lambda)^l \delta_{t+l},
+\end{equation}
+
+which is the expression proposed in the original paper \cite{gae}. This expression verifies a recursive relation, which is very useful when it comes to implementing it:
+
+\begin{equation}
+\begin{aligned}
+	A^{\gae}_{t, \infty} 	&= \delta_t + \sum_{l=1}^{n-1} (\gamma \lambda)^l \delta_{t+l}\\
+					&= \delta_t + \gamma \lambda \sum_{l=0}^{n-2} (\gamma \lambda)^l \delta_{t+l+1}\\
+					&= \delta_t + \gamma \lambda A^{\gae}_{t+1, \infty}.
+\end{aligned}
+\end{equation}
+
+Yet, for the non-asymptotic form, the same relation does not hold. We develop the non-asymptotic expression as follows:
+
+\begin{equation}
+\begin{aligned}
+	A^{\gae}_t 	&= \sum_{l=0}^{n-1} (\gamma \lambda)^l \delta_{t+l} - \lambda^n \sum_{l=0}^{n-1} \gamma^l \delta_{t+l} \\
+				&= A^{\gae}_{t,\infty} - \lambda^n \sum_{l=0}^{n-1} \gamma^l \delta_{t+l}\\
+				&= A^{\gae}_{t,\infty} - \lambda^n A^{\gae}_{t,c},
+\end{aligned}
+\end{equation}
+
+where $A^{\gae}_{t,c}$ is the corrective term for non-asymptotic form. It is easy to see that $A^{\gae}_{t,c}$ verifies the same recursion relation than $A^{\gae}_{t,\infty}$:
+
+\begin{equation}
+	A^{\gae}_{t,c} 	= \delta_t + \gamma A^{\gae}_{t+1,c},
+\end{equation}
+
+and therefore the two terms $A^{\gae}_{t,\infty}$ and $A^{\gae}_{t,c}$ can be computed separately and then assembled together. For future reference, we call this expression \cgae, standing for corrected generalized advantage estimate.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
