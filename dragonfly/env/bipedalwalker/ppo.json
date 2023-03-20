@@ -72,9 +72,9 @@
             }
         },
         "retrn": {
-            "type": "gae",
+            "type": "cgae",
             "gamma": 0.99,
-            "gae_lambda": 0.98,
+            "gae_lambda": 0.90,
             "ret_norm": true
         },
         "termination": {
