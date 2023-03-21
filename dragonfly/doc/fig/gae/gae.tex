@@ -19,7 +19,12 @@
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel=score]
 				
-			\legend{$\lambda=0.90$, $\lambda=0.95$, $\lambda=0.98$}
+			\legend{$\lambda=0.85$, $\lambda=0.90$, $\lambda=0.95$, $\lambda=0.98$}
+		
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gae/ppo_lunarlander_gae_0.85.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gae/ppo_lunarlander_gae_0.85.dat}; 
+			\addplot [fill=purple3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=purple1, thick, smooth] 		table[x index=0,y index=5] {fig/gae/ppo_lunarlander_gae_0.85.dat};
 		
 			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gae/ppo_lunarlander_gae_0.90.dat};
 			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gae/ppo_lunarlander_gae_0.90.dat}; 
@@ -58,9 +63,14 @@
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel={}]
 				
-			\legend{$\lambda=0.90$, $\lambda=0.95$, $\lambda=0.98$}
+			\legend{$\lambda=0.85$, $\lambda=0.90$, $\lambda=0.95$, $\lambda=0.98$}
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gae/ppo_bipedalwalker_gae_0.90.dat };
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gae/ppo_bipedalwalker_gae_0.85.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gae/ppo_bipedalwalker_gae_0.85.dat}; 
+			\addplot [fill=purple3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=purple1, thick, smooth] 		table[x index=0,y index=5] {fig/gae/ppo_bipedalwalker_gae_0.85.dat};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/gae/ppo_bipedalwalker_gae_0.90.dat};
 			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/gae/ppo_bipedalwalker_gae_0.90.dat}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
 			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/gae/ppo_bipedalwalker_gae_0.90.dat};

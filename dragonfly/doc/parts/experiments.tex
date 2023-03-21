@@ -82,9 +82,18 @@ We compare performance on the \ppo algorithm with and without the use of bootstr
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Value of \gae $\lambda$}
 
-We compare the performance of \ppo + \gae with different values of the $\lambda$ parameter in figure \ref{fig:ppo_gae}. The usual range proposed in the original paper \cite{gae} is between $0.90$ and $0.99$. Details on the \gae derivation are provided in section \ref{section:gae}.
+We compare the performance of \ppo + \gae with different values of the $\lambda$ parameter in figure \ref{fig:ppo_gae}. The usual range proposed in the original paper \cite{gae} is between $0.90$ and $0.99$. Here, we see that both environments behave similarly for $\lambda$ between $0.90$ and $0.98$, but react differently to $\lambda = 0.85$. Details on the \gae derivation are provided in section \ref{section:gae}.
 
 \input{fig/gae/gae}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\gae vs \cgae}
+
+In figure \ref{fig:ppo_cgae}, we compare the performance of the regular \gae with that of \cgae presented in section \ref{section:gae}. As of now, more tests are needed, mostly with shorter episodes, where the effet of the \cgae correction could mostly make a difference.
+
+\input{fig/cgae/cgae}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
