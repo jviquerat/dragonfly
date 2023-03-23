@@ -20,13 +20,13 @@ class pg():
             # Compute loss
             pdf     = p.compute_pdf(obs)
             lgp     = pdf.log_prob(act)
-            lgp     = tf.multiply(adv, lgp)
-            loss_pg =-tf.reduce_mean(lgp)
+            loss_pg = tf.multiply(adv, lgp)
+            loss_pg =-tf.reduce_mean(loss_pg)
 
             # Compute entropy loss
-            entropy      = pdf.entropy()
-            entropy      = tf.reshape(entropy, [-1])
-            entropy      = tf.reduce_mean(entropy, axis=0)
+            entropy = pdf.entropy()
+            entropy = tf.reshape(entropy, [-1])
+            entropy = tf.reduce_mean(entropy, axis=0)
             loss_entropy =-entropy
 
             # Compute total loss
