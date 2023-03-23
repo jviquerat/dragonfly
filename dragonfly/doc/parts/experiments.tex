@@ -98,6 +98,21 @@ In figure \ref{fig:ppo_cgae}, we compare the performance of the regular \gae wit
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Entropy bonus}
+
+Policy gradient methods can benefit from the use of an entropy bonus that prevents premature shrinking of the exploration. This method was originally proposed in \cite{williams1991} in the context of reinforcement learning, and re-introduced in deep reinforcement learning in \cite{a2c} and \cite{ppo}. The idea is to add an estimation of the policy entropy to the loss. For the policy gradient loss using advantage, for example, this yields:
+
+\begin{equation}
+	\mathcal{L}(\theta) = \expect{(s_t, a_t) \sim \pi_\theta} \Bigl[ \log \left( \pi_\theta (s_t, a_t) \right) A^{\pi_\theta} (s_t, a_t) + \beta \entropy \left( \pi_\theta (s_t) \right) \Bigr].
+\end{equation}
+
+We see in figure \ref{fig:ppo_entropy} that, in the case of \codeinline{bipedalwalker-v3}, a well-tuned bonus allows to solve the environment, while in the context of \codeinline{lunarlandercontinuous-v3}, small bonuses make no difference, and only a too large bonus is detrimental to the agent.
+
+\input{fig/entropy/entropy}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\section{Time-awareness}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
