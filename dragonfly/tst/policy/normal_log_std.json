@@ -1,6 +1,9 @@
 {
     "policy": {
-        "type": "normal",
+        "type": "normal_log_std",
+        "std_log_min":-5.0,
+        "std_log_max": 1.0,
+        "std_log_start": 0.0,
         "network": {
             "type": "fc",
             "trunk": {
@@ -11,10 +14,9 @@
                 "nb": 2,
                 "arch": [[16],[16]],
                 "actv": ["swish","swish"],
-                "final": ["tanh","linear"]
+                "final": ["tanh","sigmoid"]
             }
         },
-        "stddev_gen": "log",
         "optimizer": {
             "type": "nadam",
             "lr": 1.0e-3,
