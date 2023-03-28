@@ -1,0 +1,11 @@
+{
+    "env": {
+        "name": "LunarLanderContinuous-v2",
+        "args": {
+            "enable_wind": true
+        },
+        "obs_clip": false,
+        "obs_norm": true,
+        "obs_noise": 0.0
+    }
+}

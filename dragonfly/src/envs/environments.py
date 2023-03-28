@@ -21,14 +21,16 @@ class environments:
         self.obs_norm  = True
         self.obs_clip  = False
         self.obs_noise = False
+        self.args      = None
 
+        if hasattr(pms, "args"):      self.args     = pms.args
         if hasattr(pms, "act_norm"):  self.act_norm = pms.act_norm
         if hasattr(pms, "obs_norm"):  self.obs_norm = pms.obs_norm
         if hasattr(pms, "obs_clip"):  self.obs_clip = pms.obs_clip
         if hasattr(pms, "obs_noise"): self.obs_norm = pms.obs_noise
 
         # Generate workers
-        self.worker = worker(self.name, mpi.rank, path)
+        self.worker = worker(self.name, self.args, mpi.rank, path)
 
         # Set all slaves to wait for instructions
         if (mpi.rank != 0):
