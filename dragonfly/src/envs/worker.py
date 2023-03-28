@@ -11,19 +11,31 @@ gym.logger.set_level(40)
 ###############################################
 # Worker class for slave processes
 class worker():
-    def __init__(self, env_name, cpu, path):
+    def __init__(self, env_name, args, cpu, path):
 
         # Build environment
         try:
-            self.env = gym.make(env_name, render_mode="rgb_array")
+            if args is not None:
+                self.env = gym.make(env_name,
+                                    render_mode="rgb_array",
+                                    **args.__dict__)
+            else:
+                self.env = gym.make(env_name,
+                                    render_mode="rgb_array")
         except:
             sys.path.append(path)
             module    = __import__(env_name)
             env_build = getattr(module, env_name)
             try:
-                self.env = env_build(cpu)
+                if args is not None:
+                    self.env = env_build(cpu, **args.__dict__)
+                else:
+                    self.env = env_build(cpu)
             except:
-                self.env = env_build()
+                if args is not None:
+                    self.env = env_build(**args.__dict__)
+                else:
+                    self.env = env_build()
 
     # Working function for slaves
     def work(self):
