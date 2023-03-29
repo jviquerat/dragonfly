@@ -114,26 +114,24 @@ class ddpg(base_agent):
 
         # No update if buffer is not full enough
         lgt = self.gbuff.length()
-        if (lgt < max(size, self.n_filling)): return lgt
+        if (lgt < max(size, self.n_filling)): return lgt, False
 
         self.data = self.gbuff.get_batches(self.names, size)
+        return lgt, True
 
     # Training
-    def train(self, size):
+    def train(self, start, end):
 
-        # No update if buffer is not full enough
-        lgt = self.gbuff.length()
-        if (lgt < max(size, self.n_filling)): return lgt
+        obs = self.data["obs"][start:end]
+        nxt = self.data["nxt"][start:end]
+        act = self.data["act"][start:end]
+        rwd = self.data["rwd"][start:end]
+        trm = self.data["trm"][start:end]
 
-        obs = self.data["obs"][:]
-        nxt = self.data["nxt"][:]
-        act = self.data["act"][:]
-        rwd = self.data["rwd"][:]
-        trm = self.data["trm"][:]
-
-        act = tf.reshape(act, [size,-1])
-        rwd = tf.reshape(rwd, [size,-1])
-        trm = tf.reshape(trm, [size,-1])
+        size = end - start
+        act  = self.p_net.reshape_actions(act)
+        rwd  = tf.reshape(rwd, [size,-1])
+        trm  = tf.reshape(trm, [size,-1])
 
         # Train q network
         self.q_net.loss.train(obs, nxt, act, rwd, trm,

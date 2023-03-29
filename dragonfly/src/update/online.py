@@ -9,7 +9,8 @@ class online():
 
         for epoch in range(n_epochs):
             # Prepare training data
-            lgt = agent.prepare_data(size)
+            lgt, ready = agent.prepare_data(size)
+            if (not ready): return
 
             # Visit all available history
             done = False
