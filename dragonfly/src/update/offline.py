@@ -5,8 +5,15 @@ class offline():
         pass
 
     # Update
-    def update(self, agent, btc_size, n_stp):
+    def update(self, agent, btc_size, n_rollout):
 
-        for i in range(n_stp):
-            agent.prepare_data(btc_size)
-            agent.train(btc_size)
+        # Prepare a buffer of size n_rollout*btc_size
+        lgt, ready = agent.prepare_data(n_rollout*btc_size)
+        if (not ready): return
+
+        # Train n_rollout times on different minibatches
+        for i in range(n_rollout):
+            start = i*btc_size
+            end   = (i+1)*btc_size
+
+            agent.train(start, end)

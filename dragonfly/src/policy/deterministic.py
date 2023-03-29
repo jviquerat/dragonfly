@@ -63,3 +63,8 @@ class deterministic(base_policy):
         out = self.net.call(state)[0]
 
         return out
+
+    # Reshape actions
+    def reshape_actions(self, act):
+
+        return tf.reshape(act, [-1, self.act_dim])

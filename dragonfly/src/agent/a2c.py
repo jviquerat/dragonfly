@@ -95,7 +95,7 @@ class a2c(base_agent):
         self.data = self.gbuff.get_buffers(self.gnames, size)
         lgt = len(self.data["obs"])
 
-        return lgt
+        return lgt, True
 
     # Training
     def train(self, start, end):

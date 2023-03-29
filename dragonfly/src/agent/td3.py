@@ -129,16 +129,13 @@ class td3(base_agent):
 
         # No update if buffer is not full enough
         lgt = self.gbuff.length()
-        if (lgt < max(size, self.n_filling)): return lgt
+        if (lgt < max(size, self.n_filling)): return lgt, False
 
         self.data = self.gbuff.get_batches(self.names, size)
+        return lgt, True
 
     # Training
-    def train(self, size):
-
-        # No update if buffer is not full enough
-        lgt = self.gbuff.length()
-        if (lgt < max(size, self.n_filling)): return lgt
+    def train(self, start, end):
 
         obs = self.data["obs"][:]
         nxt = self.data["nxt"][:]
@@ -146,9 +143,10 @@ class td3(base_agent):
         rwd = self.data["rwd"][:]
         trm = self.data["trm"][:]
 
-        act = tf.reshape(act, [size,-1])
-        rwd = tf.reshape(rwd, [size,-1])
-        trm = tf.reshape(trm, [size,-1])
+        size = end - start
+        act  = self.p_net.reshape_actions(act)
+        rwd  = tf.reshape(rwd, [size,-1])
+        trm  = tf.reshape(trm, [size,-1])
 
         # Train q network
         self.q_net1.loss.train(obs, nxt, act, rwd, trm,

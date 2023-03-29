@@ -15,7 +15,7 @@
         "style": "td",
         "mem_size": 1000000,
         "btc_size": 128,
-        "n_stp_unroll": 1,
+        "n_stp_unroll": 50,
         "render_every": 50000
     },
     "agent": {
