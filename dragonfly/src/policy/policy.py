@@ -2,6 +2,7 @@
 from dragonfly.src.core.factory          import *
 from dragonfly.src.policy.categorical    import *
 from dragonfly.src.policy.normal         import *
+from dragonfly.src.policy.normal_cma     import *
 from dragonfly.src.policy.normal_log_std import *
 from dragonfly.src.policy.tanh_normal    import *
 from dragonfly.src.policy.beta           import *
@@ -13,6 +14,7 @@ pol_factory = factory()
 # Register policies
 pol_factory.register("categorical",    categorical)
 pol_factory.register("normal",         normal)
+pol_factory.register("normal_cma",     normal_cma)
 pol_factory.register("normal_log_std", normal_log_std)
 pol_factory.register("tanh_normal",    tanh_normal)
 pol_factory.register("beta",           beta)
