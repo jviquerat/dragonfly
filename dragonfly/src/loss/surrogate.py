@@ -19,7 +19,7 @@ class surrogate():
 
     # Train
     @tf.function
-    def train(self, obs, adv, act, plg, p):
+    def train(self, obs, adv, act, plg, p, trainables, opt):
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
@@ -45,6 +45,7 @@ class surrogate():
             loss = loss_surrogate + self.ent_coef*loss_entropy
 
             # Apply gradients
-            pol_var = p.trainables
+            #pol_var = p.trainables
+            pol_var = trainables
             grads   = tape.gradient(loss, pol_var)
-        p.opt.apply_grads(zip(grads, pol_var))
+        opt.apply_grads(zip(grads, pol_var))

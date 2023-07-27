@@ -18,31 +18,58 @@ class normal_cma(base_policy):
         self.store_type  = float
 
         # Check parameters
-        if (pms.network.heads.final[0] != "tanh"):
-            warning("normal", "__init__",
-                    "Final activation for mean of policy is not tanh")
+        # if (pms.network.heads.final[0] != "tanh"):
+        #     warning("normal", "__init__",
+        #             "Final activation for mean of policy is not tanh")
 
-        if (pms.network.heads.final[1] != "sigmoid"):
-            warning("normal", "__init__",
-                    "Final activation for stddev of policy is not sigmoid")
+        # if (pms.network.heads.final[1] != "sigmoid"):
+        #     warning("normal", "__init__",
+        #             "Final activation for stddev of policy is not sigmoid")
 
         # Define and init network
-        self.net = net_factory.create(pms.network.type,
-                                      inp_dim = obs_dim,
-                                      out_dim = [self.dim, self.dim, self.cov_dim],
-                                      pms     = pms.network)
+        self.mu_net = net_factory.create(pms.mu_network.type,
+                                         inp_dim = obs_dim,
+                                         out_dim = [self.dim],
+                                         pms     = pms.mu_network)
+
+        # Define and init network
+        self.cov_net = net_factory.create(pms.cov_network.type,
+                                          inp_dim = obs_dim,
+                                          out_dim = [self.dim, self.cov_dim],
+                                          pms     = pms.cov_network)
 
         # Define trainables
-        self.trainables = self.net.trainable_weights
+        self.mu_trainables  = self.mu_net.trainable_weights
+        self.cov_trainables = self.cov_net.trainable_weights
 
         # Define optimizers
-        self.opt = opt_factory.create(pms.optimizer.type,
-                                      pms       = pms.optimizer,
-                                      grad_vars = self.trainables)
+        self.mu_opt = opt_factory.create(pms.optimizer.type,
+                                         pms       = pms.optimizer,
+                                         grad_vars = self.mu_trainables)
+        self.cov_opt = opt_factory.create(pms.optimizer.type,
+                                          pms       = pms.optimizer,
+                                          grad_vars = self.cov_trainables)
 
         # Define loss
-        self.loss = loss_factory.create(pms.loss.type,
-                                        pms = pms.loss)
+        self.mu_loss = loss_factory.create(pms.loss.type,
+                                           pms = pms.loss)
+        self.cov_loss = loss_factory.create(pms.loss.type,
+                                            pms = pms.loss)
+
+    # Reset
+    def reset(self):
+
+        self.mu_net.reset()
+        self.cov_net.reset()
+        self.mu_opt.reset()
+        self.cov_opt.reset()
+        self.pdf = None
+
+    # Save
+    def save(self, filename):
+
+        self.mu_net.save_weights(filename)
+        self.cov_net.save_weights(filename)
 
     # Get actions
     def actions(self, obs):
@@ -82,10 +109,11 @@ class normal_cma(base_policy):
     def compute_pdf(self, obs):
 
         # Get pdf
-        mu, sg, cr = self.forward(obs)
-        cov        = self.get_cov(sg[0], cr[0])
-        scl        = tf.linalg.cholesky(cov)
-        pdf        = tfd.MultivariateNormalTriL(mu, scl)
+        mu     = self.forward_mu(obs)
+        sg, cr = self.forward_cov(obs)
+        cov    = self.get_cov(sg[0], cr[0])
+        scl    = tf.linalg.cholesky(cov)
+        pdf    = tfd.MultivariateNormalTriL(mu, scl)
 
         return pdf
 
@@ -131,14 +159,22 @@ class normal_cma(base_policy):
 
     # Networks forward pass
     @tf.function
-    def forward(self, state):
+    def forward_mu(self, state):
 
-        out = self.net.call(state)
+        out = self.mu_net.call(state)
         mu  = out[0]
-        sg  = out[1]
-        cr  = out[2]
 
-        return mu, sg, cr
+        return mu
+
+    # Networks forward pass
+    @tf.function
+    def forward_cov(self, state):
+
+        out = self.cov_net.call(state)
+        sg  = out[0]
+        cr  = out[1]
+
+        return sg, cr
 
     # Reshape actions
     def reshape_actions(self, act):
