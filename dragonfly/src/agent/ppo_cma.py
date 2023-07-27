@@ -101,18 +101,13 @@ class ppo_cma(base_agent):
         return lgt, True
 
     # Training
-    def train(self, start, end):
+    def train_mu(self, start, end):
 
-        delta = (end - start)/8
-        s = int(max(0, end - 7*delta))
-
-        print(s, end)
-
-        obs = self.data["obs"][s:end]
-        act = self.data["act"][s:end]
-        adv = self.data["adv"][s:end]
-        tgt = self.data["tgt"][s:end]
-        lgp = self.data["lgp"][s:end]
+        obs = self.data["obs"][start:end]
+        act = self.data["act"][start:end]
+        adv = self.data["adv"][start:end]
+        tgt = self.data["tgt"][start:end]
+        lgp = self.data["lgp"][start:end]
 
         # Train policy
         act = self.p_net.reshape_actions(act)
@@ -125,6 +120,9 @@ class ppo_cma(base_agent):
         # Train v network
         tgt = tf.reshape(tgt, [-1])
         self.v_net.loss.train(obs, tgt, self.v_net)
+
+    # Training
+    def train_cov(self, start, end):
 
         obs = self.data["obs"][start:end]
         act = self.data["act"][start:end]
