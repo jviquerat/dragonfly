@@ -106,6 +106,8 @@ class ppo_cma(base_agent):
         delta = (end - start)/8
         s = int(max(0, end - 7*delta))
 
+        print(s, end)
+
         obs = self.data["obs"][s:end]
         act = self.data["act"][s:end]
         adv = self.data["adv"][s:end]
