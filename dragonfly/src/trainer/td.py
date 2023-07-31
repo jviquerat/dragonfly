@@ -3,11 +3,12 @@ from dragonfly.src.trainer.base import *
 
 ###############################################
 ### Class for temporal-difference training
-### env_pms   : environment parameters
-### agent_pms : agent parameters
-### path      : path for environment
-### pms       : parameters
-class td(trainer_base):
+### env_pms     : environment parameters
+### agent_pms   : agent parameters
+### path        : path for environment
+### n_steps_max : number of max steps
+### pms         : parameters
+class td(base_trainer):
     def __init__(self, env_pms, agent_pms, path, n_stp_max, pms):
 
         # Initialize environment

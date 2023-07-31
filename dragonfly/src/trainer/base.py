@@ -17,14 +17,14 @@ from dragonfly.src.utils.counter    import *
 from dragonfly.src.utils.error      import *
 
 ###############################################
-### Class for buffer-based training
+### Base trainer class
 ### obs_dim  : dimension of observations
 ### act_dim  : dimension of actions
 ### pol_dim  : true dimension of the actions provided to the env
 ### n_cpu    : nb of parallel environments
 ### n_ep_max : max nb of episodes to unroll in a run
 ### pms      : parameters
-class trainer_base():
+class base_trainer():
     def __init__(self):
         pass
 
