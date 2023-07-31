@@ -3,7 +3,7 @@ import sys
 import gym
 
 # Custom imports
-from dragonfly.src.envs.mpi import *
+from dragonfly.src.env.mpi import *
 
 # Set warning levels from gym
 gym.logger.set_level(40)

@@ -6,7 +6,7 @@ import shutil
 import numpy as np
 
 # Custom imports
-from dragonfly.src.envs.mpi        import *
+from dragonfly.src.env.mpi         import *
 from dragonfly.src.core.constants  import *
 from dragonfly.src.utils.json      import *
 from dragonfly.src.utils.data      import *

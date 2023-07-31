@@ -2,7 +2,7 @@
 import sys
 
 # Custom imports
-from dragonfly.src.envs.mpi      import *
+from dragonfly.src.env.mpi       import *
 from dragonfly.src.core.train    import *
 from dragonfly.src.core.evaluate import *
 from dragonfly.src.core.average  import *
