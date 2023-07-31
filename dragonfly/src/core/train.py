@@ -70,32 +70,37 @@ def train(json_file):
 # Generate results folder name
 def folder_name(pms):
 
-    name_env = True
-    if hasattr(pms, "name_env"): name_env = pms.name_env
+    name_env = ""
+    if hasattr(pms.naming, "env"):
+        if (pms.naming.env is True):
+            name_env = pms.environment.name
 
-    name_agent = True
-    if hasattr(pms, "name_agent"): name_agent = pms.name_agent
+    name_agent = ""
+    if hasattr(pms.naming, "agent"):
+        if (pms.naming.agent is True):
+            name_agent = pms.agent.name
 
     name_tag = ""
-    if hasattr(pms, "name_tag"): name_tag = pms.name_tag
+    if hasattr(pms.naming, "tag"):
+        if (pms.naming.tag is not False):
+            name_tag = pms.naming.tag
 
-    name_time = False
-    if hasattr(pms, "name_time"): name_time = pms.name_time
-
-    path_time = ""
-    if (name_time):
-        path_time = str(time.strftime("%H-%M-%S", time.localtime()))
+    name_time = ""
+    if hasattr(pms.naming, "time"):
+        if (pms.naming.time is True):
+            name_time = str(time.strftime("%H-%M-%S", time.localtime()))
 
     path = ""
-    if (name_env): path += pms.env.name
+    if (name_env != ""):
+        path += name_env
     if (name_agent != ""):
         if (path != ""): path += "_"
-        path += pms.agent.type
+        path += name_agent
     if (name_tag != ""):
         if (path != ""): path += "_"
         path += name_tag
     if (name_time):
         if (path != ""): path += "_"
-        path += path_time
+        path += name_time
 
     return path
