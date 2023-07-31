@@ -5,10 +5,12 @@
         "obs_norm": true,
         "obs_noise": 0.0
     },
-    "name_env": true,
-    "name_agent": true,
-    "name_tag": "",
-    "name_time": false,
+    "naming": {
+        "env": true,
+        "agent": true,
+        "tag": false,
+        "time": false
+    },
     "n_avg": 3,
     "n_stp_max": 1000000,
     "trainer": {
