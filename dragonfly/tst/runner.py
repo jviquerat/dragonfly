@@ -3,11 +3,11 @@ import os
 import shutil
 
 # Custom imports
-from dragonfly.src.core.constants    import *
-from dragonfly.src.utils.json        import *
-from dragonfly.src.utils.data        import *
-from dragonfly.src.envs.environments import *
-from dragonfly.src.trainer.trainer   import *
+from dragonfly.src.core.constants   import *
+from dragonfly.src.utils.json       import *
+from dragonfly.src.utils.data       import *
+from dragonfly.src.env.environments import *
+from dragonfly.src.trainer.trainer  import *
 
 ###############################################
 ### Generic runner used in agent and trainer tests

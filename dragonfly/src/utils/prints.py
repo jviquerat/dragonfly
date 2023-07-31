@@ -3,7 +3,7 @@ import os
 import subprocess
 
 # Custom improts
-from dragonfly.src.envs.mpi import *
+from dragonfly.src.env.mpi import *
 
 ###############################################
 ### A set of functions to format printings

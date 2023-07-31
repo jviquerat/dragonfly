@@ -6,7 +6,7 @@ import numpy as np
 import time
 
 # Custom imports
-from dragonfly.src.envs.worker    import *
+from dragonfly.src.env.worker     import *
 from dragonfly.src.core.constants import *
 from dragonfly.src.utils.timer    import *
 
