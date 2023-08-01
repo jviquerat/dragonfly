@@ -17,7 +17,8 @@
         "n_buff": 8,
         "batch_frac": 0.25,
         "n_epochs": 32,
-        "render_every": 10000
+        "render_every": 10000,
+        "update": "cma"
     },
     "agent": {
         "type": "ppo_cma",

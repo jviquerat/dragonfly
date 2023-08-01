@@ -112,8 +112,20 @@ class ppo_cma(base_agent):
         # Train policy
         act = self.p_net.reshape_actions(act)
         adv = tf.reshape(adv, [-1])
-        adv = tf.maximum(adv, 0.0)
         lgp = tf.reshape(lgp, [-1])
+
+        # Clip negatives advantages
+        idx = tf.where(adv > 0.0)
+        idx = tf.reshape(idx, [-1])
+
+        obs = tf.gather(obs, idx)
+        act = tf.gather(act, idx)
+        adv = tf.gather(adv, idx)
+        tgt = tf.gather(tgt, idx)
+        lgp = tf.gather(lgp, idx)
+
+        #adv = tf.maximum(adv, 0.0)
+
         self.p_net.mu_loss.train(obs, adv, act, lgp, self.p_net,
                                  self.p_net.mu_trainables, self.p_net.mu_opt)
 
@@ -130,11 +142,22 @@ class ppo_cma(base_agent):
         tgt = self.data["tgt"][start:end]
         lgp = self.data["lgp"][start:end]
 
-        # Train policy
+        # Train covariance matrix
         act = self.p_net.reshape_actions(act)
         adv = tf.reshape(adv, [-1])
-        adv = tf.maximum(adv, 0.0)
         lgp = tf.reshape(lgp, [-1])
+
+        # Clip negatives advantages
+        idx = tf.where(adv > 0.0)
+        idx = tf.reshape(idx, [-1])
+
+        obs = tf.gather(obs, idx)
+        act = tf.gather(act, idx)
+        adv = tf.gather(adv, idx)
+        tgt = tf.gather(tgt, idx)
+        lgp = tf.gather(lgp, idx)
+
+        #adv = tf.maximum(adv, 0.0)
 
         self.p_net.cov_loss.train(obs, adv, act, lgp, self.p_net,
                                   self.p_net.cov_trainables, self.p_net.cov_opt)

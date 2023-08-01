@@ -14,6 +14,7 @@ class normal_cma(base_policy):
         self.obs_dim     = obs_dim
         self.dim         = self.act_dim
         self.cov_dim     = math.floor(self.dim*(self.dim - 1)/2)
+        #self.cov_dim     = self.dim
         self.store_dim   = self.act_dim
         self.store_type  = float
 
@@ -113,12 +114,19 @@ class normal_cma(base_policy):
         sg, cr = self.forward_cov(obs)
         cov    = self.get_cov(sg[0], cr[0])
         scl    = tf.linalg.cholesky(cov)
-        pdf    = tfd.MultivariateNormalTriL(mu, scl)
+        #print(scl)
+        pdf    = tfd.MultivariateNormalFullCovariance(mu, cov)
+        #pdf    = tfd.MultivariateNormalTriL(mu, scl)
 
         return pdf
 
     # Compute covariance matrix
     def get_cov(self, sg, cr):
+
+        #print(sg, cr)
+        #cov = tf.tensordot(sg, sg, axes=0)
+
+        #print(cov)
 
         # Extract sigmas and thetas
         sigmas = sg
