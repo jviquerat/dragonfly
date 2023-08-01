@@ -63,11 +63,12 @@ class categorical(base_policy):
     def sample(self, obs):
 
         # Generate pdf
-        pdf = self.compute_pdf(obs)
+        self.compute_pdf(obs)
 
         # Sample actions
-        act = pdf.sample(1)
-        lgp = pdf.log_prob(act)
+        act = self.pdf.sample(1)
+        lgp = self.log_prob(act)
+        lgp = tf.reshape(lgp, [-1,1])
 
         return act, lgp
 
@@ -75,7 +76,7 @@ class categorical(base_policy):
     def compute_pdf(self, obs):
 
         probs = self.forward(obs)
-        return tfd.Categorical(probs=probs[0])
+        self.pdf = tfd.Categorical(probs=probs[0])
 
     # Network forward pass
     @tf.function

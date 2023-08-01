@@ -24,7 +24,7 @@
     "agent": {
         "type": "ppo",
         "policy": {
-            "type": "normal",
+            "type": "tanh_normal",
             "network": {
                 "type": "fc",
                 "trunk": {
@@ -35,7 +35,7 @@
                     "nb": 2,
                     "arch": [[128],[128]],
                     "actv": ["tanh","tanh"],
-                    "final": ["tanh","sigmoid"]
+                    "final": ["linear","softplus"]
                 }
             },
             "optimizer": {

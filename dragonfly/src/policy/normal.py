@@ -67,12 +67,12 @@ class normal(base_policy):
     def sample(self, obs):
 
         # Generate pdf
-        pdf = self.compute_pdf(obs)
+        self.compute_pdf(obs)
 
         # Sample actions
-        act = pdf.sample(1)
+        act = self.pdf.sample(1)
         act = tf.reshape(act, [-1,self.store_dim])
-        lgp = pdf.log_prob(act)
+        lgp = self.log_prob(act)
         lgp = tf.reshape(lgp, [-1,1])
 
         return act, lgp
@@ -81,11 +81,9 @@ class normal(base_policy):
     def compute_pdf(self, obs):
 
         # Get pdf
-        mu, sg = self.forward(obs)
-        pdf    = tfd.MultivariateNormalDiag(loc        = mu,
-                                            scale_diag = sg)
-
-        return pdf
+        mu, sg   = self.forward(obs)
+        self.pdf = tfd.MultivariateNormalDiag(loc        = mu,
+                                              scale_diag = sg)
 
     # Networks forward pass
     @tf.function

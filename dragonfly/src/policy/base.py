@@ -65,3 +65,23 @@ class base_policy():
 
         load_status = self.net.load_weights(filename)
         load_status.assert_consumed()
+
+    # Compute log_prob
+    def log_prob(self, act):
+
+        if (self.pdf is not None):
+            return self.pdf.log_prob(act)
+
+    # Compute entropy
+    def entropy(self, lgp):
+
+        if (self.pdf is not None):
+            e = self.pdf.entropy()
+            e = tf.reshape(e, [-1])
+            e = tf.reduce_mean(e, axis=0)
+            print(e)
+            return e
+
+            #e = tf.reduce_mean(-lgp, axis=0)
+            #print(e)
+            #return e
