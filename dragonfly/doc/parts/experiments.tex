@@ -113,6 +113,15 @@ We see in figure \ref{fig:ppo_entropy} that, in the case of \codeinline{bipedalw
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\ppo-\textsc{cma}}
+
+The library implements a version of \ppo with full covariance matrix adaptation, in the idea of \cite{ppocma}. Yet, the authors in \cite{ppocma} (i) do not use the \ppo loss, but only a policy gradient loss with clipped gradients, and (ii) only use a diagonal covariance matrix.
+
+\input{fig/cma/cma}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\section{Time-awareness}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

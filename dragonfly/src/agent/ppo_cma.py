@@ -115,23 +115,25 @@ class ppo_cma(base_agent):
         lgp = tf.reshape(lgp, [-1])
 
         # Clip negatives advantages
-        idx = tf.where(adv > 0.0)
-        idx = tf.reshape(idx, [-1])
+        #sc = tf.argsort(adv)
+        #adv[sc[:2000]] = 0.0
+        # idx = tf.where(adv > 0.0)
+        # idx = tf.reshape(idx, [-1])
 
-        obs = tf.gather(obs, idx)
-        act = tf.gather(act, idx)
-        adv = tf.gather(adv, idx)
-        tgt = tf.gather(tgt, idx)
-        lgp = tf.gather(lgp, idx)
+        # obs = tf.gather(obs, idx)
+        # act = tf.gather(act, idx)
+        # adv = tf.gather(adv, idx)
+        # tgt = tf.gather(tgt, idx)
+        # lgp = tf.gather(lgp, idx)
 
-        #adv = tf.maximum(adv, 0.0)
+        # adv = tf.maximum(adv, 0.0)
 
         self.p_net.mu_loss.train(obs, adv, act, lgp, self.p_net,
                                  self.p_net.mu_trainables, self.p_net.mu_opt)
 
         # Train v network
-        tgt = tf.reshape(tgt, [-1])
-        self.v_net.loss.train(obs, tgt, self.v_net)
+        #tgt = tf.reshape(tgt, [-1])
+        #self.v_net.loss.train(obs, tgt, self.v_net)
 
     # Training
     def train_cov(self, start, end):
@@ -147,20 +149,57 @@ class ppo_cma(base_agent):
         adv = tf.reshape(adv, [-1])
         lgp = tf.reshape(lgp, [-1])
 
-        # Clip negatives advantages
-        idx = tf.where(adv > 0.0)
-        idx = tf.reshape(idx, [-1])
+        # # Clip negatives advantages
+        # idx = tf.where(adv > 0.0)
+        # idx = tf.reshape(idx, [-1])
 
-        obs = tf.gather(obs, idx)
-        act = tf.gather(act, idx)
-        adv = tf.gather(adv, idx)
-        tgt = tf.gather(tgt, idx)
-        lgp = tf.gather(lgp, idx)
+        # obs = tf.gather(obs, idx)
+        # act = tf.gather(act, idx)
+        # adv = tf.gather(adv, idx)
+        # tgt = tf.gather(tgt, idx)
+        # lgp = tf.gather(lgp, idx)
 
-        #adv = tf.maximum(adv, 0.0)
+        # adv = tf.maximum(adv, 0.0)
 
         self.p_net.cov_loss.train(obs, adv, act, lgp, self.p_net,
                                   self.p_net.cov_trainables, self.p_net.cov_opt)
+
+        # Train v network
+        # tgt = tf.reshape(tgt, [-1])
+        # self.v_net.loss.train(obs, tgt, self.v_net)
+
+    # Training
+    def train_value(self, start, end):
+
+        obs = self.data["obs"][start:end]
+        act = self.data["act"][start:end]
+        adv = self.data["adv"][start:end]
+        tgt = self.data["tgt"][start:end]
+        lgp = self.data["lgp"][start:end]
+
+        # Train covariance matrix
+        act = self.p_net.reshape_actions(act)
+        adv = tf.reshape(adv, [-1])
+        lgp = tf.reshape(lgp, [-1])
+
+        # # Clip negatives advantages
+        # idx = tf.where(adv > 0.0)
+        # idx = tf.reshape(idx, [-1])
+
+        # obs = tf.gather(obs, idx)
+        # act = tf.gather(act, idx)
+        # adv = tf.gather(adv, idx)
+        # tgt = tf.gather(tgt, idx)
+        # lgp = tf.gather(lgp, idx)
+
+        # # adv = tf.maximum(adv, 0.0)
+
+        # self.p_net.cov_loss.train(obs, adv, act, lgp, self.p_net,
+        #                           self.p_net.cov_trainables, self.p_net.cov_opt)
+
+        # Train v network
+        tgt = tf.reshape(tgt, [-1])
+        self.v_net.loss.train(obs, tgt, self.v_net)
 
     # Agent reset
     def reset(self):
@@ -197,6 +236,28 @@ class ppo_cma(base_agent):
         data  = self.buff.serialize(names)
         gobs, gnxt, gact, glgp, grwd, gtrm = (data[name] for name in names)
         gtgt, gadv = self.returns(gobs, gnxt, grwd, gtrm)
+
+        # Clip negatives advantages
+        # gadv = np.reshape(gadv, [-1, 1])
+        # gtgt = np.reshape(gtgt, [-1, 1])
+
+        # elt  = np.argsort(gadv, axis=0)
+
+        # gobs = gobs[elt[2000:]]
+        # gact = gact[elt[2000:]]
+        # gadv = gadv[elt[2000:]]
+        # gtgt = gtgt[elt[2000:]]
+        # glgp = glgp[elt[2000:]]
+
+
+        #idx = np.where(gadv > 0.0)
+        #idx = np.reshape(idx, [-1])
+
+        #gobs = np.take(gobs, idx)
+        #gact = np.take(gact, idx)
+        #gadv = np.take(gadv, idx)
+        #gtgt = np.take(gtgt, idx)
+        #glgp = np.take(glgp, idx)
 
         self.gbuff.store(self.gnames, [gobs, gact, gadv, gtgt, glgp])
 

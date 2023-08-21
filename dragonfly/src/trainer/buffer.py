@@ -20,6 +20,7 @@ class buffer(trainer_base):
         self.buff_size   = pms.buff_size
         self.n_buff      = pms.n_buff
         self.btc_frac    = pms.batch_frac
+        self.btc_size    = math.floor(self.buff_size*self.btc_frac)
         self.n_epochs    = pms.n_epochs
         self.size        = self.n_buff*self.buff_size
         self.freq_report = max(int(n_stp_max/(freq_report*self.buff_size)),1)
@@ -121,9 +122,8 @@ class buffer(trainer_base):
 
             # Train agent
             self.timer_training.tic()
-            btc_size = math.floor(self.size*self.btc_frac)
-            self.update.update(self.agent,
-                               self.size, btc_size, self.n_epochs)
+            self.update.update(self.agent,    self.size,
+                               self.btc_size, self.n_epochs)
             self.timer_training.toc()
 
         # Last printing

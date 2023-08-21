@@ -115,8 +115,8 @@ class normal_cma(base_policy):
         cov    = self.get_cov(sg[0], cr[0])
         scl    = tf.linalg.cholesky(cov)
         #print(scl)
-        pdf    = tfd.MultivariateNormalFullCovariance(mu, cov)
-        #pdf    = tfd.MultivariateNormalTriL(mu, scl)
+        #pdf    = tfd.MultivariateNormalFullCovariance(mu, cov)
+        pdf    = tfd.MultivariateNormalTriL(mu, scl)
 
         return pdf
 
@@ -128,40 +128,61 @@ class normal_cma(base_policy):
 
         #print(cov)
 
-        # Extract sigmas and thetas
-        sigmas = sg
-        thetas = cr*math.pi
+        # Create skew-symmetric matrix
+        t = tf.zeros([self.dim, self.dim])
 
-        # Build initial theta matrix
-        t   = tf.ones([self.dim,self.dim])*math.pi/2.0
-        t   = tf.linalg.set_diag(t, tf.zeros(self.dim), k=0)
         idx = 0
         for dg in range(self.dim-1):
-            diag = thetas[idx:idx+self.dim-(dg+1)]
+            diag = cr[idx:idx+self.dim-(dg+1)]
             idx += self.dim-(dg+1)
-            t    = tf.linalg.set_diag(t, diag, k=-(dg+1))
-        cor = tf.cos(t)
+            t    = tf.linalg.set_diag(t,  diag, k=-(dg+1))
+            t    = tf.linalg.set_diag(t, -diag, k= (dg+1))
 
-        # Correct upper part to exact zero
-        for dg in range(self.dim-1):
-            size = self.dim-(dg+1)
-            cor  = tf.linalg.set_diag(cor, tf.zeros(size), k=(dg+1))
+        # Exponentiate to get orthogonal matrix
+        et = tf.linalg.expm(t)
 
-        # Roll and compute additional terms
-        for roll in range(self.dim-1):
-            vec = tf.ones([self.dim, 1])
-            vec = tf.scalar_mul(math.pi/2, vec)
-            t   = tf.concat([vec, t[:, :self.dim-1]], axis=1)
-            for dg in range(self.dim-1):
-                zero = tf.zeros(self.dim-(dg+1))
-                t    = tf.linalg.set_diag(t, zero, k=dg+1)
-            cor = tf.multiply(cor, tf.sin(t))
+        # Generate diagonal matrix
+        s = tf.zeros([self.dim, self.dim])
+        s = tf.linalg.set_diag(s, sg, k=0)
 
-        cor = tf.matmul(cor, tf.transpose(cor))
-        scl = tf.zeros([self.dim, self.dim])
-        scl = tf.linalg.set_diag(scl, sigmas, k=0)
-        cov = tf.matmul(scl, cor)
-        cov = tf.matmul(cov, scl)
+        # Generate covariance matrix
+        cov = tf.matmul(et,s)
+        cov = tf.matmul(cov, tf.transpose(et))
+
+        # # Extract sigmas and thetas
+        # sigmas = sg
+        # thetas = cr*math.pi
+
+        # # Build initial theta matrix
+        # t   = tf.ones([self.dim,self.dim])*math.pi/2.0
+        # t   = tf.linalg.set_diag(t, tf.zeros(self.dim), k=0)
+        # idx = 0
+        # for dg in range(self.dim-1):
+        #     diag = thetas[idx:idx+self.dim-(dg+1)]
+        #     idx += self.dim-(dg+1)
+        #     t    = tf.linalg.set_diag(t, diag, k=-(dg+1))
+        # cor = tf.cos(t)
+
+        # # Correct upper part to exact zero
+        # for dg in range(self.dim-1):
+        #     size = self.dim-(dg+1)
+        #     cor  = tf.linalg.set_diag(cor, tf.zeros(size), k=(dg+1))
+
+        # # Roll and compute additional terms
+        # for roll in range(self.dim-1):
+        #     vec = tf.ones([self.dim, 1])
+        #     vec = tf.scalar_mul(math.pi/2, vec)
+        #     t   = tf.concat([vec, t[:, :self.dim-1]], axis=1)
+        #     for dg in range(self.dim-1):
+        #         zero = tf.zeros(self.dim-(dg+1))
+        #         t    = tf.linalg.set_diag(t, zero, k=dg+1)
+        #     cor = tf.multiply(cor, tf.sin(t))
+
+        # cor = tf.matmul(cor, tf.transpose(cor))
+        # scl = tf.zeros([self.dim, self.dim])
+        # scl = tf.linalg.set_diag(scl, tf.sqrt(sigmas), k=0)
+        # cov = tf.matmul(scl, cor)
+        # cov = tf.matmul(cov, scl)
 
         return cov
 
