@@ -2,13 +2,13 @@
 import pytest
 
 # Custom imports
-from dragonfly.tst.tst           import *
-from dragonfly.src.policy.normal import *
-from dragonfly.src.utils.json    import *
+from dragonfly.tst.tst                import *
+from dragonfly.src.policy.normal_diag import *
+from dragonfly.src.utils.json         import *
 
 ###############################################
-### Test normal policy
-def test_normal():
+### Test diagonal normal policy
+def test_normal_diag():
 
     # Initial space
     print("")
@@ -16,10 +16,10 @@ def test_normal():
     #########################
     # Initialize json parser and read test json file
     reader = json_parser()
-    reader.read("dragonfly/tst/policy/normal.json")
+    reader.read("dragonfly/tst/policy/normal_diag.json")
 
     # Initialize discrete agent
-    policy = normal(1, 5, reader.pms.policy)
+    policy = normal_diag(1, 5, reader.pms.policy)
 
     # Test action values
     print("Test normal policy")
