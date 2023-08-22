@@ -1,11 +1,11 @@
 # Custom imports
-from dragonfly.src.policy.base           import *
-from dragonfly.src.policy.normal_log_std import *
+from dragonfly.src.policy.base        import *
+from dragonfly.src.policy.normal_diag import *
 
 ###############################################
 ### Tanh-normal policy class (continuous)
 ### Inherits from normal class
-class tanh_normal(normal_log_std):
+class tanh_normal(normal_diag):
     def __init__(self, obs_dim, act_dim, pms):
 
         super().__init__(obs_dim, act_dim, pms)
