@@ -24,7 +24,7 @@ class fc(base_network):
         self.heads.actv     = ["relu"]
         self.heads.final    = ["linear"]
         self.k_init         = Orthogonal(gain=1.0)
-        self.k_init_final   = Orthogonal(gain=0.01)
+        self.k_init_final   = Orthogonal(gain=0.0)
 
         # Check inputs
         if hasattr(pms,       "trunk"):        self.trunk        = pms.trunk

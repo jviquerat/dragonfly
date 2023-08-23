@@ -2,7 +2,7 @@
 from dragonfly.src.policy.base import *
 
 ###############################################
-### Normal policy class (continuous)
+### Normal policy class with diagonal covariance matrix (continuous)
 ### obs_dim : input  dimension
 ### act_dim : output dimension
 ### pms     : parameters
