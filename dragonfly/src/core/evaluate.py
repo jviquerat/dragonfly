@@ -60,7 +60,9 @@ def evaluate(net_file, json_file, ns, nw, aw):
             act = []
             for a in aw: act.append(float(a))
             act = [act]
-        if (t == "discrete"):   act = [[int(aw)]]
+        if (t == "discrete"):
+            act = []
+            for a in aw: act.append(int(a))
 
         # Loop with neutral action
         for i in range(nw):
