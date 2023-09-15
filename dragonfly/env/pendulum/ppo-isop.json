@@ -24,7 +24,7 @@
     "agent": {
         "type": "ppo",
         "policy": {
-            "type": "normal",
+            "type": "normal_isop",
             "network": {
                 "type": "fc",
                 "trunk": {
