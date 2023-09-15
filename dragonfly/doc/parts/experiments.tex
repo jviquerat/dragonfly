@@ -138,3 +138,21 @@ We see in figure \ref{fig:ppo_entropy} that, in the case of \codeinline{bipedalw
 %\section{Target network in \dqn}
 %
 %\dqn with and without target network
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Covariance matrix of normal policy}
+
+The variance of the normal policy may be parameterized in different ways:
+
+\begin{enumerate}
+	\item a fixed isotropic variance $\sigma_0^2$ (hereafter denoted as constant),
+	\item a learned isotropic variance $\sigma^2$ (hereafter denoted as isotropic),
+	\item a learned diagonal covariance matrix $\V{\Sigma}_\text{diag}$ (hereafter denoted as diagonal),
+	\item a learned full covariance matrix $\V{\Sigma}_\text{full}$ (not considered here).
+\end{enumerate}
+
+The performances of the different parameterizations are compared  depicted in the figure \ref{fig:cov} using the \ppo algorithm.
+
+\input{fig/covariance/covariance}
