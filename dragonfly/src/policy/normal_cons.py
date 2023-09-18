@@ -6,7 +6,7 @@ from dragonfly.src.policy.base import *
 ### obs_dim : input  dimension
 ### act_dim : output dimension
 ### pms     : parameters
-class normal_fixed_sigma(base_policy):
+class normal_cons(base_policy):
     def __init__(self, obs_dim, act_dim, pms):
 
         # Fill structure
