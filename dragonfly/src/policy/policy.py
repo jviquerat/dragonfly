@@ -7,7 +7,7 @@ from dragonfly.src.policy.tanh_normal    import *
 from dragonfly.src.policy.beta           import *
 from dragonfly.src.policy.deterministic  import *
 from dragonfly.src.policy.normal_isop    import *
-from dragonfly.src.policy.normal_fixed_sigma    import *
+from dragonfly.src.policy.normal_cons    import *
 
 # Declare factory
 pol_factory = factory()
@@ -21,5 +21,5 @@ pol_factory.register("tanh_normal",    tanh_normal)
 pol_factory.register("beta",           beta)
 pol_factory.register("deterministic",  deterministic)
 pol_factory.register("normal_isop",    normal_isop)
-pol_factory.register("normal_fixed_sigma",    normal_fixed_sigma)
+pol_factory.register("normal_cons",    normal_cons)
 
