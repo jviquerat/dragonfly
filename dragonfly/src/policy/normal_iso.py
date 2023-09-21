@@ -6,7 +6,7 @@ from dragonfly.src.policy.base import *
 ### obs_dim : input  dimension
 ### act_dim : output dimension
 ### pms     : parameters
-class normal_cons(base_policy):
+class normal_iso(base_policy):
     def __init__(self, obs_dim, act_dim, pms):
 
         # Fill structure
@@ -21,14 +21,14 @@ class normal_cons(base_policy):
             warning("normal", "__init__",
                     "Final activation for mean of policy is not tanh")
 
-        #if (pms.network.heads.final[1] != "sigmoid"):
-        #    warning("normal", "__init__",
-        #            "Final activation for stddev of policy is not sigmoid")
+        if (pms.network.heads.final[1] != "sigmoid"):
+            warning("normal", "__init__",
+                    "Final activation for stddev of policy is not sigmoid")
 
         # Define and init network
         self.net = net_factory.create(pms.network.type,
                                       inp_dim = obs_dim,
-                                      out_dim = [self.dim],
+                                      out_dim = [self.dim, 1],
                                       pms     = pms.network)
 
         # Define trainables
@@ -57,7 +57,7 @@ class normal_cons(base_policy):
     def control(self, obs):
 
         obs    = tf.cast(obs, tf.float32)
-        mu = self.forward(obs)
+        mu, sg = self.forward(obs)
         act    = np.reshape(mu.numpy(), (-1,self.store_dim))
 
         return act
@@ -81,9 +81,8 @@ class normal_cons(base_policy):
     def compute_pdf(self, obs):
 
         # Get pdf
-        mu = self.forward(obs)
-        sg = tf.constant([[1.0]])
-        sigma = tf.tile(sg,[1,self.dim])
+        mu, sg = self.forward(obs)
+        sigma  = tf.tile(sg,[1,self.dim])
         pdf    = tfd.MultivariateNormalDiag(loc        = mu,
                                             scale_diag = sigma)
 
@@ -94,9 +93,10 @@ class normal_cons(base_policy):
     def forward(self, state):
 
         out = self.net.call(state)
-        mu  = out
+        mu  = out[0]
+        sg  = out[1]
 
-        return mu
+        return mu, sg
 
     # Reshape actions
     def reshape_actions(self, act):
