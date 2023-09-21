@@ -1,0 +1,88 @@
+%%%%%%%%%%%%
+%%%%%%%%%%%%
+\begin{figure}
+\centering
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=50000, scale=0.7,
+					ymin=0, ymax=220,
+					scaled x ticks=false,
+					xtick={0,10000,20000,30000,40000,50000},
+					xticklabels={$0$,$10k$,$20k$,$30k$,$40k$,$50k$},
+					ytick={0,100,200,6000},
+					legend cell align=left, legend pos=south east,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel=score]
+				
+			\legend{P1, P2, P3}
+
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/covariance/pendulum/diag.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/covariance/pendulum/diag.dat}; 
+			\addplot [fill=purple3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=purple1, thick, smooth] 		table[x index=0,y index=5] {fig/covariance/pendulum/diag.dat};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/covariance/pendulum/iso.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/covariance/pendulum/iso.dat}; 
+			\addplot [fill=bluegray3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=bluegray1, thick, smooth] 		table[x index=0,y index=5] {fig/covariance/pendulum/iso.dat}; 
+			
+ 			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/covariance/pendulum/const.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/covariance/pendulum/const.dat}; 
+			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/covariance/pendulum/const.dat}; 
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{pendulum-v1}}
+	\label{fig:cov_pendulum}
+\end{subfigure} \qquad \qquad
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=100000, scale=0.7,
+					ymin=-1400, ymax=0,
+					scaled x ticks=false, scaled y ticks=false,
+					xtick={0,25000,50000,75000,100000},
+					xticklabels={$0$,$25k$,$50k$,$75k$,$100k$},
+					ytick={-1400,-1200,-1000,-800,-600,-400,-200,0},
+					legend cell align=left, legend pos=south east,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel={}]
+				
+			\legend{P1, P2, P3}
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/covariance/bipedalwalker/diag.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/covariance/bipedalwalker/diag.dat}; 
+			\addplot [fill=bluegray3, opacity=0.5, forget plot]	 fill between[of=upper and lower];
+			\addplot[draw=bluegray1, thick, smooth] 		table[x index=0,y index=5] {fig/covariance/bipedalwalker/diag.dat};
+		
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/covariance/bipedalwalker/iso.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/covariance/bipedalwalker/iso.dat}; 
+			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/covariance/bipedalwalker/iso.dat};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/covariance/bipedalwalker/const.dat};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/covariance/bipedalwalker/const.dat}; 
+			\addplot [fill=red3, opacity=0.5, forget plot]	 	fill between[of=upper and lower];
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/covariance/bipedalwalker/const.dat}; 
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{bipedalwalker-v3}}
+	\label{fig:bipedalwalker}
+\end{subfigure}
+%%%%%%%%%%%%
+\caption{\textbf{Performance comparison of \ppo with different covariance matrices for the policy distribution}} 
+\label{fig:cov}
+\end{figure} 
+%%%%%%%%%%%%
+%%%%%%%%%%%%

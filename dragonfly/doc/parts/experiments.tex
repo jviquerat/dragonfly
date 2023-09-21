@@ -138,3 +138,17 @@ We see in figure \ref{fig:ppo_entropy} that, in the case of \codeinline{bipedalw
 %\section{Target network in \dqn}
 %
 %\dqn with and without target network
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Different covariance matrices for policy}
+The policy distribution's parameter may depend on the covariance matrix in different ways. Adopting the normal distribution with a diagonal covariance matrix, \ppo is tested with three different parametrizations:
+\begin{itemize}
+	\item one parameter for each diagonal elements of the covaraince matrix (P1),
+	\item one and same parameter for all the diagonal elements of the covariance matrix (P2),
+	\item without any parameter related to the covariance matrix: a constant value is assigned to all the diagonal elements (P3).
+\end{itemize}
+The performance of the three parametrizations is depicted in the figure \ref{fig:cov}.
+%\input{fig/covariance/covariance}
+

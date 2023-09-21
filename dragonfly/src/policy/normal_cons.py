@@ -82,7 +82,7 @@ class normal_cons(base_policy):
 
         # Get pdf
         mu = self.forward(obs)
-        sg = tf.constant([[.1]])
+        sg = tf.constant([[1.0]])
         sigma = tf.tile(sg,[1,self.dim])
         pdf    = tfd.MultivariateNormalDiag(loc        = mu,
                                             scale_diag = sigma)
