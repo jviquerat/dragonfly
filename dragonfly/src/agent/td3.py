@@ -137,11 +137,11 @@ class td3(base_agent):
     # Training
     def train(self, start, end):
 
-        obs = self.data["obs"][:]
-        nxt = self.data["nxt"][:]
-        act = self.data["act"][:]
-        rwd = self.data["rwd"][:]
-        trm = self.data["trm"][:]
+        obs = self.data["obs"][start:end]
+        nxt = self.data["nxt"][start:end]
+        act = self.data["act"][start:end]
+        rwd = self.data["rwd"][start:end]
+        trm = self.data["trm"][start:end]
 
         size = end - start
         act  = self.p_net.reshape_actions(act)
