@@ -6,7 +6,7 @@ from dragonfly.src.policy.base import *
 ### obs_dim : input  dimension
 ### act_dim : output dimension
 ### pms     : parameters
-class normal_isop(base_policy):
+class normal_const(base_policy):
     def __init__(self, obs_dim, act_dim, pms):
 
         # Fill structure
@@ -21,14 +21,10 @@ class normal_isop(base_policy):
             warning("normal", "__init__",
                     "Final activation for mean of policy is not tanh")
 
-        if (pms.network.heads.final[1] != "sigmoid"):
-            warning("normal", "__init__",
-                    "Final activation for stddev of policy is not sigmoid")
-
         # Define and init network
         self.net = net_factory.create(pms.network.type,
                                       inp_dim = obs_dim,
-                                      out_dim = [self.dim, 1],
+                                      out_dim = [self.dim],
                                       pms     = pms.network)
 
         # Define trainables
@@ -56,9 +52,9 @@ class normal_isop(base_policy):
     # Control (deterministic actions)
     def control(self, obs):
 
-        obs    = tf.cast(obs, tf.float32)
-        mu, sg = self.forward(obs)
-        act    = np.reshape(mu.numpy(), (-1,self.store_dim))
+        obs = tf.cast(obs, tf.float32)
+        mu  = self.forward(obs)
+        act = np.reshape(mu.numpy(), (-1,self.store_dim))
 
         return act
 
@@ -81,10 +77,11 @@ class normal_isop(base_policy):
     def compute_pdf(self, obs):
 
         # Get pdf
-        mu, sg = self.forward(obs)
+        mu    = self.forward(obs)
+        sg    = tf.constant([[.1]])
         sigma = tf.tile(sg,[1,self.dim])
-        pdf    = tfd.MultivariateNormalDiag(loc        = mu,
-                                            scale_diag = sigma)
+        pdf   = tfd.MultivariateNormalDiag(loc        = mu,
+                                           scale_diag = sigma)
 
         return pdf
 
@@ -93,10 +90,9 @@ class normal_isop(base_policy):
     def forward(self, state):
 
         out = self.net.call(state)
-        mu  = out[0]
-        sg  = out[1]
+        mu  = out
 
-        return mu, sg
+        return mu
 
     # Reshape actions
     def reshape_actions(self, act):

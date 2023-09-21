@@ -24,7 +24,7 @@
     "agent": {
         "type": "ppo",
         "policy": {
-            "type": "normal_isop",
+            "type": "normal_iso",
             "network": {
                 "type": "fc",
                 "trunk": {
@@ -52,21 +52,21 @@
         "value": {
             "type": "v_value",
             "network": {
-                "type": "snn",
+                "type": "fc",
                 "trunk": {
-                    "arch": [64,64,64,64,64],
-                    "actv": "selu"
+                    "arch": [64,64],
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
