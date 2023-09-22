@@ -12,6 +12,7 @@ results
 checkpoint
 *.data*
 *.index
+*.pyc
 venv
 dragonfly/doc/*.aux
 dragonfly/doc/*.out
