@@ -38,7 +38,7 @@ In that case, the environment will just rely on the `done` signal to stop the ev
 |:--------------|:---------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------:|
 | `turek-v0`    | A drag reduction problem exploiting two synthetic jets on a cylinder immersed in a flow at Re=100. | <img width="400" alt="gif" src="dragonfly/env/turek/good.gif">    |
 | `shkadov-v0`  | A control problem with multiple jets trying to damp instabilities on a falling liquid film.        | <img width="400" alt="gif" src="dragonfly/env/shkadov/good.gif">  |
-| `rayleigh-v0` | A control problem with local temperature control to kill a convection cell.                        | <img width="200" alt="gif" src="dragonfly/env/rayleigh/good.gif"> |
+| `rayleigh-v0` | A control problem with local temperature control to kill a convection cell at Ra=1e4.              | <img width="200" alt="gif" src="dragonfly/env/rayleigh/good.gif"> |
 
 ## Mujoco environments
 
