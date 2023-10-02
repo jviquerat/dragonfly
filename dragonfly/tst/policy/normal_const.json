@@ -1,0 +1,29 @@
+{
+    "policy": {
+        "type": "normal_const",
+        "sigma": 0.5,
+        "network": {
+            "type": "fc",
+            "trunk": {
+                "arch": [32,32],
+                "actv": "swish"
+            },
+            "heads": {
+                "nb": 1,
+                "arch": [[16]],
+                "actv": ["swish"],
+                "final": ["tanh"]
+            }
+        },
+        "optimizer": {
+            "type": "nadam",
+            "lr": 1.0e-3,
+            "grd_clip": 0.1
+        },
+        "loss": {
+            "type": "surrogate",
+            "pol_clip": 0.1,
+            "ent_coef": 0.01
+        }
+    }
+}
