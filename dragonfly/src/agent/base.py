@@ -7,6 +7,7 @@ from dragonfly.src.policy.policy           import *
 from dragonfly.src.value.value             import *
 from dragonfly.src.decay.decay             import *
 from dragonfly.src.retrn.retrn             import *
+from dragonfly.src.srl.srl                 import *
 from dragonfly.src.core.constants          import *
 from dragonfly.src.termination.termination import *
 from dragonfly.src.utils.buff              import *
@@ -16,12 +17,22 @@ from dragonfly.src.utils.error             import *
 ###############################################
 ### Base agent
 class base_agent():
-    def __init__(self):
-        pass
+    def __init__(self, pms):
+
+        # Check inputs
+        self.srl_type = "dummy"
+        if hasattr(pms, "srl"): self.srl_type = pms.srl.type
+
+        self.srl = srl_factory.create(self.srl_type)
 
     # Get actions
     def actions(self, obs):
         raise NotImplementedError
+
+    # Pre-process observations using srl
+    def process_obs(self, obs):
+
+        return self.srl.process(obs)
 
     # Reset
     def reset(self):

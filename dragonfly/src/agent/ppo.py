@@ -6,6 +6,9 @@ from dragonfly.src.agent.base import *
 class ppo(base_agent):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
+        # Initialize base class
+        super().__init__(pms)
+
         # Initialize from arguments
         self.name      = 'ppo'
         self.act_dim   = act_dim
@@ -60,9 +63,11 @@ class ppo(base_agent):
     # Get actions
     def actions(self, obs):
 
+        pobs = super().process_obs(obs)
+
         # Get actions and associated log-prob
         self.timer_actions.tic()
-        act, lgp = self.p_net.actions(obs)
+        act, lgp = self.p_net.actions(pobs)
 
         # Check for NaNs
         if (np.isnan(act).any()):
@@ -78,7 +83,9 @@ class ppo(base_agent):
     # Control (deterministic actions)
     def control(self, obs):
 
-        return self.p_net.control(obs)
+        pobs = super().process_obs(obs)
+
+        return self.p_net.control(pobs)
 
     # Finalize buffers before training
     def returns(self, obs, nxt, rwd, trm):
