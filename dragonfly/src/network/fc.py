@@ -8,6 +8,8 @@ from  dragonfly.src.network.base import *
 ### pms      : network parameters
 class fc(base_network):
     def __init__(self, inp_dim, out_dim, pms):
+
+        # Initialize base class
         super().__init__()
 
         # Set inputs
