@@ -18,12 +18,6 @@ from dragonfly.src.utils.error      import *
 
 ###############################################
 ### Base trainer class
-### obs_dim  : dimension of observations
-### act_dim  : dimension of actions
-### pol_dim  : true dimension of the actions provided to the env
-### n_cpu    : nb of parallel environments
-### n_ep_max : max nb of episodes to unroll in a run
-### pms      : parameters
 class base_trainer():
     def __init__(self):
         pass
@@ -35,19 +29,44 @@ class base_trainer():
     # Monitor transition
     def monitor(self, path, run, obs, act):
         if self.monitoring:
-            # Handle folder
-            fpath = path+"/"+str(run)+"/actions"
-            if ((self.counter.step == 0)):
-                if (os.path.exists(fpath)): shutil.rmtree(fpath)
-                os.makedirs(fpath)
+
+            # Check nb of cpus
+            if (mpi.size > 1):
+                error("base_trainer", "monitor",
+                      "monitoring does not work with parallel environments")
+
+            # Handle folders
+            apath = path+"/"+str(run)+"/actions"
+            opath = path+"/"+str(run)+"/observations"
+
+            if ((self.counter.ep         == 0) and
+                (self.counter.ep_step[0] == 0)):
+                if (os.path.exists(apath)): shutil.rmtree(apath)
+                if (os.path.exists(opath)): shutil.rmtree(opath)
+                os.makedirs(apath)
+                os.makedirs(opath)
 
             # Write actions
             s = str(self.counter.ep_step[0])
+            a = act.flatten()
             for i in range(act.size):
                 s += " "
-                s += str(act.flatten()[i])
+                s += str(a[i])
             s += "\n"
-            filename = fpath+"/"+str(self.counter.ep)+"_act.dat"
+
+            filename = apath+"/"+str(self.counter.ep)+".dat"
+            with open(filename, "a") as f:
+                f.write(s)
+
+            # Write observations
+            s = str(self.counter.ep_step[0])
+            o = obs.flatten()
+            for i in range(obs.size):
+                s += " "
+                s += str(o[i])
+            s += "\n"
+
+            filename = opath+"/"+str(self.counter.ep)+".dat"
             with open(filename, "a") as f:
                 f.write(s)
 
