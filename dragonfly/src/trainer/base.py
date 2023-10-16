@@ -32,14 +32,6 @@ class base_trainer():
     def loop(self, path, run):
         raise NotImplementedError
 
-    # Finish if some episodes are done
-    def finish_episodes(self, path, done):
-        raise NotImplementedError
-
-    # Train
-    def train(self):
-        raise NotImplementedError
-
     # Monitor transition
     def monitor(self, path, run, obs, act):
         if self.monitoring:
