@@ -28,12 +28,12 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [128],
+                    "arch": [],
                     "actv": "tanh"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[128],[128]],
+                    "arch": [[128,128],[128,128]],
                     "actv": ["tanh","tanh"],
                     "final": ["tanh","sigmoid"]
                 }

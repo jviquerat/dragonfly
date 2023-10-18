@@ -19,7 +19,8 @@
         "n_buff": 1,
         "batch_frac": 0.25,
         "n_epochs": 64,
-        "render_every": 10000
+        "render_every": 10000,
+        "monitoring": true
     },
     "agent": {
         "type": "ppo",

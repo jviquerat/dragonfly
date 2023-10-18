@@ -72,6 +72,7 @@ class normal_iso(base_policy):
         # Sample actions
         act = pdf.sample(1)
         act = tf.reshape(act, [-1,self.store_dim])
+        act = tf.clip_by_value(act, -1.0, 1.0)
         lgp = pdf.log_prob(act)
         lgp = tf.reshape(lgp, [-1,1])
 
@@ -94,7 +95,7 @@ class normal_iso(base_policy):
 
         out = self.net.call(state)
         mu  = out[0]
-        sg  = out[1]
+        sg  = out[1]#/0.5*0.75
 
         return mu, sg
 
