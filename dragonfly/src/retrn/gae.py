@@ -52,7 +52,7 @@ class gae():
         tgt += val
 
         # Normalize
-        if self.ret_norm:
-            adv = (adv-np.mean(adv))/(np.std(adv) + ret_eps)
+        #if self.ret_norm:
+        #    adv = (adv-np.mean(adv))/(np.std(adv) + ret_eps)
 
         return tgt, adv

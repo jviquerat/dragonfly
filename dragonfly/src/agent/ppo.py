@@ -116,6 +116,10 @@ class ppo(base_agent):
         tgt = self.data["tgt"][start:end]
         lgp = self.data["lgp"][start:end]
 
+        mean = tf.math.reduce_mean(adv)
+        std  = tf.math.reduce_std(adv)
+        adv = (adv - mean)/(std + 1.0e-8)
+
         # Train policy
         act = self.p_net.reshape_actions(act)
         adv = tf.reshape(adv, [-1])

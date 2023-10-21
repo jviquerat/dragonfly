@@ -15,6 +15,7 @@ class normal_diag(base_policy):
         self.dim         = self.act_dim
         self.store_dim   = self.act_dim
         self.store_type  = float
+        self.sigma0      = pms.sigma0
 
         # Check parameters
         if (pms.network.heads.final[0] != "tanh"):
@@ -94,7 +95,7 @@ class normal_diag(base_policy):
 
         out = self.net.call(state)
         mu  = out[0]
-        sg  = out[1]*0.7/0.5
+        sg  = out[1]*self.sigma0/0.5
 
         return mu, sg
 

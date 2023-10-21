@@ -24,16 +24,17 @@
     "agent": {
         "type": "ppo",
         "policy": {
-            "type": "normal_iso",
+            "type": "normal_diag",
+            "sigma0": 0.5,
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [],
+                    "arch": [64],
                     "actv": "tanh"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[128,128],[128,128]],
+                    "arch": [[64],[64]],
                     "actv": ["tanh","tanh"],
                     "final": ["tanh","sigmoid"]
                 }
@@ -41,7 +42,7 @@
             "optimizer": {
                 "type": "adam",
                 "lr": 5.0e-4,
-                "grd_clip": 0.1
+                "grd_clip": 0.5
             },
             "loss": {
                 "type": "surrogate",
@@ -67,7 +68,7 @@
             "optimizer": {
                 "type": "adam",
                 "lr": 5.0e-3,
-                "grd_clip": 0.1
+                "grd_clip": 0.5
             },
             "loss": {
                 "type": "mse_pg"
