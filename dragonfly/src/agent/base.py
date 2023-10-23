@@ -18,16 +18,21 @@ from dragonfly.src.utils.error             import *
 ### Base agent
 class base_agent():
     def __init__(self, pms):
+        pass
+
+    # Get actions
+    def actions(self, obs):
+        raise NotImplementedError
+
+    # Initialize srl
+    def init_srl(self, pms, obs_dim):
 
         # Check inputs
         self.srl_type = "dummy"
         if hasattr(pms, "srl"): self.srl_type = pms.srl.type
 
-        self.srl = srl_factory.create(self.srl_type)
-
-    # Get actions
-    def actions(self, obs):
-        raise NotImplementedError
+        # Create srl
+        self.srl = srl_factory.create(self.srl_type, dim=obs_dim)
 
     # Pre-process observations using srl
     def process_obs(self, obs):

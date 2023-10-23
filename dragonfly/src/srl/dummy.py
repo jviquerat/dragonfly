@@ -8,7 +8,7 @@ from dragonfly.src.core.constants import *
 ### Class for dummy srl
 ### pms : parameters
 class dummy():
-    def __init__(self, pms=None):
+    def __init__(self, dim):
         pass
 
     # Process observations

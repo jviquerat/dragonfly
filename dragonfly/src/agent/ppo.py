@@ -6,15 +6,15 @@ from dragonfly.src.agent.base import *
 class ppo(base_agent):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
-        # Initialize base class
-        super().__init__(pms)
-
         # Initialize from arguments
         self.name      = 'ppo'
         self.act_dim   = act_dim
         self.obs_dim   = obs_dim
         self.n_cpu     = n_cpu
         self.size      = size
+
+        # Initialize base class
+        self.init_srl(pms, self.obs_dim)
 
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
