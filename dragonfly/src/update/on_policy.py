@@ -1,6 +1,6 @@
 ###############################################
-### Class for regular online agent update
-class online():
+### Class for regular on-policy agent update
+class on_policy():
     def __init__(self):
         pass
 

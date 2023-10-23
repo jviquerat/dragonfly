@@ -1,6 +1,6 @@
 ###############################################
-### Class for regular offline agent update
-class offline():
+### Class for regular off-policy agent update
+class off_policy():
     def __init__(self):
         pass
 
