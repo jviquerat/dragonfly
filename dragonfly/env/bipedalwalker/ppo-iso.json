@@ -11,7 +11,7 @@
         "tag": false,
         "time": false
     },
-    "n_avg": 3,
+    "n_avg": 5,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
@@ -24,8 +24,8 @@
     "agent": {
         "type": "ppo",
         "policy": {
-            "type": "normal_diag",
-            "sigma0": 0.5,
+            "type": "normal_iso",
+            "sigma0": 0.6,
             "network": {
                 "type": "fc",
                 "trunk": {
@@ -42,7 +42,7 @@
             "optimizer": {
                 "type": "adam",
                 "lr": 5.0e-4,
-                "grd_clip": 0.5
+                "grd_clip": 0.1
             },
             "loss": {
                 "type": "surrogate",
@@ -68,7 +68,7 @@
             "optimizer": {
                 "type": "adam",
                 "lr": 5.0e-3,
-                "grd_clip": 0.5
+                "grd_clip": 0.1
             },
             "loss": {
                 "type": "mse_pg"
