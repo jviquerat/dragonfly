@@ -24,7 +24,7 @@ class buffer(base_trainer):
         self.n_epochs    = pms.n_epochs
         self.size        = self.n_buff*self.buff_size
         self.freq_report = max(int(n_stp_max/(freq_report*self.buff_size)),1)
-        self.update_type = "online"
+        self.update_type = "on_policy"
 
         # Optional modification of default args
         if hasattr(pms, "update"): self.update_type = pms.update

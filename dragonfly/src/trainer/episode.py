@@ -24,7 +24,7 @@ class episode(base_trainer):
         self.n_epochs    = pms.n_epochs
         self.size        = 1000*self.n_ep_train
         self.freq_report = 10
-        self.update_type = "online"
+        self.update_type = "on_policy"
 
         # Optional modification of default args
         if hasattr(pms, "update"): self.update_type = pms.update

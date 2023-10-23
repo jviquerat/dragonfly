@@ -22,7 +22,7 @@ class td(base_trainer):
         self.n_stp_unroll = pms.n_stp_unroll*mpi.size
         self.btc_size     = pms.btc_size
         self.freq_report  = max(int(self.n_stp_max/(freq_report*self.n_stp_unroll)),1)
-        self.update_type = "offline"
+        self.update_type = "off_policy"
 
         # Optional modification of default args
         if hasattr(pms, "update"): self.update_type = pms.update
