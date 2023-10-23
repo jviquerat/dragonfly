@@ -25,6 +25,7 @@
         "type": "ppo",
         "policy": {
             "type": "normal",
+            "sigma0": 0.6,
             "network": {
                 "type": "fc",
                 "trunk": {
@@ -54,7 +55,7 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [64,64],
+                    "arch": [128,128],
                     "actv": "relu"
                 },
                 "heads": {

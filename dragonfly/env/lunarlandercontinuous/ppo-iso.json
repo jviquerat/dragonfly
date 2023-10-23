@@ -17,7 +17,7 @@
         "style": "buffer",
         "buff_size": 4000,
         "n_buff": 1,
-        "batch_frac": 0.25,
+        "batch_frac": 0.5,
         "n_epochs": 32,
         "render_every": 10000
     },
@@ -25,6 +25,7 @@
         "type": "ppo",
         "policy": {
             "type": "normal_iso",
+            "sigma0": 0.6,
             "network": {
                 "type": "fc",
                 "trunk": {
@@ -54,7 +55,7 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [64,64],
+                    "arch": [128,128],
                     "actv": "relu"
                 },
                 "heads": {
