@@ -20,6 +20,9 @@ class normal_full(base_policy):
         self.store_dim   = self.act_dim
         self.store_type  = float
 
+        self.sigma       = 0.5
+        if (hasattr(pms, "sigma")): self.sigma = pms.sigma
+
         # Check parameters
         if (pms.network.heads.final[0] != "tanh"):
             warning("normal", "__init__",
@@ -167,7 +170,7 @@ class normal_full(base_policy):
 
         out = self.net.call(state)
         mu  = out[0]
-        sg  = out[1]
+        sg  = out[1]*self.sigma/0.5
         cr  = out[2]
 
         return mu, sg, cr
