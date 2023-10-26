@@ -102,10 +102,10 @@ class rbuff:
     		self.buff[self.i,:] = field[j,:]
     		self.i             += 1
     		
-    	# Handle filling and global index
-    	if (self.i == self.size): self.i    = 0
-    	if (not self.full):       self.n   += 1
-    	if (self.n == self.size): self.full = True
+    		# Handle filling and global index
+    		if (self.i == self.size): self.i    = 0
+    		if (not self.full):       self.n   += 1
+    		if (self.n == self.size): self.full = True
 
     def get_dim(self):
 
