@@ -93,15 +93,19 @@ class rbuff:
         return self.n
 
     def store(self, field):
-
-        for j in range(len(field)):
-            self.buff[self.i,:] = field[j,:]
-            self.i             += 1
-
-            # Handle filling and global index
-            if (self.i == self.size): self.i    = 0
-            if (not self.full):       self.n   += 1
-            if (self.n == self.size): self.full = True
+    
+    	# if shape is (n,) then make it (1,n)
+    	if len(field.shape) == 1 : 
+    		field = np.reshape(field,(1,len(field)))
+    		
+    	for j in range(len(field)):
+    		self.buff[self.i,:] = field[j,:]
+    		self.i             += 1
+    		
+    	# Handle filling and global index
+    	if (self.i == self.size): self.i    = 0
+    	if (not self.full):       self.n   += 1
+    	if (self.n == self.size): self.full = True
 
     def get_dim(self):
 
@@ -143,7 +147,7 @@ class gbuff:
     def store(self, names, fields):
 
         for name, field in zip(names, fields):
-            self.data[name].store(field)
+        	self.data[name].store(field)
 
     def length(self):
 
