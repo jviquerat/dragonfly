@@ -31,7 +31,7 @@ class pca():
 	def update(self):	
 	
 		# Get data
-		obs = self.gbuff["obs"]
+		obs = self.gbuff["obs"][0:self.counter.step]
 		# PCA algorithm	
 		obs -= obs.mean(axis=0)
 		R = np.cov(obs,rowvar=False)	    
@@ -45,9 +45,9 @@ class pca():
 	def process(self, obs):
 	
 	   	# Check if it's the update time
-	   	if self.counter.step == freq_srl :
+	   	if ((self.counter.step+1) % freq_srl == 0) :
 	   		self.update()       
-	   		self.counter.reset()
+	   		#self.counter.reset()
 	   		
 	   	# Project obs into new space
 	   	Mult = np.matmul(self.projection,obs.T)								
