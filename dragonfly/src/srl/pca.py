@@ -16,10 +16,10 @@ class pca():
 		self.buff_size = size
 		
 		# Initialize counter
-		self.counter = counter(1)
+		self.counter = 1
 		
 		# Initialize projection matrix
-		self.projection = np.identity(self.obs_dim)
+		self.matrix = np.identity(self.obs_dim)
 		
 		# Create buffers
 		self.names = ["obs"]
@@ -28,28 +28,29 @@ class pca():
 		
 		
 	# Update compression process according to the new buffer
-	def update(self):	
-	
-		# Get data
-		obs = self.gbuff["obs"][0:self.counter.step]
-		# PCA algorithm	
-		obs -= obs.mean(axis=0)
-		R = np.cov(obs,rowvar=False)	    
-		evals, evecs = la.eigh(R)
-		idx = np.argsort(evals)[::-1]
-		evecs = evecs[:,idx]
-		# Update projection matrix	
-		self.projection = evecs[:, :self.reduced_dim]
+	def update(self):
+
+                # Get data
+                obs = self.gbuff.get_buffers({"obs"},self.counter)["obs"]
+                obs = obs.numpy()
+                # PCA algorithm
+                obs -= obs.mean(axis=0)
+                R = np.cov(obs,rowvar=False)
+                evals, evecs = la.eigh(R)
+                idx = np.argsort(evals)[::-1]
+                evecs = evecs[:,idx]
+                # Update projection matrix
+                self.matrix = evecs
 		
 	# Process observations
 	def process(self, obs):
-	
-	   	# Check if it's the update time
-	   	if ((self.counter.step+1) % freq_srl == 0) :
-	   		self.update()       
-	   		#self.counter.reset()
-	   		
-	   	# Project obs into new space
-	   	Mult = np.matmul(self.projection,obs.T)								
-	   	return Mult.T
+
+                # Check if it's the update time
+                if (self.counter % freq_srl) == 0 :
+                        self.update()
+                # Reduce the dimension
+                self.projection = self.matrix[:,:self.reduced_dim]        
+                # Project obs into new space
+                Mult = np.matmul(obs,self.projection)
+                return Mult
 

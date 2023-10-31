@@ -15,6 +15,7 @@ class ppo(base_agent):
 
         # Initialize base class
         self.init_srl(pms, self.obs_dim, 1000*size)
+        obs_dim = self.obs_dim
 
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
@@ -144,7 +145,7 @@ class ppo(base_agent):
         # Store in SRL buffer
         self.srl.gbuff.store(["obs"],obs)
         # Update SRL counter
-        self.srl.counter.update_global_step(0)
+        self.srl.counter += 1
 
     # Actions to execute before the inner training loop
     def pre_loop(self):

@@ -15,7 +15,7 @@ class dummy():
     	self.buff_size = size
     	
     	# Initialize counter
-    	self.counter = counter(1)
+    	self.counter = 0
     	
     	# Create buffers
     	self.names = ["obs"]

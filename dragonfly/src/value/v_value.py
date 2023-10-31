@@ -42,6 +42,8 @@ class v_value(base_value):
 
         # Predict values
         v = np.array(self.forward(x))
+        print(v.shape)
+        print(self.out_dim)
         v = np.reshape(v, (-1,self.out_dim))
-
+        print(v.shape)
         return v

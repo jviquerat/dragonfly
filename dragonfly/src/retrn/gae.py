@@ -32,6 +32,8 @@ class gae():
         lbd = self.gae_lambda
 
         # Initialize return and check bootstrapping
+        print(rwd.shape)
+        print(nxt.shape)
         ret = np.where(trm == 2.0, rwd + gm*nxt, rwd)
 
         # Remove bootstrap information from trm buffer
