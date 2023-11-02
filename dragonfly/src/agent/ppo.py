@@ -15,7 +15,6 @@ class ppo(base_agent):
 
         # Initialize base class
         self.init_srl(pms, self.obs_dim, 1000*size)
-        obs_dim = self.obs_dim
 
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
@@ -23,7 +22,7 @@ class ppo(base_agent):
                     "Loss type for ppo agent is not surrogate")
 
         self.p_net = pol_factory.create(pms.policy.type,
-                                        obs_dim = obs_dim,
+                                        obs_dim = self.obs_dim,
                                         act_dim = act_dim,
                                         pms     = pms.policy)
 
@@ -37,7 +36,7 @@ class ppo(base_agent):
                     "Value type for ppo agent is not v_value")
 
         self.v_net = val_factory.create(pms.value.type,
-                                        inp_dim = obs_dim,
+                                        inp_dim = self.obs_dim,
                                         pms     = pms.value)
 
         # Build advantage
@@ -118,14 +117,15 @@ class ppo(base_agent):
         lgp = self.data["lgp"][start:end]
 
         # Train policy
+        pobs = self.process_obs(obs)
         act = self.p_net.reshape_actions(act)
         adv = tf.reshape(adv, [-1])
         lgp = tf.reshape(lgp, [-1])
-        self.p_net.loss.train(obs, adv, act, lgp, self.p_net)
+        self.p_net.loss.train(pobs, adv, act, lgp, self.p_net)
 
         # Train v network
         tgt = tf.reshape(tgt, [-1])
-        self.v_net.loss.train(obs, tgt, self.v_net)
+        self.v_net.loss.train(pobs, tgt, self.v_net)
 
     # Agent reset
     def reset(self):
@@ -166,7 +166,9 @@ class ppo(base_agent):
         names = ["obs", "nxt", "act", "lgp", "rwd", "trm"]
         data  = self.buff.serialize(names)
         gobs, gnxt, gact, glgp, grwd, gtrm = (data[name] for name in names)
-        gtgt, gadv = self.returns(gobs, gnxt, grwd, gtrm)
+        pgobs = self.process_obs(gobs)
+        pgnxt = self.process_obs(gnxt)
+        gtgt, gadv = self.returns(pgobs, pgnxt, grwd, gtrm)
 
         self.gbuff.store(self.gnames, [gobs, gact, gadv, gtgt, glgp])
 

@@ -24,4 +24,4 @@ n_smooth = int(5000/step_report)
 def_obs_max = 1.0e8
 
 ### Update SRL every freq_srl steps
-freq_srl = 200
+freq_srl = 100000
