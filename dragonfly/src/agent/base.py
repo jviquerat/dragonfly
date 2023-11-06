@@ -38,7 +38,8 @@ class base_agent():
         # Get the new dimension
         if hasattr(pms, "srl"):
             self.srl.reduced_dim = pms.srl.reduced_dim
-            self.obs_dim = self.srl.reduced_dim
+            self.reduced_dim = self.srl.reduced_dim
+            self.srl.freq = pms.srl.freq
 
     # Pre-process observations using srl
     def process_obs(self, obs):

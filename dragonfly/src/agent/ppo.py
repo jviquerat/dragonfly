@@ -12,9 +12,10 @@ class ppo(base_agent):
         self.obs_dim   = obs_dim
         self.n_cpu     = n_cpu
         self.size      = size
+        self.reduced_dim = obs_dim
 
         # Initialize base class
-        self.init_srl(pms, self.obs_dim, 1000*size)
+        self.init_srl(pms, obs_dim, 10000*size)
 
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
@@ -22,7 +23,7 @@ class ppo(base_agent):
                     "Loss type for ppo agent is not surrogate")
 
         self.p_net = pol_factory.create(pms.policy.type,
-                                        obs_dim = self.obs_dim,
+                                        obs_dim = self.reduced_dim,
                                         act_dim = act_dim,
                                         pms     = pms.policy)
 
@@ -36,7 +37,7 @@ class ppo(base_agent):
                     "Value type for ppo agent is not v_value")
 
         self.v_net = val_factory.create(pms.value.type,
-                                        inp_dim = self.obs_dim,
+                                        inp_dim = self.reduced_dim,
                                         pms     = pms.value)
 
         # Build advantage
