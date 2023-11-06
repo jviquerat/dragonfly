@@ -23,6 +23,11 @@
         "render_every": 5000
     },
     "agent": {
+	"srl": {
+    	    "type": "pca",
+    	    "reduced_dim": 5,
+	    "freq": 100
+    	},
         "type": "ppo",
         "policy": {
             "type": "normal",
