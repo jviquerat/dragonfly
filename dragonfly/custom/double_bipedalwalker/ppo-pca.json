@@ -1,10 +1,9 @@
 {
     "env": {
-        "name": "HalfCheetah-v4",
+        "name": "DoubleBipedalWalker",
         "obs_clip": false,
         "obs_norm": true,
-        "obs_noise": 0.0,
-	      "obs_max": 10.0
+        "obs_noise": 0.0
     },
     "naming": {
         "env": true,
@@ -18,15 +17,15 @@
         "style": "buffer",
         "buff_size": 4000,
         "n_buff": 1,
-        "batch_frac": 0.25,
-        "n_epochs": 32,
-        "render_every": 5000
+        "batch_frac": 0.5,
+        "n_epochs": 64,
+        "render_every": 50000
     },
     "agent": {
-	"srl": {
+    	"srl": {
     	    "type": "pca",
-    	    "reduced_dim": 4,
-	    "freq": 20
+    	    "reduced_dim": 24,
+	    "freq": 100000000
     	},
         "type": "ppo",
         "policy": {
@@ -34,19 +33,19 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [64],
+                    "arch": [128],
                     "actv": "tanh"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[64],[64]],
+                    "arch": [[128],[128]],
                     "actv": ["tanh","tanh"],
                     "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-4,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -60,7 +59,7 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [64,64],
+                    "arch": [128,128],
                     "actv": "relu"
                 },
                 "heads": {
@@ -82,7 +81,7 @@
         "retrn": {
             "type": "gae",
             "gamma": 0.99,
-            "gae_lambda": 0.95,
+            "gae_lambda": 0.90,
             "ret_norm": true
         },
         "termination": {

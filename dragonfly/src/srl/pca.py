@@ -1,6 +1,6 @@
 # Generic imports
 import numpy as np
-from scipy import linalg as la
+from numpy import linalg as la
 
 # Custom imports
 from dragonfly.src.srl.base import *
@@ -49,8 +49,9 @@ class pca():
 	def process(self, obs):
                 
                 # Check if it's the update time
-                if (self.counter % self.freq) == 0 :
+                if ((self.counter-20000) % self.freq) == 0 :
                         self.update()
+                        
                 # Reduce the dimension
                 self.projection = self.matrix[:,:self.reduced_dim]        
                 # Project obs into new space

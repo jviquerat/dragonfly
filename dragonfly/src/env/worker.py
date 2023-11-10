@@ -24,6 +24,7 @@ class worker():
                                     render_mode="rgb_array")
         except:
             sys.path.append(path)
+            print(path)
             module    = __import__(env_name)
             env_build = getattr(module, env_name)
             try:
