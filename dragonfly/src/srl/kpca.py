@@ -33,15 +33,15 @@ class kpca():
     def update(self):
         
         # Get data
-        obs = self.gbuff.get_buffers({"obs"},self.counter)["obs"]
+        obs = self.gbuff.get_buffers({"obs"},self.counter-2)["obs"]
         obs = obs.numpy()[-self.freq:]
         self.obs = obs
-        
+                
         # Pairwise squared Euclidean distances
         K = GramMat(obs,obs)
         
         # Compute centered symmetric kernel matrix
-        K = kernel(K)
+        K = self._kernel(K)
         K = center(K)
         
         # PCA algorithm
@@ -49,6 +49,8 @@ class kpca():
         idx = np.argsort(evals)[::-1]
         self.evecs = evecs[:,idx]
         self.evals = evals[idx]
+        scales = np.sqrt(self.evals[:self.reduced_dim])
+        self.directions = self.evecs[:,:self.reduced_dim]/scales
         	
     # Process observations
     def process(self, obs):
@@ -62,14 +64,40 @@ class kpca():
             self.update()
 
         # Compute centered gram matrix between old obs and new obs
-        K = GramMat(obs, self.obs)
-        K = kernel(K)
-        K = center(K)
+        # K = GramMat(obs, self.obs)
+        # K = self._kernel(K)
+        # K = center(K)
         
         # Project obs into new space
-        scales = np.sqrt(self.evals[:self.reduced_dim])
-        scaled_alpha = self.evecs[:,:self.reduced_dim]/scales
-        return np.dot(K, scaled_alpha)
+        # return np.dot(K, self.directions)
+
+        # Project obs into new space using approximation
+        Phi_obs = np.apply_along_axis(self._approxPhi, 1, obs)
+        return np.dot(Phi_obs,self.directions)
+
+    # RBF Kernel function for pairwise distance matrix
+    def _kernel(self,M):
+        sigma = .0001
+        self.gamma = 1/(2*(sigma**2))
+        K = exp(-self.gamma * M)
+        return K
+
+    # Approximate the RBF transformation funcion by Fourier random features
+    def _approxPhi(self,x):
+        d = int(self.directions.shape[0]/2)
+        n = x.shape[0]
+        w = np.random.normal(0,2*self.gamma,(d,n))
+        wx = np.dot(w,x)
+        c = np.cos(wx).reshape((d,1))
+        s = np.sin(wx).reshape((d,1))
+        cs = np.concatenate((c,s),axis=1)
+        return cs.reshape((1,2*d))
+        #l = []
+        #for i in range(d):
+        #    w = np.random.normal(0,2*self.gamma,n)
+        #    wx = np.dot(w,x)
+        #    l += [np.cos(wx),np.sin(wx)]
+        #return np.array(l)
 
 
 # Gram Matrix of squared Euclidean distances between X and Y
@@ -102,8 +130,3 @@ def center(K):
     K = K - one_n.dot(K) - K.dot(one_m) + one_n.dot(K).dot(one_m)
     return K
     
-# RBF Kernel function for pairwise distance matrix
-def kernel(M):
-    gamma = 1
-    K = exp(-gamma * M)
-    return K
