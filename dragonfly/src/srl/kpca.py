@@ -1,21 +1,22 @@
 # Generic imports
 import numpy as np
-from scipy import linalg as la
-from scipy.spatial.distance import pdist, squareform
-from scipy import exp
+from numpy import linalg as la
+from numpy import exp
 
 # Custom imports
 from dragonfly.src.srl.base import *
 
 ###############################################
-### Class for PCA srl
+### Class for Kernel PCA srl
 ### pms : parameters
 class kpca():
-    def __init__(self, dim, size):
+    def __init__(self, dim, new_dim, freq, size):
 
         # Initialize from arguments
         self.obs_dim = dim
         self.buff_size = size
+        self.reduced_dim = new_dim
+        self.freq = freq
 
         # Initialize counter
         self.counter = 1
@@ -27,47 +28,82 @@ class kpca():
         self.names = ["obs"]
         self.sizes = [self.obs_dim]
         self.gbuff = gbuff(self.buff_size, self.names, self.sizes)
-
-
+    
     # Update compression process according to the new buffer
     def update(self):
         
         # Get data
         obs = self.gbuff.get_buffers({"obs"},self.counter)["obs"]
-        obs = obs.numpy()
+        obs = obs.numpy()[-self.freq:]
+        self.obs = obs
         
         # Pairwise squared Euclidean distances
-        Dists = squareform(pdist(obs,'sqeuclidean'))
+        K = GramMat(obs,obs)
         
-        # Symmetric RBF kernel matrix
-        gamma = 10
-        self.K = exp(-gamma * Dists)
-        
-        # Center the kernel matrix
-        n = self.K.shape[0]
-        one_n = np.ones((n,n))/n
-        self.K -= one_n.dot(self.K) - self.K.dot(one_n) + one_n.dot(self.K).dot(one_n)
+        # Compute centered symmetric kernel matrix
+        K = kernel(K)
+        K = center(K)
         
         # PCA algorithm
-        evals, evecs = la.eigh(self.K)
+        evals, evecs = la.eigh(K)
         idx = np.argsort(evals)[::-1]
-        evecs = evecs[:,idx]
-        # Update projection matrix
-        self.matrix = evecs
-	
+        self.evecs = evecs[:,idx]
+        self.evals = evals[idx]
+        	
     # Process observations
     def process(self, obs):
         
-        if self.counter < freq_srl :
-            self.K = obs
+        # Before the update time
+        if self.counter < self.freq :
+            return obs[:,:self.reduced_dim]
 
         # Check if it's the update time
-        if (self.counter % freq_srl) == 0 :
+        if (self.counter == self.freq) :
             self.update()
 
-        # Reduce the dimension
-        self.projection = self.matrix[:,:self.reduced_dim]        
+        # Compute centered gram matrix between old obs and new obs
+        K = GramMat(obs, self.obs)
+        K = kernel(K)
+        K = center(K)
+        
         # Project obs into new space
-        Mult = np.matmul(self.K,self.projection)
-        return Mult
+        scales = np.sqrt(self.evals[:self.reduced_dim])
+        scaled_alpha = self.evecs[:,:self.reduced_dim]/scales
+        return np.dot(K, scaled_alpha)
+
+
+# Gram Matrix of squared Euclidean distances between X and Y
+"""
+def GramMat(X,Y):
+    n = X.shape[0]
+    m = Y.shape[0]
+    M = np.zeros((n,m))
+    for i in range(n):
+        for j in range(m):
+            M[i,j] = sum([a*a for a in X[i,:]-Y[j,:]])
+    return M
+"""
+def GramMat(X,Y):
+    n,p = X.shape
+    m,q = Y.shape
+    assert(p==q)
+    one_pm = np.ones((p,m))
+    one_nq = np.ones((n,q))
+    XX = (X*X) @ one_pm
+    YY = one_nq @ (Y*Y).T
+    XY = X @ (Y.T)
+    return XX + YY - 2*XY 
+        
+# Center Gram Matrix
+def center(K):
+    n, m = K.shape
+    one_n = np.ones((n,n))/n
+    one_m = np.ones((m,m))/m
+    K = K - one_n.dot(K) - K.dot(one_m) + one_n.dot(K).dot(one_m)
+    return K
     
+# RBF Kernel function for pairwise distance matrix
+def kernel(M):
+    gamma = 1
+    K = exp(-gamma * M)
+    return K

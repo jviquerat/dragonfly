@@ -8,7 +8,7 @@ from dragonfly.src.srl.base import *
 ### Class for dummy srl
 ### pms : parameters
 class dummy():
-    def __init__(self, dim, size):
+    def __init__(self, dim, new_dim, freq, size):
     	
     	# Initialize from arguments
     	self.obs_dim = dim 

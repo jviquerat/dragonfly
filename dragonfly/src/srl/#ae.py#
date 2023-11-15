@@ -78,6 +78,7 @@ class ae():
         if ((self.counter % self.freq)==0) :
             self.update()
 
+        # Call the autoencoder
         encoded_obs = self.autoencoder.encoder(obs).numpy()
         return encoded_obs
 

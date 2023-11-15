@@ -23,9 +23,9 @@
     },
     "agent": {
     	"srl": {
-    	    "type": "kpca",
-    	    "reduced_dim": 3,
-	    "freq": 5000
+    	    "type": "ae",
+    	    "reduced_dim": 2,
+	    "freq": 15
     	},
         "type": "ppo",
         "policy": {

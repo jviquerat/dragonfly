@@ -1,9 +1,10 @@
 {
     "env": {
-        "name": "CartPole-v0",
+        "name": "HalfCheetah-v4",
         "obs_clip": false,
         "obs_norm": true,
-        "obs_noise": 0.0
+        "obs_noise": 0.0,
+	      "obs_max": 10.0
     },
     "naming": {
         "env": true,
@@ -12,40 +13,40 @@
         "time": false
     },
     "n_avg": 3,
-    "n_stp_max": 50000,
+    "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
-        "buff_size": 128,
+        "buff_size": 4000,
         "n_buff": 1,
-        "batch_frac": 0.5,
-        "n_epochs": 16,
-        "render_every": 500
+        "batch_frac": 0.25,
+        "n_epochs": 32,
+        "render_every": 5000
     },
     "agent": {
-    	"srl": {
+	"srl": {
     	    "type": "kpca",
-    	    "reduced_dim": 3,
-	    "freq": 5000
+    	    "reduced_dim": 5,
+	    "freq": 10000
     	},
         "type": "ppo",
         "policy": {
-            "type": "categorical",
+            "type": "normal",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [16,16],
+                    "arch": [64],
                     "actv": "tanh"
                 },
                 "heads": {
-                    "nb": 1,
-                    "arch": [[]],
-                    "actv": ["tanh"],
-                    "final": ["softmax"]
+                    "nb": 2,
+                    "arch": [[64],[64]],
+                    "actv": ["tanh","tanh"],
+                    "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -59,13 +60,13 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [16,16],
-                    "actv": "selu"
+                    "arch": [64,64],
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
