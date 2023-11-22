@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "CartPole-v0",
+        "name": "DoubleBipedalWalker",
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0
@@ -12,35 +12,35 @@
         "time": false
     },
     "n_avg": 3,
-    "n_stp_max": 50000,
+    "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
-        "buff_size": 128,
+        "buff_size": 4000,
         "n_buff": 1,
         "batch_frac": 0.5,
-        "n_epochs": 16,
-        "render_every": 500
+        "n_epochs": 64,
+        "render_every": 50000
     },
     "agent": {
     	"srl": {
-    	    "type": "kpca",
-    	    "reduced_dim": 2,
-	    "freq": 1000
+    	    "type": "ae",
+    	    "reduced_dim": 24,
+	    "freq": 10000
     	},
         "type": "ppo",
         "policy": {
-            "type": "categorical",
+            "type": "normal",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [16,16],
+                    "arch": [128],
                     "actv": "tanh"
                 },
                 "heads": {
-                    "nb": 1,
-                    "arch": [[]],
-                    "actv": ["tanh"],
-                    "final": ["softmax"]
+                    "nb": 2,
+                    "arch": [[128],[128]],
+                    "actv": ["tanh","tanh"],
+                    "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
@@ -59,13 +59,13 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [16,16],
-                    "actv": "selu"
+                    "arch": [128,128],
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
@@ -81,7 +81,7 @@
         "retrn": {
             "type": "gae",
             "gamma": 0.99,
-            "gae_lambda": 0.95,
+            "gae_lambda": 0.90,
             "ret_norm": true
         },
         "termination": {

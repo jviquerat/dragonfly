@@ -15,12 +15,19 @@ class Autoencoder(Model):
         super(Autoencoder, self).__init__()
         self.latent_dim = latent_dim
         self.shape = shape
+        total_shape = tf.math.reduce_prod(shape)
         self.encoder = tf.keras.Sequential([
             layers.Flatten(),
-            layers.Dense(latent_dim, activation='relu'),
+            #layers.Dense(total_shape, activation='relu'),
+            #layers.Dense(total_shape, activation='relu'),
+            layers.Dense(int(total_shape/2), activation='relu'),
+            layers.Dense(latent_dim, activation='tanh')
         ])
         self.decoder = tf.keras.Sequential([
-            layers.Dense(tf.math.reduce_prod(shape), activation='sigmoid'),
+            #layers.Dense(total_shape, activation='relu'),
+            #layers.Dense(total_shape, activation='relu'),
+            layers.Dense(int(total_shape/2), activation='relu'),
+            layers.Dense(total_shape, activation='linear'),
             layers.Reshape(shape)
         ])
         
@@ -56,6 +63,13 @@ class ae():
 
         # Get data
         obs = self.gbuff.get_buffers({"obs"},self.counter)["obs"]
+        obs = obs.numpy()
+        # Normalize data
+        obs -= obs.mean(axis=0)
+        std = obs.std(axis=0)
+        index = np.where(std!=0)[0]
+        obs[:,index] /= std[index]
+        # Split data        
         n = obs.shape[0]
         n_test = int(n/7)
         x_train = obs[:n-n_test,:]
@@ -79,6 +93,8 @@ class ae():
             self.update()
 
         encoded_obs = self.autoencoder.encoder(obs).numpy()
+        #print(obs[:,0:3]/encoded_obs[:,0:3])
+        #print(obs[:,[1,0,2]]/encoded_obs[:,[1,0,2]])
         return encoded_obs
 
     

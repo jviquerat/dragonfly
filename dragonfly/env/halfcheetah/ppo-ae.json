@@ -25,8 +25,8 @@
     "agent": {
 	"srl": {
     	    "type": "ae",
-    	    "reduced_dim": 4,
-	    "freq": 1000
+    	    "reduced_dim": 10,
+	    "freq": 10000
     	},
         "type": "ppo",
         "policy": {

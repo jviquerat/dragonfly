@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "CartPole-v0",
+        "name": "burgers",
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0
@@ -12,35 +12,37 @@
         "time": false
     },
     "n_avg": 3,
-    "n_stp_max": 50000,
+    "n_cpu": 1,
+    "n_stp_max": 500000,
     "trainer": {
         "style": "buffer",
-        "buff_size": 128,
+        "buff_size": 4000,
         "n_buff": 1,
         "batch_frac": 0.5,
-        "n_epochs": 16,
-        "render_every": 500
+        "n_epochs": 32,
+        "rnd_style": "ascii",
+        "render_every": 10000
     },
     "agent": {
-    	"srl": {
-    	    "type": "kpca",
-    	    "reduced_dim": 2,
-	    "freq": 1000
-    	},
+	"srl": {
+	    "type": "ae",
+	    "reduced_dim": 12,
+	    "freq": 10000
+	},
         "type": "ppo",
         "policy": {
-            "type": "categorical",
+            "type": "normal",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [16,16],
+                    "arch": [64],
                     "actv": "tanh"
                 },
                 "heads": {
-                    "nb": 1,
-                    "arch": [[]],
-                    "actv": ["tanh"],
-                    "final": ["softmax"]
+                    "nb": 2,
+                    "arch": [[64],[64]],
+                    "actv": ["tanh","tanh"],
+                    "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
@@ -59,19 +61,19 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [16,16],
-                    "actv": "selu"
+                    "arch": [64,64],
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-3,
+                "lr": 1.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -81,7 +83,7 @@
         "retrn": {
             "type": "gae",
             "gamma": 0.99,
-            "gae_lambda": 0.95,
+            "gae_lambda": 0.99,
             "ret_norm": true
         },
         "termination": {

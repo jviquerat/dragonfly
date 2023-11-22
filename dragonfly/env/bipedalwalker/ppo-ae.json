@@ -25,7 +25,7 @@
     	"srl": {
     	    "type": "ae",
     	    "reduced_dim": 12,
-	    "freq": 100
+	    "freq": 10000
     	},
         "type": "ppo",
         "policy": {

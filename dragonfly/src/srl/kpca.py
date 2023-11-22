@@ -77,7 +77,7 @@ class kpca():
 
     # RBF Kernel function for pairwise distance matrix
     def _kernel(self,M):
-        sigma = .0001
+        sigma = .19
         self.gamma = 1/(2*(sigma**2))
         K = exp(-self.gamma * M)
         return K

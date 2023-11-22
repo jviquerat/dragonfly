@@ -29,6 +29,7 @@ class base_agent():
 
         # Check inputs
         self.srl_type = "dummy"
+        freq = 0
         if hasattr(pms, "srl"):
             self.srl_type = pms.srl.type
             self.reduced_dim =  pms.srl.reduced_dim
