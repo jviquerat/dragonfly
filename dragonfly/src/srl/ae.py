@@ -1,4 +1,5 @@
 import numpy as np
+import random as rnd
 import tensorflow as tf
 
 from tensorflow.keras import layers, losses
@@ -17,18 +18,18 @@ class Autoencoder(Model):
         self.shape = shape
         total_shape = tf.math.reduce_prod(shape)
         self.encoder = tf.keras.Sequential([
-            layers.Flatten(),
-            #layers.Dense(total_shape, activation='relu'),
-            #layers.Dense(total_shape, activation='relu'),
+            #layers.Flatten(),
+            layers.Dense(total_shape, activation='relu'),
             layers.Dense(int(total_shape/2), activation='relu'),
+            #layers.Dense(int(total_shape/2), activation='relu'),
             layers.Dense(latent_dim, activation='tanh')
         ])
         self.decoder = tf.keras.Sequential([
-            #layers.Dense(total_shape, activation='relu'),
-            #layers.Dense(total_shape, activation='relu'),
             layers.Dense(int(total_shape/2), activation='relu'),
+            layers.Dense(total_shape, activation='relu'),
+            #layers.Dense(int(total_shape/2), activation='relu'),
             layers.Dense(total_shape, activation='linear'),
-            layers.Reshape(shape)
+            #layers.Reshape(shape)
         ])
         
     def call(self, x):
@@ -64,6 +65,7 @@ class ae():
         # Get data
         obs = self.gbuff.get_buffers({"obs"},self.counter)["obs"]
         obs = obs.numpy()
+        obs = obs[rnd.sample(range(obs.shape[0]),100),:]
         # Normalize data
         obs -= obs.mean(axis=0)
         std = obs.std(axis=0)
@@ -79,7 +81,8 @@ class ae():
         self.autoencoder.fit(x_train, x_train,
                              epochs=1,
                              shuffle=True,
-                             validation_data=(x_test, x_test))
+                             validation_data=(x_test, x_test),
+                             batch_size=100)
 
 
     def process(self, obs):
