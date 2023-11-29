@@ -16,25 +16,56 @@ class Autoencoder(Model):
         super(Autoencoder, self).__init__()
         self.latent_dim = latent_dim
         self.shape = shape
-        total_shape = tf.math.reduce_prod(shape)
-        self.encoder = tf.keras.Sequential([
+        self.total_shape = tf.math.reduce_prod(shape)
+        self.initializer = tf.keras.initializers.Ones()
+        
+        #self.encoder = tf.keras.Sequential([
             #layers.Flatten(),
-            layers.Dense(total_shape, activation='relu'),
-            layers.Dense(int(total_shape/2), activation='relu'),
+            #layers.Dense(total_shape, activation='relu'),
             #layers.Dense(int(total_shape/2), activation='relu'),
-            layers.Dense(latent_dim, activation='tanh')
-        ])
-        self.decoder = tf.keras.Sequential([
-            layers.Dense(int(total_shape/2), activation='relu'),
-            layers.Dense(total_shape, activation='relu'),
             #layers.Dense(int(total_shape/2), activation='relu'),
-            layers.Dense(total_shape, activation='linear'),
+            #layers.Dense(latent_dim, activation='tanh')
+            #layers.Reshape((total_shape,1)),
+            #layers.Input(shape=(1,total_shape,1)),
+            #layers.Conv1D(1, 3, padding='causal',
+            #              kernel_initializer=initializer),
+            #layers.Dense(latent_dim, activation='tanh'),
+            #layers.Input(shape=(total_shape))
             #layers.Reshape(shape)
-        ])
+        #])
+        #self.decoder = tf.keras.Sequential([
+            #layers.Flatten(),
+            #layers.Dense(int(total_shape/2), activation='relu'),
+            #layers.Dense(total_shape, activation='relu'),
+            #layers.Dense(int(total_shape/2), activation='relu'),
+            #layers.Input(shape=self.shape),
+            #layers.Dense(self.total_shape, activation='linear'),
+            #layers.Conv1DTranspose(total_shape, 2, activation='linear'),
+            #layers.Conv1D(1, 2, activation='linear'),
+            #layers.Reshape(shape)
+        #])
+        
+    def encoder(self,x):
+        x = tf.reshape(x,(1,self.total_shape,1))
+        conv1d = layers.Conv1D(1,3,
+                               kernel_initializer=self.initializer,
+                               padding="causal",
+                               use_bias=False) 
+        return conv1d(x)
+
+    def decoder(self,x):
+        #x = tf.reshape(x,self.shape)
+        #x = layers.Dense(self.total_shape, activation='linear')
+        #x = layers.Reshape(self.shape)
+        conv1dTrans = layers.Conv1DTranspose(1,3)
+        conv1d = layers.Conv1D(1,3)(conv1dTrans)
+        return conv1d(x)
         
     def call(self, x):
         encoded = self.encoder(x)
+        print("en",encoded.shape)
         decoded = self.decoder(encoded)
+        print("de",decoded.shape)
         return decoded
 
 
