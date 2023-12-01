@@ -16,40 +16,24 @@ class Autoencoder(Model):
         self.latent_dim = latent_dim
         self.shape = shape
         self.total_shape = tf.math.reduce_prod(shape)
-        self.initializer = tf.keras.initializers.Ones()
+        #self.initializer = tf.keras.initializers.Ones()
 
-        #input_layer = layers.Input(shape=self.shape)
-        #self.encoder = layers.Conv1D(self.latent_dim, 3, activation='relu', padding='same')(input_layer)
-        #encoded = layers.MaxPooling1D(2, padding='same')(self.encoder)
-        #self.decoder = layers.Conv1D(1, 3, activation='sigmoid', padding='same')(encoded)
-        #self.decoder = layers.Reshape(self.shape)(self.decoder)
-            
-        #self.encoder = tf.keras.Sequential([
+        self.encoder = tf.keras.Sequential([
             #layers.Flatten(),
             #layers.Dense(total_shape, activation='relu'),
             #layers.Dense(int(total_shape/2), activation='relu'),
             #layers.Dense(int(total_shape/2), activation='relu'),
-            #layers.Dense(latent_dim, activation='tanh')
-            #layers.Reshape((total_shape,1)),
-            #layers.Input(shape=(1,total_shape,1)),
-            #layers.Conv1D(1, 3, padding='causal',
-            #              kernel_initializer=initializer),
-            #layers.Dense(latent_dim, activation='tanh'),
-            #layers.Input(shape=(total_shape))
-            #layers.Reshape(shape)
-        #])
-        #self.decoder = tf.keras.Sequential([
-            #layers.Flatten(),
+            layers.Dense(latent_dim, activation='tanh')
+        ])
+        self.decoder = tf.keras.Sequential([
             #layers.Dense(int(total_shape/2), activation='relu'),
             #layers.Dense(total_shape, activation='relu'),
             #layers.Dense(int(total_shape/2), activation='relu'),
-            #layers.Input(shape=self.shape),
-            #layers.Dense(self.total_shape, activation='linear'),
-            #layers.Conv1DTranspose(total_shape, 2, activation='linear'),
-            #layers.Conv1D(1, 2, activation='linear'),
-            #layers.Reshape(shape)
-        #])
+            layers.Dense(self.total_shape, activation='linear')
+            #layers.Input(shape=self.shape)
+        ])
 
+    '''#Convolution 1D
     def encoder(self,x):
         x = layers.Input(shape=(1,self.total_shape,1))
         encoded = layers.Conv1D(1, 3, activation='relu', padding='same')(x)
@@ -60,16 +44,13 @@ class Autoencoder(Model):
         x = layers.Conv1D(1, 3, activation='relu', padding='same')(x)
         #decoded = layers.UpSampling1D(2)(decoded)
         #output_layer = layers.Conv1D(1, 3, activation='sigmoid', padding='same')(decoded)
-        output_layer = layers.Reshape(self.shape)(x)
+        output_layer = tf.reshape(x,self.shape)
         return output_layer
-
+    '''
     
     def call(self, x):
         encoded = self.encoder(x)
-        print("en",encoded.shape)
         decoded = self.decoder(encoded)
-        print(decoded)
-        print("de",decoded.shape)
         return decoded
 
 
