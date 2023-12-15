@@ -41,7 +41,7 @@ class base_agent():
                                       new_dim = self.reduced_dim,
                                       freq = freq,
                                       size = size)
-        
+
     # Pre-process observations using srl
     def process_obs(self, obs):
 

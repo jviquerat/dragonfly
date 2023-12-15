@@ -24,11 +24,11 @@
         "render_every": 10000
     },
     "agent": {
-	"srl": {
-	    "type": "ae",
-	    "reduced_dim": 5,
-	    "freq": 1000
-	},
+	      "srl": {
+	          "type": "ae",
+	          "reduced_dim": 5,
+	          "freq": 1000
+	      },
         "type": "ppo",
         "policy": {
             "type": "normal",

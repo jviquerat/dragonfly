@@ -7,7 +7,7 @@ from dragonfly.src.srl.base import *
 ###############################################
 ### Class for dummy srl
 ### pms : parameters
-class dummy():
+class dummy(base_srl):
     def __init__(self, dim, new_dim, freq, size):
     	
     	# Initialize from arguments

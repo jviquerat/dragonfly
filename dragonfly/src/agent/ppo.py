@@ -135,6 +135,7 @@ class ppo(base_agent):
         self.v_net.reset()
         self.buff.reset()
         self.gbuff.reset()
+        self.srl.reset()
 
     # Store transition
     def store(self, obs, nxt, act, rwd, dne, trc):
@@ -142,9 +143,10 @@ class ppo(base_agent):
         trm = self.term.terminate(dne, trc)
         self.buff.store(["obs", "nxt", "act", "rwd", "trm"],
                         [ obs,   nxt,   act,   rwd,   trm ])
-        
+
         # Store in SRL buffer
         self.srl.gbuff.store(["obs"],obs)
+
         # Update SRL counter
         self.srl.counter += 1
 

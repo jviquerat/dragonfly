@@ -19,3 +19,6 @@ from dragonfly.src.utils.counter           import *
 class base_srl():
     def __init__(self):
         pass
+
+    def reset(self):
+        pass

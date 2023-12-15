@@ -63,6 +63,10 @@ class ae():
         self.reduced_dim = new_dim
         self.freq = freq
 
+        self.reset()
+
+    def reset(self):
+
         # Initialize counter
         self.counter = 1
 
@@ -72,7 +76,7 @@ class ae():
         self.gbuff = gbuff(self.buff_size, self.names, self.sizes)
 
         # Initialize Autoencoder
-        self.autoencoder = Autoencoder(new_dim, (dim,1))
+        self.autoencoder = Autoencoder(self.reduced_dim, (self.obs_dim,1))
         self.autoencoder.compile(optimizer='adam',
                                  loss=losses.MeanSquaredError())
 
@@ -81,15 +85,24 @@ class ae():
         # Get data
         obs = self.gbuff.get_buffers({"obs"},self.counter)["obs"]
         obs = obs.numpy()
-        obs = obs[rnd.sample(range(obs.shape[0]),100),:]
-        # Normalize data
-        obs -= obs.mean(axis=0)
+        mu  = obs.mean(axis=0)
         std = obs.std(axis=0)
-        index = np.where(std!=0)[0]
-        obs[:,index] /= std[index]
-        # Split data        
+        obs = obs[rnd.sample(range(obs.shape[0]),self.freq-1),:]
+
+        # Update mu,std
+        #self.mu_obs = 0.5*self.mu_obs + 0.5*obs.mean(axis=0)
+        #self.std_obs = 0.5*self.std_obs + 0.5*obs.std(axis=0)
+
+        # Normalize data
+        obs  = (obs - mu)/std
+        # obs -= obs.mean(axis=0)
+        # std = obs.std(axis=0)
+        # index = np.where(std!=0)[0]
+        # obs[:,index] /= std[index]
+
+        # Split data
         n = obs.shape[0]
-        n_test = int(n/7)
+        n_test = int(n/5)
         x_train = obs[:n-n_test,:]
         x_test = obs[n-n_test:,:]
 
@@ -98,22 +111,20 @@ class ae():
                              epochs=1,
                              shuffle=True,
                              validation_data=(x_test, x_test),
-                             batch_size=100)
+                             batch_size=500)
 
 
     def process(self, obs):
 
         # Before the update time
-        if (self.counter < self.freq) :
-            return obs[:,:self.reduced_dim]
+        #if (self.counter < self.freq) :
+        #    return obs[:,:self.reduced_dim]
 
         # Check if it's the update time
-        if ((self.counter % self.freq)==0) :
+        if ((self.counter%self.freq)==0):
             self.update()
 
         encoded_obs = self.autoencoder.encoder(obs).numpy()
         #print(obs[:,0:3]/encoded_obs[:,0:3])
         #print(obs[:,[1,0,2]]/encoded_obs[:,[1,0,2]])
         return encoded_obs
-
-    
