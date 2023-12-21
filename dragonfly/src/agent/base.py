@@ -33,13 +33,14 @@ class base_agent():
         if hasattr(pms, "srl"):
             self.srl_type = pms.srl.type
             self.reduced_dim =  pms.srl.reduced_dim
-            freq = pms.srl.freq
+            #freq = pms.srl.freq
 
         # Create srl
         self.srl = srl_factory.create(self.srl_type,
+                                      pms = pms,
                                       dim = obs_dim,
-                                      new_dim = self.reduced_dim,
-                                      freq = freq,
+                                      #new_dim = self.reduced_dim,
+                                      #freq = freq,
                                       size = size)
 
     # Pre-process observations using srl

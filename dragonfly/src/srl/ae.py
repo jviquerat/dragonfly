@@ -29,7 +29,7 @@ class Autoencoder(Model):
             #layers.Dense(int(total_shape/2), activation='relu'),
             #layers.Dense(total_shape, activation='relu'),
             #layers.Dense(int(total_shape/2), activation='relu'),
-            layers.Dense(self.total_shape, activation='linear')
+            layers.Dense(self.total_shape, activation='linear'),
             #layers.Input(shape=self.shape)
         ])
 
@@ -55,13 +55,16 @@ class Autoencoder(Model):
 
 
 class ae():
-    def __init__(self, dim, new_dim, freq, size):
+    def __init__(self, pms, dim, size):
 
         # Initialize from arguments
         self.obs_dim = dim
         self.buff_size = size
-        self.reduced_dim = new_dim
-        self.freq = freq
+        self.reduced_dim = pms.srl.reduced_dim
+        self.freq = pms.srl.freq
+        self.learning_rate = pms.srl.learning_rate
+        self.batch_size = pms.srl.batch_size
+        self.epochs = pms.srl.epochs
 
         self.reset()
 
@@ -76,18 +79,21 @@ class ae():
         self.gbuff = gbuff(self.buff_size, self.names, self.sizes)
 
         # Initialize Autoencoder
+        opt = tf.keras.optimizers.Adam(learning_rate=self.learning_rate)
         self.autoencoder = Autoencoder(self.reduced_dim, (self.obs_dim,1))
-        self.autoencoder.compile(optimizer='adam',
+        self.autoencoder.compile(optimizer=opt,
                                  loss=losses.MeanSquaredError())
 
     def update(self):
 
         # Get data
+        # select_size = self.freq-1
+        select_size = self.batch_size
         obs = self.gbuff.get_buffers({"obs"},self.counter)["obs"]
         obs = obs.numpy()
         mu  = obs.mean(axis=0)
         std = obs.std(axis=0)
-        obs = obs[rnd.sample(range(obs.shape[0]),self.freq-1),:]
+        obs = obs[rnd.sample(range(obs.shape[0]),select_size),:]
 
         # Update mu,std
         #self.mu_obs = 0.5*self.mu_obs + 0.5*obs.mean(axis=0)
@@ -108,10 +114,10 @@ class ae():
 
         # Train autoencoder
         self.autoencoder.fit(x_train, x_train,
-                             epochs=1,
+                             epochs=self.epochs,
                              shuffle=True,
                              validation_data=(x_test, x_test),
-                             batch_size=500)
+                             batch_size=self.batch_size)
 
 
     def process(self, obs):

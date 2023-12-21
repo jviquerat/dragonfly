@@ -169,7 +169,7 @@ class environments:
         # Continuous observation space
         if (type(self.worker.env.observation_space).__name__ == "Box"):
             self.obs_dim = int(self.worker.env.observation_space.shape[0])
-
+        
     # Get action boundaries
     def get_act_bounds(self):
 
@@ -253,6 +253,7 @@ class environments:
 
     # Process observations
     def process_obs(self, obs):
+
         if (self.obs_clip):
             obs = self.clip_obs(obs)
         if (self.obs_norm):
