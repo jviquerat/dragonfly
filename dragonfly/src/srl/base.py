@@ -11,15 +11,13 @@ from dragonfly.src.utils.counter  import *
 ### Base srl
 class base_srl():
     def __init__(self):
-        pass
+
+        self.counter = 0
 
     def reset(self):
         pass
 
-    def store(self, name, x):
+    def store_obs(self, obs):
 
-        self.gbuff.store([name], x)
-
-    def update_counter(self):
-
-        self.counter += 1
+        self.gbuff.store(["obs"], obs)
+        self.counter += len(obs)

@@ -25,6 +25,7 @@ class buffer(base_trainer):
         self.size        = self.n_buff*self.buff_size
         self.freq_report = max(int(n_stp_max/(freq_report*self.buff_size)),1)
         self.update_type = "online"
+        self.warmup      = pms.warmup
 
         # Optional modification of default args
         if hasattr(pms, "update"): self.update_type = pms.update
@@ -123,8 +124,9 @@ class buffer(base_trainer):
             # Train agent
             self.timer_training.tic()
             btc_size = math.floor(self.size*self.btc_frac)
-            self.update.update(self.agent,
-                               self.size, btc_size, self.n_epochs)
+            if (self.counter.step > self.warmup):
+                self.update.update(self.agent,
+                                   self.size, btc_size, self.n_epochs)
             self.timer_training.toc()
 
         # Last printing

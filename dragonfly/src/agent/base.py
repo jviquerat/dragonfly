@@ -28,15 +28,14 @@ class base_agent():
     def init_srl(self, pms, obs_dim, buff_size):
 
         # Check inputs
-        self.srl_type = "dummy"
-        if hasattr(pms, "srl"):
-            self.srl_type = pms.srl.type
+        if not hasattr(pms, "srl"):
+            pms.srl.type = "dummy"
 
         # Create srl
-        self.srl = srl_factory.create(self.srl_type,
+        self.srl = srl_factory.create(pms.srl.type,
                                       obs_dim   = obs_dim,
                                       buff_size = buff_size,
-                                      pms       = pms)
+                                      pms       = pms.srl)
 
     # Pre-process observations using srl
     def process_obs(self, obs):

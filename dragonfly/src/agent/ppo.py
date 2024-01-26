@@ -7,15 +7,15 @@ class ppo(base_agent):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
-        self.name      = 'ppo'
-        self.act_dim   = act_dim
-        self.obs_dim   = obs_dim
-        self.n_cpu     = n_cpu
-        self.size      = size
-        self.reduced_dim = obs_dim
+        self.name       = 'ppo'
+        self.act_dim    = act_dim
+        self.obs_dim    = obs_dim
+        self.n_cpu      = n_cpu
+        self.size       = size
 
-        # Initialize base class
-        self.init_srl(pms, obs_dim, 10000*size)
+        # Initialize srl class
+        self.init_srl(pms, obs_dim, 1000*size)
+        self.latent_dim = self.srl.latent_dim
 
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
@@ -23,7 +23,7 @@ class ppo(base_agent):
                     "Loss type for ppo agent is not surrogate")
 
         self.p_net = pol_factory.create(pms.policy.type,
-                                        obs_dim = self.reduced_dim,
+                                        obs_dim = self.latent_dim,
                                         act_dim = act_dim,
                                         pms     = pms.policy)
 
@@ -37,7 +37,7 @@ class ppo(base_agent):
                     "Value type for ppo agent is not v_value")
 
         self.v_net = val_factory.create(pms.value.type,
-                                        inp_dim = self.reduced_dim,
+                                        inp_dim = self.latent_dim,
                                         pms     = pms.value)
 
         # Build advantage
@@ -145,11 +145,7 @@ class ppo(base_agent):
                         [ obs,   nxt,   act,   rwd,   trm ])
 
         # Store in SRL buffer
-        #self.srl.gbuff.store(["obs"],obs)
-        self.srl.store("obs", obs)
-
-        # Update SRL counter
-        self.srl.update_counter()
+        self.srl.store_obs(obs)
 
     # Actions to execute before the inner training loop
     def pre_loop(self):
