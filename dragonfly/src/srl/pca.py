@@ -24,15 +24,22 @@ class pca(base_srl):
         self.std  = np.zeros(self.latent_dim)
 
         # Initialize projection matrix
-        self.matrix = np.identity(self.obs_dim)
+        self.matrix = np.zeros((self.obs_dim, self.latent_dim))
+        for i in range(self.latent_dim):
+            self.matrix[i,i] = 1
 
         # Create buffers
         self.names = ["obs"]
         self.sizes = [self.obs_dim]
         self.gbuff = gbuff(self.buff_size, self.names, self.sizes)
 
+        #self.updated = False
+
     # Update compression process according to the new buffer
     def update(self):
+
+
+        #if (self.updated): return
 
         print("UPDATE PCA")
 
@@ -77,6 +84,8 @@ class pca(base_srl):
         #lobs = np.matmul(obs, self.matrix[:,:self.latent_dim])
         #self.mean = alpha*self.mean  + (1.0-alpha)*np.mean(lobs, axis=0)
         #self.std = alpha*self.std + (1.0-alpha)*np.std(lobs, axis=0)
+
+        #self.updated = True
 
     # Process observation
     def process(self, obs):
