@@ -29,10 +29,12 @@ class base_agent():
 
         # Check inputs
         if not hasattr(pms, "srl"):
-            pms.srl.type = "dummy"
+            pms.srl  = None
+            srl_type = "dummy"
+        else: srl_type = pms.srl.type
 
         # Create srl
-        self.srl = srl_factory.create(pms.srl.type,
+        self.srl = srl_factory.create(srl_type,
                                       obs_dim   = obs_dim,
                                       buff_size = buff_size,
                                       pms       = pms.srl)

@@ -30,12 +30,12 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64],
-                    "actv": "relu"
+                    "actv": "tanh"
                 },
                 "heads": {
                     "nb": 2,
                     "arch": [[64],[64]],
-                    "actv": ["relu","relu"],
+                    "actv": ["tanh","tanh"],
                     "final": ["tanh","sigmoid"]
                 }
             },

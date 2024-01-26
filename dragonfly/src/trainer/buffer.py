@@ -25,7 +25,10 @@ class buffer(base_trainer):
         self.size        = self.n_buff*self.buff_size
         self.freq_report = max(int(n_stp_max/(freq_report*self.buff_size)),1)
         self.update_type = "online"
-        self.warmup      = pms.warmup
+        self.warmup      = 0
+
+        # Optional warmup mode
+        if hasattr(pms, "warmup"): self.warmup = pms.warmup
 
         # Optional modification of default args
         if hasattr(pms, "update"): self.update_type = pms.update
