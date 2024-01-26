@@ -3,16 +3,9 @@ import random
 import numpy as np
 
 # Custom imports
-# from dragonfly.src.policy.policy           import *
-# from dragonfly.src.value.value             import *
-# from dragonfly.src.decay.decay             import *
-# from dragonfly.src.retrn.retrn             import *
-from dragonfly.src.core.constants          import *
-# from dragonfly.src.termination.termination import *
-from dragonfly.src.utils.buff              import *
-# from dragonfly.src.utils.timer             import *
-# from dragonfly.src.utils.error             import *
-from dragonfly.src.utils.counter           import *
+from dragonfly.src.core.constants import *
+from dragonfly.src.utils.buff     import *
+from dragonfly.src.utils.counter  import *
 
 ###############################################
 ### Base srl
@@ -22,3 +15,11 @@ class base_srl():
 
     def reset(self):
         pass
+
+    def store(self, name, x):
+
+        self.gbuff.store([name], x)
+
+    def update_counter(self):
+
+        self.counter += 1

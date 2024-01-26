@@ -25,23 +25,18 @@ class base_agent():
         raise NotImplementedError
 
     # Initialize srl
-    def init_srl(self, pms, obs_dim, size):
+    def init_srl(self, pms, obs_dim, buff_size):
 
         # Check inputs
         self.srl_type = "dummy"
-        freq = 0
         if hasattr(pms, "srl"):
             self.srl_type = pms.srl.type
-            self.reduced_dim =  pms.srl.reduced_dim
-            #freq = pms.srl.freq
 
         # Create srl
         self.srl = srl_factory.create(self.srl_type,
-                                      pms = pms,
-                                      dim = obs_dim,
-                                      #new_dim = self.reduced_dim,
-                                      #freq = freq,
-                                      size = size)
+                                      obs_dim   = obs_dim,
+                                      buff_size = buff_size,
+                                      pms       = pms)
 
     # Pre-process observations using srl
     def process_obs(self, obs):

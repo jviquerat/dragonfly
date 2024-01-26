@@ -6,23 +6,18 @@ from dragonfly.src.srl.base import *
 
 ###############################################
 ### Class for dummy srl
-### pms : parameters
 class dummy(base_srl):
-    def __init__(self, dim, new_dim, freq, size):
-    	
-    	# Initialize from arguments
-    	self.obs_dim = dim 
-    	self.buff_size = size
-    	
-    	# Initialize counter
-    	self.counter = 0
-    	
-    	# Create buffers
-    	self.names = ["obs"]
-    	self.sizes = [self.obs_dim]
-    	self.gbuff = gbuff(self.buff_size, self.names, self.sizes)
+    def __init__(self, obs_dim, buff_size, pms):
+
+        # Initialize from arguments
+        self.obs_dim = obs_dim
+        self.buff_size = buff_size
+        self.counter = 0
 
     # Process observations
     def process(self, obs):
 
         return obs
+
+    def store(self, name, x):
+        pass
