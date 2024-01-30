@@ -14,10 +14,16 @@ class pca(base_srl):
         super().__init__()
 
         # Initialize from arguments
-        self.obs_dim     = obs_dim
-        self.buff_size   = buff_size
-        self.latent_dim  = pms.latent_dim
-        self.update_freq = pms.update_freq
+        self.obs_dim       = obs_dim
+        self.buff_size     = buff_size
+        self.latent_dim    = pms.latent_dim
+        self.update_freq   = pms.update_freq
+
+        # Possible single update of PCA kernel
+        self.single_update = False
+        self.updated = False
+        if hasattr(pms, "single_update"):
+                self.single_update = pms.single_update
 
         # Running mean and std for latent observations
         self.mean = np.zeros(self.latent_dim)
@@ -33,13 +39,11 @@ class pca(base_srl):
         self.sizes = [self.obs_dim]
         self.gbuff = gbuff(self.buff_size, self.names, self.sizes)
 
-        #self.updated = False
-
     # Update compression process according to the new buffer
     def update(self):
 
-
-        #if (self.updated): return
+        # If single update
+        if (self.single_update and self.updated): return
 
         print("UPDATE PCA")
 
@@ -85,7 +89,7 @@ class pca(base_srl):
         #self.mean = alpha*self.mean  + (1.0-alpha)*np.mean(lobs, axis=0)
         #self.std = alpha*self.std + (1.0-alpha)*np.std(lobs, axis=0)
 
-        #self.updated = True
+        self.updated = True
 
     # Process observation
     def process(self, obs):
