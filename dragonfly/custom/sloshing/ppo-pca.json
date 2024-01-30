@@ -28,8 +28,8 @@
         "type": "ppo",
         "srl": {
             "type": "pca",
-            "latent_dim": 3,
-            "single_update": false,
+            "latent_dim": 50,
+            "n_updates": 5,
             "update_freq": 10000
         },
         "policy": {
