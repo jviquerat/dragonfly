@@ -13,9 +13,6 @@ from dragonfly.src.loss.loss           import *
 class ae(base_srl):
     def __init__(self, obs_dim, buff_size, pms):
 
-        # Init base class
-        super().__init__()
-
         # Initialize from arguments
         self.obs_dim       = obs_dim
         self.buff_size     = buff_size
@@ -49,12 +46,14 @@ class ae(base_srl):
 
         self.reset()
 
+    # Reset
     def reset(self):
 
         self.gbuff.reset()
         self.net.reset()
         self.opt.reset()
 
+        self.counter  = 0
         self.n_update = 0
 
     # Update autoencoder
@@ -80,6 +79,7 @@ class ae(base_srl):
 
         return self.net.call(state)[0]
 
+    # Process raw observations
     def process(self, obs):
 
         # Check if it's the update time

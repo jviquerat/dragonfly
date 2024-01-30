@@ -10,9 +10,6 @@ from dragonfly.src.srl.base import *
 class pca(base_srl):
     def __init__(self, obs_dim, buff_size, pms):
 
-        # Init base class
-        super().__init__()
-
         # Initialize from arguments
         self.obs_dim       = obs_dim
         self.buff_size     = buff_size
@@ -35,6 +32,7 @@ class pca(base_srl):
 
         self.gbuff.reset()
 
+        self.counter  = 0
         self.n_update = 0
 
     # Update compression process according to the new buffer
@@ -61,7 +59,7 @@ class pca(base_srl):
 
         self.n_update += 1
 
-    # Process observation
+    # Process raw observations
     def process(self, obs):
 
         # Check if it's the update time

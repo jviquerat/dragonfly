@@ -2,11 +2,11 @@
 from dragonfly.src.network.base import *
 
 ###############################################
-### Autoencoder network class
+### Variational autoencoder network class
 ### inp_dim  : dimension of input  layer
 ### out_dim  : dimension of output layer
 ### pms      : network parameters
-class ae(base_network):
+class vae(base_network):
     def __init__(self, inp_dim, lat_dim, pms):
 
         # Initialize base class
@@ -31,7 +31,8 @@ class ae(base_network):
         for l in range(len(self.arch)):
             self.net.append(Dense(self.arch[l],
                                   activation = self.actv))
-        self.net.append(Dense(self.lat_dim, activation = "tanh"))
+        self.net.append(Dense(self.lat_dim, activation = "linear"))
+        self.net.append(Dense(self.lat_dim, activation = "sigmoid"))
 
         # Define decoder
         for l in range(len(self.arch)):
@@ -57,8 +58,18 @@ class ae(base_network):
         for l in range(len(self.arch)):
             var = self.net[i](var)
             i  += 1
-        var = self.net[i](var)
+
+        # Output mean
+        mean = self.net[i](var)
         i += 1
+
+        # Output std
+        std = self.net[i](var)
+        i += 1
+
+        # Sample
+        lat = self.reparameterize(mean, std)
+        var = lat
 
         # Compute decoder
         for l in range(len(self.arch)):
@@ -69,7 +80,17 @@ class ae(base_network):
 
         out.append(var)
 
-        return out
+        return out, mean, std
+
+    # Reparameterization trick
+    @tf.function
+    def reparameterize(self, mean, std):
+
+        epsilon = tf.random.normal(shape=(tf.shape(std)))
+        z       = mean + std*epsilon
+
+        return z
+
 
     # Network forward pass
     @tf.function
@@ -83,8 +104,17 @@ class ae(base_network):
         for l in range(len(self.arch)):
             var = self.net[i](var)
             i  += 1
-        lat = self.net[i](var)
+
+        # Output mean
+        mean = self.net[i](var)
         i += 1
+
+        # Output std
+        std = self.net[i](var)
+        i += 1
+
+        # Sample
+        lat = self.reparameterize(mean, std)
 
         out.append(lat)
 

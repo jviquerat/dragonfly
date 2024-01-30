@@ -1,5 +1,5 @@
 # Custom imports
-from  dragonfly.src.network.base import *
+from dragonfly.src.network.base import *
 
 ###############################################
 ### Fully-connected network class

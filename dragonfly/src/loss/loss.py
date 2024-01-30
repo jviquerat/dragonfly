@@ -6,6 +6,7 @@ from dragonfly.src.loss.mse_ddpg  import *
 from dragonfly.src.loss.mse_td3   import *
 from dragonfly.src.loss.mse_sac   import *
 from dragonfly.src.loss.mse_ae    import *
+from dragonfly.src.loss.mse_vae    import *
 from dragonfly.src.loss.surrogate import *
 from dragonfly.src.loss.pg        import *
 from dragonfly.src.loss.q_pol     import *
@@ -21,6 +22,7 @@ loss_factory.register("mse_ddpg",  mse_ddpg)
 loss_factory.register("mse_td3",   mse_td3)
 loss_factory.register("mse_sac",   mse_sac)
 loss_factory.register("mse_ae",    mse_ae)
+loss_factory.register("mse_vae",   mse_vae)
 loss_factory.register("surrogate", surrogate)
 loss_factory.register("pg",        pg)
 loss_factory.register("q_pol",     q_pol)
