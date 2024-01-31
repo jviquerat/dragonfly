@@ -1,6 +1,5 @@
 # Generic imports
 import numpy as np
-import random as rnd
 
 # Custom imports
 from dragonfly.src.srl.base            import *

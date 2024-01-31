@@ -11,7 +11,7 @@ srl_factory = factory()
 
 # Register srl
 srl_factory.register("dummy", dummy)
-srl_factory.register("pca", pca)
-srl_factory.register("ae", ae)
-srl_factory.register("vae", vae)
-srl_factory.register("kpca", kpca)
+srl_factory.register("pca",   pca)
+srl_factory.register("ae",    ae)
+srl_factory.register("vae",   vae)
+srl_factory.register("kpca",  kpca)

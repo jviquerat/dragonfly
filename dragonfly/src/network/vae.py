@@ -32,7 +32,7 @@ class vae(base_network):
             self.net.append(Dense(self.arch[l],
                                   activation = self.actv))
         self.net.append(Dense(self.lat_dim, activation = "linear"))
-        self.net.append(Dense(self.lat_dim, activation = "sigmoid"))
+        self.net.append(Dense(self.lat_dim, activation = "linear"))
 
         # Define decoder
         for l in range(len(self.arch)):
@@ -64,7 +64,8 @@ class vae(base_network):
         i += 1
 
         # Output std
-        std = self.net[i](var)
+        log_std = self.net[i](var)
+        std     = tf.math.exp(log_std)
         i += 1
 
         # Sample

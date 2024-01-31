@@ -34,7 +34,7 @@
 	          "batch_size": 2000,
             "network": {
                 "arch": [64,64],
-                "actv": "relu"
+                "actv": "selu"
             },
             "optimizer": {
                 "type": "adam",

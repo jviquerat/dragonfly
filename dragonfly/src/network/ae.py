@@ -31,7 +31,7 @@ class ae(base_network):
         for l in range(len(self.arch)):
             self.net.append(Dense(self.arch[l],
                                   activation = self.actv))
-        self.net.append(Dense(self.lat_dim, activation = "tanh"))
+        self.net.append(Dense(self.lat_dim, activation = "linear"))
 
         # Define decoder
         for l in range(len(self.arch)):

@@ -10,11 +10,11 @@ class mse_vae():
 
     # Train
     @tf.function
-    def train(self, x, ae):
+    def train(self, x, vae):
         with tf.GradientTape() as tape:
 
             # Compute loss
-            y, m, s = ae.forward(x)
+            y, m, s = vae.forward(x)
             diff    = tf.square(y - x)
             mse     = tf.reduce_mean(diff)
 
@@ -24,8 +24,8 @@ class mse_vae():
             loss = mse + self.beta*kl
 
             # Apply gradients
-            ae_var = ae.trainables
-            grads   = tape.gradient(loss, ae_var)
-        ae.opt.apply_grads(zip(grads, ae_var))
+            vae_var = vae.trainables
+            grads   = tape.gradient(loss, vae_var)
+        vae.opt.apply_grads(zip(grads, vae_var))
 
         return loss
