@@ -38,11 +38,11 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-4
+                "lr": 1.0e-3
             },
             "loss": {
                 "type": "mse_vae",
-                "beta": 0.5
+                "beta": 0.1
             }
 	      },
         "type": "ppo",

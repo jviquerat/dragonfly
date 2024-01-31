@@ -26,7 +26,7 @@
     },
     "agent": {
 	      "srl": {
-	          "type": "ae",
+	          "type": "sae",
             "latent_dim": 50,
 	          "update_freq": 10000,
 	          "n_epochs" : 32,

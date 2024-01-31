@@ -22,7 +22,7 @@
         "n_epochs": 16,
         "rnd_style": "ascii",
         "render_every": 10000,
-        "warmup": 2000
+        "warmup": 10000
     },
     "agent": {
         "type": "ppo",

@@ -8,8 +8,8 @@ from dragonfly.src.optimizer.optimizer import *
 from dragonfly.src.loss.loss           import *
 
 ###############################################
-### Autoencoder srl class
-class ae(base_srl):
+### Standard autoencoder srl class
+class sae(base_srl):
     def __init__(self, obs_dim, buff_size, pms):
 
         # Initialize from arguments
