@@ -42,7 +42,7 @@
             },
             "loss": {
                 "type": "mse_vae",
-                "beta": 0.0
+                "beta": 0.01
             }
 	      },
         "type": "ppo",

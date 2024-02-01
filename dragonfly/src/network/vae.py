@@ -18,12 +18,12 @@ class vae(base_network):
 
         # Set default values
         self.arch = [64]
-        #self.actv = "relu"
-        self.actv = tf.nn.leaky_relu
+        self.actv = "relu"
+        #self.actv = tf.nn.leaky_relu
 
         # Check inputs
         if hasattr(pms, "arch"):  self.arch = pms.arch
-        #if hasattr(pms, "actv"):  self.actv = pms.actv
+        if hasattr(pms, "actv"):  self.actv = pms.actv
 
         # Initialize network
         self.net = []
@@ -65,13 +65,11 @@ class vae(base_network):
         i += 1
 
         # Output std
-        #std = self.net[i](var)
-        log_std = self.net[i](var)
-        std     = tf.math.exp(log_std)
+        log_var = self.net[i](var)
         i += 1
 
         # Sample
-        lat = self.reparameterize(mean, std)
+        lat = self.reparameterize(mean, log_var)
         var = lat
 
         # Compute decoder
@@ -83,13 +81,14 @@ class vae(base_network):
 
         out.append(var)
 
-        return out, mean, std
+        return out, mean, log_var
 
     # Reparameterization trick
     @tf.function
-    def reparameterize(self, mean, std):
+    def reparameterize(self, mean, log_var):
 
-        epsilon = tf.random.normal(shape=(tf.shape(std)))
+        epsilon = tf.random.normal(shape=(tf.shape(log_var)))
+        std     = tf.math.exp(0.5*log_var)
         z       = mean + std*epsilon
 
         return z
@@ -113,13 +112,11 @@ class vae(base_network):
         i += 1
 
         # Output std
-        #std = self.net[i](var)
-        log_std = self.net[i](var)
-        std     = tf.math.exp(log_std)
+        log_var = self.net[i](var)
         i += 1
 
         # Sample
-        lat = self.reparameterize(mean, std)
+        lat = self.reparameterize(mean, log_var)
 
         out.append(lat)
 

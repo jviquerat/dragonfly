@@ -76,10 +76,10 @@ class vae(base_srl):
     # Full network forward pass
     def forward(self, state):
 
-        x, mean, std = self.net.call(state)
+        x, mean, log_var = self.net.call(state)
         x = x[0]
 
-        return x, mean, std
+        return x, mean, log_var
 
     # Process raw observations
     def process(self, obs):

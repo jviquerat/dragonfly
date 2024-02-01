@@ -24,6 +24,8 @@ class ae(base_network):
         if hasattr(pms, "arch"):  self.arch = pms.arch
         if hasattr(pms, "actv"):  self.actv = pms.actv
 
+        self.actv = tf.nn.leaky_relu
+
         # Initialize network
         self.net = []
 

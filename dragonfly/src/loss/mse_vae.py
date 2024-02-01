@@ -14,12 +14,12 @@ class mse_vae():
         with tf.GradientTape() as tape:
 
             # Compute loss
-            y, m, s = vae.forward(x)
-            diff    = tf.square(y - x)
-            mse     = tf.reduce_mean(diff)
+            y, m, lgv = vae.forward(x)
+            diff      = tf.square(y - x)
+            mse       = tf.reduce_mean(diff)
 
-            kl = 0.5*tf.reduce_sum(-1.0 - 2.0*tf.math.log(s) + s**2 + m**2, axis=1)
-            kl = tf.reduce_mean(kl)
+            kl =-0.5*tf.reduce_sum(1.0 + lgv - m**2 - tf.math.exp(lgv), axis=1)
+            kl = tf.reduce_mean(kl, axis=0)
 
             loss = mse + self.beta*kl
 
