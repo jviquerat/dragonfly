@@ -18,11 +18,12 @@ class vae(base_network):
 
         # Set default values
         self.arch = [64]
-        self.actv = "relu"
+        #self.actv = "relu"
+        self.actv = tf.nn.leaky_relu
 
         # Check inputs
         if hasattr(pms, "arch"):  self.arch = pms.arch
-        if hasattr(pms, "actv"):  self.actv = pms.actv
+        #if hasattr(pms, "actv"):  self.actv = pms.actv
 
         # Initialize network
         self.net = []
@@ -64,6 +65,7 @@ class vae(base_network):
         i += 1
 
         # Output std
+        #std = self.net[i](var)
         log_std = self.net[i](var)
         std     = tf.math.exp(log_std)
         i += 1
@@ -111,7 +113,9 @@ class vae(base_network):
         i += 1
 
         # Output std
-        std = self.net[i](var)
+        #std = self.net[i](var)
+        log_std = self.net[i](var)
+        std     = tf.math.exp(log_std)
         i += 1
 
         # Sample

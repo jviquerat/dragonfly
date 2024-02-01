@@ -16,6 +16,7 @@ class ppo(base_agent):
         # Initialize srl class
         self.init_srl(pms, obs_dim, 1000*size)
         self.latent_dim = self.srl.latent_dim
+        #self.latent_dim = self.obs_dim
 
         # Build policies
         if (pms.policy.loss.type != "surrogate"):

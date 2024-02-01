@@ -282,7 +282,10 @@ class environments:
     # Add noise to observations
     def noise_obs(self, obs):
 
-        noise = np.random.normal(0.0, self.obs_noise, self.obs_dim)
+        #noise = np.random.normal(0.0, self.obs_noise, self.obs_dim)
+        noise = np.random.uniform(-self.obs_noise,
+                                   self.obs_noise,
+                                   self.obs_dim)
         for i in range(self.obs_dim):
             obs[i] += noise[i]
 

@@ -67,9 +67,9 @@ class vae(base_srl):
             obs = self.gbuff.get_batches(["obs"], self.batch_size)["obs"]
             loss = self.loss.train(obs, self)
 
-        # Write to file
-        with open("vae_loss.dat", "a") as f:
-            f.write(str(loss.numpy())+"\n")
+            # Write to file
+            with open("vae_loss.dat", "a") as f:
+                f.write(str(loss.numpy())+"\n")
 
         self.n_update += 1
 

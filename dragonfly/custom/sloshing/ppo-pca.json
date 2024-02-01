@@ -2,7 +2,7 @@
     "env": {
         "name": "sloshing",
         "obs_clip": false,
-        "obs_norm": false,
+        "obs_norm": true,
         "obs_noise": 0.0
     },
     "naming": {
@@ -28,8 +28,8 @@
         "type": "ppo",
         "srl": {
             "type": "pca",
-            "latent_dim": 50,
-            "n_updates": 5,
+            "latent_dim": 10,
+            "n_updates": 1,
             "update_freq": 10000
         },
         "policy": {
@@ -89,7 +89,7 @@
             "ret_norm": true
         },
         "termination": {
-            "type": "regular"
+            "type": "bootstrap"
         }
     }
 }

@@ -2,7 +2,7 @@
     "env": {
         "name": "sloshing",
         "obs_clip": false,
-        "obs_norm": false,
+        "obs_norm": true,
         "obs_noise": 0.0
     },
     "naming": {
@@ -27,14 +27,14 @@
     "agent": {
 	      "srl": {
 	          "type": "sae",
-            "latent_dim": 50,
+            "latent_dim": 10,
 	          "update_freq": 10000,
-	          "n_epochs" : 32,
-            "n_updates": 5,
-	          "batch_size": 2000,
+	          "n_epochs" : 512,
+            "n_updates": 1,
+	          "batch_size": 1000,
             "network": {
-                "arch": [64,64],
-                "actv": "selu"
+                "arch": [64,32],
+                "actv": "relu"
             },
             "optimizer": {
                 "type": "adam",
@@ -102,7 +102,7 @@
             "ret_norm": true
         },
         "termination": {
-            "type": "regular"
+            "type": "bootstrap"
         }
     }
 }

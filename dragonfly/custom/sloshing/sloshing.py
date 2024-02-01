@@ -231,9 +231,6 @@ class sloshing(gym.Env):
         obs = self.q.copy()[1:-1]
         obs = obs[::self.obs_smpl]
 
-        eps  = 1.0e-1
-        obs += np.random.uniform(-eps, eps, self.n_obs)
-
         return obs
 
     # Compute reward
