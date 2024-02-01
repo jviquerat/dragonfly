@@ -34,7 +34,7 @@ class sloshing(gym.Env):
         self.init_file  = "init_field.dat" # initialization file
 
         # Compute nb of observations
-        self.obs_smpl = 4                  # sub-sampling level
+        self.obs_smpl = 2                  # sub-sampling level
         self.n_obs = self.nx//self.obs_smpl + (1 if (self.nx%self.obs_smpl !=0) else 0)
 
         # Deduced parameters
@@ -230,6 +230,9 @@ class sloshing(gym.Env):
 
         obs = self.q.copy()[1:-1]
         obs = obs[::self.obs_smpl]
+
+        eps  = 1.0e-1
+        obs += np.random.uniform(-eps, eps, self.n_obs)
 
         return obs
 

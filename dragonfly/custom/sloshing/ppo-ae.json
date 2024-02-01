@@ -2,7 +2,7 @@
     "env": {
         "name": "sloshing",
         "obs_clip": false,
-        "obs_norm": true,
+        "obs_norm": false,
         "obs_noise": 0.0
     },
     "naming": {
