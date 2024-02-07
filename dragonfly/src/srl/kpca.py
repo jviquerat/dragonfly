@@ -9,34 +9,51 @@ from dragonfly.src.srl.base import *
 ###############################################
 ### Class for Kernel PCA srl
 ### pms : parameters
-class kpca():
-    def __init__(self, dim, new_dim, freq, size):
+class kpca(base_srl):
+    def __init__(self, obs_dim, buff_size, pms):
 
         # Initialize from arguments
-        self.obs_dim = dim
-        self.buff_size = size
-        self.reduced_dim = new_dim
-        self.freq = freq
+        self.obs_dim     = obs_dim
+        self.buff_size   = buff_size
+        self.latent_dim  = pms.latent_dim
+        self.update_freq = pms.update_freq
+        self.n_updates   = pms.n_updates
+        self.sigma       = pms.sigma
+        self.gamma       = 1/(2*(self.sigma**2))
 
         # Initialize counter
         self.counter = 1
 
         # Initialize projection matrix
-        self.matrix = np.identity(self.obs_dim)
+        self.matrix = np.zeros((self.obs_dim, self.latent_dim))
+        for i in range(self.latent_dim):
+            self.matrix[i,i] = 1
 
         # Create buffers
         self.names = ["obs"]
         self.sizes = [self.obs_dim]
         self.gbuff = gbuff(self.buff_size, self.names, self.sizes)
     
+    # Reset
+    def reset(self):
+
+        self.gbuff.reset()
+
+        self.counter  = 0
+        self.n_update = 0
+
     # Update compression process according to the new buffer
     def update(self):
         
+        if (self.n_update >= self.n_updates): return
+
+        print("UPDATE KPCA")
+
         # Get data
-        obs = self.gbuff.get_buffers({"obs"},self.counter-2)["obs"]
-        obs = obs.numpy()[-self.freq:]
+        obs = self.gbuff.get_buffers({"obs"},self.gbuff.length()-1)["obs"]
+        obs = obs.numpy()#[-self.freq:]
         self.obs = obs
-                
+                                
         # Pairwise squared Euclidean distances
         K = GramMat(obs,obs)
         
@@ -49,42 +66,44 @@ class kpca():
         idx = np.argsort(evals)[::-1]
         self.evecs = evecs[:,idx]
         self.evals = evals[idx]
-        scales = np.sqrt(self.evals[:self.reduced_dim])
-        self.directions = self.evecs[:,:self.reduced_dim]/scales
+        scales = np.sqrt(self.evals[:self.latent_dim])
+        self.matrix = self.evecs[:,:self.latent_dim]/scales
+
+        self.n_update += 1
         	
     # Process observations
     def process(self, obs):
         
-        # Before the update time
-        if self.counter < self.freq :
-            return obs[:,:self.reduced_dim]
-
         # Check if it's the update time
-        if (self.counter == self.freq) :
+        if ((self.gbuff.length() > 0) and (self.counter > self.update_freq)):
             self.update()
+            self.counter = 0
 
         # Compute centered gram matrix between old obs and new obs
-        # K = GramMat(obs, self.obs)
-        # K = self._kernel(K)
-        # K = center(K)
+        try:
+            K = GramMat(obs, self.obs)
+            K = self._kernel(K)
+            K = center(K)
+        except AttributeError:
+            K = obs
         
         # Project obs into new space
-        # return np.dot(K, self.directions)
+        latent_obs = np.dot(K, self.matrix)
 
         # Project obs into new space using approximation
-        Phi_obs = np.apply_along_axis(self._approxPhi, 1, obs)
-        return np.dot(Phi_obs,self.directions)
+        # x          = np.reshape(obs, (len(obs), -1))
+        # Phi_obs    = np.apply_along_axis(self._approxPhi, 1, x)
+        # latent_obs = np.dot(Phi_obs, self.matrix)
+        return latent_obs
 
     # RBF Kernel function for pairwise distance matrix
     def _kernel(self,M):
-        sigma = .19
-        self.gamma = 1/(2*(sigma**2))
         K = exp(-self.gamma * M)
         return K
 
     # Approximate the RBF transformation funcion by Fourier random features
     def _approxPhi(self,x):
-        d = int(self.directions.shape[0]/2)
+        d = int(self.matrix.shape[0]/2)
         n = x.shape[0]
         w = np.random.normal(0,2*self.gamma,(d,n))
         wx = np.dot(w,x)

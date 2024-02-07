@@ -45,7 +45,7 @@ class pca(base_srl):
         # Get data
         obs = self.gbuff.get_buffers(["obs"], self.gbuff.length())["obs"]
         obs = obs.numpy()
-
+        
         # Normalize data
         #mu  = obs.mean(axis=0)
         #obs = obs - mu
