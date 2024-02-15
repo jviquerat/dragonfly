@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "sloshing",
+        "name": "Pendulum-v1",
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0
@@ -28,10 +28,10 @@
         "type": "ppo",
         "srl": {
             "type": "kpca",
-            "latent_dim": 10,
+            "latent_dim": 2,
             "n_updates": 1,
             "update_freq": 10000,
-	    "sigma": 100
+	    "sigma": 1
         },
         "policy": {
             "type": "normal",

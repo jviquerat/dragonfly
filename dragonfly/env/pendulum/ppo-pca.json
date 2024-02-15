@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "sloshing",
+        "name": "Pendulum-v1",
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0
@@ -8,8 +8,8 @@
     "naming": {
         "env": true,
         "agent": true,
-        "tag": "kpca",
-        "time": true
+        "tag": "pca",
+        "time": false
     },
     "n_avg": 3,
     "n_cpu": 1,
@@ -25,14 +25,26 @@
         "warmup": 10000
     },
     "agent": {
+	      "srl": {
+	          "type": "pca",
+            "latent_dim": 2,
+	          "update_freq": 10000,
+	          "n_epochs" : 512,
+            "n_updates": 10,
+	          "batch_size": 1000,
+            "network": {
+                "arch": [64,32],
+                "actv": "relu"
+            },
+            "optimizer": {
+                "type": "adam",
+                "lr": 1.0e-3
+            },
+            "loss": {
+                "type": "mse_ae"
+            }
+	      },
         "type": "ppo",
-        "srl": {
-            "type": "kpca",
-            "latent_dim": 10,
-            "n_updates": 1,
-            "update_freq": 10000,
-	    "sigma": 100
-        },
         "policy": {
             "type": "normal",
             "network": {
