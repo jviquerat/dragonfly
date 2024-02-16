@@ -15,8 +15,6 @@ from dragonfly.src.utils.renderer   import *
 from dragonfly.src.utils.counter    import *
 from dragonfly.src.utils.error      import *
 
-###############################################
-### Base trainer class
 class base_trainer():
     def __init__(
             self,
@@ -57,20 +55,29 @@ class base_trainer():
         self.timer_global   = timer("global   ")
         self.timer_training = timer("training ")
 
-    # Loop
     def loop(self, path, run):
         raise NotImplementedError
 
-    # Monitor transition
     def monitor(self, path, run, obs, act):
-        if self.monitoring:
+        """
+        Monitors and logs the actions and observations during training.
+        This method handles the logging of actions and observations for each episode
+        and step during the training process. 
 
-            # Check nb of cpus
+        Args:
+            path (str): The base path for logging.
+            run (int): The current run number.
+            obs (np.array): The observation array from the environment.
+            act (np.array): The action array taken by the agent.
+
+        Raises:
+            error: If monitoring is attempted in a parallel environment setup.
+        """
+        if self.monitoring:
             if (mpi.size > 1):
                 error("base_trainer", "monitor",
                       "monitoring does not work with parallel environments")
 
-            # Handle folders
             apath = path+"/"+str(run)+"/actions"
             opath = path+"/"+str(run)+"/observations"
 
@@ -105,20 +112,23 @@ class base_trainer():
             with open(filename, "a") as f:
                 f.write(s)
 
-    # Reset
     def reset(self):
-
         self.agent.reset()
         self.report.reset()
         self.renderer.reset()
 
-    # Printings at the end of an episode
     def print_episode(self):
+        """
+        Prints a summary at the end of each episode.
 
+        This method outputs the episode number, current step, average score, and the best score
+        achieved so far, along with the episode number where the best score was achieved. It
+        manages the printing format to ensure that the output is updated in place until the
+        maximum number of steps is reached, after which it starts printing on new lines.
+        """
         # No initial printing
         if (self.counter.ep == 0): return
 
-        # Average and print
         ep        = self.counter.ep
         stp       = self.counter.step
         n_stp_max = self.n_stp_max
@@ -141,26 +151,17 @@ class base_trainer():
         if (self.cnt <= 1):
             print("# Ep #"+str(ep)+", step = "+str(stp)+", avg score = "+str(avg)+", best score = "+str(bst)+" at ep "+str(bst_ep)+"                 ", end=end)
 
-    ################################
-    ### Report wrappings
-    ################################
-
-    # Store data in report
     def store_report(self, cpu):
-
         for i in range(self.counter.ep_step[cpu]):
             if (self.counter.step%step_report == 0):
                 self.report.append("step",    self.counter.step)
-
                 self.report.append("episode", self.counter.ep)
                 self.report.append("score",   self.counter.score[cpu])
                 smooth_score = self.report.avg("score", n_smooth)
                 self.report.append("smooth_score",  smooth_score)
             self.counter.step += 1
 
-    # Write learning data report
     def write_report(self, path, run, force=False):
-
         # Set filename with method name and run number
         filename = path+'/'+str(run)+'/'+str(run)+'.dat'
         self.report.write(filename, force)
