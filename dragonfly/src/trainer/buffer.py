@@ -10,14 +10,8 @@ from dragonfly.src.trainer.base import *
 ### pms         : parameters
 class buffer(base_trainer):
     def __init__(self, env_pms, agent_pms, path, n_stp_max, pms):
-
-        # Initialize environment
-        self.env = environments(path, env_pms)
-
-        # Initialize from input
-        self.obs_dim     = self.env.obs_dim
-        self.act_dim     = self.env.act_dim
-        self.n_stp_max   = n_stp_max
+        super().__init__(self, env_pms=env_pms, path=path, n_stp_max=n_stp_max)
+        
         self.buff_size   = pms.buff_size
         self.n_buff      = pms.n_buff
         self.btc_frac    = pms.batch_frac

@@ -1,8 +1,7 @@
 # Generic imports
 import os
-import math
 import shutil
-import numpy as np
+from typing import Any
 
 # Custom imports
 from dragonfly.src.core.constants   import *
@@ -19,8 +18,24 @@ from dragonfly.src.utils.error      import *
 ###############################################
 ### Base trainer class
 class base_trainer():
-    def __init__(self):
-        pass
+    def __init__(
+            self,
+            env_pms: Any,
+            path: str,
+            n_stp_max: int
+        ):
+        """
+        Initializes the base trainer class.
+
+        Args:
+            env_pms (Any): Parameters for the environment.
+            path (str): Path for saving or loading data.
+            n_stp_max (int): Maximum number of steps.
+        """
+        self.env = environments(path, env_pms, n_stp_max)
+        self.obs_dim     = self.env.obs_dim
+        self.act_dim     = self.env.act_dim
+        self.n_stp_max   = n_stp_max
 
     # Loop
     def loop(self, path, run):
