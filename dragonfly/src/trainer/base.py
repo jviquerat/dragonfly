@@ -22,7 +22,8 @@ class base_trainer():
             self,
             env_pms: Any,
             path: str,
-            n_stp_max: int
+            n_stp_max: int,
+            pms: Any
         ):
         """
         Initializes the base trainer class.
@@ -31,11 +32,17 @@ class base_trainer():
             env_pms (Any): Parameters for the environment.
             path (str): Path for saving or loading data.
             n_stp_max (int): Maximum number of steps.
+            pms (Any): Parameters for the trainer.
         """
         self.env = environments(path, env_pms, n_stp_max)
         self.obs_dim     = self.env.obs_dim
         self.act_dim     = self.env.act_dim
         self.n_stp_max   = n_stp_max
+
+        if hasattr(pms, "update"): self.update_type = pms.update
+        
+        self.monitoring = False
+        if hasattr(pms, "monitoring"): self.monitoring = pms.monitoring
 
     # Loop
     def loop(self, path, run):

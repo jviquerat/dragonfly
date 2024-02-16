@@ -18,13 +18,6 @@ class td(base_trainer):
         self.freq_report  = max(int(self.n_stp_max/(freq_report*self.n_stp_unroll)),1)
         self.update_type = "off_policy"
 
-        # Optional modification of default args
-        if hasattr(pms, "update"): self.update_type = pms.update
-
-        # Optional parameters
-        self.monitoring = False
-        if hasattr(pms, "monitoring"):  self.monitoring = pms.monitoring
-
         # Local variables
         self.unroll = 0
 

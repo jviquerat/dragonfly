@@ -11,7 +11,7 @@ from dragonfly.src.trainer.base import *
 class episode(base_trainer):
     def __init__(self, env_pms, agent_pms, path, n_stp_max, pms):
         super().__init__(self, env_pms=env_pms, path=path, n_stp_max=n_stp_max)
-        
+
         self.n_ep_unroll = pms.n_ep_unroll*(mpi.size)
         self.n_ep_train  = pms.n_ep_train
         self.btc_frac    = pms.batch_frac
@@ -19,13 +19,6 @@ class episode(base_trainer):
         self.size        = 1000*self.n_ep_train
         self.freq_report = 10
         self.update_type = "on_policy"
-
-        # Optional modification of default args
-        if hasattr(pms, "update"): self.update_type = pms.update
-
-        # Optional monitoring
-        self.monitoring = False
-        if hasattr(pms, "monitoring"):  self.monitoring = pms.monitoring
 
         # Local variables
         self.lengths = np.array([], dtype=int)

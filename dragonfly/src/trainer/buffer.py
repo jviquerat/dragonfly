@@ -11,7 +11,7 @@ from dragonfly.src.trainer.base import *
 class buffer(base_trainer):
     def __init__(self, env_pms, agent_pms, path, n_stp_max, pms):
         super().__init__(self, env_pms=env_pms, path=path, n_stp_max=n_stp_max)
-        
+
         self.buff_size   = pms.buff_size
         self.n_buff      = pms.n_buff
         self.btc_frac    = pms.batch_frac
@@ -19,13 +19,6 @@ class buffer(base_trainer):
         self.size        = self.n_buff*self.buff_size
         self.freq_report = max(int(n_stp_max/(freq_report*self.buff_size)),1)
         self.update_type = "on_policy"
-
-        # Optional modification of default args
-        if hasattr(pms, "update"): self.update_type = pms.update
-
-        # Optional monitoring
-        self.monitoring = False
-        if hasattr(pms, "monitoring"): self.monitoring = pms.monitoring
 
         # Initialize agent
         self.agent = agent_factory.create(agent_pms.type,
