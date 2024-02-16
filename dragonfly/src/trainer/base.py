@@ -37,6 +37,8 @@ class base_trainer():
         self.act_dim     = self.env.act_dim
         self.n_stp_max   = n_stp_max
 
+        self.agent = None
+
         if hasattr(pms, "update"): self.update_type = pms.update
 
         self.monitoring = False
@@ -112,6 +114,40 @@ class base_trainer():
             with open(filename, "a") as f:
                 f.write(s)
 
+    def apply_next_step(self,
+                        obs: np.array,
+                        path: str,
+                        run: int
+        ):
+        """
+        Executes the next step in the environment using the current observation, updates the agent's state,
+        and handles monitoring and rendering.
+
+        This method sends the current observation to the agent to decide on an action, then applies this action
+        in the environment to get the next state and reward. It stores the transition (current state, action,
+        next state, reward, done flag, and trace) in the agent's memory. It also updates the training counter
+        with the received reward and handles the rendering of the environment's current state.
+
+        Args:
+            obs (np.array): The current observation from the environment.
+            path (str): The base path for logging and monitoring.
+            run (int): The current run number.
+
+        Returns:
+            tuple: A tuple containing the next state (np.array), reward (float), done flag (bool),
+        """
+        act = self.agent.actions(obs)
+        nxt, rwd, dne, trc = self.env.step(act)
+
+        # Store transition
+        self.agent.store(obs, nxt, act, rwd, dne, trc)
+        self.monitor(path, run, obs, act)
+        # Update counter
+        self.counter.update(rwd)
+        # Handle rendering
+        self.renderer.store(self.env)
+        return nxt, rwd, dne, trc
+
     def reset(self):
         self.agent.reset()
         self.report.reset()
@@ -165,3 +201,27 @@ class base_trainer():
         # Set filename with method name and run number
         filename = path+'/'+str(run)+'/'+str(run)+'.dat'
         self.report.write(filename, force)
+
+    def end_training(self, path, run):
+        """
+        Finalizes a training by printing a summary, writing reports, and closing timers.
+
+        This method is called at the end of training to perform final housekeeping tasks:
+        it prints a summary of the episode, writes the episode's data to a report, and closes
+        all active timers, displaying their summaries. This ensures that all relevant information
+        is logged and that resources are properly managed at the conclusion of a training.
+
+        Args:
+            path (str): The base path for logging and monitoring.
+            run (int): The current run number.
+        """
+        # Last printing
+        self.print_episode()
+        # Last writing
+        self.write_report(path, run, force=True)
+        # Close timers and show
+        self.timer_global.toc()
+        self.timer_global.show()
+        self.env.timer_env.show()
+        self.agent.timer_actions.show()
+        self.timer_training.show()

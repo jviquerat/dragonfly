@@ -57,24 +57,10 @@ class td(base_trainer):
             # Loop over training steps
             while (not (self.unroll >= self.n_stp_unroll)):
 
-                # Get actions
-                act = self.agent.actions(obs)
-
-                # Make one env step
-                nxt, rwd, dne, trc = self.env.step(act)
-
-                # Store transition
-                self.agent.store(obs, nxt, act, rwd, dne, trc)
-                self.monitor(path, run, obs, act)
-
-                # Update counter
-                self.counter.update(rwd)
+                nxt, _, dne, _ = self.apply_next_step(obs,path,run)
 
                 # Update unrolling counter
                 self.unroll += mpi.size
-
-                # Handle rendering
-                self.renderer.store(self.env)
 
                 # Finish if some episodes are done
                 for cpu in range(mpi.size):
@@ -106,15 +92,4 @@ class td(base_trainer):
             # Reset unroll
             self.unroll = 0
 
-        # Last printing
-        self.print_episode()
-
-        # Last writing
-        self.write_report(path, run, force=True)
-
-        # Close timers and show
-        self.timer_global.toc()
-        self.timer_global.show()
-        self.env.timer_env.show()
-        self.agent.timer_actions.show()
-        self.timer_training.show()
+        self.end_training(path, run)
