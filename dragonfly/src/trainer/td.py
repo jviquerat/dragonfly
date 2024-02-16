@@ -11,7 +11,7 @@ class td(base_trainer):
             n_stp_max (int): Maximum number of steps.
             pms (Any): Parameters for the trainer.
         """
-        super().__init__(self, env_pms=env_pms, path=path, n_stp_max=n_stp_max)
+        super().__init__(env_pms=env_pms, path=path, n_stp_max=n_stp_max)
 
         self.mem_size = pms.mem_size
         self.n_stp_unroll = pms.n_stp_unroll * mpi.size
