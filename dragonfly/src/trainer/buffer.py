@@ -31,22 +31,9 @@ class buffer(base_trainer):
         # Initialize update
         self.update = update_factory.create(self.update_type)
 
-        # Initialize counter
-        self.counter = counter(mpi.size)
-
         # Initialize learning data report
         self.report = report(self.freq_report,
                              ["step", "episode", "score", "smooth_score"])
-
-        # Initialize renderer
-        self.rnd_style = "rgb_array"
-        if hasattr(pms, "rnd_style"):
-            self.rnd_style = pms.rnd_style
-        self.renderer = renderer(mpi.size, self.rnd_style, pms.render_every)
-
-        # Initialize timers
-        self.timer_global   = timer("global   ")
-        self.timer_training = timer("training ")
 
     # Loop
     def loop(self, path, run):

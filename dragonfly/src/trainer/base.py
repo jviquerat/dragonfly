@@ -40,9 +40,22 @@ class base_trainer():
         self.n_stp_max   = n_stp_max
 
         if hasattr(pms, "update"): self.update_type = pms.update
-        
+
         self.monitoring = False
         if hasattr(pms, "monitoring"): self.monitoring = pms.monitoring
+
+        # Initialize counter
+        self.counter = counter(mpi.size)
+
+        # Initialize renderer
+        self.rnd_style = "rgb_array"
+        if hasattr(pms, "rnd_style"):
+            self.rnd_style = pms.rnd_style
+        self.renderer = renderer(mpi.size, self.rnd_style, pms.render_every)
+
+        # Initialize timers
+        self.timer_global   = timer("global   ")
+        self.timer_training = timer("training ")
 
     # Loop
     def loop(self, path, run):
