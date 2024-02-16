@@ -57,6 +57,24 @@ class base_trainer():
         self.timer_global   = timer("global   ")
         self.timer_training = timer("training ")
 
+    def start_training(self) -> np.array:
+        """
+        Initiates the training process by resetting the environment and counters.
+
+        This method marks the beginning of the training process. It starts the global timer,
+        resets the environment to its initial state, and resets the training counter. It returns
+        the initial observation from the environment to start the training loop.
+
+        Returns:
+            np.array: The initial observation from the environment after reset.
+        """
+        self.timer_global.tic()
+        # Reset environment
+        obs = self.env.reset_all()
+        # Reset counter
+        self.counter.reset()
+        return obs
+
     def loop(self, path, run):
         raise NotImplementedError
 
