@@ -11,7 +11,7 @@ class episode(base_trainer):
             n_stp_max (int): Maximum number of steps.
             pms (Any): Parameters for the trainer.
         """
-        super().__init__(env_pms=env_pms, path=path, n_stp_max=n_stp_max)
+        super().__init__(env_pms=env_pms, path=path, n_stp_max=n_stp_max, pms=pms)
 
         self.n_ep_unroll = pms.n_ep_unroll * (mpi.size)
         self.n_ep_train = pms.n_ep_train

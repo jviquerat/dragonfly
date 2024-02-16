@@ -11,7 +11,7 @@ class buffer(base_trainer):
             n_stp_max (int): Maximum number of steps.
             pms (Any): Parameters for the trainer.
         """
-        super().__init__(env_pms=env_pms, path=path, n_stp_max=n_stp_max)
+        super().__init__(env_pms=env_pms, path=path, n_stp_max=n_stp_max, pms=pms)
 
         self.buff_size = pms.buff_size
         self.n_buff = pms.n_buff
