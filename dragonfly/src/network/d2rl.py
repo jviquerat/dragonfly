@@ -11,39 +11,20 @@ class d2rl(base_network):
         self.inp_dim = inp_dim
         self.out_dim = out_dim
 
-        # Set default values
-        self.trunk = trunk()
-        self.trunk.arch = [64]
-        self.trunk.actv = "relu"
-        self.heads = heads()
-        self.heads.nb = 1
-        self.heads.arch = [[64]]
-        self.heads.actv = ["relu"]
-        self.heads.final = ["linear"]
-        self.k_init = Orthogonal(gain=1.0)
-        self.k_init_final = Orthogonal(gain=0.0)
-
-        # Check inputs
-        if hasattr(pms, "trunk"):
-            self.trunk = pms.trunk
-        if hasattr(pms.trunk, "arch"):
-            self.trunk.arch = pms.trunk.arch
-        if hasattr(pms.trunk, "actv"):
-            self.trunk.actv = pms.trunk.actv
-        if hasattr(pms, "heads"):
-            self.heads = pms.heads
-        if hasattr(pms.heads, "nb"):
-            self.heads.nb = pms.heads.nb
-        if hasattr(pms.heads, "arch"):
-            self.heads.arch = pms.heads.arch
-        if hasattr(pms.heads, "actv"):
-            self.heads.actv = pms.heads.actv
-        if hasattr(pms.heads, "final"):
-            self.heads.final = pms.heads.final
-        if hasattr(pms, "k_init"):
-            self.k_init = pms.k_init
-        if hasattr(pms, "k_init_final"):
-            self.k_init_final = pms.k_init_final
+        self.trunk = pms.trunk if hasattr(pms, "trunk") else trunk()
+        self.trunk.arch = pms.trunk.arch if hasattr(pms.trunk, "arch") else [64]
+        self.trunk.actv = pms.trunk.actv if hasattr(pms.trunk, "actv") else "relu"
+        self.heads = pms.heads if hasattr(pms.heads, "heads") else heads()
+        self.heads.nb = pms.heads.nb if hasattr(pms.heads, "nb") else 1
+        self.heads.arch = pms.heads.arch if hasattr(pms.heads, "arch") else [[64]]
+        self.heads.actv = pms.heads.actv if hasattr(pms.heads, "actv") else ["relu"]
+        self.heads.final = (
+            pms.heads.final if hasattr(pms.heads, "final") else ["linear"]
+        )
+        self.k_init = pms.k_init if hasattr(pms, "k_init") else Orthogonal(gain=1.0)
+        self.k_init_final = (
+            pms.k_init_final if hasattr(pms, "k_init_final") else Orthogonal(gain=0.0)
+        )
 
         # Check that out_dim and heads have same dimension
         if len(self.out_dim) != pms.heads.nb:
@@ -89,14 +70,13 @@ class d2rl(base_network):
     # Network forward pass
     @tf.function
     def call(self, input):
-
         # Initialize
         i = 0
         out = []
         var = tf.identity(input)
 
         # Compute trunk
-        for l in range(len(self.trunk.arch)):
+        for _ in range(len(self.trunk.arch)):
             var = self.net[i](var)
             # Concatenation for D2RL
             var = tf.concat([var, input], 1)
@@ -107,7 +87,7 @@ class d2rl(base_network):
         # is appended to the global output
         for h in range(self.heads.nb):
             hvar = var
-            for l in range(len(self.heads.arch[h])):
+            for _ in range(len(self.heads.arch[h])):
                 hvar = self.net[i](hvar)
                 # Concatenation for D2RL
                 hvar = tf.concat([hvar, input], 1)
@@ -120,5 +100,4 @@ class d2rl(base_network):
 
     # Reset weights
     def reset(self):
-
         self.set_weights(self.init_weights)
