@@ -59,9 +59,10 @@ class pca(base_srl):
 
         self.n_update += 1
 
-        obs = self.gbuff.get_batches(["obs"], 1000)["obs"]
-        encoded = self.process(obs)
-        self.plot2Dencoded(encoded)
+        # 2D compressed respresentation
+        #obs = self.gbuff.get_batches(["obs"], 1000)["obs"]
+        #encoded = self.process(obs)
+        #self.plot2Dencoded(encoded)
 
 
     # Process raw observations
