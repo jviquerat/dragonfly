@@ -79,7 +79,7 @@ class d2rl(base_network):
         for _ in range(len(self.trunk.arch)):
             var = self.net[i](var)
             # Concatenation for D2RL
-            var = tf.concat([var, input], 1)
+            var = tf.concat([var, input], 0)
             i += 1
 
         # Compute heads
@@ -90,7 +90,7 @@ class d2rl(base_network):
             for _ in range(len(self.heads.arch[h])):
                 hvar = self.net[i](hvar)
                 # Concatenation for D2RL
-                hvar = tf.concat([hvar, input], 1)
+                hvar = tf.concat([hvar, input], 0)
                 i += 1
             hvar = self.net[i](hvar)
             i += 1
