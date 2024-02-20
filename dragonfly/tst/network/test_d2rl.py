@@ -6,7 +6,8 @@ from dragonfly.tst.tst    import *
 from dragonfly.tst.runner import *
 
 ###############################################
-### Test continuous ppo agent
-def test_ppo_continuous():
-    runner("dragonfly/tst/network/d2rl_ppo_continuous.json",
-           "continuous ppo")
+### Test d2rl
+def test_d2rl():
+
+    runner("dragonfly/tst/network/d2rl.json",
+           "d2rl")
