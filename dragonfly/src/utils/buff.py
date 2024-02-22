@@ -143,10 +143,10 @@ class gbuff:
         for name, dim in zip(self.names, self.dims):
             self.data[name] = rbuff(self.size, dim)
 
-    def store(self, names, fields):
+    def store(self, names, data):
 
-        for name, field in zip(names, fields):
-            self.data[name].store(field)
+        for name in names:
+            self.data[name].store(data[name])
 
     def length(self):
 

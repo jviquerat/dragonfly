@@ -136,10 +136,7 @@ class dqn():
     # Actions to execute after the inner training loop
     def post_loop(self):
 
-        data = self.buff.serialize(self.names)
-        gobs, gnxt, gact, grwd, gtrm = (data[name] for name in self.names)
-
-        self.gbuff.store(self.names, [gobs, gnxt, gact, grwd, gtrm])
+        self.gbuff.store(self.names, self.buff.serialize(self.names))
 
     # Save parameters
     def save(self, filename):

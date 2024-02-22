@@ -176,6 +176,8 @@ class ddpg(base_agent):
 
         self.gbuff.store(self.names, [gobs, gnxt, gact, grwd, gtrm])
 
+        #self.gbuff.store(self.names, self.buff.serialize(self.names))
+
     # Save agent parameters
     def save(self, filename):
 
