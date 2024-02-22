@@ -120,9 +120,7 @@ class td3(base_agent):
     # Control (deterministic actions)
     def control(self, obs):
 
-        act = self.p_net.control(obs)
-
-        return act
+        return self.p_net.control(obs)
 
     # Prepare training data
     def prepare_data(self, size):
