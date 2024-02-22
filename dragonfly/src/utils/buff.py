@@ -109,9 +109,12 @@ class rbuff:
 
     def get_buffer_indexes(self, size):
 
-        end = self.i
-        if (    self.full): start = end-size
-        if (not self.full): start = max(0, end-size)
+        if (    self.full):
+            end   = size
+            start = end-size
+        if (not self.full):
+            end   = self.i
+            start = max(0, end-size)
 
         return start, end
 
