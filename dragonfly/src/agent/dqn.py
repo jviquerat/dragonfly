@@ -84,14 +84,6 @@ class dqn():
 
         return act
 
-    # Control (deterministic actions)
-    def control(self, obs):
-
-        val = self.q_net.values(obs)
-        act = np.reshape(np.argmax(val), (-1))
-
-        return act
-
     # Prepare training data
     def prepare_data(self, size):
 

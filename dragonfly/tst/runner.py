@@ -37,10 +37,21 @@ def runner(json_file, agent_type):
     os.makedirs("1/", exist_ok=True)
     trainer.reset()
     trainer.loop(".", 0)
+
     averager.store("0/0.dat", 0)
     trainer.reset()
     trainer.loop(".", 1)
+    trainer.agent.save("0/checkpoint")
     averager.store("1/1.dat", 1)
+
+    # Test of the `control` method
+    trainer.reset()
+    obs = trainer.env.reset_all()
+    trainer.agent.load("0/checkpoint")
+    act = trainer.agent.control(obs)
+    trainer.env.step(act)
+    #############################
+
     trainer.env.close()
     averager.average("avg.dat")
 
