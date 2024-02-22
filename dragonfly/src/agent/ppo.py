@@ -67,6 +67,7 @@ class ppo(base_agent):
 
         pobs = super().process_obs(obs)
 
+        
         # Get actions and associated log-prob
         self.timer_actions.tic()
         act, lgp = self.p_net.actions(pobs)

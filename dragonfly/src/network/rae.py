@@ -40,6 +40,7 @@ class rae(base_network):
         self.net.append(LSTM(self.lat_dim))
 
         # Define decoder
+        self.net.append(RepeatVector(inp_dim, input_shape=[lat_dim]))
         for l in range(len(self.arch)):
             self.net.append(LSTM(self.arch[-l],
                                  return_sequences = True))
@@ -47,7 +48,7 @@ class rae(base_network):
                                               activation = "sigmoid")))
 
         # Initialize weights
-        dummy = self.call(tf.ones([1,self.inp_dim]))
+        dummy = self.call(tf.ones([1,100,self.inp_dim]))
 
         # Save initial weights
         self.init_weights = self.get_weights()
@@ -86,6 +87,9 @@ class rae(base_network):
         i   = 0
         out = []
 
+        a,b = var.shape
+        var = tf.reshape(var,[1,a,b])
+        
         # Compute encoder
         for l in range(len(self.arch)):
             var = self.net[i](var)
