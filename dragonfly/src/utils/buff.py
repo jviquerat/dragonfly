@@ -158,7 +158,6 @@ class gbuff:
 
         # Start/end indices
         start, end = self.data[self.names[0]].get_buffer_indexes(size)
-        s          = end-start
 
         # Randomized indices
         p = np.arange(start, end)
