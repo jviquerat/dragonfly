@@ -46,6 +46,61 @@ class base_agent_on_policy(base_agent):
     def __init__(self):
         pass
 
+    # Create storage buffers
+    def create_buffers(self):
+
+        self.lnames = ["obs", "nxt", "act", "lgp", "rwd", "trm"]
+        self.lsizes = [self.obs_dim, self.obs_dim, self.pol_dim, 1, 1, 1]
+        self.buff   = buff(self.n_cpu, self.lnames, self.lsizes)
+
+        self.gnames = ["obs", "act", "adv", "tgt", "lgp"]
+        self.gsizes = [self.obs_dim, self.pol_dim, 1, 1, 1]
+        self.gbuff  = gbuff(self.size, self.gnames, self.gsizes)
+
+    # Get actions
+    def actions(self, obs):
+
+        # Get actions and associated log-prob
+        self.timer_actions.tic()
+        act, lgp = self.p_net.actions(obs)
+
+        # Check for NaNs
+        if (np.isnan(act).any()):
+            error("a2c", "get_actions",
+                  "Detected NaN in generated actions")
+
+        # Store log-prob
+        self.buff.store(["lgp"], [lgp])
+
+        self.timer_actions.toc()
+
+        return act
+
+    # Control (deterministic actions)
+    def control(self, obs):
+
+        return self.p_net.control(obs)
+
+    # Finalize buffers before training
+    def returns(self, obs, nxt, rwd, trm):
+
+        # Get current and next values
+        cval = self.v_net.values(obs)
+        nval = self.v_net.values(nxt)
+
+        # Compute advantages
+        tgt, adv = self.retrn.compute(rwd, cval, nval, trm)
+
+        return tgt, adv
+
+    # Prepare training data
+    def prepare_data(self, size):
+
+        self.data = self.gbuff.get_buffers(self.gnames, size)
+        lgt = len(self.data["obs"])
+
+        return lgt, True
+
     # Actions to execute after the inner training loop
     def post_loop(self, style=None):
 
@@ -70,6 +125,32 @@ class base_agent_on_policy(base_agent):
         data["lgp"] = glgp
 
         self.gbuff.store(self.gnames, data)
+
+    # Agent reset
+    def reset(self):
+
+        self.p_net.reset()
+        self.v_net.reset()
+        self.buff.reset()
+        self.gbuff.reset()
+
+    # Store transition
+    def store(self, obs, nxt, act, rwd, dne, trc):
+
+        trm = self.term.terminate(dne, trc)
+        self.buff.store(["obs", "nxt", "act", "rwd", "trm"],
+                        [ obs,   nxt,   act,   rwd,   trm ])
+
+    # Save agent parameters
+    def save(self, filename):
+
+        self.p_net.save(filename)
+
+    # Load agent parameters
+    def load(self, filename):
+
+        self.p_net.load(filename)
+
 
 ###############################################
 ### Base for off-policy agents
