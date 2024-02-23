@@ -3,7 +3,7 @@ from dragonfly.src.agent.base import *
 
 ###############################################
 ### DQN agent
-class dqn():
+class dqn(base_agent_off_policy):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
@@ -42,10 +42,7 @@ class dqn():
         self.q_tgt.net.set_weights(self.q_net.net.get_weights())
 
         # Create buffers
-        self.names = ["obs", "nxt", "act", "rwd", "trm"]
-        self.sizes = [obs_dim, obs_dim, 1, 1, 1]
-        self.buff  = buff(self.n_cpu, self.names, self.sizes)
-        self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
+        self.create_buffers(act_dim=1)
 
         # Initialize termination
         self.term = termination_factory.create(pms.termination.type,
@@ -129,25 +126,6 @@ class dqn():
         self.buff.reset()
         self.gbuff.reset()
         self.eps.reset()
-
-    # Store transition
-    def store(self, obs, nxt, act, rwd, dne, trc):
-
-        trm = self.term.terminate(dne, trc)
-        self.buff.store(self.names, [obs, nxt, act, rwd, trm])
-
-    # Actions to execute before the inner training loop
-    def pre_loop(self):
-
-        self.buff.reset()
-
-    # Actions to execute after the inner training loop
-    def post_loop(self):
-
-        data = self.buff.serialize(self.names)
-        gobs, gnxt, gact, grwd, gtrm = (data[name] for name in self.names)
-
-        self.gbuff.store(self.names, [gobs, gnxt, gact, grwd, gtrm])
 
     # Save parameters
     def save(self, filename):

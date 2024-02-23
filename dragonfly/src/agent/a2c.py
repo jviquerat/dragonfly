@@ -3,7 +3,7 @@ from dragonfly.src.agent.base import *
 
 ###############################################
 ### A2C agent
-class a2c(base_agent):
+class a2c(base_agent_on_policy):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
@@ -40,14 +40,8 @@ class a2c(base_agent):
         self.retrn = retrn_factory.create(pms.retrn.type,
                                           pms = pms.retrn)
 
-        # Create buffers
-        self.lnames = ["obs", "nxt", "act", "rwd", "trm"]
-        self.lsizes = [obs_dim, obs_dim, self.pol_dim, 1, 1]
-        self.buff   = buff(self.n_cpu, self.lnames, self.lsizes)
-
-        self.gnames = ["obs", "act", "adv", "tgt"]
-        self.gsizes = [obs_dim, self.pol_dim, 1, 1]
-        self.gbuff  = gbuff(self.size, self.gnames, self.gsizes)
+        # Create storage buffers
+        self.create_buffers()
 
         # Initialize terminator
         self.term = termination_factory.create(pms.termination.type,
@@ -56,46 +50,6 @@ class a2c(base_agent):
 
         # Initialize timer
         self.timer_actions = timer("actions  ")
-
-    # Get actions
-    def actions(self, obs):
-
-        # Get actions and associated log-prob
-        self.timer_actions.tic()
-        act, lgp = self.p_net.actions(obs)
-
-        # Check for NaNs
-        if (np.isnan(act).any()):
-            error("a2c", "get_actions",
-                  "Detected NaN in generated actions")
-        self.timer_actions.toc()
-
-        return act
-
-    # Control (deterministic actions)
-    def control(self, obs):
-
-        return self.p_net.control(obs)
-
-    # Finalize buffers before training
-    def returns(self, obs, nxt, rwd, trm):
-
-        # Get current and next values
-        cval = self.v_net.values(obs)
-        nval = self.v_net.values(nxt)
-
-        # Compute advantages
-        tgt, adv = self.retrn.compute(rwd, cval, nval, trm)
-
-        return tgt, adv
-
-    # Prepare training data
-    def prepare_data(self, size):
-
-        self.data = self.gbuff.get_buffers(self.gnames, size)
-        lgt = len(self.data["obs"])
-
-        return lgt, True
 
     # Training
     def train(self, start, end):
@@ -113,51 +67,3 @@ class a2c(base_agent):
         # Train v network
         tgt = tf.reshape(tgt, [-1])
         self.v_net.loss.train(obs, tgt, self.v_net)
-
-    # Agent reset
-    def reset(self):
-
-        self.p_net.reset()
-        self.v_net.reset()
-        self.buff.reset()
-        self.gbuff.reset()
-
-    # Store transition
-    def store(self, obs, nxt, act, rwd, dne, trc):
-
-        trm = self.term.terminate(dne, trc)
-        self.buff.store(["obs", "nxt", "act", "rwd", "trm"],
-                        [ obs,   nxt,   act,   rwd,   trm ])
-
-    # Actions to execute before the inner training loop
-    def pre_loop(self):
-
-        self.buff.reset()
-
-    # Actions to execute after the inner training loop
-    def post_loop(self, style=None):
-
-        # For buffer-style training, the last step of each buffer
-        # must be bootstraped to mimic a continuing episode
-        if ((style == "buffer") and (self.term.type == "bootstrap")):
-            for i in range(self.n_cpu):
-                done = (self.buff.data["trm"].buff[i][-1] == 0.0)
-                if (not done):
-                    self.buff.data["trm"].buff[i][-1] = 2.0
-
-        names = ["obs", "nxt", "act", "rwd", "trm"]
-        data  = self.buff.serialize(names)
-        gobs, gnxt, gact, grwd, gtrm = (data[name] for name in names)
-        gtgt, gadv = self.returns(gobs, gnxt, grwd, gtrm)
-
-        self.gbuff.store(self.gnames, [gobs, gact, gadv, gtgt])
-
-    # Save agent parameters
-    def save(self, filename):
-
-        self.p_net.save(filename)
-
-    # Load agent parameters
-    def load(self, filename):
-
-        self.p_net.load(filename)

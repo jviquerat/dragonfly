@@ -4,7 +4,7 @@ from dragonfly.src.utils.polyak import *
 
 ###############################################
 ### TD3 agent
-class td3(base_agent):
+class td3(base_agent_off_policy):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
@@ -80,10 +80,7 @@ class td3(base_agent):
         self.polyak = polyak(self.rho)
 
         # Create buffers
-        self.names = ["obs", "nxt", "act", "rwd", "trm"]
-        self.sizes = [obs_dim, obs_dim, self.pol_dim, 1, 1]
-        self.buff  = buff(self.n_cpu, self.names, self.sizes)
-        self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
+        self.create_buffers(act_dim=self.pol_dim)
 
         # Initialize termination
         self.term = termination_factory.create(pms.termination.type,
@@ -116,21 +113,6 @@ class td3(base_agent):
         self.timer_actions.toc()
 
         return act
-
-    # Control (deterministic actions)
-    def control(self, obs):
-
-        return self.p_net.control(obs)
-
-    # Prepare training data
-    def prepare_data(self, size):
-
-        # No update if buffer is not full enough
-        lgt = self.gbuff.length()
-        if (lgt < max(size, self.n_filling)): return lgt, False
-
-        self.data = self.gbuff.get_batches(self.names, size)
-        return lgt, True
 
     # Training
     def train(self, start, end):
@@ -181,32 +163,3 @@ class td3(base_agent):
         self.q_tgt2.net.set_weights(self.q_net2.net.get_weights())
         self.buff.reset()
         self.gbuff.reset()
-
-    # Store transition
-    def store(self, obs, nxt, act, rwd, dne, trc):
-
-        trm = self.term.terminate(dne, trc)
-        self.buff.store(self.names, [obs, nxt, act, rwd, trm])
-
-    # Actions to execute before the inner training loop
-    def pre_loop(self):
-
-        self.buff.reset()
-
-    # Actions to execute after the inner training loop
-    def post_loop(self):
-
-        data = self.buff.serialize(self.names)
-        gobs, gnxt, gact, grwd, gtrm = (data[name] for name in self.names)
-
-        self.gbuff.store(self.names, [gobs, gnxt, gact, grwd, gtrm])
-
-    # Save agent parameters
-    def save(self, filename):
-
-        self.p_net.save(filename)
-
-    # Load agent parameters
-    def load(self, filename):
-
-        self.p_net.load(filename)
