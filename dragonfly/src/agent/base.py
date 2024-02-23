@@ -166,7 +166,38 @@ class base_agent_off_policy(base_agent):
         self.buff  = buff(self.n_cpu, self.names, self.sizes)
         self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
 
+    # Control (deterministic actions)
+    def control(self, obs):
+
+        return self.p_net.control(obs)
+
+    # Prepare training data
+    def prepare_data(self, size):
+
+        # No update if buffer is not full enough
+        lgt = self.gbuff.length()
+        if (lgt < max(size, self.n_filling)): return lgt, False
+
+        self.data = self.gbuff.get_batches(self.names, size)
+        return lgt, True
+
     # Actions to execute after the inner training loop
     def post_loop(self):
 
         self.gbuff.store(self.names, self.buff.serialize(self.names))
+
+    # Store transition
+    def store(self, obs, nxt, act, rwd, dne, trc):
+
+        trm = self.term.terminate(dne, trc)
+        self.buff.store(self.names, [obs, nxt, act, rwd, trm])
+
+     # Save agent parameters
+    def save(self, filename):
+
+        self.p_net.save(filename)
+
+    # Load agent parameters
+    def load(self, filename):
+
+        self.p_net.load(filename)

@@ -119,12 +119,6 @@ class dqn(base_agent_off_policy):
         self.gbuff.reset()
         self.eps.reset()
 
-    # Store transition
-    def store(self, obs, nxt, act, rwd, dne, trc):
-
-        trm = self.term.terminate(dne, trc)
-        self.buff.store(self.names, [obs, nxt, act, rwd, trm])
-
     # Save parameters
     def save(self, filename):
 

@@ -114,23 +114,6 @@ class td3(base_agent_off_policy):
 
         return act
 
-    # Control (deterministic actions)
-    def control(self, obs):
-
-        act = self.p_net.control(obs)
-
-        return act
-
-    # Prepare training data
-    def prepare_data(self, size):
-
-        # No update if buffer is not full enough
-        lgt = self.gbuff.length()
-        if (lgt < max(size, self.n_filling)): return lgt, False
-
-        self.data = self.gbuff.get_batches(self.names, size)
-        return lgt, True
-
     # Training
     def train(self, start, end):
 
@@ -180,19 +163,3 @@ class td3(base_agent_off_policy):
         self.q_tgt2.net.set_weights(self.q_net2.net.get_weights())
         self.buff.reset()
         self.gbuff.reset()
-
-    # Store transition
-    def store(self, obs, nxt, act, rwd, dne, trc):
-
-        trm = self.term.terminate(dne, trc)
-        self.buff.store(self.names, [obs, nxt, act, rwd, trm])
-
-     # Save agent parameters
-    def save(self, filename):
-
-        self.p_net.save(filename)
-
-    # Load agent parameters
-    def load(self, filename):
-
-        self.p_net.load(filename)
