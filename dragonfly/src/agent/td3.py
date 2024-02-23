@@ -80,10 +80,7 @@ class td3(base_agent_off_policy):
         self.polyak = polyak(self.rho)
 
         # Create buffers
-        self.names = ["obs", "nxt", "act", "rwd", "trm"]
-        self.sizes = [obs_dim, obs_dim, self.pol_dim, 1, 1]
-        self.buff  = buff(self.n_cpu, self.names, self.sizes)
-        self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
+        self.create_buffers(act_dim=self.pol_dim)
 
         # Initialize termination
         self.term = termination_factory.create(pms.termination.type,

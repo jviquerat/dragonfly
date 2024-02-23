@@ -158,6 +158,14 @@ class base_agent_off_policy(base_agent):
     def __init__(self):
         pass
 
+    # Create storage buffers
+    def create_buffers(self, act_dim):
+
+        self.names = ["obs", "nxt", "act", "rwd", "trm"]
+        self.sizes = [self.obs_dim, self.obs_dim, act_dim, 1, 1]
+        self.buff  = buff(self.n_cpu, self.names, self.sizes)
+        self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
+
     # Actions to execute after the inner training loop
     def post_loop(self):
 

@@ -42,10 +42,7 @@ class dqn(base_agent_off_policy):
         self.q_tgt.net.set_weights(self.q_net.net.get_weights())
 
         # Create buffers
-        self.names = ["obs", "nxt", "act", "rwd", "trm"]
-        self.sizes = [obs_dim, obs_dim, 1, 1, 1]
-        self.buff  = buff(self.n_cpu, self.names, self.sizes)
-        self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
+        self.create_buffers(act_dim=1)
 
         # Initialize termination
         self.term = termination_factory.create(pms.termination.type,
