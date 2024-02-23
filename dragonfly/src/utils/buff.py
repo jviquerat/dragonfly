@@ -31,9 +31,11 @@ class pbuff:
 
     def serialize(self):
 
-        arr = np.array([])
+        size = len(self.buff[0])
+        arr  = np.zeros(self.n_cpu*size)
+
         for cpu in range(self.n_cpu):
-            arr = np.append(arr, self.buff[cpu])
+            arr[cpu*size:(cpu+1)*size] = self.buff[cpu][:]
 
         return np.reshape(arr, (-1,self.dim))
 
