@@ -3,7 +3,7 @@ from dragonfly.src.agent.base import *
 
 ###############################################
 ### PPO agent
-class ppo(base_agent):
+class ppo(base_agent_on_policy):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
@@ -71,6 +71,7 @@ class ppo(base_agent):
 
         # Store log-prob
         self.buff.store(["lgp"], [lgp])
+
         self.timer_actions.toc()
 
         return act
@@ -133,29 +134,6 @@ class ppo(base_agent):
         trm = self.term.terminate(dne, trc)
         self.buff.store(["obs", "nxt", "act", "rwd", "trm"],
                         [ obs,   nxt,   act,   rwd,   trm ])
-
-    # Actions to execute before the inner training loop
-    def pre_loop(self):
-
-        self.buff.reset()
-
-    # Actions to execute after the inner training loop
-    def post_loop(self, style=None):
-
-        # For buffer-style training, the last step of each buffer
-        # must be bootstraped to mimic a continuing episode
-        if ((style == "buffer") and (self.term.type == "bootstrap")):
-            for i in range(self.n_cpu):
-                done = (self.buff.data["trm"].buff[i][-1] == 0.0)
-                if (not done):
-                    self.buff.data["trm"].buff[i][-1] = 2.0
-
-        names = ["obs", "nxt", "act", "lgp", "rwd", "trm"]
-        data  = self.buff.serialize(names)
-        gobs, gnxt, gact, glgp, grwd, gtrm = (data[name] for name in names)
-        gtgt, gadv = self.returns(gobs, gnxt, grwd, gtrm)
-
-        self.gbuff.store(self.gnames, [gobs, gact, gadv, gtgt, glgp])
 
     # Save agent parameters
     def save(self, filename):

@@ -3,7 +3,7 @@ from dragonfly.src.agent.base import *
 
 ###############################################
 ### A2C agent
-class a2c(base_agent):
+class a2c(base_agent_on_policy):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
@@ -41,12 +41,12 @@ class a2c(base_agent):
                                           pms = pms.retrn)
 
         # Create buffers
-        self.lnames = ["obs", "nxt", "act", "rwd", "trm"]
-        self.lsizes = [obs_dim, obs_dim, self.pol_dim, 1, 1]
+        self.lnames = ["obs", "nxt", "act", "lgp", "rwd", "trm"]
+        self.lsizes = [obs_dim, obs_dim, self.pol_dim, 1, 1, 1]
         self.buff   = buff(self.n_cpu, self.lnames, self.lsizes)
 
-        self.gnames = ["obs", "act", "adv", "tgt"]
-        self.gsizes = [obs_dim, self.pol_dim, 1, 1]
+        self.gnames = ["obs", "act", "adv", "tgt", "lgp"]
+        self.gsizes = [obs_dim, self.pol_dim, 1, 1, 1]
         self.gbuff  = gbuff(self.size, self.gnames, self.gsizes)
 
         # Initialize terminator
@@ -68,6 +68,10 @@ class a2c(base_agent):
         if (np.isnan(act).any()):
             error("a2c", "get_actions",
                   "Detected NaN in generated actions")
+
+        # Store log-prob
+        self.buff.store(["lgp"], [lgp])
+
         self.timer_actions.toc()
 
         return act
@@ -128,29 +132,6 @@ class a2c(base_agent):
         trm = self.term.terminate(dne, trc)
         self.buff.store(["obs", "nxt", "act", "rwd", "trm"],
                         [ obs,   nxt,   act,   rwd,   trm ])
-
-    # Actions to execute before the inner training loop
-    def pre_loop(self):
-
-        self.buff.reset()
-
-    # Actions to execute after the inner training loop
-    def post_loop(self, style=None):
-
-        # For buffer-style training, the last step of each buffer
-        # must be bootstraped to mimic a continuing episode
-        if ((style == "buffer") and (self.term.type == "bootstrap")):
-            for i in range(self.n_cpu):
-                done = (self.buff.data["trm"].buff[i][-1] == 0.0)
-                if (not done):
-                    self.buff.data["trm"].buff[i][-1] = 2.0
-
-        names = ["obs", "nxt", "act", "rwd", "trm"]
-        data  = self.buff.serialize(names)
-        gobs, gnxt, gact, grwd, gtrm = (data[name] for name in names)
-        gtgt, gadv = self.returns(gobs, gnxt, grwd, gtrm)
-
-        self.gbuff.store(self.gnames, [gobs, gact, gadv, gtgt])
 
     # Save agent parameters
     def save(self, filename):

@@ -4,7 +4,7 @@ from dragonfly.src.utils.polyak import *
 
 ###############################################
 ### SAC agent
-class sac(base_agent):
+class sac(base_agent_off_policy):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
@@ -169,19 +169,6 @@ class sac(base_agent):
 
         trm = self.term.terminate(dne, trc)
         self.buff.store(self.names, [obs, nxt, act, rwd, trm])
-
-    # Actions to execute before the inner training loop
-    def pre_loop(self):
-
-        self.buff.reset()
-
-    # Actions to execute after the inner training loop
-    def post_loop(self):
-
-        data = self.buff.serialize(self.names)
-        gobs, gnxt, gact, grwd, gtrm = (data[name] for name in self.names)
-
-        self.gbuff.store(self.names, [gobs, gnxt, gact, grwd, gtrm])
 
     # Save agent parameters
     def save(self, filename):

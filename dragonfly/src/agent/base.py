@@ -27,6 +27,11 @@ class base_agent():
     def reset(self):
         raise NotImplementedError
 
+    # Actions to execute before the inner training loop
+    def pre_loop(self):
+
+        self.buff.reset()
+
     # Save
     def save(self, filename):
         raise NotImplementedError
@@ -34,3 +39,45 @@ class base_agent():
     # Load
     def load(self, filename):
         raise NotImplementedError
+
+###############################################
+### Base for on-policy agents
+class base_agent_on_policy(base_agent):
+    def __init__(self):
+        pass
+
+    # Actions to execute after the inner training loop
+    def post_loop(self, style=None):
+
+        # For buffer-style training, the last step of each buffer
+        # must be bootstraped to mimic a continuing episode
+        if ((style == "buffer") and (self.term.type == "bootstrap")):
+            for i in range(self.n_cpu):
+                done = (self.buff.data["trm"].buff[i][-1] == 0.0)
+                if (not done):
+                    self.buff.data["trm"].buff[i][-1] = 2.0
+
+        names = ["obs", "nxt", "act", "lgp", "rwd", "trm"]
+        data  = self.buff.serialize(names)
+        gobs, gnxt, gact, glgp, grwd, gtrm = (data[name] for name in names)
+        gtgt, gadv = self.returns(gobs, gnxt, grwd, gtrm)
+
+        data        = {}
+        data["obs"] = gobs
+        data["act"] = gact
+        data["adv"] = gadv
+        data["tgt"] = gtgt
+        data["lgp"] = glgp
+
+        self.gbuff.store(self.gnames, data)
+
+###############################################
+### Base for off-policy agents
+class base_agent_off_policy(base_agent):
+    def __init__(self):
+        pass
+
+    # Actions to execute after the inner training loop
+    def post_loop(self):
+
+        self.gbuff.store(self.names, self.buff.serialize(self.names))

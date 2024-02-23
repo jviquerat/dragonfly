@@ -3,7 +3,7 @@ from dragonfly.src.agent.base import *
 
 ###############################################
 ### DQN agent
-class dqn():
+class dqn(base_agent_off_policy):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
@@ -127,16 +127,6 @@ class dqn():
 
         trm = self.term.terminate(dne, trc)
         self.buff.store(self.names, [obs, nxt, act, rwd, trm])
-
-    # Actions to execute before the inner training loop
-    def pre_loop(self):
-
-        self.buff.reset()
-
-    # Actions to execute after the inner training loop
-    def post_loop(self):
-
-        self.gbuff.store(self.names, self.buff.serialize(self.names))
 
     # Save parameters
     def save(self, filename):

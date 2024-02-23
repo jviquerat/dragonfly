@@ -46,7 +46,15 @@ def test_glb_buff():
                     [0.3],
                     [0.1],
                     [0.1]])
-    buff.store(names, [obs, act, adv, tgt, lgp])
+
+    base_data        = {}
+    base_data["obs"] = obs
+    base_data["act"] = act
+    base_data["adv"] = adv
+    base_data["tgt"] = tgt
+    base_data["lgp"] = lgp
+
+    buff.store(names, base_data)
 
     print("Storing buffers")
     print("obs: ")
@@ -83,12 +91,14 @@ def test_glb_buff():
     assert(len(data["adv"])==n)
 
     # Re-store buffers
-    buff.store(names, [obs, act, adv, tgt, lgp])
+    # As n=5 and n_tot=9, the last element stored
+    # will overwrite the first element of the buffer
+    buff.store(names, base_data)
     assert(buff.length() == n_tot)
 
-    # Retrieve full buffer again
+    # Retrieve full buffer again and test ring storage
     data = buff.get_buffers(names, n, shuffle=False)
     assert(len(data["obs"])==n)
     ob, ac, ad, tg, lg = (data[name] for name in names)
-    assert(ob.numpy()==obs).all()
-    assert(ac.numpy()==act).all()
+    assert(ob[0].numpy()==obs[-1]).all()
+    assert(ac[0].numpy()==act[-1]).all()
