@@ -216,15 +216,6 @@ class base_trainer:
                 end=end,
             )
 
-    def store_report(self, cpu):
-        for i in range(self.counter.ep_step[cpu]):
-            if self.counter.step % step_report == 0:
-                self.report.append("step", self.counter.step)
-                self.report.append("episode", self.counter.ep)
-                self.report.append("score", self.counter.score[cpu])
-                smooth_score = self.report.avg("score", n_smooth)
-                self.report.append("smooth_score", smooth_score)
-
     def write_report(self, path, run, force=False):
         # Set filename with method name and run number
         filename = path + "/" + str(run) + "/" + str(run) + ".dat"

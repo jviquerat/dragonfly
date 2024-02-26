@@ -73,7 +73,7 @@ class episode(base_trainer):
                         self.lengths = np.append(
                             self.lengths, self.counter.ep_step[cpu]
                         )
-                        self.store_report(cpu)
+                        self.report.store(cpu=cpu, counter=self.counter)
                         self.print_episode()
                         self.renderer.finish(path, run, self.counter.ep, cpu)
                         best = self.counter.reset_ep(cpu)
