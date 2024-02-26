@@ -6,6 +6,7 @@ from dragonfly.src.srl.sae      import *
 from dragonfly.src.srl.vae      import *
 from dragonfly.src.srl.rae      import *
 from dragonfly.src.srl.kpca     import *
+from dragonfly.src.srl.aeConv1D     import *
 
 # Declare factory
 srl_factory = factory()
@@ -17,3 +18,4 @@ srl_factory.register("sae",   sae)
 srl_factory.register("vae",   vae)
 srl_factory.register("rae",   rae)
 srl_factory.register("kpca",  kpca)
+srl_factory.register("aeConv1D",  aeConv1D)
