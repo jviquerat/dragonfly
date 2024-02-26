@@ -187,8 +187,13 @@ class gbuff:
         start, end = self.data[self.names[0]].get_batch_indexes()
 
         # Randomized indices
-        p = np.arange(start, end)
-        if (shuffle): p = np.random.permutation(p)[:size]
+        # We don't use np.random.permutation as it is too expensive
+        # and this function may be called thousands to millions of times
+        # for off-policy agents. Using np.random.randint is almost
+        # as good, as the risk to select twice the same sample
+        # in large buffers is very low, and the impact very limited
+        if (shuffle): p = np.random.randint(start, end, size)
+        else:         p = np.arange(end-start, end)
 
         # Return shuffled fields
         out = {}
