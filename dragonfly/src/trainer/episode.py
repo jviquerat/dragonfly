@@ -89,7 +89,7 @@ class episode(base_trainer):
             # Finalize inner training loop
             self.agent.post_loop()
             # Write report data to file
-            self.write_report(path, run)
+            self.report.write(path, run)
             # Train agent
             self.timer_training.tic()
             size = np.sum(self.lengths[-self.n_ep_train :])

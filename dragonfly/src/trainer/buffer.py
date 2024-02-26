@@ -79,7 +79,7 @@ class buffer(base_trainer):
             # Finalize inner training loop
             self.agent.post_loop(style="buffer")
             # Write report data to file
-            self.write_report(path, run)
+            self.report.write(path, run)
             # Train agent
             self.timer_training.tic()
             btc_size = math.floor(self.size * self.btc_frac)

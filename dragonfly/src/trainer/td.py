@@ -86,7 +86,7 @@ class td(base_trainer):
             # Finalize inner training loop
             self.agent.post_loop()
             # Write report data to file
-            self.write_report(path, run)
+            self.report.write(path, run)
             # Train agent
             self.timer_training.tic()
             self.update.update(self.agent, self.btc_size, self.n_stp_unroll)

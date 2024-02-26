@@ -54,7 +54,7 @@ class report:
                 self.append("smooth_score", smooth_score)
 
     # Write report
-    def write(self, filename, force=False):
+    def _write(self, filename, force=False):
 
         self.count += 1
         if (self.count % self.frequency == 0) or (force == True):
@@ -76,3 +76,8 @@ class report:
 
             # Reset
             self.count = 0
+
+    def write(self, path, run, force=False):
+        # Set filename with method name and run number
+        filename = path + "/" + str(run) + "/" + str(run) + ".dat"
+        self._write(filename, force)
