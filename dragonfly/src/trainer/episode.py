@@ -73,7 +73,9 @@ class episode(base_trainer):
                         self.lengths = np.append(
                             self.lengths, self.counter.ep_step[cpu]
                         )
-                        self.report.store(cpu=cpu, counter=self.counter)
+                        for _ in range(self.counter.ep_step[cpu]):
+                            self.report.store(cpu=cpu, counter=self.counter)
+                            self.counter.step += 1
                         self.print_episode()
                         self.renderer.finish(path, run, self.counter.ep, cpu)
                         best = self.counter.reset_ep(cpu)
@@ -81,7 +83,6 @@ class episode(base_trainer):
                         if best:
                             self.agent.save(name)
                         self.unroll += 1
-                        self.counter.step += self.counter.ep_step[cpu]
                 # Update observation
                 obs = nxt
                 # Reset only finished environments

@@ -43,15 +43,14 @@ class report:
     def avg(self, name, n):
 
         return self.davg[name].avg()
-
+    
     def store(self, cpu: int, counter: counter):
-        for _ in range(counter.ep_step[cpu]):
-            if counter.step % step_report == 0:
-                self.append("step", counter.step)
-                self.append("episode", counter.ep)
-                self.append("score", counter.score[cpu])
-                smooth_score = self.avg("score", n_smooth)
-                self.append("smooth_score", smooth_score)
+        if counter.step % step_report == 0:
+            self.append("step", counter.step)
+            self.append("episode", counter.ep)
+            self.append("score", counter.score[cpu])
+            smooth_score = self.avg("score", n_smooth)
+            self.append("smooth_score", smooth_score)
 
     # Write report
     def _write(self, filename, force=False):
