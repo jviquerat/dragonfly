@@ -224,7 +224,6 @@ class base_trainer:
                 self.report.append("score", self.counter.score[cpu])
                 smooth_score = self.report.avg("score", n_smooth)
                 self.report.append("smooth_score", smooth_score)
-            self.counter.step += 1
 
     def write_report(self, path, run, force=False):
         # Set filename with method name and run number

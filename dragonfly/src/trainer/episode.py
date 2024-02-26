@@ -81,6 +81,7 @@ class episode(base_trainer):
                         if best:
                             self.agent.save(name)
                         self.unroll += 1
+                        self.counter.step += len(self.counter.ep_step[cpu])
                 # Update observation
                 obs = nxt
                 # Reset only finished environments
