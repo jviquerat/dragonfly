@@ -153,6 +153,22 @@ The variance of the normal policy may be parameterized in different ways:
 	\item a learned full covariance matrix $\V{\Sigma}_\text{full}$ (not considered here).
 \end{enumerate}
 
-The performances of the different parameterizations are compared  depicted in the figure \ref{fig:cov} using the \ppo algorithm.
+The performances of the different parameterizations are compared in figure \ref{fig:cov} using the \ppo algorithm.
 
 \input{fig/covariance/covariance}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Parallel off-policy agent}
+
+Off-policy agents typically train once per step, which make them slower to run than on-policy agents (regardless of final performance). Here we  compare two different approaches:
+
+\begin{enumerate}
+	\item sequential environment with one update per step,
+	\item sequential environment with \codeinline{n_stp_unroll} updates every \codeinline{n_stp_unroll} steps.
+\end{enumerate}
+
+The performances of the different approaches are compared in figure \ref{fig:n_stp_unroll} using the \tdt algorithm. Regarding pure CPU performance, the baseline run takes approximately $530$ seconds, going down to $440$ seconds for \codeinline{n_stp_unroll}$\, = 16$, and $390$ seconds for \codeinline{n_stp_unroll}$\, = 64$.
+
+\input{fig/n_stp_unroll/n_stp_unroll}
