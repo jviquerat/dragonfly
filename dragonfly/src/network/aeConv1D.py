@@ -32,22 +32,25 @@ class aeConv1D(base_network):
         # Define encoder
         for l in range(len(self.arch)):
             self.net.append(Conv1D(filters=self.arch[l],
-                                   kernel_size=4,
-                                   strides=2,
+                                   kernel_size=3,
+                                   strides=1,
                                    padding="valid",
                                    input_shape=[50,1],
                                    activation = self.actv))
+        self.net.append(Reshape([1,-1]))
         self.net.append(Dense(self.lat_dim, activation = "linear"))
 
         # Define decoder
         for l in range(len(self.arch)):
             self.net.append(Conv1DTranspose(filters=self.arch[-l],
-                                  kernel_size=4,
-                                  strides=2,
+                                  kernel_size=3,
+                                  strides=1,
                                   padding="valid",
-                                  input_shape=[None,self.lat_dim],
+                                  input_shape=[self.lat_dim,1],
                                   activation = self.actv))
+        self.net.append(Reshape([1,-1]))
         self.net.append(Dense(self.inp_dim, activation = "linear"))
+
 
         # Initialize weights
         dummy = self.call(tf.ones([1,self.inp_dim]))
@@ -63,19 +66,28 @@ class aeConv1D(base_network):
         i   = 0
         out = []
 
+        var = Reshape([self.inp_dim,1])(var)
+        
         # Compute encoder
         for l in range(len(self.arch)):
             var = self.net[i](var)
             i  += 1
         var = self.net[i](var)
         i += 1
-
+        var = self.net[i](var)
+        i += 1
+                        
+        var = Reshape([self.lat_dim,1])(var)
+                
         # Compute decoder
         for l in range(len(self.arch)):
             var = self.net[i](var)
             i  += 1
         var = self.net[i](var)
         i += 1
+        var = self.net[i](var)
+
+        var = Reshape([self.inp_dim])(var)
 
         out.append(var)
 
@@ -89,13 +101,18 @@ class aeConv1D(base_network):
         i   = 0
         out = []
 
+        var = Reshape([self.inp_dim,1])(var)
+
         # Compute encoder
         for l in range(len(self.arch)):
             var = self.net[i](var)
             i  += 1
-        lat = self.net[i](var)
-        i += 1
 
+        var = self.net[i](var)
+        i += 1
+        lat = self.net[i](var)
+        lat = Reshape([self.lat_dim])(lat)
+        
         out.append(lat)
 
         return out

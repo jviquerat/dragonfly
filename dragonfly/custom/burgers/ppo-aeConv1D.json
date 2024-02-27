@@ -8,12 +8,12 @@
     "naming": {
         "env": true,
         "agent": true,
-        "tag": false,
-        "time": false
+        "tag": "cnn",
+        "time": true
     },
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 200000,
+    "n_stp_max": 500000,
     "trainer": {
         "style": "buffer",
         "buff_size": 2000,
@@ -27,13 +27,13 @@
     "agent": {
 	      "srl": {
 	          "type": "aeConv1D",
-            "latent_dim": 10,
+            "latent_dim": 5,
 	          "update_freq": 10000,
 	          "n_epochs" : 512,
             "n_updates": 10,
 	          "batch_size": 100,
             "network": {
-                "arch": [64,32],
+                "arch": [20,1],
                 "actv": "relu"
             },
             "optimizer": {
