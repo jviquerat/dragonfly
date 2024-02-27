@@ -6,7 +6,6 @@ from dragonfly.src.core.constants import *
 from dragonfly.src.utils.ema import *
 from dragonfly.src.utils.counter import *
 
-
 ###############################################
 ### Report buffer, used to store learning metrics
 # frequency : writing frequency (in number of calls to write() )
@@ -43,7 +42,7 @@ class report:
     def avg(self, name, n):
 
         return self.davg[name].avg()
-    
+
     def store(self, cpu: int, counter: counter):
         if counter.step % step_report == 0:
             self.append("step", counter.step)
