@@ -71,7 +71,9 @@ class td(base_trainer):
                 # Finish if some episodes are done
                 for cpu in range(mpi.size):
                     if dne[cpu]:
-                        self.store_report(cpu)
+                        for _ in range(self.counter.ep_step[cpu]):
+                            self.report.store(cpu=cpu, counter=self.counter)
+                            self.counter.step += 1
                         self.print_episode()
                         self.renderer.finish(path, run, self.counter.ep, cpu)
                         best = self.counter.reset_ep(cpu)
@@ -85,7 +87,7 @@ class td(base_trainer):
             # Finalize inner training loop
             self.agent.post_loop()
             # Write report data to file
-            self.write_report(path, run)
+            self.report.write(path, run)
             # Train agent
             self.timer_training.tic()
             self.update.update(self.agent, self.btc_size, self.n_stp_unroll)

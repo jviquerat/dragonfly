@@ -216,21 +216,6 @@ class base_trainer:
                 end=end,
             )
 
-    def store_report(self, cpu):
-        for i in range(self.counter.ep_step[cpu]):
-            if self.counter.step % step_report == 0:
-                self.report.append("step", self.counter.step)
-                self.report.append("episode", self.counter.ep)
-                self.report.append("score", self.counter.score[cpu])
-                smooth_score = self.report.avg("score", n_smooth)
-                self.report.append("smooth_score", smooth_score)
-            self.counter.step += 1
-
-    def write_report(self, path, run, force=False):
-        # Set filename with method name and run number
-        filename = path + "/" + str(run) + "/" + str(run) + ".dat"
-        self.report.write(filename, force)
-
     def end_training(self, path, run):
         """
         Finalizes a training by printing a summary, writing reports, and closing timers.
@@ -247,7 +232,7 @@ class base_trainer:
         # Last printing
         self.print_episode()
         # Last writing
-        self.write_report(path, run, force=True)
+        self.report.write(path, run, force=True)
         # Close timers and show
         self.timer_global.toc()
         self.timer_global.show()
