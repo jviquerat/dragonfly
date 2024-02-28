@@ -8,7 +8,7 @@
     "naming": {
         "env": true,
         "agent": true,
-        "tag": false,
+        "tag": "rae",
         "time": false
     },
     "n_avg": 3,

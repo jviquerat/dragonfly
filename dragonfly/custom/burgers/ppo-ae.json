@@ -13,7 +13,7 @@
     },
     "n_avg": 3,
     "n_cpu": 1,
-    "n_stp_max": 200000,
+    "n_stp_max": 500000,
     "trainer": {
         "style": "buffer",
         "buff_size": 2000,
@@ -27,7 +27,7 @@
     "agent": {
 	      "srl": {
 	          "type": "sae",
-            "latent_dim": 10,
+            "latent_dim": 5,
 	          "update_freq": 10000,
 	          "n_epochs" : 512,
             "n_updates": 10,

@@ -33,8 +33,8 @@
             "n_updates": 10,
 	          "batch_size": 100,
             "network": {
-                "arch": [20,1],
-                "actv": "relu"
+                "arch": [25,1],
+                "actv": "tanh"
             },
             "optimizer": {
                 "type": "adam",
