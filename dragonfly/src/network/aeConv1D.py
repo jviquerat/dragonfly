@@ -31,23 +31,23 @@ class aeConv1D(base_network):
 
         # Define encoder
         for l in range(len(self.arch)):
-            self.net.append(Conv1D(filters=self.arch[l],
-                                   kernel_size=3,
-                                   strides=1,
-                                   padding="valid",
-                                   input_shape=[50,1],
-                                   activation = self.actv))
+            self.net.append(Conv1D(filters     = self.arch[l],
+                                   kernel_size = 3,
+                                   strides     = 1,
+                                   padding     = "valid",
+                                   input_shape = [50,1],
+                                   activation  = self.actv))
         self.net.append(Reshape([1,-1]))
         self.net.append(Dense(self.lat_dim, activation = "linear"))
 
         # Define decoder
         for l in range(len(self.arch)):
-            self.net.append(Conv1DTranspose(filters=self.arch[-l],
-                                  kernel_size=3,
-                                  strides=1,
-                                  padding="valid",
-                                  input_shape=[self.lat_dim,1],
-                                  activation = self.actv))
+            self.net.append(Conv1DTranspose(filters     = self.arch[-l],
+                                            kernel_size = 3,
+                                            strides     = 1,
+                                            padding     = "valid",
+                                            input_shape = [self.lat_dim,1],
+                                            activation  = self.actv))
         self.net.append(Reshape([1,-1]))
         self.net.append(Dense(self.inp_dim, activation = "linear"))
 
