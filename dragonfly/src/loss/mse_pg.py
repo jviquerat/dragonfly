@@ -9,16 +9,15 @@ class mse_pg():
 
     # Train
     @tf.function
-    def train(self, obs, tgt, v):
+    def train(self, obs, tgt, net, opt):
         with tf.GradientTape() as tape:
 
             # Compute loss
-            val  = tf.cast(v.forward(obs), tf.float32)
-            val  = tf.reshape(val, [tf.size(tgt)])
+            val  = tf.reshape(net.call(obs), [tf.size(tgt)])
             diff = tf.square(tgt - val)
             loss = tf.reduce_mean(diff)
 
             # Apply gradients
-            val_var = v.trainables
-            grads   = tape.gradient(loss, val_var)
-        v.opt.apply_grads(zip(grads, val_var))
+            var   = net.trainables()
+            grads = tape.gradient(loss, var)
+        opt.apply_grads(zip(grads, var))

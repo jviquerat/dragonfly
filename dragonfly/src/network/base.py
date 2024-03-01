@@ -30,3 +30,9 @@ class base_network(Model):
     # Reset weights
     def reset(self):
         raise NotImplementedError
+
+
+    # Return trainable parameters
+    def trainables(self):
+
+        return self.trainable_weights

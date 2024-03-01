@@ -34,13 +34,10 @@ class categorical(base_policy):
                                           pms     = pms.network)
             self.copy_tgt()
 
-        # Define trainables
-        self.trainables = self.net.trainable_weights
-
         # Define optimizer
         self.opt = opt_factory.create(pms.optimizer.type,
                                       pms       = pms.optimizer,
-                                      grad_vars = self.net.trainable_weights)
+                                      grad_vars = self.net.trainables())
 
         # Define loss
         self.loss = loss_factory.create(pms.loss.type,

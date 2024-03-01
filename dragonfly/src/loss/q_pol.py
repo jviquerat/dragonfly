@@ -11,16 +11,17 @@ class q_pol():
 
     # Train
     @tf.function
-    def train(self, obs, p, q):
+    def train(self, obs, p, q, opt):
         with tf.GradientTape() as tape:
 
             # Compute loss
-            act  = p.forward(obs)
+            lgt  = tf.shape(obs)[0]
+            act  = tf.reshape(p.call(obs), [lgt,-1])
             cct  = tf.concat([obs,act], axis=-1)
-            tgt  = q.forward(cct)
+            tgt  = tf.reshape(q.call(cct), [lgt,-1])
             loss =-tf.reduce_mean(tgt)
 
             # Apply gradients
-            val_var = p.trainables
-            grads   = tape.gradient(loss, val_var)
-        p.opt.apply_grads(zip(grads, val_var))
+            var   = p.trainables()
+            grads = tape.gradient(loss, var)
+        opt.apply_grads(zip(grads, var))

@@ -19,7 +19,7 @@ class surrogate():
 
     # Train
     @tf.function
-    def train(self, obs, adv, act, plg, p):
+    def train(self, obs, adv, act, plg, p, opt):
         with tf.GradientTape() as tape:
 
             # Compute ratio of probabilities
@@ -36,8 +36,7 @@ class surrogate():
             loss_surrogate =-tf.reduce_mean(tf.minimum(p1,p2))
 
             # Compute entropy loss
-            entropy = pdf.entropy()
-            entropy = tf.reshape(entropy, [-1])
+            entropy = tf.reshape(pdf.entropy(), [-1])
             entropy = tf.reduce_mean(entropy, axis=0)
             loss_entropy =-entropy
 
@@ -45,6 +44,6 @@ class surrogate():
             loss = loss_surrogate + self.ent_coef*loss_entropy
 
             # Apply gradients
-            pol_var = p.trainables
-            grads   = tape.gradient(loss, pol_var)
-        p.opt.apply_grads(zip(grads, pol_var))
+            var   = p.net.trainables()
+            grads = tape.gradient(loss, var)
+        opt.apply_grads(zip(grads, var))

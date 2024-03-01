@@ -34,13 +34,10 @@ class deterministic(base_policy):
                                           pms     = pms.network)
             self.copy_tgt()
 
-        # Define trainables
-        self.trainables = self.net.trainable_weights
-
         # Define optimizers
         self.opt = opt_factory.create(pms.optimizer.type,
                                       pms       = pms.optimizer,
-                                      grad_vars = self.trainables)
+                                      grad_vars = self.net.trainables())
 
         # Define loss
         self.loss = loss_factory.create(pms.loss.type,

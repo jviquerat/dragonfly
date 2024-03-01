@@ -56,6 +56,10 @@ class base_policy():
         self.opt.reset()
         self.pdf = None
 
+        if (self.target):
+            self.tgt.reset()
+            self.copy_tgt()
+
     # Save
     def save(self, filename):
 

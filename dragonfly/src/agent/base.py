@@ -62,7 +62,7 @@ class base_agent_on_policy(base_agent):
 
         # Get actions and associated log-prob
         self.timer_actions.tic()
-        act, lgp = self.p_net.actions(obs)
+        act, lgp = self.p.actions(obs)
 
         # Check for NaNs
         if (np.isnan(act).any()):
@@ -79,14 +79,14 @@ class base_agent_on_policy(base_agent):
     # Control (deterministic actions)
     def control(self, obs):
 
-        return self.p_net.control(obs)
+        return self.p.control(obs)
 
     # Finalize buffers before training
     def returns(self, obs, nxt, rwd, trm):
 
         # Get current and next values
-        cval = self.v_net.values(obs)
-        nval = self.v_net.values(nxt)
+        cval = self.v.values(obs)
+        nval = self.v.values(nxt)
 
         # Compute advantages
         tgt, adv = self.retrn.compute(rwd, cval, nval, trm)
@@ -122,8 +122,8 @@ class base_agent_on_policy(base_agent):
     # Agent reset
     def reset(self):
 
-        self.p_net.reset()
-        self.v_net.reset()
+        self.p.reset()
+        self.v.reset()
         self.buff.reset()
         self.gbuff.reset()
 
@@ -137,13 +137,12 @@ class base_agent_on_policy(base_agent):
     # Save agent parameters
     def save(self, filename):
 
-        self.p_net.save(filename)
+        self.p.save(filename)
 
     # Load agent parameters
     def load(self, filename):
 
-        self.p_net.load(filename)
-
+        self.p.load(filename)
 
 ###############################################
 ### Base for off-policy agents
@@ -162,7 +161,7 @@ class base_agent_off_policy(base_agent):
     # Control (deterministic actions)
     def control(self, obs):
 
-        return self.p_net.control(obs)
+        return self.p.control(obs)
 
     # Prepare training data
     def prepare_data(self, size):
@@ -191,9 +190,9 @@ class base_agent_off_policy(base_agent):
      # Save agent parameters
     def save(self, filename):
 
-        self.p_net.save(filename)
+        self.p.save(filename)
 
     # Load agent parameters
     def load(self, filename):
 
-        self.p_net.load(filename)
+        self.p.load(filename)
