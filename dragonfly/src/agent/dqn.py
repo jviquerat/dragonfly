@@ -31,15 +31,11 @@ class dqn(base_agent_off_policy):
             error("dqn", "__init__",
                   "Loss type for dqn agent is not mse_dqn")
 
-        self.q_net = val_factory.create(pms.value.type,
-                                        inp_dim = obs_dim,
-                                        out_dim = act_dim,
-                                        pms     = pms.value)
-        self.q_tgt = val_factory.create(pms.value.type,
-                                        inp_dim = obs_dim,
-                                        out_dim = act_dim,
-                                        pms     = pms.value)
-        self.q_tgt.net.set_weights(self.q_net.net.get_weights())
+        self.q = val_factory.create(pms.value.type,
+                                    inp_dim = obs_dim,
+                                    out_dim = act_dim,
+                                    pms     = pms.value,
+                                    target  = True)
 
         # Create buffers
         self.create_buffers(act_dim=1)
@@ -65,7 +61,7 @@ class dqn(base_agent_off_policy):
                 act[i] = random.randrange(0, self.act_dim)
             else:
                 cob = tf.cast([obs[i]], tf.float32)
-                val = self.q_net.values(cob)
+                val = self.q.values(cob)
                 act[i] = np.argmax(val)
 
         act = np.reshape(act, (-1))
@@ -76,7 +72,7 @@ class dqn(base_agent_off_policy):
     # Control (deterministic actions)
     def control(self, obs):
 
-        val = self.q_net.values(obs)
+        val = self.q.values(obs)
         act = np.reshape(np.argmax(val), (-1))
 
         return act
@@ -106,12 +102,13 @@ class dqn(base_agent_off_policy):
         trm  = tf.reshape(trm, [size,-1])
         act  = tf.cast(act, tf.int32)
 
-        self.q_net.loss.train(obs, nxt, act, rwd, trm,
-                              self.gamma, self.q_net, self.q_tgt)
+        self.q.loss.train(obs, nxt, act, rwd, trm,
+                          self.gamma, self.q.net,
+                          self.q.net, self.q.opt)
 
         # Update target networks
         if (self.tgt_step == self.tgt_update):
-            self.q_tgt.net.set_weights(self.q_net.net.get_weights())
+            self.q.copy_tgt()
             self.tgt_step  = 0
         else:
             self.tgt_step += 1
@@ -120,9 +117,7 @@ class dqn(base_agent_off_policy):
     def reset(self):
 
         self.tgt_step = 0
-        self.q_net.reset()
-        self.q_tgt.reset()
-        self.q_tgt.net.set_weights(self.q_net.net.get_weights())
+        self.q.reset()
         self.buff.reset()
         self.gbuff.reset()
         self.eps.reset()
@@ -130,9 +125,9 @@ class dqn(base_agent_off_policy):
     # Save parameters
     def save(self, filename):
 
-        self.q_net.save(filename)
+        self.q.save(filename)
 
     # Load agent parameters
     def load(self, filename):
 
-        self.q_net.load(filename)
+        self.q.load(filename)

@@ -34,19 +34,15 @@ class td3(base_agent_off_policy):
             error("td3", "__init__",
                   "Policy loss type for td3 agent is not q_pol")
 
-        self.p_net = pol_factory.create(pms.policy.type,
-                                        obs_dim = obs_dim,
-                                        act_dim = act_dim,
-                                        pms     = pms.policy)
-        self.p_tgt = pol_factory.create(pms.policy.type,
-                                        obs_dim = obs_dim,
-                                        act_dim = act_dim,
-                                        pms     = pms.policy)
-        self.p_tgt.net.set_weights(self.p_net.net.get_weights())
+        self.p = pol_factory.create(pms.policy.type,
+                                    obs_dim = obs_dim,
+                                    act_dim = act_dim,
+                                    pms     = pms.policy,
+                                    target  = True)
 
         # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
-        self.pol_dim = self.p_net.store_dim
+        self.pol_dim = self.p.store_dim
 
         # Build values
         if (pms.value.type != "q_value"):
@@ -57,24 +53,16 @@ class td3(base_agent_off_policy):
             error("td3", "__init__",
                   "Loss type for td3 agent is not mse_td3")
 
-        self.q_net1 = val_factory.create(pms.value.type,
-                                        inp_dim = obs_dim+act_dim,
-                                        out_dim = 1,
-                                        pms     = pms.value)
-        self.q_net2 = val_factory.create(pms.value.type,
-                                        inp_dim = obs_dim+act_dim,
-                                        out_dim = 1,
-                                        pms     = pms.value)
-        self.q_tgt1 = val_factory.create(pms.value.type,
-                                        inp_dim = obs_dim+act_dim,
-                                        out_dim = 1,
-                                        pms     = pms.value)
-        self.q_tgt2 = val_factory.create(pms.value.type,
-                                        inp_dim = obs_dim+act_dim,
-                                        out_dim = 1,
-                                        pms     = pms.value)
-        self.q_tgt1.net.set_weights(self.q_net1.net.get_weights())
-        self.q_tgt2.net.set_weights(self.q_net2.net.get_weights())
+        self.q1 = val_factory.create(pms.value.type,
+                                     inp_dim = obs_dim+act_dim,
+                                     out_dim = 1,
+                                     pms     = pms.value,
+                                     target  = True)
+        self.q2 = val_factory.create(pms.value.type,
+                                     inp_dim = obs_dim+act_dim,
+                                     out_dim = 1,
+                                     pms     = pms.value,
+                                     target  = True)
 
         # Polyak averager
         self.polyak = polyak(self.rho)
@@ -97,7 +85,7 @@ class td3(base_agent_off_policy):
         if (self.step < self.n_warmup):
             act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
         else:
-            act   = self.p_net.actions(obs)
+            act   = self.p.actions(obs)
             noise = np.random.normal(0.0, self.sigma_act,
                                      (self.n_cpu, self.act_dim))
             act  += noise
@@ -124,42 +112,38 @@ class td3(base_agent_off_policy):
         trm = self.data["trm"][start:end]
 
         size = end - start
-        act  = self.p_net.reshape_actions(act)
+        act  = self.p.reshape_actions(act)
         rwd  = tf.reshape(rwd, [size,-1])
         trm  = tf.reshape(trm, [size,-1])
 
         # Train q network
-        self.q_net1.loss.train(obs, nxt, act, rwd, trm,
-                               self.gamma, self.sigma_tgt, self.noise_clip,
-                               self.p_tgt, self.q_net1, self.q_tgt1, self.q_tgt2)
-        self.q_net2.loss.train(obs, nxt, act, rwd, trm,
-                               self.gamma, self.sigma_tgt, self.noise_clip,
-                               self.p_tgt, self.q_net2, self.q_tgt1, self.q_tgt2)
+        self.q1.loss.train(obs, nxt, act, rwd, trm, self.gamma,
+                           self.sigma_tgt, self.noise_clip,
+                           self.p.tgt, self.q1.net, self.q1.tgt,
+                           self.q2.tgt, self.q1.opt)
+        self.q2.loss.train(obs, nxt, act, rwd, trm, self.gamma,
+                           self.sigma_tgt, self.noise_clip,
+                           self.p.tgt, self.q2.net, self.q1.tgt,
+                           self.q2.tgt, self.q2.opt)
 
         # Train policy network
         self.p_step += 1
         if (self.p_step == self.p_update):
             self.p_step = 0
-            self.p_net.loss.train(obs, self.p_net, self.q_net1)
+            self.p.loss.train(obs, self.p.net, self.q1.net, self.p.opt)
 
             # Update target networks
-            self.polyak.average(self.p_net.net,  self.p_tgt.net)
-            self.polyak.average(self.q_net1.net, self.q_tgt1.net)
-            self.polyak.average(self.q_net2.net, self.q_tgt2.net)
+            self.polyak.average(self.p.net,  self.p.tgt)
+            self.polyak.average(self.q1.net, self.q1.tgt)
+            self.polyak.average(self.q2.net, self.q2.tgt)
 
     # Reset
     def reset(self):
 
         self.step = 0
         self.p_step = 0
-        self.p_net.reset()
-        self.q_net1.reset()
-        self.q_net2.reset()
-        self.p_tgt.reset()
-        self.q_tgt1.reset()
-        self.q_tgt2.reset()
-        self.p_tgt.net.set_weights(self.p_net.net.get_weights())
-        self.q_tgt1.net.set_weights(self.q_net1.net.get_weights())
-        self.q_tgt2.net.set_weights(self.q_net2.net.get_weights())
+        self.p.reset()
+        self.q1.reset()
+        self.q2.reset()
         self.buff.reset()
         self.gbuff.reset()

@@ -17,9 +17,14 @@ class base_value():
         raise NotImplementedError
 
     # Network forward pass
-    def forward(self, state):
+    def forward(self, x):
 
-        return self.net.call(state)[0]
+        return self.net.call(tf.cast(x, tf.float32))[0]
+
+    # Get values
+    def values(self, x):
+
+        return np.reshape(self.forward(x), (-1,self.out_dim))
 
     # Save network weights
     def save_weights(self):
@@ -41,6 +46,10 @@ class base_value():
 
         self.net.reset()
         self.opt.reset()
+
+        if (self.target):
+            self.tgt.reset()
+            self.copy_tgt()
 
     # Save
     def save(self, filename):

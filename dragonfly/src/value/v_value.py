@@ -30,26 +30,11 @@ class v_value(base_value):
                                           pms     = pms.network)
             self.copy_tgt()
 
-        # Define trainables
-        self.trainables = self.net.trainable_weights
-
         # Define optimizer
         self.opt = opt_factory.create(pms.optimizer.type,
                                       pms       = pms.optimizer,
-                                      grad_vars = self.trainables)
+                                      grad_vars = self.net.trainables())
 
         # Define loss
         self.loss = loss_factory.create(pms.loss.type,
                                         pms = pms.loss)
-
-    # Get values
-    def values(self, x):
-
-        # Cast
-        x = tf.cast(x, tf.float32)
-
-        # Predict values
-        v = np.array(self.forward(x))
-        v = np.reshape(v, (-1,self.out_dim))
-
-        return v
