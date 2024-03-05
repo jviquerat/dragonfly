@@ -8,7 +8,7 @@
     "naming": {
         "env": true,
         "agent": true,
-        "tag": "cnn",
+        "tag": "aeConv1D",
         "time": true
     },
     "n_avg": 3,
@@ -33,7 +33,7 @@
             "n_updates": 10,
 	          "batch_size": 100,
             "network": {
-                "arch": [25,1],
+                "arch": [32,16],
                 "actv": "tanh"
             },
             "optimizer": {
