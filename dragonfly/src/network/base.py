@@ -10,7 +10,7 @@ warnings.filterwarnings('ignore',category=FutureWarning)
 import tensorflow                    as     tf
 import tensorflow.keras              as     tk
 from   tensorflow.keras              import Model
-from   tensorflow.keras.layers       import Dense, Conv1D, Conv1DTranspose, Reshape, Flatten, MaxPooling1D, UpSampling1D
+from   tensorflow.keras.layers       import Dense, Conv1D, Conv1DTranspose, Reshape, Flatten, MaxPooling1D, UpSampling1D, AveragePooling1D
 from   tensorflow.keras.initializers import Orthogonal, LecunNormal, Zeros
 
 # Custom imports

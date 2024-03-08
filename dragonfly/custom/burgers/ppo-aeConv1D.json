@@ -8,7 +8,7 @@
     "naming": {
         "env": true,
         "agent": true,
-        "tag": "aeConv1D",
+        "tag": "aeConv1D-kernel5",
         "time": true
     },
     "n_avg": 3,
@@ -28,13 +28,13 @@
 	      "srl": {
 	          "type": "aeConv1D",
             "latent_dim": 5,
-	          "update_freq": 10000,
+	          "update_freq": 7500,
 	          "n_epochs" : 512,
-            "n_updates": 10,
-	          "batch_size": 100,
+            "n_updates": 15,
+	          "batch_size": 32,
             "network": {
                 "arch": [32,16],
-                "actv": "tanh"
+                "actv": "selu"
             },
             "optimizer": {
                 "type": "adam",

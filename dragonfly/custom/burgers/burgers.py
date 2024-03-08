@@ -26,7 +26,7 @@ class burgers(gym.Env):
         self.nx         = 500      # nb of discretization pts
         self.t_max      = 10.0     # total simulation time
         self.dt_act     = 0.05     # action timestep
-        self.n_obs_pts  = 50       # nb of observation pts
+        self.n_obs_pts  = 20       # nb of observation pts
         self.amp        = amp      # action scaling
         self.sigma      = sigma    # variance of noise
         self.u_target   = u_target # target value
