@@ -1,6 +1,11 @@
+# Custom imports
 from dragonfly.src.network.base import *
 
-
+###############################################
+### Fully-connected network class
+### inp_dim  : dimension of input  layer
+### out_dim  : dimension of output layer
+### pms      : network parameters
 class d2rl(base_network):
     def __init__(self, inp_dim, out_dim, pms):
 
