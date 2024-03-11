@@ -18,10 +18,8 @@ class tanh_normal(normal_diag):
         mu, sg = self.forward(obs)
         pdf    = tfd.MultivariateNormalDiag(loc        = mu,
                                             scale_diag = sg)
-        act = pdf.sample(1)
-        act = tf.reshape(act, [-1,self.store_dim])
-        lgp = pdf.log_prob(act)
-        lgp = tf.reshape(lgp, [-1,1])
+        act = tf.reshape(pdf.sample(1), [-1,self.store_dim])
+        lgp = tf.reshape(pdf.log_prob(act), [-1,1])
 
         tanh_act = tf.tanh(act)
 

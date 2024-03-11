@@ -38,9 +38,6 @@ class beta(base_policy):
                                           pms     = pms.network)
             self.copy_tgt()
 
-        # Define trainables
-        self.trainables = self.net.trainable_weights
-
         # Define optimizers
         self.opt = opt_factory.create(pms.optimizer.type,
                                       pms       = pms.optimizer,

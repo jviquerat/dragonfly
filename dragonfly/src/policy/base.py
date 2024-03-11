@@ -11,8 +11,28 @@ from dragonfly.src.loss.loss           import *
 ###############################################
 ### Base policy
 class base_policy():
-    def __init__(self):
-        pass
+    def __init__(self, pms):
+
+        self.net = net_factory.create(pms.network.type,
+                                      inp_dim = self.obs_dim,
+                                      out_dim = self.out_dim,
+                                      pms     = pms.network)
+
+        if (self.target):
+            self.tgt = net_factory.create(pms.network.type,
+                                          inp_dim = self.obs_dim,
+                                          out_dim = [self.dim],
+                                          pms     = pms.network)
+            self.copy_tgt()
+
+        # Define optimizer
+        self.opt = opt_factory.create(pms.optimizer.type,
+                                      pms       = pms.optimizer,
+                                      grad_vars = self.net.trainables())
+
+        # Define loss
+        self.loss = loss_factory.create(pms.loss.type,
+                                        pms = pms.loss)
 
     # Get actions
     def actions(self, obs):
@@ -75,3 +95,37 @@ class base_policy():
     def copy_tgt(self):
 
         self.tgt.set_weights(self.net.get_weights())
+
+    # Reshape actions
+    def reshape_actions(self, act):
+
+        return tf.reshape(act, [-1, self.act_dim])
+
+###############################################
+### Base policy for normal laws
+class base_normal(base_policy):
+    def __init__(self, pms):
+
+        super().__init__(pms)
+
+    # Get actions
+    def actions(self, obs):
+
+        act, lgp = self.sample(tf.cast(obs, tf.float32))
+        act      = np.reshape(act.numpy(), (-1,self.store_dim))
+        lgp      = np.reshape(lgp.numpy(), (-1))
+
+        return act, lgp
+
+    # Sample actions
+    @tf.function
+    def sample(self, obs):
+
+        # Generate pdf
+        pdf = self.compute_pdf(obs)
+
+        # Sample actions
+        act = tf.reshape(pdf.sample(1), [-1,self.store_dim])
+        lgp = tf.reshape(pdf.log_prob(act), [-1,1])
+
+        return act, lgp
