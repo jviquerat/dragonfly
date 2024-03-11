@@ -6,13 +6,14 @@ from dragonfly.src.policy.base import *
 ### obs_dim : input  dimension
 ### act_dim : output dimension
 ### pms     : parameters
-class normal_const(base_policy):
+class normal_const(base_normal):
     def __init__(self, obs_dim, act_dim, pms, target=False):
 
         # Fill structure
         self.act_dim     = act_dim
         self.obs_dim     = obs_dim
         self.dim         = self.act_dim
+        self.out_dim     = [self.dim]
         self.store_dim   = self.act_dim
         self.store_type  = float
         self.sigma       = pms.sigma
@@ -23,61 +24,16 @@ class normal_const(base_policy):
             warning("normal", "__init__",
                     "Final activation for mean of policy is not tanh")
 
-        # Define and init network
-        self.net = net_factory.create(pms.network.type,
-                                      inp_dim = obs_dim,
-                                      out_dim = [self.dim],
-                                      pms     = pms.network)
-
-        if (self.target):
-            self.tgt = net_factory.create(pms.network.type,
-                                          inp_dim = obs_dim,
-                                          out_dim = [self.dim],
-                                          pms     = pms.network)
-            self.copy_tgt()
-
-        # Define optimizers
-        self.opt = opt_factory.create(pms.optimizer.type,
-                                      pms       = pms.optimizer,
-                                      grad_vars = self.net.trainables())
-
-        # Define loss
-        self.loss = loss_factory.create(pms.loss.type,
-                                        pms = pms.loss)
-
-    # Get actions
-    def actions(self, obs):
-
-        obs      = tf.cast(obs, tf.float32)
-        act, lgp = self.sample(obs)
-        act      = np.reshape(act.numpy(), (-1,self.store_dim))
-        lgp      = np.reshape(lgp.numpy(), (-1))
-
-        return act, lgp
+        # Init from base class
+        super().__init__(pms)
 
     # Control (deterministic actions)
     def control(self, obs):
 
-        obs = tf.cast(obs, tf.float32)
-        mu  = self.forward(obs)
+        mu  = self.forward(tf.cast(obs, tf.float32))
         act = np.reshape(mu.numpy(), (-1,self.store_dim))
 
         return act
-
-    # Sample actions
-    @tf.function
-    def sample(self, obs):
-
-        # Generate pdf
-        pdf = self.compute_pdf(obs)
-
-        # Sample actions
-        act = pdf.sample(1)
-        act = tf.reshape(act, [-1,self.store_dim])
-        lgp = pdf.log_prob(act)
-        lgp = tf.reshape(lgp, [-1,1])
-
-        return act, lgp
 
     # Compute pdf
     def compute_pdf(self, obs):
@@ -95,12 +51,4 @@ class normal_const(base_policy):
     @tf.function
     def forward(self, state):
 
-        out = self.net.call(state)
-        mu  = out
-
-        return mu
-
-    # Reshape actions
-    def reshape_actions(self, act):
-
-        return tf.reshape(act, [-1, self.act_dim])
+        return self.net.call(state)

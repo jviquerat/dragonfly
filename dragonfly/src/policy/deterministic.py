@@ -13,6 +13,7 @@ class deterministic(base_policy):
         self.act_dim    = act_dim
         self.obs_dim    = obs_dim
         self.dim        = self.act_dim
+        self.out_dim    = [self.dim]
         self.store_dim  = self.act_dim
         self.store_type = float
         self.target     = target
@@ -22,32 +23,13 @@ class deterministic(base_policy):
             warning("normal", "__init__",
                     "Final activation for network of deterministic policy is not tanh")
 
-        self.net = net_factory.create(pms.network.type,
-                                      inp_dim = obs_dim,
-                                      out_dim = [self.dim],
-                                      pms     = pms.network)
-
-        if (self.target):
-            self.tgt = net_factory.create(pms.network.type,
-                                          inp_dim = obs_dim,
-                                          out_dim = [self.dim],
-                                          pms     = pms.network)
-            self.copy_tgt()
-
-        # Define optimizers
-        self.opt = opt_factory.create(pms.optimizer.type,
-                                      pms       = pms.optimizer,
-                                      grad_vars = self.net.trainables())
-
-        # Define loss
-        self.loss = loss_factory.create(pms.loss.type,
-                                        pms = pms.loss)
+        # Init from base class
+        super().__init__(pms)
 
     # Get actions
     def actions(self, obs):
 
-        obs   = tf.cast(obs, tf.float32)
-        act   = self.forward(obs)
+        act   = self.forward(tf.cast(obs, tf.float32))
         act   = np.reshape(act.numpy(), (-1,self.store_dim))
 
         return act
@@ -55,11 +37,7 @@ class deterministic(base_policy):
     # Control (deterministic actions)
     def control(self, obs):
 
-        obs = tf.cast(obs, tf.float32)
-        act = self.forward(obs)
-        act = np.reshape(act.numpy(), (-1,self.store_dim))
-
-        return act
+        return self.actions(obs)
 
     # Networks forward pass
     @tf.function
@@ -68,8 +46,3 @@ class deterministic(base_policy):
         out = self.net.call(state)[0]
 
         return out
-
-    # Reshape actions
-    def reshape_actions(self, act):
-
-        return tf.reshape(act, [-1, self.act_dim])
