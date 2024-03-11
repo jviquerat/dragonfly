@@ -7,11 +7,12 @@ from dragonfly.src.value.base import *
 ### out_dim : output dimension
 ### pms     : parameters
 class q_value(base_value):
-    def __init__(self, inp_dim, out_dim, pms):
+    def __init__(self, inp_dim, out_dim, pms, target=False):
 
         # Fill structure
         self.inp_dim = inp_dim
         self.out_dim = out_dim
+        self.target  = target
 
         # Define and init network
         if (pms.network.heads.final[0] != "linear"):
@@ -22,6 +23,13 @@ class q_value(base_value):
                                       inp_dim = self.inp_dim,
                                       out_dim = [self.out_dim],
                                       pms     = pms.network)
+
+        if (self.target):
+            self.tgt = net_factory.create(pms.network.type,
+                                          inp_dim = self.inp_dim,
+                                          out_dim = [self.out_dim],
+                                          pms     = pms.network)
+            self.copy_tgt()
 
         # Define trainables
         self.trainables = self.net.trainable_weights
@@ -46,5 +54,3 @@ class q_value(base_value):
         v = np.reshape(v, (-1,self.out_dim))
 
         return v
-
-
