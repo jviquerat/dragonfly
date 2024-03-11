@@ -1,6 +1,3 @@
-# Generic imports
-import math
-
 # Custom imports
 from dragonfly.src.policy.base import *
 
@@ -10,7 +7,7 @@ from dragonfly.src.policy.base import *
 ### act_dim : output dimension
 ### pms     : parameters
 class normal_full(base_policy):
-    def __init__(self, obs_dim, act_dim, pms):
+    def __init__(self, obs_dim, act_dim, pms, target=False):
 
         # Fill structure
         self.act_dim     = act_dim
@@ -19,6 +16,7 @@ class normal_full(base_policy):
         self.cov_dim     = math.floor(self.dim*(self.dim - 1)/2)
         self.store_dim   = self.act_dim
         self.store_type  = float
+        self.target      = target
 
         self.sigma       = 0.5
         if (hasattr(pms, "sigma")): self.sigma = pms.sigma
@@ -41,6 +39,13 @@ class normal_full(base_policy):
                                       inp_dim = obs_dim,
                                       out_dim = [self.dim, self.dim, self.cov_dim],
                                       pms     = pms.network)
+
+        if (self.target):
+            self.tgt = net_factory.create(pms.network.type,
+                                          inp_dim = obs_dim,
+                                          out_dim = [self.dim, self.dim, self.cov_dim],
+                                          pms     = pms.network)
+            self.copy_tgt()
 
         # Define trainables
         self.trainables = self.net.trainable_weights

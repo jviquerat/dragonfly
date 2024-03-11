@@ -52,3 +52,8 @@ class base_value():
 
         load_status = self.net.load_weights(filename)
         load_status.assert_consumed()
+
+    # Copy net into tgt
+    def copy_tgt(self):
+
+        self.tgt.set_weights(self.net.get_weights())
