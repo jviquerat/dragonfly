@@ -12,7 +12,7 @@
         "tag": false,
         "time": false
     },
-    "n_avg": 5,
+    "n_avg": 3,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
