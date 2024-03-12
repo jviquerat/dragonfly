@@ -38,18 +38,16 @@ class gae():
         tmn = np.where(trm == 2.0, 0.0, trm)
 
         # Compute TD residual
-        dlt    = np.zeros_like(ret)
+        dlt    = np.zeros_like(rwd)
         dlt[:] = ret[:] + gm*tmn[:]*nxt[:] - val[:]
 
         # Compute advantages
-        n   = len(dlt)
-        adv = np.zeros_like(dlt)
-        for t in reversed(range(n-1)):
-            adv[t] = dlt[t] + tmn[t]*gm*lbd*adv[t+1]
+        adv = dlt.copy()
+        for t in reversed(range(len(adv)-1)):
+            adv[t] += gm*lbd*adv[t+1]
 
         # Compute targets
-        tgt  = adv.copy()
-        tgt += val
+        tgt = adv.copy() + val
 
         # Normalize
         if self.ret_norm:
