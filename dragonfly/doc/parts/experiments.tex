@@ -73,23 +73,23 @@ This chapter contains experiments on several technical details of algorithms. Mo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Bootstrapping}
 
-We compare performance on the \ppo algorithm with and without the use of bootstrapping in figure \ref{fig:bootstrap}. There is a clear advantage in using bootstrapping in terms of learning speed and final performance. It is interesting to see that bootstrapping induces an initial lowering in score in the first steps of the \codeinline{lunarlandercontinuous-v2} environment, which also happens repeatedly in figure \ref{fig:gae_lunarlander}. This behavior remains to be explored.
+We compare performance on the \ppo algorithm with and without the use of bootstrapping in figure \ref{fig:bootstrap}, using different types of returns. Overall, bootstrapping provides a nice performance boost on \codeinline{bipedalwalker-v3}, while it does not change much on \codeinline{lunarlandercontinuous-v2}. The performance gain is clearly visible on \mujoco environments (tested here only with \gae).
 
 \input{fig/bootstrap/bootstrap}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Value of \gae $\lambda$}
+\section{Value of \gae $\lambda$ \textcolor{red}{(to reproduce)}}
 
-We compare the performance of \ppo + \gae with different values of the $\lambda$ parameter in figure \ref{fig:ppo_gae}. The usual range proposed in the original paper \cite{gae} is between $0.90$ and $0.99$. Here, we see that both environments behave similarly for $\lambda$ between $0.90$ and $0.98$, but react differently to $\lambda = 0.85$. Details on the \gae derivation are provided in section \ref{section:gae}.
+We compare the performance of \ppo with \gae for different values of the $\lambda$ parameter in figure \ref{fig:ppo_gae}. The usual range proposed in the original paper \cite{gae} is between $0.90$ and $0.99$. Here, we see that both environments behave similarly for $\lambda$ between $0.90$ and $0.98$, but react differently to $\lambda = 0.85$. Details on the \gae derivation are provided in section \ref{section:gae}.
 
 \input{fig/gae/gae}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{\gae vs \cgae}
+\section{\gae vs \cgae \textcolor{red}{(to reproduce)}}
 
 In figure \ref{fig:ppo_cgae}, we compare the performance of the regular \gae with that of \cgae presented in section \ref{section:gae}. As of now, more tests are needed, mostly with shorter episodes, where the effet of the \cgae correction could mostly make a difference.
 
@@ -98,7 +98,7 @@ In figure \ref{fig:ppo_cgae}, we compare the performance of the regular \gae wit
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Entropy bonus}
+\section{Entropy bonus \textcolor{red}{(to reproduce)}}
 
 Policy gradient methods can benefit from the use of an entropy bonus that prevents premature shrinking of the exploration. This method was originally proposed in \cite{williams1991} in the context of reinforcement learning, and re-introduced in deep reinforcement learning in \cite{a2c} and \cite{ppo}. The idea is to add an estimation of the policy entropy to the loss. For the policy gradient loss using advantage, for example, this yields:
 
@@ -142,7 +142,7 @@ We see in figure \ref{fig:ppo_entropy} that, in the case of \codeinline{bipedalw
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Covariance matrix of normal policy}
+\section{Covariance matrix of normal policy \textcolor{red}{(to reproduce)}}
 
 The variance of the normal policy may be parameterized in different ways:
 
@@ -160,7 +160,7 @@ The performances of the different parameterizations are compared in figure \ref{
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Parallel off-policy agent}
+\section{Parallel off-policy agent \textcolor{red}{(to reproduce)}}
 
 Off-policy agents typically train once per step, which make them slower to run than on-policy agents (regardless of final performance). Here we  compare two different approaches:
 

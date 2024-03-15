@@ -81,7 +81,7 @@
             "ret_norm": true
         },
         "termination": {
-            "type": "bootstrap"
+            "type": "regular"
         }
     }
 }
