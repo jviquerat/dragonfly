@@ -1,6 +1,9 @@
 # Generic imports
 import numpy as np
 
+# Custom imports
+from dragonfly.src.utils.ema import *
+
 ###############################################
 ### Data averager class
 ### Used to compute avg+/-std of drl-related fields
@@ -12,6 +15,7 @@ class data_avg():
 
         self.n_stp    = n_stp
         self.n_fields = n_fields
+        self.n_avg    = n_avg
         self.stp  = np.zeros((       n_stp          ), dtype=int)
         self.ep   = np.zeros((n_avg, n_stp          ), dtype=int)
         self.data = np.zeros((n_avg, n_stp, n_fields), dtype=float)
@@ -23,6 +27,15 @@ class data_avg():
         self.ep[run,:] = f[:self.n_stp, 1]
         for field in range(self.n_fields):
             self.data[run,:,field] = f[:self.n_stp,field+2]
+
+    def smooth(self):
+
+        for r in range(self.n_avg):
+            for f in range(self.n_fields):
+                avg = ema(0.01, 50)
+                for i in range(self.n_stp):
+                    avg.add(self.data[r,i,f])
+                    self.data[r,i,f] = avg.avg()
 
     def average(self, filename):
 
