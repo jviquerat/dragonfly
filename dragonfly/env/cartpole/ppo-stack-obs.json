@@ -1,10 +1,10 @@
 {
     "env": {
-        "name": "Hopper-v4",
+        "name": "CartPole-v0",
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0,
-	      "obs_max": 10.0
+        "obs_stack": 4
     },
     "naming": {
         "env": true,
@@ -13,35 +13,35 @@
         "time": false
     },
     "n_avg": 3,
-    "n_stp_max": 1000000,
+    "n_stp_max": 50000,
     "trainer": {
         "style": "buffer",
-        "buff_size": 4000,
+        "buff_size": 128,
         "n_buff": 1,
-        "batch_frac": 0.25,
-        "n_epochs": 32,
-        "render_every": 5000
+        "batch_frac": 0.5,
+        "n_epochs": 16,
+        "render_every": 50000
     },
     "agent": {
         "type": "ppo",
         "policy": {
-            "type": "normal",
+            "type": "categorical",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [64],
+                    "arch": [16,16],
                     "actv": "tanh"
                 },
                 "heads": {
-                    "nb": 2,
-                    "arch": [[64],[64]],
-                    "actv": ["tanh","tanh"],
-                    "final": ["tanh","sigmoid"]
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["tanh"],
+                    "final": ["softmax"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-4,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -55,13 +55,13 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [64,64],
-                    "actv": "relu"
+                    "arch": [16,16],
+                    "actv": "selu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["relu"],
+                    "actv": ["selu"],
                     "final": ["linear"]
                 }
             },
@@ -76,7 +76,7 @@
         },
         "retrn": {
             "type": "gae",
-            "gamma": 0.999,
+            "gamma": 0.99,
             "gae_lambda": 0.95,
             "ret_norm": true
         },

@@ -21,6 +21,7 @@ class environments:
         self.obs_norm  = True
         self.obs_clip  = False
         self.obs_noise = False
+        self.obs_stack = 1
         self.args      = None
 
         if hasattr(pms, "args"):      self.args      = pms.args
@@ -28,6 +29,7 @@ class environments:
         if hasattr(pms, "obs_norm"):  self.obs_norm  = pms.obs_norm
         if hasattr(pms, "obs_clip"):  self.obs_clip  = pms.obs_clip
         if hasattr(pms, "obs_noise"): self.obs_noise = pms.obs_noise
+        if hasattr(pms, "obs_stack"): self.obs_stack = pms.obs_stack
 
         # Generate workers
         self.worker = worker(self.name, self.args, mpi.rank, path)
@@ -47,6 +49,10 @@ class environments:
         # Handle action and observation dimensions
         self.get_dims()
 
+        # Handle possible observation stacking
+        self.obs_base = self.obs_dim
+        self.obs_dim *= self.obs_stack
+
         # Handle actions bounds
         self.get_act_bounds()
         self.act_avg = 0.5*(self.act_max + self.act_min)
@@ -62,6 +68,9 @@ class environments:
                                 self.obs_max)
         self.obs_avg = 0.5*(self.obs_max + self.obs_min)
         self.obs_rng = 0.5*(self.obs_max - self.obs_min)
+
+        # Initialize an observation array for stacking
+        self.nxt = np.zeros((mpi.size, self.obs_stack, self.obs_base))
 
         # Initialize timer
         self.timer_env = timer("env      ")
@@ -85,22 +94,29 @@ class environments:
         # Main process executing
         n, r, d, t = self.worker.step(data[0][1])
 
-        # Receive
-        nxt   = np.empty((mpi.size, self.obs_dim))
+        # Handle arrays
+        for p in range(mpi.size):
+            for s in range(self.obs_stack-1):
+                self.nxt[p,s,:] = self.nxt[p,s+1,:]
+
         rwd   = np.empty((mpi.size))
         done  = np.empty((mpi.size))
         trunc = np.empty((mpi.size))
 
-        data  = mpi.comm.gather((n, r, d, t), root=0)
+        # Receive
+        data = mpi.comm.gather((n, r, d, t), root=0)
 
         for p in range(mpi.size):
             vals       = data[p]
             n, r, d, t = vals[0], vals[1], vals[2], vals[3]
-            n          = self.process_obs(n)
-            nxt  [p]   = np.reshape(n, (self.obs_dim))
-            rwd  [p]   = r
-            done [p]   = bool(d)
-            trunc[p]   = bool(t)
+            nn         = self.process_obs(n)
+
+            self.nxt[p,-1,:] = nn[:]
+            rwd  [p]         = r
+            done [p]         = bool(d)
+            trunc[p]         = bool(t)
+
+        nxt = np.reshape(self.nxt, (mpi.size, self.obs_dim)).copy()
 
         self.timer_env.toc()
 
@@ -117,12 +133,14 @@ class environments:
         obs = self.worker.reset(data[0][1])
 
         # Receive and normalize
-        results = np.empty((mpi.size, self.obs_dim))
-        data    = mpi.comm.gather((obs), root=0)
+        data = mpi.comm.gather((obs), root=0)
         for p in range(mpi.size):
-            results[p] = self.process_obs(data[p])
+            for s in range(self.obs_stack):
+                self.nxt[p,s,:] = self.process_obs(data[p])[:]
 
-        return results
+        nxt = np.reshape(self.nxt, (mpi.size, self.obs_dim)).copy()
+
+        return nxt
 
     # Reset based on a done array
     def reset(self, done, obs_array):
@@ -140,7 +158,10 @@ class environments:
         data = mpi.comm.gather(obs, root=0)
         for p in range(mpi.size):
             if (done[p]):
-                obs_array[p] = self.process_obs(data[p])
+                obs = self.process_obs(data[p])
+                obs_array[p,:] = np.tile(obs, self.obs_stack)[:]
+
+        return obs_array
 
     # Check action type
     def get_action_type(self):
@@ -253,6 +274,7 @@ class environments:
 
     # Process observations
     def process_obs(self, obs):
+
         if (self.obs_clip):
             obs = self.clip_obs(obs)
         if (self.obs_norm):
@@ -265,7 +287,7 @@ class environments:
     # Clip observations
     def clip_obs(self, obs):
 
-        for i in range(self.obs_dim):
+        for i in range(self.obs_base):
             obs[i] = np.clip(obs[i], self.obs_min[i], self.obs_max[i])
 
         return obs
@@ -281,8 +303,8 @@ class environments:
     # Add noise to observations
     def noise_obs(self, obs):
 
-        noise = np.random.normal(0.0, self.obs_noise, self.obs_dim)
-        for i in range(self.obs_dim):
+        noise = np.random.normal(0.0, self.obs_noise, self.obs_base)
+        for i in range(self.obs_base):
             obs[i] += noise[i]
 
         return obs

@@ -76,7 +76,7 @@ class buffer(base_trainer):
                 # Update observation
                 obs = nxt
                 # Reset only finished environments
-                self.env.reset(dne, obs)
+                obs = self.env.reset(dne, obs)
             # Finalize inner training loop
             self.agent.post_loop(style="buffer")
             # Write report data to file
