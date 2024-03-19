@@ -1,9 +1,10 @@
 {
     "env": {
-        "name": "HalfCheetah-v4",
+        "name": "Ant-v4",
         "obs_clip": false,
-        "obs_norm": false,
-        "obs_noise": 0.0
+        "obs_norm": true,
+        "obs_noise": 0.0,
+	      "obs_max": 10.0
     },
     "naming": {
         "env": true,
@@ -18,18 +19,15 @@
         "mem_size": 1000000,
         "btc_size": 100,
         "n_stp_unroll": 100,
-        "render_every": 500000
+        "render_every": 50000
     },
     "agent": {
-        "type": "td3",
+        "type": "ddpg",
         "gamma": 0.99,
         "rho": 0.995,
         "n_warmup": 10000,
         "n_filling": 1000,
-        "p_update": 2,
-        "sigma_act": 0.1,
-        "sigma_tgt": 0.2,
-        "noise_clip": 0.5,
+        "sigma": 0.1,
         "policy": {
             "type": "deterministic",
             "network": {
@@ -47,7 +45,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-4,
                 "grd_clip": null
             },
             "loss": {
@@ -71,11 +69,11 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-4,
                 "grd_clip": null
             },
             "loss": {
-                "type": "mse_td3"
+                "type": "mse_ddpg"
             }
         },
         "termination": {

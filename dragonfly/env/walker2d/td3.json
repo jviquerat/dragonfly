@@ -11,13 +11,13 @@
         "tag": false,
         "time": false
     },
-    "n_avg": 5,
+    "n_avg": 3,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "td",
         "mem_size": 1000000,
-        "btc_size": 128,
-        "n_stp_unroll": 50,
+        "btc_size": 100,
+        "n_stp_unroll": 100,
         "render_every": 500000
     },
     "agent": {

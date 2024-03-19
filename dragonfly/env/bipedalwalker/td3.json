@@ -2,7 +2,7 @@
     "env": {
         "name": "BipedalWalker-v3",
         "obs_clip": false,
-        "obs_norm": true,
+        "obs_norm": false,
         "obs_noise": 0.0
     },
     "naming": {
@@ -17,8 +17,8 @@
         "style": "td",
         "mem_size": 1000000,
         "btc_size": 100,
-        "n_stp_unroll": 1,
-        "render_every": 5000
+        "n_stp_unroll": 100,
+        "render_every": 50000
     },
     "agent": {
         "type": "td3",
@@ -47,7 +47,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
@@ -71,7 +71,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
