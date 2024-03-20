@@ -172,3 +172,16 @@ Off-policy agents typically train once per step, which make them slower to run t
 The performances of the different approaches are compared in figure \ref{fig:n_stp_unroll} using the \tdt algorithm. Regarding pure CPU performance, the baseline run takes approximately $530$ seconds, going down to $440$ seconds for \codeinline{n_stp_unroll}$\, = 16$, and $390$ seconds for \codeinline{n_stp_unroll}$\, = 64$.
 
 \input{fig/n_stp_unroll/n_stp_unroll}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Convolutional layers}
+In different neural networks deployed in the library, one may replace the default fully connected layers by convolutional ones in the trunk of the architectures.
+\subsection{One dimensional convolution}
+When the observations are vectors in which there are linear spatial relationships among the entries, a natural idea might be to use one dimensional convolutional layers. Here, we consider the \ppo algorithm with policy and value networks composed of two layers of size 64. In figure \ref{fig:conv1d}, we see how the performance of the algorithm is affected if the first fully connected (FC) layer in both policy and value networks becomes convolutional (CV) with kernel size equal to 4. 
+
+\input{fig/convolution/1d/conv1d}
+
+\subsection{Two dimensional convolution}
+
