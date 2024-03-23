@@ -9,6 +9,118 @@ This chapter contains experiments on several technical details of algorithms. Mo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Bootstrapping}
+
+We compare performance on the \ppo algorithm with and without the use of bootstrapping in figure \ref{fig:bootstrap}, using different types of returns. Overall, bootstrapping provides a nice performance boost on \codeinline{bipedalwalker-v3}, while it does not change much on \codeinline{lunarlandercontinuous-v2}. The performance gain is clearly visible on \mujoco environments (tested here only with \gae).
+
+\input{fig/bootstrap/bootstrap}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Value of \gae $\lambda$ \textcolor{red}{(to reproduce)}}
+
+We compare the performance of \ppo with \gae for different values of the $\lambda$ parameter in figure \ref{fig:ppo_gae}. The usual range proposed in the original paper \cite{gae} is between $0.90$ and $0.99$. Here, we see that both environments behave similarly for $\lambda$ between $0.90$ and $0.98$, but react differently to $\lambda = 0.85$. Details on the \gae derivation are provided in section \ref{section:gae}.
+
+\input{fig/gae/gae}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\gae vs \cgae \textcolor{red}{(to reproduce)}}
+
+In figure \ref{fig:ppo_cgae}, we compare the performance of the regular \gae with that of \cgae presented in section \ref{section:gae}. As of now, more tests are needed, mostly with shorter episodes, where the effet of the \cgae correction could mostly make a difference.
+
+\input{fig/cgae/cgae}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Entropy bonus \textcolor{red}{(to reproduce)}}
+
+Policy gradient methods can benefit from the use of an entropy bonus that prevents premature shrinking of the exploration. This method was originally proposed in \cite{williams1991} in the context of reinforcement learning, and re-introduced in deep reinforcement learning in \cite{a2c} and \cite{ppo}. The idea is to add an estimation of the policy entropy to the loss. For the policy gradient loss using advantage, for example, this yields:
+
+\begin{equation}
+	\mathcal{L}(\theta) = \expect{(s_t, a_t) \sim \pi_\theta} \Bigl[ \log \left( \pi_\theta (s_t, a_t) \right) A^{\pi_\theta} (s_t, a_t) + \beta \entropy \left( \pi_\theta (s_t) \right) \Bigr].
+\end{equation}
+
+We see in figure \ref{fig:ppo_entropy} that, in the case of \codeinline{bipedalwalker-v3}, a well-tuned bonus allows to solve the environment, while in the context of \codeinline{lunarlandercontinuous-v3}, small bonuses make no difference, and only a too large bonus is detrimental to the agent.
+
+\input{fig/entropy/entropy}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Covariance matrix of normal policy \textcolor{red}{(to reproduce)}}
+
+The variance of the normal policy may be parameterized in different ways:
+
+\begin{enumerate}
+	\item a fixed isotropic variance $\sigma_0^2$ (hereafter denoted as constant),
+	\item a learned isotropic variance $\sigma^2$ (hereafter denoted as isotropic),
+	\item a learned diagonal covariance matrix $\V{\Sigma}_\text{diag}$ (hereafter denoted as diagonal),
+	\item a learned full covariance matrix $\V{\Sigma}_\text{full}$ (not considered here).
+\end{enumerate}
+
+The performances of the different parameterizations are compared in figure \ref{fig:cov} using the \ppo algorithm.
+
+\input{fig/covariance/covariance}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Parallel off-policy agent \textcolor{red}{(to reproduce)}}
+
+Off-policy agents typically train once per step, which make them slower to run than on-policy agents (regardless of final performance). Here we  compare two different approaches:
+
+\begin{enumerate}
+	\item sequential environment with one update per step,
+	\item sequential environment with \codeinline{n_stp_unroll} updates every \codeinline{n_stp_unroll} steps.
+\end{enumerate}
+
+The performances of the different approaches are compared in figure \ref{fig:n_stp_unroll} using the \tdt algorithm. Regarding pure CPU performance, the baseline run takes approximately $530$ seconds, going down to $440$ seconds for \codeinline{n_stp_unroll}$\, = 16$, and $390$ seconds for \codeinline{n_stp_unroll}$\, = 64$.
+
+\input{fig/n_stp_unroll/n_stp_unroll}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\textsc{d2rl} vs \textsc{mlp}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Time-awareness}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Random initial state}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Exploration in \tdt and \sac}
+
+%Compare exploration rates on \codeinline{lunarlandercontinuous} for example
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{\sac without reparameterization trick}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Target network in \dqn}
+%
+%\dqn with and without target network
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\section{Standard deviation generation for normal law (revision \codeinline{04cb588})}
 %
 %When using the normal law policy with on-policy algorithms such as \ppo, several options exist to generate the standard deviation vector, the policy network can output either the standard deviation or its logarithm. The impact of this choice is explored in this section. Here, the policy network is composed of a common trunk (one layer of size 64) followed two branches (each with one layer of size 64). The branch for the mean value ends with a $\tanh$ activation function, while the branch for the standard deviation ends either with a sigmoid activation (direct output of standard deviation) or a linear activation (output of the log of the standard deviation). In the latter case, the output is clipped to $[-20,0]$ before being exponentiated, meaning the standard deviation is roughly in $[\num{2e-9},1]$. The mean value being constrained in $[-1,1]$ by the $\tanh$ activation, this ensures a proper exploration of the domain, the actions being mapped to the physical bounds of the problem afterward. In figure \ref{fig:normal_stddev}, we compare the performance of the two approaches on several standard \gym and \mujoco environments. It appears in figure \ref{fig:normal_stddev} that, overall, the regular approach performs best on most environments except \codeinline{pendulum-v1}.
@@ -184,4 +296,3 @@ When the observations are vectors in which there are linear spatial relationship
 \input{fig/convolution/1d/conv1d}
 
 \subsection{Two dimensional convolution}
-
