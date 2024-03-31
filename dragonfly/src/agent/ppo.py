@@ -1,6 +1,6 @@
 # Custom imports
 from dragonfly.src.agent.base import *
-
+from dragonfly.src.utils.similarity import *
 ###############################################
 ### PPO agent
 class ppo(base_agent_on_policy):
@@ -12,6 +12,8 @@ class ppo(base_agent_on_policy):
         self.obs_dim   = obs_dim
         self.n_cpu     = n_cpu
         self.size      = size
+        self.use_state_similarity = False
+        self.similarity_distance = 0.01
 
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
@@ -54,11 +56,20 @@ class ppo(base_agent_on_policy):
     # Training
     def train(self, start, end):
 
-        obs = self.data["obs"][start:end]
-        act = self.data["act"][start:end]
-        adv = self.data["adv"][start:end]
-        tgt = self.data["tgt"][start:end]
-        lgp = self.data["lgp"][start:end]
+        if self.use_state_similarity:
+            obs, act, adv, tgt, lgp = get_upgraded_states(
+                obs=self.data["obs"],
+                start=start,
+                end=end,
+                info=(self.data["obs"], self.data["act"], self.data["adv"], self.data["tgt"], self.data["lgp"]),
+                max_distance=self.similarity_distance,
+            )
+        else:
+            obs = self.data["obs"][start:end]
+            act = self.data["act"][start:end]
+            adv = self.data["adv"][start:end]
+            tgt = self.data["tgt"][start:end]
+            lgp = self.data["lgp"][start:end]
 
         # Train policy
         act = self.p.reshape_actions(act)
