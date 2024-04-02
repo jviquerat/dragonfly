@@ -10,6 +10,7 @@ def _normalize(x: tf.Tensor):
     """
     return tf.linalg.normalize(x)[0]
 
+
 def _find_similar_states_indexes(
     full_obs: tf.Tensor, mini_batch: tf.Tensor, max_distance: float = 0.1
 ):
@@ -23,15 +24,42 @@ def _find_similar_states_indexes(
 
     return np.ndarray.astype(unique_indexes, np.int32)
 
+
+def _find_similar_states_indexes_tf(
+    full_obs: tf.Tensor, mini_batch: tf.Tensor, max_distance: float = 0.98
+):
+    # Calculate norms
+    full_norm = tf.norm(full_obs, axis=1, keepdims=True)
+    mini_batch_norm = tf.norm(mini_batch, axis=1, keepdims=True)
+
+    # Compute cosine similarity
+    dot_product = tf.matmul(full_obs, mini_batch, transpose_b=True)
+    cosine_sim = dot_product / (full_norm * tf.transpose(mini_batch_norm))
+
+    # Find indexes where cosine similarity exceeds max_distance
+    similar_indexes = tf.where(cosine_sim > max_distance)
+
+    unique_indexes, _ = tf.unique(similar_indexes[:, 0])
+    return unique_indexes
+
+
 def _get_similar_states(
     full_obs: tf.Tensor,
     mini_batch: tf.Tensor,
     info: Tuple[tf.Tensor],
     max_distance: float = 0.1,
+    use_ckdtree: bool = True,
 ) -> Tuple[tf.Tensor]:
-    similar_states_indexes = tf.numpy_function(
-        _find_similar_states_indexes, [full_obs, mini_batch, max_distance], [tf.int32]
-    )
+    if use_ckdtree:
+        similar_states_indexes = tf.numpy_function(
+            _find_similar_states_indexes,
+            [full_obs, mini_batch, max_distance],
+            [tf.int32],
+        )
+    else:
+        similar_states_indexes = _find_similar_states_indexes_tf(
+            full_obs, mini_batch, max_distance
+        )
     return tuple(tf.gather(x, similar_states_indexes) for x in info)
 
 
@@ -41,6 +69,7 @@ def get_upgraded_states(
     end: int,
     info: Tuple[tf.Tensor],
     max_distance: float = 0.1,
+    use_ckdtree: bool = True,
 ) -> Tuple[tf.Tensor]:
     """
     Get upgraded states by finding similar states within a maximum distance.
@@ -55,13 +84,17 @@ def get_upgraded_states(
     Returns:
         Tuple[tf.Tensor]: Upgraded states based on similarity.
     """
-    full_obs = tf.concat([obs[:start], obs[end:]],0)
+    full_obs = tf.concat([obs[:start], obs[end:]], 0)
     batch_obs = obs[start:end]
 
-    _info = tuple(tf.concat([a[:start], a[end:]],0) for a in info)
+    _info = tuple(tf.concat([a[:start], a[end:]], 0) for a in info)
 
     info_to_add = _get_similar_states(
-        full_obs=_normalize(full_obs), mini_batch=_normalize(batch_obs), info=_info, max_distance=max_distance
+        full_obs=_normalize(full_obs),
+        mini_batch=_normalize(batch_obs),
+        info=_info,
+        max_distance=max_distance,
+        use_ckdtree=use_ckdtree,
     )
 
-    return (tf.concat([a[start:end], b],0) for a, b in zip(info, info_to_add))
+    return (tf.concat([a[start:end], b], 0) for a, b in zip(info, info_to_add))
