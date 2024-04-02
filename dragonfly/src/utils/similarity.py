@@ -1,29 +1,5 @@
-import numpy as np
 import tensorflow as tf
-from scipy.spatial import cKDTree
 from typing import Tuple
-
-
-def _normalize(x: tf.Tensor):
-    """Normalizing 2D vectors let us use euclidian distance instead of cosine similarity
-    https://medium.com/ai-for-real/relationship-between-cosine-similarity-and-euclidean-distance-7e283a277dff
-    """
-    return tf.linalg.normalize(x)[0]
-
-
-def _find_similar_states_indexes(
-    full_obs: tf.Tensor, mini_batch: tf.Tensor, max_distance: float = 0.1
-):
-    full_tree = cKDTree(full_obs)
-    batch_tree = cKDTree(mini_batch)
-
-    indexes = batch_tree.query_ball_tree(full_tree, r=max_distance)
-
-    # Flatten and get unique indexes
-    unique_indexes = np.unique(np.concatenate(indexes))
-
-    return np.ndarray.astype(unique_indexes, np.int32)
-
 
 def _find_similar_states_indexes_tf(
     full_obs: tf.Tensor, mini_batch: tf.Tensor, max_distance: float = 0.98
@@ -48,16 +24,8 @@ def _get_similar_states(
     mini_batch: tf.Tensor,
     info: Tuple[tf.Tensor],
     max_distance: float = 0.95,
-    use_ckdtree: bool = False,
 ) -> Tuple[tf.Tensor]:
-    if use_ckdtree:
-        similar_states_indexes = tf.numpy_function(
-            _find_similar_states_indexes,
-            [full_obs, mini_batch, max_distance],
-            [tf.int32],
-        )
-    else:
-        similar_states_indexes = _find_similar_states_indexes_tf(
+    similar_states_indexes = _find_similar_states_indexes_tf(
             full_obs, mini_batch, max_distance
         )
     return tuple(tf.gather(x, similar_states_indexes) for x in info)
@@ -69,7 +37,6 @@ def get_upgraded_states(
     end: int,
     info: Tuple[tf.Tensor],
     max_distance: float = 0.95,
-    use_ckdtree: bool = False,
 ) -> Tuple[tf.Tensor]:
     """
     Get upgraded states by finding similar states within a maximum distance.
@@ -90,11 +57,10 @@ def get_upgraded_states(
     _info = tuple(tf.concat([a[:start], a[end:]], 0) for a in info)
 
     info_to_add = _get_similar_states(
-        full_obs=_normalize(full_obs),
-        mini_batch=_normalize(batch_obs),
+        full_obs=full_obs,
+        mini_batch=batch_obs,
         info=_info,
         max_distance=max_distance,
-        use_ckdtree=use_ckdtree,
     )
 
     return (tf.concat([a[start:end], b], 0) for a, b in zip(info, info_to_add))
