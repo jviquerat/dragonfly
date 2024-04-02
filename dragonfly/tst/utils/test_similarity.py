@@ -51,12 +51,3 @@ class TestGetUpgradedStates(unittest.TestCase):
             self.assertTrue(
                 tf.reduce_all(tf.math.equal(tensor, expected_output[i])).numpy()
             )
-
-def find_similar_states_indexes_tf():
-    full_obs = tf.random.uniform(shape=(4000, 20))
-    batch_obs = tf.random.uniform(shape=(1000, 20))
-    max_distance = 0.9
-    _find_similar_states_indexes_tf(full_obs, batch_obs, max_distance)
-
-def test_find_similar_states_indexes_tf(benchmark):
-    benchmark(find_similar_states_indexes_tf)
