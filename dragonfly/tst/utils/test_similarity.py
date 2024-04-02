@@ -1,41 +1,82 @@
 from dragonfly.src.utils.similarity import *
-from dragonfly.src.utils.similarity import _normalize, _find_similar_states_indexes, _get_similar_states
+from dragonfly.src.utils.similarity import (
+    _find_similar_states_indexes,
+    _find_similar_states_indexes_tf,
+)
 import unittest
+import pytest
+
 
 class TestGetUpgradedStates(unittest.TestCase):
     def setUp(self):
-        self.full_obs = tf.constant([[1, 2], [10, 10], [10, 10], [7, 8]], dtype=tf.float32)
-        self.batch_obs = tf.constant([[2, 3], [6, 7]], dtype=tf.float32)
-        self.info = (
-            tf.constant([[1, 2], [10, 10], [10, 10], [7, 8]], dtype=tf.float32),
-            tf.constant([[1, 2], [10, 10], [10, 10], [7, 8]], dtype=tf.float32),
-            tf.constant([[1, 2], [10, 10], [10, 10], [7, 8]], dtype=tf.float32),
-            tf.constant([[1, 2], [10, 10], [10, 10], [7, 8]], dtype=tf.float32)
+        self.full_obs = tf.constant(
+            [[-1, -2], [10, 10], [10, 10], [-70, -80]], dtype=tf.float32
         )
-        self.max_distance = 2.0
+        self.batch_obs = tf.constant([[-2, -3], [-70, -80]], dtype=tf.float32)
+        self.info = (
+            tf.constant([[-1, -2], [10, 10], [10, 10], [-70, -80]], dtype=tf.float32),
+            tf.constant([[1, 2], [10, 10], [10, 10], [7, 8]], dtype=tf.float32),
+            tf.constant([[1, 2], [10, 10], [10, 10], [7, 8]], dtype=tf.float32),
+            tf.constant([[1, 2], [10, 10], [10, 10], [7, 8]], dtype=tf.float32),
+        )
+        self.max_distance = 0.99
 
-    def test_normalize(self):
-        normalized_obs = _normalize(self.full_obs)
-        assert tf.linalg.normalize(normalized_obs)[1] == 1.0
-   
     def test_find_similar_states_indexes(self):
-        similar_states_indexes = _find_similar_states_indexes(self.full_obs, self.batch_obs, self.max_distance)
-        self.assertTrue(np.array_equal(similar_states_indexes, np.array([0, 3], dtype=np.int32)))
-
-    def test_get_similar_states(self):
-        upgraded_states = _get_similar_states(self.full_obs, self.batch_obs, self.info, self.max_distance)
-        print(upgraded_states)
-        expected_output = (tf.constant([[1, 2], [7, 8]], dtype=tf.float32),tf.constant([[1, 2], [7, 8]], dtype=tf.float32),tf.constant([[1, 2], [7, 8]], dtype=tf.float32),tf.constant([[1, 2], [7, 8]], dtype=tf.float32))
-        for i, tensor in enumerate(upgraded_states):
-            self.assertTrue(tf.reduce_all(tf.math.equal(tensor, expected_output[i])).numpy())
+        similar_states_indexes = _find_similar_states_indexes_tf(
+            self.full_obs, self.batch_obs, self.max_distance
+        )
+        self.assertTrue(
+            np.array_equal(similar_states_indexes, np.array([0, 3], dtype=np.int32))
+        )
 
     def test_get_upgraded_states(self):
-        upgraded_states = get_upgraded_states(self.full_obs, 1, 3, self.info, self.max_distance)
-        expected_output = (
-            tf.constant([[10, 10], [10, 10], [1, 2], [7, 8]], dtype=tf.float32),
-            tf.constant([[10, 10], [10, 10], [1, 2], [7, 8]], dtype=tf.float32),
-            tf.constant([[10, 10], [10, 10], [1, 2], [7, 8]], dtype=tf.float32),
-            tf.constant([[10, 10], [10, 10], [1, 2], [7, 8]], dtype=tf.float32)
+        full_obs = tf.constant(
+            [[-1, -2], [10, 10], [10, 10], [9, 10]], dtype=tf.float32
         )
+        info = (
+            tf.constant([[-1, -2], [10, 10], [10, 10], [9, 10]], dtype=tf.float32),
+            tf.constant([[1, 2], [10, 10], [10, 10], [7, 8]], dtype=tf.float32),
+            tf.constant([[1, 2], [10, 10], [10, 10], [7, 8]], dtype=tf.float32),
+            tf.constant([[1, 2], [10, 10], [10, 10], [7, 8]], dtype=tf.float32),
+        )
+        upgraded_states = get_upgraded_states(full_obs, 1, 3, info, self.max_distance)
+        expected_output = (
+            tf.constant([[10, 10], [10, 10], [9, 10]], dtype=tf.float32),
+            tf.constant([[10, 10], [10, 10], [7, 8]], dtype=tf.float32),
+            tf.constant([[10, 10], [10, 10], [7, 8]], dtype=tf.float32),
+            tf.constant([[10, 10], [10, 10], [7, 8]], dtype=tf.float32),
+        )
+        print(upgraded_states)
         for i, tensor in enumerate(upgraded_states):
-            self.assertTrue(tf.reduce_all(tf.math.equal(tensor, expected_output[i])).numpy())
+            tf.print(tensor)
+            self.assertTrue(
+                tf.reduce_all(tf.math.equal(tensor, expected_output[i])).numpy()
+            )
+
+
+def find_similar_states_indexes():
+    full_obs = tf.random.uniform(shape=(4000, 20))
+    batch_obs = tf.random.uniform(shape=(1000, 20))
+    max_distance = 0.5
+    _find_similar_states_indexes(full_obs, batch_obs, max_distance)
+
+
+def find_similar_states_indexes_tf():
+    full_obs = tf.random.uniform(shape=(4000, 20))
+    batch_obs = tf.random.uniform(shape=(1000, 20))
+    max_distance = 0.9
+    _find_similar_states_indexes_tf(full_obs, batch_obs, max_distance)
+
+
+@pytest.mark.benchmark(
+    min_rounds=2000,
+)
+def test_find_similar_states_indexes(benchmark):
+    benchmark(find_similar_states_indexes)
+
+
+@pytest.mark.benchmark(
+    min_rounds=2000,
+)
+def test_find_similar_states_indexes_tf(benchmark):
+    benchmark(find_similar_states_indexes_tf)

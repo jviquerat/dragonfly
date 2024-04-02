@@ -47,8 +47,8 @@ def _get_similar_states(
     full_obs: tf.Tensor,
     mini_batch: tf.Tensor,
     info: Tuple[tf.Tensor],
-    max_distance: float = 0.1,
-    use_ckdtree: bool = True,
+    max_distance: float = 0.95,
+    use_ckdtree: bool = False,
 ) -> Tuple[tf.Tensor]:
     if use_ckdtree:
         similar_states_indexes = tf.numpy_function(
@@ -68,8 +68,8 @@ def get_upgraded_states(
     start: int,
     end: int,
     info: Tuple[tf.Tensor],
-    max_distance: float = 0.1,
-    use_ckdtree: bool = True,
+    max_distance: float = 0.95,
+    use_ckdtree: bool = False,
 ) -> Tuple[tf.Tensor]:
     """
     Get upgraded states by finding similar states within a maximum distance.
