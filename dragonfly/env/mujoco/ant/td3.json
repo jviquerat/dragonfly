@@ -11,7 +11,7 @@
         "tag": false,
         "time": false
     },
-    "n_avg": 5,
+    "n_avg": 3,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "td",
@@ -47,7 +47,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {
@@ -71,7 +71,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": null
             },
             "loss": {

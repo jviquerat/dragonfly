@@ -36,17 +36,17 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [32,32],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-4,
                 "grd_clip": null
             },

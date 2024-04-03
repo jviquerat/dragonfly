@@ -36,12 +36,12 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [32,32],
-                    "actv": "selu"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["selu"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },

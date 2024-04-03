@@ -16,7 +16,7 @@
     "trainer": {
         "style": "td",
         "mem_size": 1000000,
-        "btc_size": 128,
+        "btc_size": 100,
         "n_stp_unroll": 100,
         "render_every": 500000
     },
