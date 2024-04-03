@@ -32,4 +32,10 @@ for f in ${lst[@]}; do
 
     # Run with output in dedicated file
     dgf --train $f &> $name &
+
+    # Retrieve background pid
+    pid = $!
 done
+
+wait $pid
+wait
