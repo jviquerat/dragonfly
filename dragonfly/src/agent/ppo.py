@@ -69,3 +69,13 @@ class ppo(base_agent_on_policy):
         # Train v network
         tgt = tf.reshape(tgt, [-1])
         self.v.loss.train(obs, tgt, self.v.net, self.v.opt)
+
+    # Save value parameters
+    def save_value(self, filename):
+
+        self.v.save(filename)
+
+    # Load value parameters
+    def load_value(self, filename):
+
+        self.v.load(filename)
