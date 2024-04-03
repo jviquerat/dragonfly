@@ -34,7 +34,7 @@ for f in ${lst[@]}; do
     dgf --train $f &> $name &
 
     # Retrieve background pid
-    pid = $!
+    pid=$!
 done
 
 wait $pid
