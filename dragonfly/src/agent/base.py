@@ -32,13 +32,15 @@ class base_agent():
 
         self.buff.reset()
 
-    # Save
-    def save(self, filename):
-        raise NotImplementedError
+    # Save policy parameters
+    def save_policy(self, filename):
 
-    # Load
-    def load(self, filename):
-        raise NotImplementedError
+        self.p.save(filename)
+
+    # Load policy parameters
+    def load_policy(self, filename):
+
+        self.p.load(filename)
 
 ###############################################
 ### Base for on-policy agents
@@ -134,16 +136,6 @@ class base_agent_on_policy(base_agent):
         self.buff.store(["obs", "nxt", "act", "rwd", "trm"],
                         [ obs,   nxt,   act,   rwd,   trm ])
 
-    # Save agent parameters
-    def save(self, filename):
-
-        self.p.save(filename)
-
-    # Load agent parameters
-    def load(self, filename):
-
-        self.p.load(filename)
-
 ###############################################
 ### Base for off-policy agents
 class base_agent_off_policy(base_agent):
@@ -186,13 +178,3 @@ class base_agent_off_policy(base_agent):
 
         trm = self.term.terminate(dne, trc)
         self.buff.store(self.names, [obs, nxt, act, rwd, trm])
-
-     # Save agent parameters
-    def save(self, filename):
-
-        self.p.save(filename)
-
-    # Load agent parameters
-    def load(self, filename):
-
-        self.p.load(filename)

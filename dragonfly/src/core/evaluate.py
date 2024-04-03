@@ -37,7 +37,7 @@ def evaluate(net_file, json_file, ns, nw, aw):
                                  pms     = pms.agent)
 
     # Load network
-    agent.load(net_file)
+    agent.load_policy(net_file)
 
     # Specify termination
     term_ns = True
