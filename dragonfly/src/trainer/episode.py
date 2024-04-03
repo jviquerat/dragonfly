@@ -81,7 +81,7 @@ class episode(base_trainer):
                         best = self.counter.reset_ep(cpu)
                         name = path + "/" + str(run) + "/" + self.agent.name
                         if best:
-                            self.agent.save(name)
+                            self.agent.save_policy(name)
                         self.unroll += 1
                 # Update observation
                 obs = nxt

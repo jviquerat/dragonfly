@@ -72,7 +72,7 @@ class buffer(base_trainer):
                         best = self.counter.reset_ep(cpu)
                         name = path + "/" + str(run) + "/" + self.agent.name
                         if best:
-                            self.agent.save(name)
+                            self.agent.save_policy(name)
                 # Update observation
                 obs = nxt
                 # Reset only finished environments

@@ -123,11 +123,13 @@ class dqn(base_agent_off_policy):
         self.eps.reset()
 
     # Save parameters
-    def save(self, filename):
+    # This function overrides the base_agent::save_policy
+    def save_policy(self, filename):
 
         self.q.save(filename)
 
-    # Load agent parameters
-    def load(self, filename):
+    # Load parameters
+    # This function overrides the base_agent::load_policy
+    def load_policy(self, filename):
 
         self.q.load(filename)

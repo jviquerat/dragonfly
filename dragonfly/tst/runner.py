@@ -41,13 +41,13 @@ def runner(json_file, agent_type):
     averager.store("0/0.dat", 0)
     trainer.reset()
     trainer.loop(".", 1)
-    trainer.agent.save("0/checkpoint")
+    trainer.agent.save_policy("0/checkpoint")
     averager.store("1/1.dat", 1)
 
     # Test of the `control` method
     trainer.reset()
     obs = trainer.env.reset_all()
-    trainer.agent.load("0/checkpoint")
+    trainer.agent.load_policy("0/checkpoint")
     act = trainer.agent.control(obs)
     trainer.env.step(act)
     #############################
