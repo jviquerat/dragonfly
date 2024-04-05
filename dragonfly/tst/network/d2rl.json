@@ -1,7 +1,7 @@
 {
     "env": {
         "name": "Pendulum-v1",
-        "obs_clip": true,
+        "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0
     },
@@ -23,17 +23,17 @@
                 "type": "d2rl",
                 "trunk": {
                     "arch": [32,32],
-                    "actv": "swish"
+                    "actv": "tanh"
                 },
                 "heads": {
                     "nb": 2,
                     "arch": [[16],[16]],
-                    "actv": ["swish","swish"],
+                    "actv": ["tanh","tanh"],
                     "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 1.0e-3,
                 "grd_clip": 0.1
             },
@@ -49,17 +49,17 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [32,32],
-                    "actv": "swish"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["swish"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
+                "type": "adam",
                 "lr": 5.0e-3,
                 "grd_clip": 0.1
             },
