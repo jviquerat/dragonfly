@@ -51,7 +51,7 @@ It is possible to run many json files at once using the scripts in `env/benchmar
 |:----------------------------------------------------------------:|:-------------------------------------------------------------:|:------------------------------------------------------------:|
 | <img height="250" alt="gif" src="dragonfly/msc/hopper.gif">      | <img height="250" alt="gif" src="dragonfly/msc/ant.gif">      | <img height="250" alt="gif" src="dragonfly/msc/swimmer.gif"> |
 | **`HalfCheetah-v4`**                                             | **`Walker2d-v4`**                                             | **`Humanoid-v4`**                                            |
-| <img height="250" alt="gif" src="dragonfly/msc/halfcheetah.gif"> | <img height="250" alt="gif" src="dragonfly/msc/walker2d.gif"> | <img height="250" alt="gif" src="dragonfly/msc/logo.png">    |
+| <img height="250" alt="gif" src="dragonfly/msc/halfcheetah.gif"> | <img height="250" alt="gif" src="dragonfly/msc/walker2d.gif"> | <img height="250" alt="gif" src="dragonfly/msc/humanoid.gif">|
 
 ## Gym environments
 
