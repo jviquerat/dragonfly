@@ -17,7 +17,7 @@
         "style": "td",
         "mem_size": 1000000,
         "btc_size": 100,
-        "n_stp_unroll": 100,
+        "n_stp_unroll": 50,
         "render_every": 500000
     },
     "agent": {
@@ -25,12 +25,16 @@
         "gamma": 0.99,
         "rho": 0.995,
         "n_warmup": 10000,
-        "n_filling": 1000,
+        "n_filling": 10000,
 	      "alpha": 0.2,
         "policy": {
 	          "type": "tanh_normal",
+            "min_log_std": -20.0,
+            "max_log_std": 2.0,
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
+                "k_final": "lecun_normal",
                 "trunk": {
                     "arch": [256],
                     "actv": "relu"
@@ -39,7 +43,7 @@
                     "nb": 2,
                     "arch": [[256],[256]],
                     "actv": ["relu","relu"],
-                    "final": ["linear","sigmoid"]
+                    "final": ["linear","linear"]
                 }
             },
             "optimizer": {
@@ -55,6 +59,8 @@
             "type": "q_value",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
+                "k_final": "lecun_normal",
                 "trunk": {
                     "arch": [256,256],
                     "actv": "relu"

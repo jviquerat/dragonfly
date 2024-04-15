@@ -17,7 +17,7 @@
         "style": "td",
         "mem_size": 100000,
         "btc_size": 100,
-        "n_stp_unroll": 100,
+        "n_stp_unroll": 50,
         "render_every": 50000
     },
     "agent": {
@@ -29,6 +29,8 @@
         "alpha": 0.1,
         "policy": {
             "type": "tanh_normal",
+            "min_log_std": -20.0,
+            "max_log_std": 2.0,
             "network": {
                 "type": "fc",
                 "trunk": {
@@ -39,7 +41,7 @@
                     "nb": 2,
                     "arch": [[64],[64]],
                     "actv": ["relu","relu"],
-                    "final": ["linear","sigmoid"]
+                    "final": ["linear","linear"]
                 }
             },
             "optimizer": {
