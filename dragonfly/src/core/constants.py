@@ -2,6 +2,9 @@
 # Constants
 ########################
 
+### Generic epsilon
+eps = 1.0e-8
+
 ### Small epsilon for return normalization
 ret_eps = 1.0e-8
 
