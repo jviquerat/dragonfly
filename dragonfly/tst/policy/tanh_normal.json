@@ -1,21 +1,23 @@
 {
     "policy": {
         "type": "tanh_normal",
+        "min_log_std": -20.0,
+        "max_log_std": 2.0,
         "network": {
             "type": "fc",
             "trunk": {
                 "arch": [32,32],
-                "actv": "swish"
+                "actv": "relu"
             },
             "heads": {
                 "nb": 2,
                 "arch": [[16],[16]],
-                "actv": ["swish","swish"],
-                "final": ["tanh","sigmoid"]
+                "actv": ["relu","relu"],
+                "final": ["linear","linear"]
             }
         },
         "optimizer": {
-            "type": "nadam",
+            "type": "adam",
             "lr": 1.0e-3,
             "grd_clip": 0.1
         },

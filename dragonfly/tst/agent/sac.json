@@ -10,8 +10,8 @@
     "trainer": {
         "style": "td",
         "mem_size": 20000,
-        "btc_size": 64,
-        "n_stp_unroll": 1,
+        "btc_size": 50,
+        "n_stp_unroll": 25,
         "render_every": 500
     },
     "agent": {
@@ -19,10 +19,12 @@
         "gamma": 0.99,
         "rho": 0.995,
         "n_warmup": 200,
-        "n_filling": 100,
+        "n_filling": 200,
         "alpha": 0.2,
         "policy": {
             "type": "tanh_normal",
+            "min_log_std": -20.0,
+            "max_log_std": 2.0,
             "network": {
                 "type": "fc",
                 "trunk": {
@@ -33,13 +35,13 @@
                     "nb": 2,
                     "arch": [[64],[64]],
                     "actv": ["relu","relu"],
-                    "final": ["tanh","sigmoid"]
+                    "final": ["linear","linear"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
-                "grd_clip": 0.1
+                "lr": 1.0e-3,
+                "grd_clip": null
             },
             "loss": {
                 "type": "q_pol_sac"
@@ -51,19 +53,19 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "swish"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["swish"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
-                "type": "nadam",
-                "lr": 5.0e-4,
-                "grd_clip": 100.0
+                "type": "adam",
+                "lr": 1.0e-3,
+                "grd_clip": null
             },
             "loss": {
                 "type": "mse_sac"

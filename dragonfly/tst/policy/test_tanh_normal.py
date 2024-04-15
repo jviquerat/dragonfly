@@ -19,7 +19,7 @@ def test_normal():
     reader.read("dragonfly/tst/policy/tanh_normal.json")
 
     # Initialize discrete agent
-    policy = normal_diag(1, 5, reader.pms.policy)
+    policy = tanh_normal(1, 5, reader.pms.policy)
 
     # Test action values
     print("Test tanh-normal policy")
@@ -28,9 +28,7 @@ def test_normal():
     print("Actions:",act)
 
     obs = tf.cast([obs], tf.float32)
-    mu, sg = policy.forward(obs)
-    assert(np.all(np.abs(mu) < 1.0))
-    assert(np.all(np.abs(sg) < 1.0))
-    assert(np.all(np.abs(sg) > 0.0))
+    tanh_act, lgp = policy.sample(obs)
+    assert(np.all(np.abs(tanh_act) < 1.0))
 
     print("")

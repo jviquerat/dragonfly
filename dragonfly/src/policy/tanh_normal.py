@@ -1,26 +1,75 @@
 # Custom imports
-from dragonfly.src.policy.base        import *
-from dragonfly.src.policy.normal_diag import *
+from dragonfly.src.core.constants import *
+from dragonfly.src.policy.base    import *
 
 ###############################################
 ### Tanh-normal policy class (continuous)
-### Inherits from normal class
-class tanh_normal(normal_diag):
-    def __init__(self, obs_dim, act_dim, pms):
+class tanh_normal(base_normal):
+    def __init__(self, obs_dim, act_dim, pms, target=False):
 
-        super().__init__(obs_dim, act_dim, pms)
+        # Fill structure
+        self.act_dim     = act_dim
+        self.obs_dim     = obs_dim
+        self.dim         = self.act_dim
+        self.out_dim     = [self.dim, self.dim]
+        self.store_dim   = self.act_dim
+        self.store_type  = float
+        self.target      = target
+        self.min_log_std = pms.min_log_std
+        self.max_log_std = pms.max_log_std
+
+        # Check parameters
+        if (pms.network.heads.final[0] != "linear"):
+            warning("tanh_normal", "__init__",
+                    "Final activation for mean of policy is not linear")
+
+        if (pms.network.heads.final[1] != "linear"):
+            warning("tanh_normal", "__init__",
+                    "Final activation for stddev of policy is not linear")
+
+        # Init from base class
+        super().__init__(pms)
+
+    # Control (deterministic actions)
+    def control(self, obs):
+
+        mu, sg   = self.forward(tf.cast(obs, tf.float32))
+        act      = tf.reshape(mu, [-1,self.store_dim])
+        tanh_act = tf.tanh(act)
+        tanh_act = np.reshape(tanh_act.numpy(), (-1,self.store_dim))
+
+        return tanh_act
+
+    # Networks forward pass
+    @tf.function
+    def forward(self, state):
+
+        out     = self.net.call(state)
+        mu      = out[0]
+        log_std = out[1]
+        log_std = tf.clip_by_value(log_std,
+                                   self.min_log_std,
+                                   self.max_log_std)
+        std     = tf.exp(log_std)
+
+        return mu, std
 
     # Sample actions
+    # Mostly taken from openAI implementation
     @tf.function
     def sample(self, obs):
 
         # Reparameterization trick
-        mu, sg = self.forward(obs)
-        pdf    = tfd.MultivariateNormalDiag(loc        = mu,
-                                            scale_diag = sg)
-        act = tf.reshape(pdf.sample(1), [-1,self.store_dim])
-        lgp = tf.reshape(pdf.log_prob(act), [-1,1])
+        mu, std = self.forward(obs)
+        act     = mu + tf.random.normal(tf.shape(mu))*std
 
+        # Compute gaussian likelihood
+        lkh = -0.5*(((act - mu)/(std + eps))**2 +
+                    2.0*tf.math.log(std) +
+                    tf.math.log(2.0*math.pi))
+        lgp = tf.reduce_sum(lkh, axis=1)
+
+        # Squash actions
         tanh_act = tf.tanh(act)
 
         # Compute log-prob of reparameterized action
