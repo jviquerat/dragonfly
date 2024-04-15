@@ -160,7 +160,7 @@ class base_agent_off_policy(base_agent):
 
         # No update if buffer is not full enough
         lgt = self.gbuff.length()
-        if (lgt < max(size, self.n_filling)): return lgt, False
+        if (lgt < min(size, self.n_filling)): return lgt, False
 
         self.data = self.gbuff.get_batches(self.names, size)
         return lgt, True
