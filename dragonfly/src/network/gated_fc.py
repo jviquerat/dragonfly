@@ -131,7 +131,10 @@ class gated_fc(base_network):
 
         # Compute trunk
         for l in range(len(self.trunk.arch)):
-            var = var + _gated_layer(var, self.net[i])
+            if l == 0:
+                var = _gated_layer(var, self.net[i])
+            else:
+                var = var + _gated_layer(var, self.net[i])
             i += 1
 
         # Compute heads
