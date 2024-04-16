@@ -94,7 +94,7 @@ class environments:
         # Main process executing
         n, r, d, t = self.worker.step(data[0][1])
 
-        # Handle arrays
+        # Handle stacked observations
         for p in range(mpi.size):
             for s in range(self.obs_stack-1):
                 self.nxt[p,s,:] = self.nxt[p,s+1,:]
@@ -135,8 +135,9 @@ class environments:
         # Receive and normalize
         data = mpi.comm.gather((obs), root=0)
         for p in range(mpi.size):
-            for s in range(self.obs_stack):
-                self.nxt[p,s,:] = self.process_obs(data[p])[:]
+            obs = self.process_obs(data[p])[:]
+            self.nxt[p,:,:]  = 0.0
+            self.nxt[p,-1,:] = obs[:]
 
         nxt = np.reshape(self.nxt, (mpi.size, self.obs_dim)).copy()
 
@@ -160,6 +161,9 @@ class environments:
             if (done[p]):
                 obs = self.process_obs(data[p])
                 obs_array[p,:] = np.tile(obs, self.obs_stack)[:]
+
+                self.nxt[p,:,:]  = 0.0
+                self.nxt[p,-1,:] = obs[:]
 
         return obs_array
 
