@@ -26,6 +26,7 @@
         "type": "ppo",
         "policy": {
             "type": "normal",
+            "sigma": 0.5,
             "network": {
                 "type": "fc",
                 "trunk": {

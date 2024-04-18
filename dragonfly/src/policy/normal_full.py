@@ -19,7 +19,7 @@ class normal_full(base_normal):
         self.store_type  = float
         self.target      = target
 
-        self.sigma       = 0.5
+        self.sigma       = 1.0
         if (hasattr(pms, "sigma")): self.sigma = pms.sigma
 
         # Check parameters
@@ -128,7 +128,7 @@ class normal_full(base_normal):
 
         out = self.net.call(state)
         mu  = out[0]
-        sg  = out[1]*self.sigma/0.5
+        sg  = out[1]*self.sigma
         cr  = out[2]
 
         return mu, sg, cr

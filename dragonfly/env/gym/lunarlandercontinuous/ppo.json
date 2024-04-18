@@ -23,6 +23,7 @@
     },
     "agent": {
         "type": "ppo",
+        "sigma": 1.5,
         "policy": {
             "type": "normal",
             "network": {
