@@ -13,7 +13,7 @@ pol_factory = factory()
 
 # Register policies
 pol_factory.register("categorical",    categorical)
-pol_factory.register("normal",         normal_diag)
+pol_factory.register("normal",         normal_iso)
 pol_factory.register("normal_diag",    normal_diag)
 pol_factory.register("normal_full",    normal_full)
 pol_factory.register("tanh_normal",    tanh_normal)
