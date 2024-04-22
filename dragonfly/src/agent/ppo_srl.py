@@ -2,16 +2,20 @@
 from dragonfly.src.agent.base import *
 
 ###############################################
-### PPO agent
-class ppo(base_agent_on_policy):
+### PPO-SRL agent
+class ppo_srl(base_agent_on_policy):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
         self.name      = 'ppo'
         self.act_dim   = act_dim
-        self.obs_dim   = obs_dim
+        self.obs_dim  = obs_dim
         self.n_cpu     = n_cpu
         self.size      = size
+
+        # Initialize srl class
+        self.init_srl(pms, obs_dim, 1000*size)
+        self.latent_dim = self.srl.latent_dim
 
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
@@ -19,7 +23,7 @@ class ppo(base_agent_on_policy):
                     "Loss type for ppo agent is not surrogate")
 
         self.p = pol_factory.create(pms.policy.type,
-                                    obs_dim = self.obs_dim,
+                                    obs_dim = self.latent_dim,
                                     act_dim = act_dim,
                                     pms     = pms.policy)
 
@@ -33,7 +37,7 @@ class ppo(base_agent_on_policy):
                     "Value type for ppo agent is not v_value")
 
         self.v = val_factory.create(pms.value.type,
-                                    inp_dim = self.obs_dim,
+                                    inp_dim = self.latent_dim,
                                     pms     = pms.value)
 
         # Build advantage
@@ -61,14 +65,15 @@ class ppo(base_agent_on_policy):
         lgp = self.data["lgp"][start:end]
 
         # Train policy
+        pobs = self.process_obs(obs)
         act = self.p.reshape_actions(act)
         adv = tf.reshape(adv, [-1])
         lgp = tf.reshape(lgp, [-1])
-        self.p.loss.train(obs, adv, act, lgp, self.p, self.p.opt)
+        self.p.loss.train(pobs, adv, act, lgp, self.p, self.p.opt)
 
         # Train v network
         tgt = tf.reshape(tgt, [-1])
-        self.v.loss.train(obs, tgt, self.v.net, self.v.opt)
+        self.v.loss.train(pobs, tgt, self.v.net, self.v.opt)
 
     # Save value parameters
     def save_value(self, filename):

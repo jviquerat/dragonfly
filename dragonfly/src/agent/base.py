@@ -7,6 +7,7 @@ from dragonfly.src.policy.policy           import *
 from dragonfly.src.value.value             import *
 from dragonfly.src.decay.decay             import *
 from dragonfly.src.retrn.retrn             import *
+from dragonfly.src.srl.srl                 import *
 from dragonfly.src.core.constants          import *
 from dragonfly.src.termination.termination import *
 from dragonfly.src.utils.buff              import *
@@ -22,6 +23,26 @@ class base_agent():
     # Get actions
     def actions(self, obs):
         raise NotImplementedError
+
+    # Initialize srl
+    def init_srl(self, pms, obs_dim, buff_size):
+
+        # Check inputs
+        if not hasattr(pms, "srl"):
+            pms.srl  = None
+            srl_type = "dummy"
+        else: srl_type = pms.srl.type
+
+        # Create srl
+        self.srl = srl_factory.create(srl_type,
+                                      obs_dim   = obs_dim,
+                                      buff_size = buff_size,
+                                      pms       = pms.srl)
+
+    # Pre-process observations using srl
+    def process_obs(self, obs):
+
+        return self.srl.process(obs)
 
     # Reset
     def reset(self):
@@ -62,9 +83,12 @@ class base_agent_on_policy(base_agent):
     # Get actions
     def actions(self, obs):
 
+        if hasattr(self, "srl"): pobs = super().process_obs(obs)
+        else: pobs = obs
+
         # Get actions and associated log-prob
         self.timer_actions.tic()
-        act, lgp = self.p.actions(obs)
+        act, lgp = self.p.actions(pobs)
 
         # Check for NaNs
         if (np.isnan(act).any()):
@@ -81,7 +105,10 @@ class base_agent_on_policy(base_agent):
     # Control (deterministic actions)
     def control(self, obs):
 
-        return self.p.control(obs)
+        if hasattr(self, "srl"): pobs = super().process_obs(obs)
+        else: pobs = obs
+
+        return self.p.control(pobs)
 
     # Finalize buffers before training
     def returns(self, obs, nxt, rwd, trm):
@@ -117,7 +144,15 @@ class base_agent_on_policy(base_agent):
         names = ["obs", "nxt", "act", "lgp", "rwd", "trm"]
         data  = self.buff.serialize(names)
         gobs, gnxt, gact, glgp, grwd, gtrm = (data[name] for name in names)
-        gtgt, gadv = self.returns(gobs, gnxt, grwd, gtrm)
+
+        if hasattr(self, "srl"):
+            pgobs = super().process_obs(gobs)
+            pgnxt = super().process_obs(gnxt)
+        else:
+            pgobs = gobs
+            pgnxt = gnxt
+
+        gtgt, gadv = self.returns(pgobs, pgnxt, grwd, gtrm)
 
         self.gbuff.store(self.gnames, [gobs, gact, gadv, gtgt, glgp])
 
@@ -128,6 +163,8 @@ class base_agent_on_policy(base_agent):
         self.v.reset()
         self.buff.reset()
         self.gbuff.reset()
+        if hasattr(self, "srl"):
+            self.srl.reset()
 
     # Store transition
     def store(self, obs, nxt, act, rwd, dne, trc):
@@ -135,6 +172,9 @@ class base_agent_on_policy(base_agent):
         trm = self.term.terminate(dne, trc)
         self.buff.store(["obs", "nxt", "act", "rwd", "trm"],
                         [ obs,   nxt,   act,   rwd,   trm ])
+
+        # Store in SRL buffer
+        if hasattr(self, "srl"): self.srl.store_obs(obs)
 
 ###############################################
 ### Base for off-policy agents
