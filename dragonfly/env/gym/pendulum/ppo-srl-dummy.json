@@ -22,19 +22,22 @@
         "render_every": 10000
     },
     "agent": {
-        "type": "ppo",
+        "type": "ppo-srl",
+        "srl": {
+            "type": "dummy"
+        },
         "policy": {
             "type": "normal",
             "network": {
                 "type": "fc",
                 "trunk": {
                     "arch": [64],
-                    "actv": "tanh"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 2,
                     "arch": [[64],[64]],
-                    "actv": ["tanh","tanh"],
+                    "actv": ["relu","relu"],
                     "final": ["tanh","sigmoid"]
                 }
             },

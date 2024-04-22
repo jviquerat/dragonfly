@@ -21,6 +21,9 @@ class buffer(base_trainer):
         self.freq_report = max(int(n_stp_max / (freq_report * self.buff_size)), 1)
         self.update_type = "on_policy"
 
+        self.warmup = 0
+        if hasattr(pms, "warmup"): self.warmup = pms.warmup
+
         # Initialize agent
         self.agent = agent_factory.create(
             agent_pms.type,
@@ -84,7 +87,11 @@ class buffer(base_trainer):
             # Train agent
             self.timer_training.tic()
             btc_size = math.floor(self.size * self.btc_frac)
-            self.update.update(self.agent, self.size, btc_size, self.n_epochs)
+
+            if (self.counter.step > self.warmup):
+                self.update.update(self.agent,
+                                   self.size, btc_size, self.n_epochs)
+
             self.timer_training.toc()
 
         self.end_training(path, run)

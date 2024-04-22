@@ -19,7 +19,7 @@ class ppo(base_agent_on_policy):
                     "Loss type for ppo agent is not surrogate")
 
         self.p = pol_factory.create(pms.policy.type,
-                                    obs_dim = obs_dim,
+                                    obs_dim = self.obs_dim,
                                     act_dim = act_dim,
                                     pms     = pms.policy)
 
@@ -33,7 +33,7 @@ class ppo(base_agent_on_policy):
                     "Value type for ppo agent is not v_value")
 
         self.v = val_factory.create(pms.value.type,
-                                    inp_dim = obs_dim,
+                                    inp_dim = self.obs_dim,
                                     pms     = pms.value)
 
         # Build advantage

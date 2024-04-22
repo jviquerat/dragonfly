@@ -11,29 +11,48 @@
         "tag": false,
         "time": false
     },
-    "n_avg": 3,
-    "n_stp_max": 100000,
+    "n_avg": 2,
+    "n_stp_max": 500,
     "trainer": {
         "style": "buffer",
-        "buff_size": 2000,
+        "buff_size": 128,
         "n_buff": 1,
-        "batch_frac": 0.25,
-        "n_epochs": 64,
-        "render_every": 10000
+        "batch_frac": 0.5,
+        "n_epochs": 16,
+        "render_every": 500
     },
     "agent": {
-        "type": "ppo",
+	      "srl": {
+	          "type": "sae",
+            "latent_dim": 2,
+	          "update_freq": 200,
+	          "n_epochs" : 512,
+            "n_updates": 2,
+	          "batch_size": 100,
+            "network": {
+                "arch": [64,32],
+                "actv": "relu"
+            },
+            "optimizer": {
+                "type": "adam",
+                "lr": 1.0e-3
+            },
+            "loss": {
+                "type": "mse_ae"
+            }
+	      },
+        "type": "ppo-srl",
         "policy": {
             "type": "normal",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [64],
+                    "arch": [32],
                     "actv": "tanh"
                 },
                 "heads": {
                     "nb": 2,
-                    "arch": [[64],[64]],
+                    "arch": [[16],[16]],
                     "actv": ["tanh","tanh"],
                     "final": ["tanh","sigmoid"]
                 }
@@ -54,13 +73,13 @@
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [64,64],
-                    "actv": "relu"
+                    "arch": [16,16],
+                    "actv": "selu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["relu"],
+                    "actv": ["selu"],
                     "final": ["linear"]
                 }
             },
