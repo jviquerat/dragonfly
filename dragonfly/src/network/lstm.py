@@ -1,5 +1,8 @@
+# Generic imports
+from tensorflow.keras.layers    import LSTM, Permute
+
 # Custom imports
-from  dragonfly.src.network.base import *
+from dragonfly.src.network.base import *
 
 ###############################################
 ### Fully-connected network class
