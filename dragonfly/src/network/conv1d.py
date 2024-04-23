@@ -1,3 +1,6 @@
+# Generic imports
+from  tensorflow.keras.layers    import Conv1D
+
 # Custom imports
 from  dragonfly.src.network.base import *
 
@@ -94,10 +97,9 @@ class conv1d(base_network):
         for l in range(len(self.trunk.arch)):
             var = self.net[i](var)
             i  += 1
-        
-        #var = MaxPooling1D(2)(var)
+
         var = Flatten()(var)
-                
+
         # Compute heads
         # Each head output is stored in a tf.tensor, and
         # is appended to the global output
@@ -106,7 +108,6 @@ class conv1d(base_network):
             for l in range(len(self.heads.arch[h])):
                 hvar = self.net[i](hvar)
                 i   += 1
-                #hvar = Dropout(0.5)(hvar)
             hvar = self.net[i](hvar)
             i   += 1
             hvar = Reshape([self.out_dim[h]])(hvar)
