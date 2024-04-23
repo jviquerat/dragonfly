@@ -16,20 +16,24 @@ class environments:
     def __init__(self, path, pms):
 
         # Default parameters
-        self.name      = pms.name
-        self.act_norm  = True
-        self.obs_norm  = True
-        self.obs_clip  = False
-        self.obs_noise = False
-        self.obs_stack = 1
-        self.args      = None
+        self.name          = pms.name
+        self.act_norm      = True
+        self.obs_norm      = True
+        self.obs_clip      = False
+        self.obs_noise     = False
+        self.obs_stack     = 1
+        self.obs_grayscale = False
+        self.obs_downscale = 1
+        self.args          = None
 
-        if hasattr(pms, "args"):      self.args      = pms.args
-        if hasattr(pms, "act_norm"):  self.act_norm  = pms.act_norm
-        if hasattr(pms, "obs_norm"):  self.obs_norm  = pms.obs_norm
-        if hasattr(pms, "obs_clip"):  self.obs_clip  = pms.obs_clip
-        if hasattr(pms, "obs_noise"): self.obs_noise = pms.obs_noise
-        if hasattr(pms, "obs_stack"): self.obs_stack = pms.obs_stack
+        if hasattr(pms, "args"):          self.args          = pms.args
+        if hasattr(pms, "act_norm"):      self.act_norm      = pms.act_norm
+        if hasattr(pms, "obs_norm"):      self.obs_norm      = pms.obs_norm
+        if hasattr(pms, "obs_clip"):      self.obs_clip      = pms.obs_clip
+        if hasattr(pms, "obs_noise"):     self.obs_noise     = pms.obs_noise
+        if hasattr(pms, "obs_stack"):     self.obs_stack     = pms.obs_stack
+        if hasattr(pms, "obs_grayscale"): self.obs_grayscale = pms.obs_grayscale
+        if hasattr(pms, "obs_downscale"): self.obs_downscale = pms.obs_downscale
 
         # Generate workers
         self.worker = worker(self.name, self.args, mpi.rank, path)
@@ -68,6 +72,21 @@ class environments:
                                 self.obs_max)
         self.obs_avg = 0.5*(self.obs_max + self.obs_min)
         self.obs_rng = 0.5*(self.obs_max - self.obs_min)
+
+        # For pixel-based envs
+        if (self.obs_grayscale):
+            self.obs_avg = self.obs_avg[:,:,0]
+            self.obs_rng = self.obs_rng[:,:,0]
+
+        if (self.obs_downscale):
+            s = self.obs_downscale
+
+            if (len(self.obs_avg.shape) == 1):
+                self.obs_avg = self.obs_avg[::s]
+                self.obs_rng = self.obs_rng[::s]
+            if (len(self.obs_avg.shape) == 2):
+                self.obs_avg = self.obs_avg[::s,::s]
+                self.obs_rng = self.obs_rng[::s,::s]
 
         # Initialize an observation array for stacking
         self.nxt = np.zeros((mpi.size, self.obs_stack, self.obs_base))
@@ -111,7 +130,7 @@ class environments:
             n, r, d, t = vals[0], vals[1], vals[2], vals[3]
             nn         = self.process_obs(n)
 
-            self.nxt[p,-1,:] = nn[:]
+            self.nxt[p,-1,:] = nn[:].flatten()
             rwd  [p]         = r
             done [p]         = bool(d)
             trunc[p]         = bool(t)
@@ -135,9 +154,9 @@ class environments:
         # Receive and normalize
         data = mpi.comm.gather((obs), root=0)
         for p in range(mpi.size):
-            obs = self.process_obs(data[p])[:]
+            obs = self.process_obs(data[p])
             self.nxt[p,:,:]  = 0.0
-            self.nxt[p,-1,:] = obs[:]
+            self.nxt[p,-1,:] = obs[:].flatten()
 
         nxt = np.reshape(self.nxt, (mpi.size, self.obs_dim)).copy()
 
@@ -160,10 +179,10 @@ class environments:
         for p in range(mpi.size):
             if (done[p]):
                 obs = self.process_obs(data[p])
-                obs_array[p,:] = np.tile(obs, self.obs_stack)[:]
+                obs_array[p,:] = np.tile(obs.flatten(), self.obs_stack)[:]
 
                 self.nxt[p,:,:]  = 0.0
-                self.nxt[p,-1,:] = obs[:]
+                self.nxt[p,-1,:] = obs[:].flatten()
 
         return obs_array
 
@@ -193,7 +212,24 @@ class environments:
             self.obs_dim = int(self.worker.env.observation_space.n)
         # Continuous observation space
         if (type(self.worker.env.observation_space).__name__ == "Box"):
-            self.obs_dim = int(self.worker.env.observation_space.shape[0])
+            shape     = self.worker.env.observation_space.shape
+            n_dims    = len(shape)
+
+            # First dimension in any case
+            shape_x   = shape[0]//self.obs_downscale
+            total_dim = shape_x
+
+            # Second and third dimensions if image
+            # Alpha channel dimension is mandatory
+            if (n_dims > 1):
+                shape_y    = shape[1]//self.obs_downscale
+                total_dim *= shape_y
+
+                if self.obs_grayscale: shape_z = 1
+                else: shape_z = shape[2]
+                total_dim *= shape_z
+
+            self.obs_dim = total_dim
 
     # Get action boundaries
     def get_act_bounds(self):
@@ -279,6 +315,10 @@ class environments:
     # Process observations
     def process_obs(self, obs):
 
+        if (self.obs_grayscale):
+            obs = self.grayscale_obs(obs)
+        if (self.obs_downscale):
+            obs = self.downscale_obs(obs)
         if (self.obs_clip):
             obs = self.clip_obs(obs)
         if (self.obs_norm):
@@ -287,6 +327,25 @@ class environments:
             obs = self.noise_obs(obs)
 
         return obs
+
+    # Grayscale observations (for pixel-based envs)
+    # Alpha channel is assumed to be last
+    def grayscale_obs(self, obs):
+
+        x = np.zeros((obs.shape[0], obs.shape[1]))
+        x[:,:] = np.mean(obs, axis=2)
+
+        return x
+
+    # Downscale observations (for pixel-based envs)
+    def downscale_obs(self, obs):
+
+        if (len(obs.shape) == 1):
+            x = obs[::self.obs_downscale]
+        if (len(obs.shape) == 2):
+            x = obs[::self.obs_downscale,::self.obs_downscale]
+
+        return x
 
     # Clip observations
     def clip_obs(self, obs):
