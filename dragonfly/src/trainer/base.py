@@ -193,6 +193,7 @@ class base_trainer:
         bst_ep = self.counter.best_ep
 
         # Handle no-printing after max step
+        self.cnt = 0
         if stp < n_stp_max - 1:
             end = "\r"
             self.cnt = 0
