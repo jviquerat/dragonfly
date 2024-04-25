@@ -5,14 +5,14 @@ class off_policy():
         pass
 
     # Update
-    def update(self, agent, btc_size, n_rollout):
+    def update(self, agent, btc_size, n_stp_unroll):
 
-        # Prepare a buffer of size n_rollout*btc_size
-        lgt, ready = agent.prepare_data(n_rollout*btc_size)
+        # Prepare a buffer of size n_stp_unroll*btc_size
+        lgt, ready = agent.prepare_data(n_stp_unroll*btc_size)
         if (not ready): return
 
         # Train n_rollout times on different minibatches
-        for i in range(n_rollout):
+        for i in range(n_stp_unroll):
             start = i*btc_size
             end   = (i+1)*btc_size
 
