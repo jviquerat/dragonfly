@@ -1,8 +1,6 @@
 # Tensorflow imports
 import tensorflow as tf
 
-import numpy as np
-
 ###############################################
 ### Q-policy loss class for DDPG policy update
 class q_pol():
