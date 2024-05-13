@@ -1,9 +1,5 @@
 # Tensorflow imports
 import tensorflow as tf
-import tensorflow_probability as tfp
-tfd = tfp.distributions
-
-import numpy as np
 
 ###############################################
 ### Q-policy loss class for SAC policy update
@@ -27,4 +23,5 @@ class q_pol_sac():
             # Apply gradients
             var   = p.net.trainables()
             grads = tape.gradient(loss, var)
+
         opt.apply_grads(zip(grads, var))
