@@ -96,7 +96,7 @@ class conv2d(base_network):
                                   activation         = self.heads.final[h]))
 
         # Initialize weights
-        dummy = self.call(tf.ones([1, self.nx, self.ny, self.stack]))
+        dummy = self.call(tf.ones([1, self.stack, self.nx, self.ny]))
 
         # Save initial weights
         self.init_weights = self.get_weights()
@@ -110,6 +110,7 @@ class conv2d(base_network):
         out = []
 
         # Back to the original dimension
+        # Reminder : the new shape will be (batch_size, self.original_dim)
         var = Reshape(self.original_dim)(var)
 
         # Compute trunk

@@ -89,7 +89,7 @@ class environments:
                 self.obs_rng = self.obs_rng[::s,::s]
 
         # Initialize an observation array for stacking
-        self.nxt = np.zeros((mpi.size, self.obs_stack, self.obs_base))
+        self.nxt = np.zeros((mpi.size, self.obs_base, self.obs_stack))
 
         # Initialize timer
         self.timer_env = timer("env      ")
@@ -114,9 +114,10 @@ class environments:
         n, r, d, t = self.worker.step(data[0][1])
 
         # Handle stacked observations
+        # Latest observation is put in last position
         for p in range(mpi.size):
             for s in range(self.obs_stack-1):
-                self.nxt[p,s,:] = self.nxt[p,s+1,:]
+                self.nxt[p,:,s] = self.nxt[p,:,s+1]
 
         rwd   = np.empty((mpi.size))
         done  = np.empty((mpi.size))
@@ -130,7 +131,8 @@ class environments:
             n, r, d, t = vals[0], vals[1], vals[2], vals[3]
             nn         = self.process_obs(n)
 
-            self.nxt[p,-1,:] = nn[:].flatten()
+            # New observation is put in last position
+            self.nxt[p,:,-1] = nn[:].flatten()
             rwd  [p]         = r
             done [p]         = bool(d)
             trunc[p]         = bool(t)
@@ -156,7 +158,7 @@ class environments:
         for p in range(mpi.size):
             obs = self.process_obs(data[p])
             self.nxt[p,:,:]  = 0.0
-            self.nxt[p,-1,:] = obs[:].flatten()
+            self.nxt[p,:,-1] = obs[:].flatten()
 
         nxt = np.reshape(self.nxt, (mpi.size, self.obs_dim)).copy()
 
@@ -182,7 +184,7 @@ class environments:
                 obs_array[p,:] = np.tile(obs.flatten(), self.obs_stack)[:]
 
                 self.nxt[p,:,:]  = 0.0
-                self.nxt[p,-1,:] = obs[:].flatten()
+                self.nxt[p,:,-1] = obs[:].flatten()
 
         return obs_array
 
