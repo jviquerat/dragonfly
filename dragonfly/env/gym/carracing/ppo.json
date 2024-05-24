@@ -5,7 +5,7 @@
         "obs_norm": true,
         "obs_noise": 0.0,
         "obs_grayscale": true,
-        "obs_downscale": 4,
+        "obs_downscale": 2,
 	      "obs_stack": 4
     },
     "naming": {
@@ -22,7 +22,7 @@
         "n_buff": 1,
         "batch_frac": 0.5,
         "n_epochs": 32,
-        "render_every": 5
+        "render_every": 50000
     },
     "agent": {
         "type": "ppo",
@@ -30,13 +30,13 @@
             "type": "normal",
             "network": {
                 "type": "conv2d",
-		            "original_dim": [24,24,4],
+		            "original_dim": [48,48,4],
                 "trunk": {
-                    "filters": [4,8],
+                    "filters": [16,32],
 		                "kernel": 3,
 		                "stride": 1,
                     "pooling": true,
-                    "actv": "tanh"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 2,
@@ -47,7 +47,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-4,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -60,24 +60,24 @@
             "type": "v_value",
             "network": {
                 "type": "conv2d",
-		            "original_dim": [24,24,4],
+		            "original_dim": [48,48,4],
                 "trunk": {
-                    "filters": [4,8],
+                    "filters": [16,32],
 		                "kernel": 3,
 		                "stride": 1,
                     "pooling": true,
-                    "actv": "tanh"
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[64]],
-                    "actv": ["tanh"],
+                    "actv": ["relu"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 5.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
