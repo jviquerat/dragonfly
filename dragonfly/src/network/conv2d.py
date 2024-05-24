@@ -110,6 +110,7 @@ class conv2d(base_network):
         out = []
 
         # Back to the original dimension
+        # Reminder : the new shape will be (batch_size, self.original_dim)
         var = Reshape(self.original_dim)(var)
 
         # Compute trunk
