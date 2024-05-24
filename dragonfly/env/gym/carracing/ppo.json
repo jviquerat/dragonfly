@@ -5,7 +5,7 @@
         "obs_norm": true,
         "obs_noise": 0.0,
         "obs_grayscale": true,
-        "obs_downscale": 4,
+        "obs_downscale": 1,
 	      "obs_stack": 4
     },
     "naming": {
@@ -30,7 +30,7 @@
             "type": "normal",
             "network": {
                 "type": "conv2d",
-		            "original_dim": [24,24,4],
+		            "original_dim": [4,96,96],
                 "trunk": {
                     "filters": [4,8],
 		                "kernel": 3,
@@ -60,7 +60,7 @@
             "type": "v_value",
             "network": {
                 "type": "conv2d",
-		            "original_dim": [24,24,4],
+		            "original_dim": [4,96,96],
                 "trunk": {
                     "filters": [4,8],
 		                "kernel": 3,

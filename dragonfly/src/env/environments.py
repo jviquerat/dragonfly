@@ -114,6 +114,7 @@ class environments:
         n, r, d, t = self.worker.step(data[0][1])
 
         # Handle stacked observations
+        # Latest observation is put in last position
         for p in range(mpi.size):
             for s in range(self.obs_stack-1):
                 self.nxt[p,s,:] = self.nxt[p,s+1,:]
@@ -130,6 +131,7 @@ class environments:
             n, r, d, t = vals[0], vals[1], vals[2], vals[3]
             nn         = self.process_obs(n)
 
+            # New observation is put in last position
             self.nxt[p,-1,:] = nn[:].flatten()
             rwd  [p]         = r
             done [p]         = bool(d)
