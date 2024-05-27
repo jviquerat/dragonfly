@@ -1,0 +1,80 @@
+%%%%%%%%%%%%
+%%%%%%%%%%%%
+\begin{figure} [h!]
+\centering
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
+					ymin=0, ymax=5000,
+					scaled x ticks=false,
+					xtick={0,250000,500000,750000,1000000},
+					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
+					ytick={0,1000,2000,3000,4000,5000},
+					yticklabels={$0$,$1k$,$2k$,$3k$,$4k$,$5k$},
+					legend cell align=left, legend pos=south east,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel=score]
+					
+			\legend{Bootstrapping, Regular}
+				
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_bootstrapping};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_bootstrapping}; 
+			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_bootstrapping}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_regular};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_regular}; 
+			\addplot [fill=teal3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_regular}; 
+						
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{halfcheetah-v4}}
+	\label{fig:bootstrap_halfcheetah}
+\end{subfigure} \qquad \qquad
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
+					ymin=0, ymax=3000,
+					scaled x ticks=false,
+					xtick={0,250000,500000,750000,1000000},
+					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
+					ytick={0,1000,2000,3000},
+					yticklabels={$0$,$1k$,$2k$,$3k$},
+					legend cell align=left, legend pos=south east,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel={}]
+				
+			\legend{Bootstrapping, Regular}
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/walker2d-v4_ppo_bootstrapping};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/walker2d-v4_ppo_bootstrapping}; 
+			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/walker2d-v4_ppo_bootstrapping};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/walker2d-v4_ppo_regular};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/walker2d-v4_ppo_regular}; 
+			\addplot [fill=teal3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/walker2d-v4_ppo_regular};
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{walker2d-v4}}
+	\label{fig:bootstrap_walker2d}
+\end{subfigure}
+%%%%%%%%%%%%
+\caption{\textbf{Performance comparison with and without bootstrap with the \ppo algorithm.}} 
+\label{fig:bootstrap}
+\end{figure} 
+%%%%%%%%%%%%
+%%%%%%%%%%%%
