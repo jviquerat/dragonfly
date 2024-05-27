@@ -4,7 +4,97 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Experiments}
 
-This chapter contains experiments on several technical details of algorithms. Most often, the goal is to compare the performances of slightly implementations on a set of reference environments.
+This chapter contains experiments on several technical details of algorithms. The goal is to compare the performances of slightly different implementations on a set of reference environments. On-policy experiments are repeated 10 times, while off-policy ones are repeated 5 times.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Value of \gae $\lambda$}
+
+We compare the performance of \ppo with \gae for different values of the $\lambda$ parameter in figure \ref{fig:ppo_gae}. The usual range proposed in the original paper \cite{gae} is between $0.90$ and $0.99$, although here we are not considering the exact same cases. Details on the \gae derivation are provided in section \ref{section:gae}.
+
+\input{fig/experiments/gae}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Entropy bonus}
+
+Policy gradient methods can benefit from the use of an entropy bonus that prevents premature shrinking of the exploration. This method was originally proposed in \cite{williams1991} in the context of reinforcement learning, and re-introduced in deep reinforcement learning in \cite{a2c} and \cite{ppo}. The idea is to add an estimation of the policy entropy to the loss. For the policy gradient loss using advantage, for example, this yields:
+
+\begin{equation}
+	\mathcal{L}(\theta) = \expect{(s_t, a_t) \sim \pi_\theta} \Bigl[ \log \left( \pi_\theta (s_t, a_t) \right) A^{\pi_\theta} (s_t, a_t) + \beta \entropy \left( \pi_\theta (s_t) \right) \Bigr].
+\end{equation}
+
+We see in figure \ref{fig:ppo_entropy} that the fine-tuning of this parameter can be extremely important. Conversely, some cases are almost insensitive to it.
+
+\input{fig/experiments/entropy}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Bootstrapping}
+
+We compare performance on the \ppo algorithm with and without the use of bootstrapping in figure \ref{fig:bootstrap}. Overall, bootstrapping provides a nice performance boost on \codeinline{halfcheetah}, but not particularly on \codeinline{walker2d}.
+
+\input{fig/experiments/bootstrap}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Initializers}
+
+In figure \ref{fig:initialization}, we check the impact of the kernel initializations on the performance using \ppo and \sac. For \ppo, orthogonal initialization makes a large difference.
+
+\input{fig/experiments/initialization}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Off-policy rollout}
+
+In figure \ref{fig:rollout}, we compare the performance when performing different amounts of rollout between two updates for \sac (the ratio of number of rollout steps on number of udpate steps is kept equal to $1$).
+
+\input{fig/experiments/rollout}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Architectures}
+
+%In figure \ref{fig:initialization}, we check the impact of the kernel initializations on the performance using \ppo and \sac. For \ppo, orthogonal initialization makes a large difference.
+
+%\input{fig/experiments/architectures}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Parallel off-policy agent \textcolor{red}{(to reproduce)}}
+%
+%Off-policy agents typically train once per step, which make them slower to run than on-policy agents (regardless of final performance). Here we  compare two different approaches:
+%
+%\begin{enumerate}
+%	\item sequential environment with one update per step,
+%	\item sequential environment with \codeinline{n_stp_unroll} updates every \codeinline{n_stp_unroll} steps.
+%\end{enumerate}
+%
+%The performances of the different approaches are compared in figure \ref{fig:n_stp_unroll} using the \tdt algorithm. Regarding pure CPU performance, the baseline run takes approximately $530$ seconds, going down to $440$ seconds for \codeinline{n_stp_unroll}$\, = 16$, and $390$ seconds for \codeinline{n_stp_unroll}$\, = 64$.
+%
+%\input{fig/n_stp_unroll/n_stp_unroll}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -15,14 +105,7 @@ This chapter contains experiments on several technical details of algorithms. Mo
 %
 %\input{fig/stddev/normal_stddev}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\section{Initializers (revision \codeinline{04cb588})}
-%
-%In figure \ref{fig:initializer}, we check the impact of the kernel initializations on the performance using \ppo. It does not seem to make much of a difference, although Lecun normal exhibits a slightly slower convergence.
-%
-%\input{fig/initialization/initialization}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -42,73 +125,16 @@ This chapter contains experiments on several technical details of algorithms. Mo
 %
 %\input{fig/adam_epsilon/ppo_adam_epsilon}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\section{SNN}
-%
-%Test self-normalizing neural networks, combining selu activation with normal initialization and alpha dropout (see paper)
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\section{Early stopping using KL-divergence with \ppo}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\section{Activation function}
-%
-%tanh, relu, selu, gelu, swish, mish
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\section{Clipped normal against squashed normal with \ppo}
-%
-%Must use linear/softplus activation and remove the action clipping and rescaling
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Bootstrapping}
-
-We compare performance on the \ppo algorithm with and without the use of bootstrapping in figure \ref{fig:bootstrap}, using different types of returns. Overall, bootstrapping provides a nice performance boost on \codeinline{bipedalwalker-v3}, while it does not change much on \codeinline{lunarlandercontinuous-v2}. The performance gain is clearly visible on \mujoco environments (tested here only with \gae).
-
-\input{fig/bootstrap/bootstrap}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Value of \gae $\lambda$ \textcolor{red}{(to reproduce)}}
-
-We compare the performance of \ppo with \gae for different values of the $\lambda$ parameter in figure \ref{fig:ppo_gae}. The usual range proposed in the original paper \cite{gae} is between $0.90$ and $0.99$. Here, we see that both environments behave similarly for $\lambda$ between $0.90$ and $0.98$, but react differently to $\lambda = 0.85$. Details on the \gae derivation are provided in section \ref{section:gae}.
-
-\input{fig/gae/gae}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{\gae vs \cgae \textcolor{red}{(to reproduce)}}
-
-In figure \ref{fig:ppo_cgae}, we compare the performance of the regular \gae with that of \cgae presented in section \ref{section:gae}. As of now, more tests are needed, mostly with shorter episodes, where the effet of the \cgae correction could mostly make a difference.
-
-\input{fig/cgae/cgae}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Entropy bonus \textcolor{red}{(to reproduce)}}
+%\section{\gae vs \cgae \textcolor{red}{(to reproduce)}}
+%
+%In figure \ref{fig:ppo_cgae}, we compare the performance of the regular \gae with that of \cgae presented in section \ref{section:gae}. As of now, more tests are needed, mostly with shorter episodes, where the effet of the \cgae correction could mostly make a difference.
+%
+%\input{fig/cgae/cgae}
 
-Policy gradient methods can benefit from the use of an entropy bonus that prevents premature shrinking of the exploration. This method was originally proposed in \cite{williams1991} in the context of reinforcement learning, and re-introduced in deep reinforcement learning in \cite{a2c} and \cite{ppo}. The idea is to add an estimation of the policy entropy to the loss. For the policy gradient loss using advantage, for example, this yields:
 
-\begin{equation}
-	\mathcal{L}(\theta) = \expect{(s_t, a_t) \sim \pi_\theta} \Bigl[ \log \left( \pi_\theta (s_t, a_t) \right) A^{\pi_\theta} (s_t, a_t) + \beta \entropy \left( \pi_\theta (s_t) \right) \Bigr].
-\end{equation}
-
-We see in figure \ref{fig:ppo_entropy} that, in the case of \codeinline{bipedalwalker-v3}, a well-tuned bonus allows to solve the environment, while in the context of \codeinline{lunarlandercontinuous-v3}, small bonuses make no difference, and only a too large bonus is detrimental to the agent.
-
-\input{fig/entropy/entropy}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -130,58 +156,39 @@ We see in figure \ref{fig:ppo_entropy} that, in the case of \codeinline{bipedalw
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\section{\sac without reparameterization trick}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\section{Target network in \dqn}
 %
 %\dqn with and without target network
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Covariance matrix of normal policy \textcolor{red}{(to reproduce)}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Covariance matrix of normal policy \textcolor{red}{(to reproduce)}}
+%
+%The variance of the normal policy may be parameterized in different ways:
+%
+%\begin{enumerate}
+%	\item a fixed isotropic variance $\sigma_0^2$ (hereafter denoted as constant),
+%	\item a learned isotropic variance $\sigma^2$ (hereafter denoted as isotropic),
+%	\item a learned diagonal covariance matrix $\V{\Sigma}_\text{diag}$ (hereafter denoted as diagonal),
+%	\item a learned full covariance matrix $\V{\Sigma}_\text{full}$ (not considered here).
+%\end{enumerate}
+%
+%The performances of the different parameterizations are compared in figure \ref{fig:cov} using the \ppo algorithm.
+%
+%\input{fig/covariance/covariance}
 
-The variance of the normal policy may be parameterized in different ways:
 
-\begin{enumerate}
-	\item a fixed isotropic variance $\sigma_0^2$ (hereafter denoted as constant),
-	\item a learned isotropic variance $\sigma^2$ (hereafter denoted as isotropic),
-	\item a learned diagonal covariance matrix $\V{\Sigma}_\text{diag}$ (hereafter denoted as diagonal),
-	\item a learned full covariance matrix $\V{\Sigma}_\text{full}$ (not considered here).
-\end{enumerate}
 
-The performances of the different parameterizations are compared in figure \ref{fig:cov} using the \ppo algorithm.
-
-\input{fig/covariance/covariance}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Parallel off-policy agent \textcolor{red}{(to reproduce)}}
-
-Off-policy agents typically train once per step, which make them slower to run than on-policy agents (regardless of final performance). Here we  compare two different approaches:
-
-\begin{enumerate}
-	\item sequential environment with one update per step,
-	\item sequential environment with \codeinline{n_stp_unroll} updates every \codeinline{n_stp_unroll} steps.
-\end{enumerate}
-
-The performances of the different approaches are compared in figure \ref{fig:n_stp_unroll} using the \tdt algorithm. Regarding pure CPU performance, the baseline run takes approximately $530$ seconds, going down to $440$ seconds for \codeinline{n_stp_unroll}$\, = 16$, and $390$ seconds for \codeinline{n_stp_unroll}$\, = 64$.
-
-\input{fig/n_stp_unroll/n_stp_unroll}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Convolutional layers}
-In different neural networks deployed in the library, one may replace the default fully connected layers by convolutional ones in the trunk of the architectures.
-\subsection{One dimensional convolution}
-When the observations are vectors in which there are linear spatial relationships among the entries, a natural idea might be to use one dimensional convolutional layers. Here, we consider the \ppo algorithm with policy and value networks composed of two layers of size 64. In figure \ref{fig:conv1d}, we see how the performance of the algorithm is affected if the first fully connected (FC) layer in both policy and value networks becomes convolutional (CV) with kernel size equal to 4. 
-
-\input{fig/convolution/1d/conv1d}
-
-\subsection{Two dimensional convolution}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Convolutional layers}
+%In different neural networks deployed in the library, one may replace the default fully connected layers by convolutional ones in the trunk of the architectures.
+%\subsection{One dimensional convolution}
+%When the observations are vectors in which there are linear spatial relationships among the entries, a natural idea might be to use one dimensional convolutional layers. Here, we consider the \ppo algorithm with policy and value networks composed of two layers of size 64. In figure \ref{fig:conv1d}, we see how the performance of the algorithm is affected if the first fully connected (FC) layer in both policy and value networks becomes convolutional (CV) with kernel size equal to 4. 
+%
+%\input{fig/convolution/1d/conv1d}
+%
+%\subsection{Two dimensional convolution}
+%

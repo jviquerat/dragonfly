@@ -1,0 +1,131 @@
+%%%%%%%%%%%%
+%%%%%%%%%%%%
+\begin{figure} [h!]
+\centering
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
+					ymin=0, ymax=5000,
+					scaled x ticks=false,
+					xtick={0,250000,500000,750000,1000000},
+					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
+					ytick={0,1000,2000,3000,4000,5000},
+					yticklabels={$0$,$1k$,$2k$,$3k$,$4k$,$5k$},
+					legend cell align=left, legend pos=north west,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel=score]
+					
+			\legend{mlp/mlp, mlp/gmlp, mlp/d2rl, gmlp/mlp, d2rl/mlp, d2rl/d2rl, gmlp/gmlp}
+				
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_mlp_mlp };
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_mlp_mlp}; 
+			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_mlp_mlp}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_mlp_gmlp};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_mlp_gmlp}; 
+			\addplot [fill=green3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=green1, thick, smooth] 		table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_mlp_gmlp};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_mlp_d2rl};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_mlp_d2rl}; 
+			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_mlp_d2rl};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_mlp};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_mlp}; 
+			\addplot [fill=purple3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=purple1, thick, smooth] 		table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_mlp}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_mlp};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_mlp}; 
+			\addplot [fill=teal3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_mlp};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_d2rl};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_d2rl}; 
+			\addplot [fill=red3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_d2rl}; 
+			
+%			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_gmlp};
+%			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_gmlp}; 
+%			\addplot [fill=orange3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+%			\addplot[draw=orange1, thick, smooth] 		table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_gmlp}; 
+
+						
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{halfcheetah-v4}}
+	\label{fig:architectures_halfcheetah}
+\end{subfigure} \qquad \qquad
+%%%%%%%%%%%%
+\begin{subfigure}[t]{.35\textwidth}
+	\centering
+	\begin{tikzpicture}[	trim axis left, trim axis right, font=\scriptsize,
+					upper/.style={	name path=upper, smooth, draw=none},
+					lower/.style={	name path=lower, smooth, draw=none},]
+		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
+					ymin=0, ymax=5000,
+					scaled x ticks=false,
+					xtick={0,250000,500000,750000,1000000},
+					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
+					ytick={0,1000,2000,3000,4000,5000},
+					yticklabels={$0$,$1k$,$2k$,$3k$,$4k$,$5k$},
+					legend cell align=left, legend pos=north west,
+					legend style={nodes={scale=0.8, transform shape}},
+					every tick label/.append style={font=\scriptsize},
+					grid=major, xlabel=transitions, ylabel={}]
+				
+			\legend{mlp/mlp, mlp/gmlp, mlp/d2rl, gmlp/mlp, d2rl/mlp, d2rl/d2rl, gmlp/gmlp}
+				
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_mlp_mlp};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_mlp_mlp}; 
+			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_mlp_mlp}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_mlp_gmlp};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_mlp_gmlp}; 
+			\addplot [fill=green3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=green1, thick, smooth] 		table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_mlp_gmlp};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_mlp_d2rl};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_mlp_d2rl}; 
+			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_mlp_d2rl};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_mlp};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_mlp}; 
+			\addplot [fill=purple3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=purple1, thick, smooth] 		table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_mlp}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_mlp};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_mlp}; 
+			\addplot [fill=teal3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_mlp};
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_d2rl};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_d2rl}; 
+			\addplot [fill=red3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_d2rl_d2rl};
+			
+%			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_gmlp};
+%			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_gmlp}; 
+%			\addplot [fill=orange3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+%			\addplot[draw=orange1, thick, smooth] 			table[x index=0,y index=5] {fig/experiments/data/halfcheetah-v4_ppo_gmlp_gmlp}; 
+			
+		\end{axis}
+	\end{tikzpicture}
+	\caption{\codeinline{walker2d-v4}}
+	\label{fig:bootstrap_walker2d}
+\end{subfigure}
+%%%%%%%%%%%%
+\caption{\textbf{Performance comparison with and without bootstrap with the \ppo algorithm.}} 
+\label{fig:bootstrap}
+\end{figure} 
+%%%%%%%%%%%%
+%%%%%%%%%%%%

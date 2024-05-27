@@ -29,3 +29,6 @@ venv
 *.bbl
 *.blg
 *minted*
+*.txt
+experiments_*
+bench_data
