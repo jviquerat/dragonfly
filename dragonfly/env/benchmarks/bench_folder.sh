@@ -8,6 +8,9 @@
 # Retrieve folder name
 input=$1
 
+# Retrieve number of parallel envs
+n_cpu=$2
+
 # Remove possible trailing slash
 folder=${input%/}
 
@@ -31,7 +34,7 @@ for f in ${lst[@]}; do
     name=${name//\//_}
 
     # Run with output in dedicated file
-    dgf --train $f &> $name &
+    mpirun -n $n_cpu dgf --train $f &> $name &
 
     # Retrieve background pid
     pid=$!
