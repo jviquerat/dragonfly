@@ -20,22 +20,27 @@
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel=score]
 				
-			\legend{\ppo, \tdt, \sac}
+			\legend{\ppo, \ddpg, \tdt, \sac}
 			
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant/ppo.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant/ppo.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant-v4_ppo};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant-v4_ppo}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant/ppo.dat};
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant-v4_ppo};
 			
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant/td3.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant/td3.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant-v4_ddpg};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant-v4_ddpg}; 
+			\addplot [fill=red3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant-v4_ddpg}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant-v4_td3};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant-v4_td3}; 
 			\addplot [fill=teal3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant/td3.dat}; 
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant-v4_td3}; 
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant/sac.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant/sac.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/ant-v4_sac};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/ant-v4_sac}; 
 			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant/sac.dat};
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/ant-v4_sac};
 			
 		\end{axis}
 	\end{tikzpicture}
@@ -49,33 +54,38 @@
 					upper/.style={	name path=upper, smooth, draw=none},
 					lower/.style={	name path=lower, smooth, draw=none},]
 		\begin{axis}[	xmin=0, xmax=1000000, scale=0.7,
-					ymin=-500, ymax=10000,
+					ymin=-500, ymax=12000,
 					scaled x ticks=false, scaled y ticks=false,
 					xtick={0,250000,500000,750000,1000000},
 					xticklabels={$0$,$250k$,$500k$,$750k$,$1000k$},
-					ytick={0,2000,4000,6000,8000, 10000},
-					yticklabels={$0$,$2k$,$4k$,$6k$,$8k$, $10k$},
+					ytick={0,2000,4000,6000,8000,10000,12000},
+					yticklabels={$0$,$2k$,$4k$,$6k$,$8k$,$10k$,$12k$},
 					legend cell align=left, legend pos=south east,
 					legend style={nodes={scale=0.8, transform shape}},
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel={}]
 				
-			\legend{\ppo, \tdt, \sac}
+			\legend{\ppo, \ddpg, \tdt, \sac}
 			
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/halfcheetah/ppo.dat };
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/halfcheetah/ppo.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/halfcheetah-v4_ppo};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/halfcheetah-v4_ppo}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/halfcheetah/ppo.dat};
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/halfcheetah-v4_ppo};
 			
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/halfcheetah/td3.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/halfcheetah/td3.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/halfcheetah-v4_ddpg};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/halfcheetah-v4_ddpg}; 
+			\addplot [fill=red3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/halfcheetah-v4_ddpg}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/halfcheetah-v4_td3};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/halfcheetah-v4_td3}; 
 			\addplot [fill=teal3, opacity=0.5, forget plot]	fill between[of=upper and lower];
-			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/halfcheetah/td3.dat};  
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/halfcheetah-v4_td3};  
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/halfcheetah/sac.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/halfcheetah/sac.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/halfcheetah-v4_sac};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/halfcheetah-v4_sac}; 
 			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/halfcheetah/sac.dat};
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/halfcheetah-v4_sac};
 			
 		\end{axis}
 	\end{tikzpicture}
@@ -105,22 +115,27 @@
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel=score]
 				
-			\legend{\ppo, \tdt, \sac}
+			\legend{\ppo, \ddpg, \tdt, \sac}
 			
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/hopper/ppo.dat };
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/hopper/ppo.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/hopper-v4_ppo};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/hopper-v4_ppo}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/hopper/ppo.dat};
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/hopper-v4_ppo};
 			
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/hopper/td3.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/hopper/td3.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/hopper-v4_ddpg};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/hopper-v4_ddpg}; 
+			\addplot [fill=red3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/hopper-v4_ddpg}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/hopper-v4_td3};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/hopper-v4_td3}; 
 			\addplot [fill=teal3, opacity=0.5, forget plot]	fill between[of=upper and lower];
-			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/hopper/td3.dat}; 
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/hopper-v4_td3}; 
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/hopper/sac.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/hopper/sac.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/hopper-v4_sac};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/hopper-v4_sac}; 
 			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/hopper/sac.dat};
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/hopper-v4_sac};
 			
 		\end{axis}
 	\end{tikzpicture}
@@ -190,22 +205,27 @@
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel=score]
 				
-			\legend{\ppo, \tdt, \sac}
+			\legend{\ppo, \ddpg, \tdt, \sac}
 			
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/walker2d/ppo.dat };
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/walker2d/ppo.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/walker2d-v4_ppo};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/walker2d-v4_ppo}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/walker2d/ppo.dat};
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/walker2d-v4_ppo};
+
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/swimmer-v4_ddpg};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/swimmer-v4_ddpg}; 
+			\addplot [fill=red3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/swimmer-v4_ddpg}; 
 			
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/walker2d/td3.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/walker2d/td3.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/walker2d-v4_td3};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/walker2d-v4_td3}; 
 			\addplot [fill=teal3, opacity=0.5, forget plot]	fill between[of=upper and lower];
-			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/walker2d/td3.dat}; 
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/walker2d-v4_td3}; 
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/walker2d/sac.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/walker2d/sac.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/walker2d-v4_sac};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/walker2d-v4_sac}; 
 			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/walker2d/sac.dat};
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/walker2d-v4_sac};
 			
 		\end{axis}
 	\end{tikzpicture}
@@ -229,22 +249,27 @@
 					every tick label/.append style={font=\scriptsize},
 					grid=major, xlabel=transitions, ylabel={}]
 				
-			\legend{\ppo, \tdt, \sac}
+			\legend{\ppo, \ddpg, \tdt, \sac}
 			
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/swimmer/ppo.dat };
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/swimmer/ppo.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/swimmer-v4_ppo};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/swimmer-v4_ppo}; 
 			\addplot [fill=gray3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/swimmer/ppo.dat}; 
+			\addplot[draw=gray1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/swimmer-v4_ppo};
 			
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/swimmer/td3.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/swimmer/td3.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/swimmer-v4_ddpg};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/swimmer-v4_ddpg}; 
+			\addplot [fill=red3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
+			\addplot[draw=red1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/swimmer-v4_ddpg}; 
+			
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/swimmer-v4_td3};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/swimmer-v4_td3}; 
 			\addplot [fill=teal3, opacity=0.5, forget plot]	fill between[of=upper and lower];
-			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/swimmer/td3.dat}; 
+			\addplot[draw=teal1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/swimmer-v4_td3}; 
 		
-			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/swimmer/sac.dat};
-			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/swimmer/sac.dat}; 
+			\addplot [upper, forget plot] 				table[x index=0,y index=7] {fig/mujoco/swimmer-v4_sac};
+			\addplot [lower, forget plot] 				table[x index=0,y index=6] {fig/mujoco/swimmer-v4_sac}; 
 			\addplot [fill=blue3, opacity=0.5, forget plot] 	fill between[of=upper and lower];
-			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/swimmer/sac.dat};
+			\addplot[draw=blue1, thick, smooth] 			table[x index=0,y index=5] {fig/mujoco/swimmer-v4_sac};
 			
 		\end{axis}
 	\end{tikzpicture}

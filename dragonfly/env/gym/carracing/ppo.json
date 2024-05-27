@@ -6,7 +6,7 @@
         "obs_noise": 0.0,
         "obs_grayscale": true,
         "obs_downscale": 2,
-	      "obs_stack": 4
+	"obs_stack": 1
     },
     "naming": {
         "env": true,
@@ -14,7 +14,7 @@
         "tag": "cnn",
         "time": false
     },
-    "n_avg": 1,
+    "n_avg": 2,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
@@ -30,11 +30,11 @@
             "type": "normal",
             "network": {
                 "type": "conv2d",
-		            "original_dim": [48,48,4],
+		"original_dim": [48,48,1],
                 "trunk": {
-                    "filters": [16,32],
-		                "kernel": 3,
-		                "stride": 1,
+                    "filters": [8,16],
+		    "kernel": 3,
+		    "stride": 1,
                     "pooling": true,
                     "actv": "relu"
                 },
@@ -47,24 +47,24 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.2,
-                "ent_coef": 0.01
+                "ent_coef": 0.0
             }
         },
         "value": {
             "type": "v_value",
             "network": {
                 "type": "conv2d",
-		            "original_dim": [48,48,4],
+		"original_dim": [48,48,1],
                 "trunk": {
-                    "filters": [16,32],
-		                "kernel": 3,
-		                "stride": 1,
+                    "filters": [8,16],
+		    "kernel": 3,
+		    "stride": 1,
                     "pooling": true,
                     "actv": "relu"
                 },

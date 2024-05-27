@@ -11,7 +11,7 @@
         "tag": false,
         "time": false
     },
-    "n_avg": 3,
+    "n_avg": 10,
     "n_stp_max": 200000,
     "trainer": {
         "style": "buffer",
