@@ -14,7 +14,7 @@
         "tag": "cnn",
         "time": false
     },
-    "n_avg": 1,
+    "n_avg": 2,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
@@ -33,9 +33,9 @@
 		            "original_dim": [48,48,4],
                 "trunk": {
                     "filters": [16,32],
-		                "kernel": 3,
-		                "stride": 1,
-                    "pooling": true,
+		    "kernel": 3,
+		    "stride": 1,
+                    "pooling": false,
                     "actv": "relu"
                 },
                 "heads": {
@@ -63,9 +63,9 @@
 		            "original_dim": [48,48,4],
                 "trunk": {
                     "filters": [16,32],
-		                "kernel": 3,
-		                "stride": 1,
-                    "pooling": true,
+		    "kernel": 3,
+		    "stride": 1,
+                    "pooling": false,
                     "actv": "relu"
                 },
                 "heads": {

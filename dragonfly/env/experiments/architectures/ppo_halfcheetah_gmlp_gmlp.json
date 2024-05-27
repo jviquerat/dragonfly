@@ -1,46 +1,49 @@
 {
     "env": {
-        "name": "BipedalWalker-v3",
+        "name": "HalfCheetah-v4",
         "obs_clip": false,
         "obs_norm": true,
-        "obs_noise": 0.0
+        "obs_noise": 0.0,
+	      "obs_max": 10.0
     },
     "naming": {
         "env": true,
         "agent": true,
-        "tag": false,
+        "tag": "gmlp_gmlp",
         "time": false
     },
-    "n_avg": 3,
+    "n_avg": 10,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
         "buff_size": 4000,
         "n_buff": 1,
         "batch_frac": 0.25,
-        "n_epochs": 64,
-        "render_every": 10000
+        "n_epochs": 32,
+        "render_every": 5000
     },
     "agent": {
         "type": "ppo",
         "policy": {
-            "type": "normal_full",
+            "type": "normal",
+            "sigma": 0.5,
             "network": {
-                "type": "fc",
+                "type": "gated_fc",
                 "trunk": {
-                    "arch": [128],
+                    "arch": [64,64],
                     "actv": "tanh"
                 },
+                "expansion_factor": 2,
                 "heads": {
-                    "nb": 3,
-                    "arch": [[128],[128],[128]],
-                    "actv": ["tanh","tanh","tanh"],
-                    "final": ["tanh","sigmoid","sigmoid"]
+                    "nb": 2,
+                    "arch": [[64],[64]],
+                    "actv": ["tanh","tanh"],
+                    "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -52,11 +55,12 @@
         "value": {
             "type": "v_value",
             "network": {
-                "type": "fc",
+                "type": "gated_fc",
                 "trunk": {
-                    "arch": [128,128],
+                    "arch": [64,64],
                     "actv": "relu"
                 },
+                "expansion_factor": 2,
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
@@ -66,7 +70,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-3,
+                "lr": 1.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -76,7 +80,7 @@
         "retrn": {
             "type": "gae",
             "gamma": 0.99,
-            "gae_lambda": 0.90,
+            "gae_lambda": 0.95,
             "ret_norm": true
         },
         "termination": {

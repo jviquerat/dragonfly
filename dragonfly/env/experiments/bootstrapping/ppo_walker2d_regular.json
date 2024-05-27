@@ -1,30 +1,32 @@
 {
     "env": {
-        "name": "Pendulum-v1",
+        "name": "Walker2d-v4",
         "obs_clip": false,
         "obs_norm": true,
-        "obs_noise": 0.0
+        "obs_noise": 0.0,
+	      "obs_max": 10.0
     },
     "naming": {
         "env": true,
         "agent": true,
-        "tag": false,
+        "tag": "regular",
         "time": false
     },
-    "n_avg": 3,
-    "n_stp_max": 100000,
+    "n_avg": 10,
+    "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
-        "buff_size": 2000,
+        "buff_size": 4000,
         "n_buff": 1,
         "batch_frac": 0.25,
-        "n_epochs": 64,
-        "render_every": 10000
+        "n_epochs": 32,
+        "render_every": 5000
     },
     "agent": {
         "type": "ppo",
         "policy": {
             "type": "normal",
+            "sigma": 1.0,
             "network": {
                 "type": "fc",
                 "trunk": {
@@ -40,7 +42,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 1.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -80,7 +82,7 @@
             "ret_norm": true
         },
         "termination": {
-            "type": "bootstrap"
+            "type": "regular"
         }
     }
 }

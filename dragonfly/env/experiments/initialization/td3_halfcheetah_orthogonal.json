@@ -1,0 +1,85 @@
+{
+    "env": {
+        "name": "HalfCheetah-v4",
+        "obs_clip": false,
+        "obs_norm": false,
+        "obs_noise": 0.0
+    },
+    "naming": {
+        "env": true,
+        "agent": true,
+        "tag": "orthogonal",
+        "time": false
+    },
+    "n_avg": 3,
+    "n_stp_max": 1000000,
+    "trainer": {
+        "style": "td",
+        "mem_size": 1000000,
+        "btc_size": 100,
+        "n_stp_unroll": 50,
+        "render_every": 500000
+    },
+    "agent": {
+        "type": "td3",
+        "gamma": 0.99,
+        "rho": 0.995,
+        "n_warmup": 10000,
+        "n_filling": 1000,
+        "p_update": 2,
+        "sigma_act": 0.1,
+        "sigma_tgt": 0.2,
+        "noise_clip": 0.5,
+        "policy": {
+            "type": "deterministic",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [256,256],
+                    "actv": "relu"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["relu"],
+                    "final": ["tanh"]
+                }
+            },
+            "optimizer": {
+                "type": "adam",
+                "lr": 1.0e-3,
+                "grd_clip": null
+            },
+            "loss": {
+                "type": "q_pol"
+            }
+        },
+        "value": {
+            "type": "q_value",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [256,256],
+                    "actv": "relu"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["relu"],
+                    "final": ["linear"]
+                }
+            },
+            "optimizer": {
+                "type": "adam",
+                "lr": 1.0e-3,
+                "grd_clip": null
+            },
+            "loss": {
+                "type": "mse_td3"
+            }
+        },
+        "termination": {
+            "type": "bootstrap"
+        }
+    }
+}

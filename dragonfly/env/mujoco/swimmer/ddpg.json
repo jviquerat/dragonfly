@@ -1,8 +1,8 @@
 {
     "env": {
-        "name": "CartPole-v0",
+        "name": "Swimmer-v4",
         "obs_clip": false,
-        "obs_norm": true,
+        "obs_norm": false,
         "obs_noise": 0.0
     },
     "naming": {
@@ -11,50 +11,52 @@
         "tag": false,
         "time": false
     },
-    "n_avg": 3,
-    "n_stp_max": 50000,
+    "n_avg": 5,
+    "n_stp_max": 1000000,
     "trainer": {
-        "style": "buffer",
-        "buff_size": 128,
-        "n_buff": 1,
-        "batch_frac": 0.5,
-        "n_epochs": 16,
-        "render_every": 500
+        "style": "td",
+        "mem_size": 1000000,
+        "btc_size": 100,
+        "n_stp_unroll": 50,
+        "render_every": 50000
     },
     "agent": {
-        "type": "ppo",
+        "type": "ddpg",
+        "gamma": 0.99,
+        "rho": 0.995,
+        "n_warmup": 10000,
+        "n_filling": 1000,
+        "sigma": 0.1,
         "policy": {
-            "type": "categorical",
+            "type": "deterministic",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [16,16],
-                    "actv": "tanh"
+                    "arch": [256,256],
+                    "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["tanh"],
-                    "final": ["softmax"]
+                    "actv": ["relu"],
+                    "final": ["tanh"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
-                "grd_clip": 0.1
+                "lr": 1.0e-3,
+                "grd_clip": null
             },
             "loss": {
-                "type": "surrogate",
-                "pol_clip": 0.2,
-                "ent_coef": 0.01
+                "type": "q_pol"
             }
         },
         "value": {
-            "type": "v_value",
+            "type": "q_value",
             "network": {
                 "type": "fc",
                 "trunk": {
-                    "arch": [16,16],
+                    "arch": [256,256],
                     "actv": "relu"
                 },
                 "heads": {
@@ -66,18 +68,12 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-3,
-                "grd_clip": 0.1
+                "lr": 1.0e-3,
+                "grd_clip": null
             },
             "loss": {
-                "type": "mse_pg"
+                "type": "mse_ddpg"
             }
-        },
-        "retrn": {
-            "type": "gae",
-            "gamma": 0.99,
-            "gae_lambda": 0.95,
-            "ret_norm": true
         },
         "termination": {
             "type": "bootstrap"
