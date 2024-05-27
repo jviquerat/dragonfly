@@ -61,6 +61,8 @@ class lstm(base_network):
         for l in range(lgt):
 
             # Handle return_sequence depending on network depth
+            # return_sequence must be set to true for stacked lstms,
+            # for all but last layer
             return_seq = False
             if (l < lgt-1): return_seq = True
 
@@ -70,7 +72,7 @@ class lstm(base_network):
                                      activation         = self.trunk.actv,
                                      kernel_initializer = self.k_init,
                                      return_sequences   = return_seq,
-                                     input_shape        = (self.seq_length, self.obs_dim)))
+                                     input_shape        = (self.obs_dim, self.seq_length)))
             else:
                 self.net.append(LSTM(units              = self.trunk.arch[l],
                                      activation         = self.trunk.actv,
@@ -88,7 +90,7 @@ class lstm(base_network):
                                   activation         = self.heads.final[h]))
 
         # Initialize weights
-        dummy = self.call(tf.ones([1, self.seq_length, self.obs_dim]))
+        dummy = self.call(tf.ones([1, self.obs_dim, self.seq_length]))
 
         # Save initial weights
         self.init_weights = self.get_weights()
@@ -102,7 +104,6 @@ class lstm(base_network):
         out = []
 
         var = Reshape([self.obs_dim, self.seq_length])(var)
-        var = Permute((2,1))(var)
 
         # Compute trunk
         for l in range(len(self.trunk.arch)):
