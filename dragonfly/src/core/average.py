@@ -1,6 +1,7 @@
 # Custom imports
-from dragonfly.src.utils.data import *
-from dragonfly.src.plot.plot  import *
+from dragonfly.src.utils.data   import *
+from dragonfly.src.plot.plot    import *
+from dragonfly.src.utils.prints import *
 
 # Average existing runs
 def average(args):
@@ -8,9 +9,18 @@ def average(args):
     # Count arguments
     n_args = len(args)
 
-    # Get length of file
-    with open(args[0], 'r') as f:
-        n_lines = sum(1 for line in f)
+    # Printing
+    spacer()
+    print("Averaging files:")
+    for i in range(len(args)):
+        spacer()
+        print(args[i])
+
+    # Get ming length over all files
+    n_lines = 1000000000000
+    for i in range(len(args)):
+        with open(args[i], 'r') as f:
+            n_lines = min(n_lines, sum(1 for line in f))
 
     # Intialize averager
     averager = data_avg(2, n_lines, n_args)
