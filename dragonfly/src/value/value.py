@@ -1,7 +1,7 @@
 # Custom imports
-from dragonfly.src.core.factory  import *
-from dragonfly.src.value.v_value import *
-from dragonfly.src.value.q_value import *
+from dragonfly.src.core.factory  import factory
+from dragonfly.src.value.v_value import v_value
+from dragonfly.src.value.q_value import q_value
 
 # Declare factory
 val_factory = factory()

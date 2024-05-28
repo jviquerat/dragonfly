@@ -1,17 +1,18 @@
 # Generic imports
 import random
-import numpy as np
+import numpy      as np
+import tensorflow as tf
 
 # Custom imports
-from dragonfly.src.policy.policy           import *
-from dragonfly.src.value.value             import *
-from dragonfly.src.decay.decay             import *
-from dragonfly.src.retrn.retrn             import *
 from dragonfly.src.core.constants          import *
-from dragonfly.src.termination.termination import *
-from dragonfly.src.utils.buff              import *
-from dragonfly.src.utils.timer             import *
-from dragonfly.src.utils.error             import *
+from dragonfly.src.policy.policy           import pol_factory
+from dragonfly.src.value.value             import val_factory
+from dragonfly.src.decay.decay             import decay_factory
+from dragonfly.src.retrn.retrn             import retrn_factory
+from dragonfly.src.termination.termination import termination_factory
+from dragonfly.src.utils.buff              import buff, gbuff
+from dragonfly.src.utils.timer             import timer
+from dragonfly.src.utils.error             import error
 
 ###############################################
 ### Base agent

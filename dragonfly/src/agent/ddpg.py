@@ -1,6 +1,6 @@
 # Custom imports
 from dragonfly.src.agent.base   import *
-from dragonfly.src.utils.polyak import *
+from dragonfly.src.utils.polyak import polyak
 
 ###############################################
 ### DDPG agent

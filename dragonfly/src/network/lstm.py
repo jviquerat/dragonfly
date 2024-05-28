@@ -1,5 +1,5 @@
 # Generic imports
-from tensorflow.keras.layers    import LSTM, Permute
+from tensorflow.keras.layers    import LSTM
 
 # Custom imports
 from dragonfly.src.network.base import *

@@ -1,9 +1,9 @@
 # Custom imports
-from dragonfly.src.core.factory    import *
-from dragonfly.src.retrn.full      import *
-from dragonfly.src.retrn.advantage import *
-from dragonfly.src.retrn.gae       import *
-from dragonfly.src.retrn.cgae      import *
+from dragonfly.src.core.factory    import factory
+from dragonfly.src.retrn.full      import full
+from dragonfly.src.retrn.advantage import advantage
+from dragonfly.src.retrn.gae       import gae
+from dragonfly.src.retrn.cgae      import cgae
 
 # Declare factory
 retrn_factory = factory()

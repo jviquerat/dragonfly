@@ -1,5 +1,5 @@
 # Custom imports
-from dragonfly.src.utils.prints import *
+from dragonfly.src.utils.prints import liner, errr, spacer, warn, new_line
 
 ###############################################
 ### A set of functions to print errors and warnings

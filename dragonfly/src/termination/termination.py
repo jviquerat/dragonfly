@@ -1,7 +1,7 @@
 # Custom imports
-from dragonfly.src.core.factory          import *
-from dragonfly.src.termination.bootstrap import *
-from dragonfly.src.termination.regular   import *
+from dragonfly.src.core.factory          import factory
+from dragonfly.src.termination.bootstrap import bootstrap
+from dragonfly.src.termination.regular   import regular
 
 # Declare factory
 termination_factory = factory()

@@ -2,7 +2,7 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.src.srl.base import *
+from dragonfly.src.srl.base import base_srl
 
 ###############################################
 ### Class for dummy srl

@@ -45,10 +45,6 @@ class pca(base_srl):
         # Get data
         obs = self.gbuff.get_buffers(["obs"], self.gbuff.length())["obs"]
         obs = obs.numpy()
-        
-        # Normalize data
-        #mu  = obs.mean(axis=0)
-        #obs = obs - mu
 
         # PCA algorithm
         m              = np.cov(obs, rowvar=False)
@@ -64,7 +60,6 @@ class pca(base_srl):
         # encoded = self.process(obs)
         # self.plot2Dencoded(encoded)
 
-
     # Process raw observations
     def process(self, obs):
 
@@ -76,7 +71,5 @@ class pca(base_srl):
         # Project obs into new space
         x          = np.reshape(obs, (len(obs), -1))
         latent_obs = np.matmul(x, self.matrix)
-
-        #latent_obs = np.matmul(latent_obs, np.transpose(self.matrix))
 
         return latent_obs

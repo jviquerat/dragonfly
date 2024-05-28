@@ -4,7 +4,7 @@ import numpy      as np
 import tensorflow as tf
 
 # Custom imports
-from dragonfly.src.utils.error import *
+from dragonfly.src.utils.error import error
 
 ###############################################
 ### Parallel buffer class, used to temporarily

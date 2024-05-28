@@ -1,10 +1,10 @@
 # Generic imports
 import numpy as np
-from dragonfly.src.core.constants import *
 
 # Custom imports
-from dragonfly.src.utils.ema import *
-from dragonfly.src.utils.counter import *
+from dragonfly.src.core.constants import *
+from dragonfly.src.utils.ema      import ema
+from dragonfly.src.utils.counter  import counter
 
 ###############################################
 ### Report buffer, used to store learning metrics

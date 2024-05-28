@@ -3,9 +3,9 @@ import numpy as np
 
 # Custom imports
 from dragonfly.src.srl.base            import *
-from dragonfly.src.network.network     import *
-from dragonfly.src.optimizer.optimizer import *
-from dragonfly.src.loss.loss           import *
+from dragonfly.src.network.network     import net_factory
+from dragonfly.src.optimizer.optimizer import opt_factory
+from dragonfly.src.loss.loss           import loss_factory
 
 ###############################################
 ### Standard autoencoder srl class

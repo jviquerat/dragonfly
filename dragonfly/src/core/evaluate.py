@@ -2,11 +2,11 @@
 import gym
 
 # Custom imports
-from dragonfly.src.utils.json       import *
-from dragonfly.src.agent.agent      import *
-from dragonfly.src.env.environments import *
-from dragonfly.src.utils.renderer   import *
-from dragonfly.src.utils.prints     import *
+from dragonfly.src.utils.json       import json_parser
+from dragonfly.src.agent.agent      import agent_factory
+from dragonfly.src.env.environments import environments
+from dragonfly.src.utils.renderer   import renderer
+from dragonfly.src.utils.prints     import new_line, spacer
 
 # Evaluate agent
 def evaluate(net_file, json_file, ns, nw, aw):

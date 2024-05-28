@@ -1,8 +1,8 @@
 # Custom imports
-from dragonfly.src.core.factory import *
-from dragonfly.src.srl.dummy    import *
-from dragonfly.src.srl.pca      import *
-from dragonfly.src.srl.sae      import *
+from dragonfly.src.core.factory import factory
+from dragonfly.src.srl.dummy    import dummy
+from dragonfly.src.srl.pca      import pca
+from dragonfly.src.srl.sae      import sae
 
 # Declare factory
 srl_factory = factory()

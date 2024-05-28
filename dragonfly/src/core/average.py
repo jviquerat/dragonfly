@@ -1,7 +1,7 @@
 # Custom imports
-from dragonfly.src.utils.data   import *
-from dragonfly.src.plot.plot    import *
-from dragonfly.src.utils.prints import *
+from dragonfly.src.utils.data   import data_avg
+from dragonfly.src.plot.plot    import plot_avg
+from dragonfly.src.utils.prints import spacer
 
 # Average existing runs
 def average(args):

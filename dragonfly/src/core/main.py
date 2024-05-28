@@ -2,11 +2,11 @@
 import sys
 
 # Custom imports
-from dragonfly.src.env.mpi       import *
-from dragonfly.src.core.train    import *
-from dragonfly.src.core.evaluate import *
-from dragonfly.src.core.average  import *
-from dragonfly.src.utils.prints  import *
+from dragonfly.src.env.mpi       import dgf_mpi
+from dragonfly.src.core.train    import train
+from dragonfly.src.core.evaluate import evaluate
+from dragonfly.src.core.average  import average
+from dragonfly.src.utils.prints  import disclaimer, new_line, liner_simple, bold
 
 def error():
     new_line()

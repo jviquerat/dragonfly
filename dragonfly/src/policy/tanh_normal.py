@@ -1,6 +1,7 @@
 # Custom imports
 from dragonfly.src.core.constants import *
-from dragonfly.src.policy.base    import *
+from dragonfly.src.policy.tfd     import *
+from dragonfly.src.policy.base    import base_normal
 
 ###############################################
 ### Tanh-normal policy class (continuous)

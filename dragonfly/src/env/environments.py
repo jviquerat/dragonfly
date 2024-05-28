@@ -1,14 +1,10 @@
 # Generic imports
-import os
-import sys
-import gym
 import numpy as np
-import time
 
 # Custom imports
-from dragonfly.src.env.worker     import *
 from dragonfly.src.core.constants import *
-from dragonfly.src.utils.timer    import *
+from dragonfly.src.env.worker     import *
+from dragonfly.src.utils.timer    import timer
 
 ###############################################
 ### A wrapper class for parallel environments

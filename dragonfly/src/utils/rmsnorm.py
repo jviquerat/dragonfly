@@ -2,7 +2,6 @@ from tensorflow.keras.layers import Layer
 from tensorflow.keras import initializers, regularizers, constraints
 import tensorflow as tf
 
-
 class RMSNorm(Layer):
     def __init__(
         self,

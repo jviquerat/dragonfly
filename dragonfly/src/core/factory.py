@@ -1,5 +1,5 @@
 # Custom imports
-from dragonfly.src.utils.error import *
+from dragonfly.src.utils.error import error
 
 ###############################################
 ### A very basic factory
