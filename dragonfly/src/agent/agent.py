@@ -1,13 +1,13 @@
 # Custom imports
-from dragonfly.src.core.factory   import *
-from dragonfly.src.agent.a2c      import *
-from dragonfly.src.agent.ppo      import *
-from dragonfly.src.agent.ppo_srl  import *
-from dragonfly.src.agent.dqn      import *
-from dragonfly.src.agent.ddpg     import *
-from dragonfly.src.agent.td3      import *
-from dragonfly.src.agent.sac      import *
-from dragonfly.src.agent.sac_auto import *
+from dragonfly.src.core.factory   import factory
+from dragonfly.src.agent.a2c      import a2c
+from dragonfly.src.agent.ppo      import ppo
+from dragonfly.src.agent.ppo_srl  import ppo_srl
+from dragonfly.src.agent.dqn      import dqn
+from dragonfly.src.agent.ddpg     import ddpg
+from dragonfly.src.agent.td3      import td3
+from dragonfly.src.agent.sac      import sac
+from dragonfly.src.agent.sac_auto import sac_auto
 
 # Declare factory
 agent_factory = factory()

@@ -1,23 +1,23 @@
 # Generic imports
 import os
 import shutil
-from typing import Any
+import math
+import numpy as np
 
 # Custom imports
-from dragonfly.src.core.constants import *
-from dragonfly.src.utils.timer import *
-from dragonfly.src.env.environments import *
-from dragonfly.src.agent.agent import *
-from dragonfly.src.update.update import *
-from dragonfly.src.utils.buff import *
-from dragonfly.src.utils.report import *
-from dragonfly.src.utils.renderer import *
-from dragonfly.src.utils.counter import *
-from dragonfly.src.utils.error import *
-
+from dragonfly.src.env.mpi          import *
+from dragonfly.src.core.constants   import *
+from dragonfly.src.utils.timer      import timer
+from dragonfly.src.env.environments import environments
+from dragonfly.src.agent.agent      import agent_factory
+from dragonfly.src.update.update    import update_factory
+from dragonfly.src.utils.report     import report
+from dragonfly.src.utils.renderer   import renderer
+from dragonfly.src.utils.counter    import counter
+from dragonfly.src.utils.error      import error
 
 class base_trainer:
-    def __init__(self, env_pms: Any, path: str, n_stp_max: int, pms: Any):
+    def __init__(self, env_pms, path, n_stp_max, pms):
         """
         Initializes the base trainer class.
 

@@ -1,15 +1,15 @@
 # Custom imports
-from dragonfly.src.core.factory   import *
-from dragonfly.src.loss.mse_pg    import *
-from dragonfly.src.loss.mse_dqn   import *
-from dragonfly.src.loss.mse_ddpg  import *
-from dragonfly.src.loss.mse_td3   import *
-from dragonfly.src.loss.mse_sac   import *
-from dragonfly.src.loss.mse_ae    import *
-from dragonfly.src.loss.surrogate import *
-from dragonfly.src.loss.pg        import *
-from dragonfly.src.loss.q_pol     import *
-from dragonfly.src.loss.q_pol_sac import *
+from dragonfly.src.core.factory   import factory
+from dragonfly.src.loss.mse_pg    import mse_pg
+from dragonfly.src.loss.mse_dqn   import mse_dqn
+from dragonfly.src.loss.mse_ddpg  import mse_ddpg
+from dragonfly.src.loss.mse_td3   import mse_td3
+from dragonfly.src.loss.mse_sac   import mse_sac
+from dragonfly.src.loss.mse_ae    import mse_ae
+from dragonfly.src.loss.surrogate import surrogate
+from dragonfly.src.loss.pg        import pg
+from dragonfly.src.loss.q_pol     import q_pol
+from dragonfly.src.loss.q_pol_sac import q_pol_sac
 
 # Declare factory
 loss_factory = factory()

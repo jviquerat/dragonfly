@@ -2,7 +2,7 @@
 import numpy as np
 
 # Custom imports
-from dragonfly.src.utils.ema import *
+from dragonfly.src.utils.ema import ema
 
 ###############################################
 ### Data averager class

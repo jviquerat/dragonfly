@@ -1,6 +1,5 @@
 from dragonfly.src.network.base import *
 
-
 class d2rl(base_network):
     def __init__(self, inp_dim, out_dim, pms):
 

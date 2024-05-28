@@ -1,5 +1,6 @@
 # Custom imports
-from dragonfly.src.policy.base import *
+from dragonfly.src.policy.tfd  import *
+from dragonfly.src.policy.base import base_normal
 
 ###############################################
 ### Normal policy class with diagonal covariance matrix (continuous)

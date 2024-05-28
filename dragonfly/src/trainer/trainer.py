@@ -1,8 +1,8 @@
 # Custom imports
-from dragonfly.src.core.factory    import *
-from dragonfly.src.trainer.buffer  import *
-from dragonfly.src.trainer.episode import *
-from dragonfly.src.trainer.td      import *
+from dragonfly.src.core.factory    import factory
+from dragonfly.src.trainer.buffer  import buffer
+from dragonfly.src.trainer.episode import episode
+from dragonfly.src.trainer.td      import td
 
 # Declare factory
 trainer_factory = factory()

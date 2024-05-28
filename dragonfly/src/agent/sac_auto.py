@@ -1,8 +1,8 @@
 # Custom imports
-from dragonfly.src.agent.base     import *
-from dragonfly.src.agent.sac      import *
-from dragonfly.src.loss.alpha_sac import *
-from dragonfly.src.utils.polyak   import *
+from dragonfly.src.agent.sac           import *
+from dragonfly.src.optimizer.optimizer import opt_factory
+from dragonfly.src.loss.alpha_sac      import alpha_sac
+from dragonfly.src.utils.polyak        import polyak
 
 ###############################################
 ### SAC auto agent

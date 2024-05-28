@@ -2,7 +2,7 @@
 import time
 
 # Custom imports
-from dragonfly.src.utils.prints import *
+from dragonfly.src.utils.prints import spacer
 
 ###############################################
 ### timer class

@@ -1,5 +1,5 @@
-from dragonfly.src.trainer.base import *
-
+# Custom imports
+from dragonfly.src.trainer.base   import *
 
 class episode(base_trainer):
     def __init__(self, env_pms, agent_pms, path, n_stp_max, pms):

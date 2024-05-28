@@ -8,14 +8,13 @@ warnings.filterwarnings('ignore',category=FutureWarning)
 
 # Tensorflow imports
 import tensorflow                    as     tf
-import tensorflow.keras              as     tk
 from   tensorflow.keras              import Model
-from   tensorflow.keras.layers       import Dense, Flatten, Reshape, Lambda
-from   tensorflow.keras.initializers import Orthogonal, LecunNormal, Zeros
+from   tensorflow.keras.layers       import Dense, Flatten, Reshape
+from   tensorflow.keras.initializers import Orthogonal, LecunNormal
 
 # Custom imports
-from   dragonfly.src.utils.error     import *
-from   dragonfly.src.network.tree    import *
+from   dragonfly.src.utils.error     import error, warning
+from   dragonfly.src.network.tree    import trunk, heads
 
 ###############################################
 ### Base network
