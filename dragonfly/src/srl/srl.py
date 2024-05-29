@@ -3,6 +3,7 @@ from dragonfly.src.core.factory import *
 from dragonfly.src.srl.dummy    import *
 from dragonfly.src.srl.pca      import *
 from dragonfly.src.srl.sae      import *
+from dragonfly.src.srl.cae      import *
 
 # Declare factory
 srl_factory = factory()
@@ -11,3 +12,4 @@ srl_factory = factory()
 srl_factory.register("dummy", dummy)
 srl_factory.register("pca",   pca)
 srl_factory.register("sae",   sae)
+srl_factory.register("cae",   cae)

@@ -2,26 +2,24 @@
     "env": {
         "name": "CarRacing-v2",
         "obs_clip": false,
-        "obs_norm": true,
-        "obs_noise": 0.0,
-        "obs_grayscale": true,
-        "obs_downscale": 2,
-	      "obs_stack": 4
+        "obs_norm": false,
+	"obs_stack": 4,
+        "obs_noise": 0.0
     },
     "naming": {
         "env": true,
         "agent": true,
-        "tag": "cnn",
+        "tag": "conv2d_3layers_32_32_64",
         "time": false
     },
-    "n_avg": 1,
+    "n_avg": 3,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
         "buff_size": 4000,
         "n_buff": 1,
         "batch_frac": 0.5,
-        "n_epochs": 32,
+        "n_epochs": 64,
         "render_every": 50000
     },
     "agent": {
@@ -30,18 +28,17 @@
             "type": "normal",
             "network": {
                 "type": "conv2d",
-		"original_dim": [48,48,4],
+		"original_dim": [96,96,3,4],
                 "trunk": {
-                    "filters": [16,32],
-		    "kernel": 3,
-		    "stride": 1,
-                    "pooling": true,
+                    "arch": [32,32],
+		    "k_size": [8,4],
+		    "strides": [4,2],
                     "actv": "relu"
                 },
                 "heads": {
                     "nb": 2,
                     "arch": [[64],[64]],
-                    "actv": ["tanh","tanh"],
+                    "actv": ["relu","relu"],
                     "final": ["tanh","sigmoid"]
                 }
             },
@@ -60,12 +57,11 @@
             "type": "v_value",
             "network": {
                 "type": "conv2d",
-		"original_dim": [48,48,4],
+		"original_dim": [96,96,3,4],
                 "trunk": {
-                    "filters": [16,32],
-		    "kernel": 3,
-		    "stride": 1,
-                    "pooling": true,
+                    "arch": [32,32],
+		    "k_size": [8,4],
+		    "strides": [4,2],
                     "actv": "relu"
                 },
                 "heads": {
@@ -87,7 +83,7 @@
         "retrn": {
             "type": "gae",
             "gamma": 0.99,
-            "gae_lambda": 0.95,
+            "gae_lambda": 0.90,
             "ret_norm": true
         },
         "termination": {

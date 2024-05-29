@@ -1,20 +1,21 @@
 {
     "env": {
-        "name": "CarRacing-v2",
+	"name": "CarRacing-v2",
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0,
         "obs_grayscale": true,
-        "obs_downscale": 2,
-	      "obs_stack": 4
+        "obs_downscale": 4,
+	"obs_stack": 4
     },
     "naming": {
         "env": true,
         "agent": true,
-        "tag": "cnn",
+        "tag": "conv2d_ae",
         "time": false
     },
-    "n_avg": 1,
+    "n_avg": 2,
+    "n_cpu": 1,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
@@ -22,21 +23,46 @@
         "n_buff": 1,
         "batch_frac": 0.5,
         "n_epochs": 32,
-        "render_every": 50000
+        "render_every": 10000,
+	"warmup": 10000
     },
     "agent": {
-        "type": "ppo",
-        "policy": {
+        "type": "ppo-srl",
+        "srl": {
+            "type": "cae",
+	    "latent_dim" : 50,
+	    "update_freq": 10000,
+            "n_epochs" : 512,
+            "n_updates": 1,
+            "batch_size": 100,
+            "network": {
+		"original_dim": [24,24,4],
+                "conv": {
+                    "filters": [32],
+                    "actv": "relu",
+		    "kernel": 4,
+		    "stride": 1
+                },
+                "fc": {
+                    "arch": [18432],
+                    "actv": "relu"
+                }
+            },
+            "optimizer": {
+                "type": "adam",
+                "lr": 1.0e-3
+            },
+            "loss": {
+                "type": "mse_ae"
+            }
+        },
+	"policy": {
             "type": "normal",
             "network": {
-                "type": "conv2d",
-		"original_dim": [48,48,4],
+                "type": "fc",
                 "trunk": {
-                    "filters": [16,32],
-		    "kernel": 3,
-		    "stride": 1,
-                    "pooling": true,
-                    "actv": "relu"
+                    "arch": [64],
+                    "actv": "tanh"
                 },
                 "heads": {
                     "nb": 2,
@@ -59,18 +85,14 @@
         "value": {
             "type": "v_value",
             "network": {
-                "type": "conv2d",
-		"original_dim": [48,48,4],
+                "type": "fc",
                 "trunk": {
-                    "filters": [16,32],
-		    "kernel": 3,
-		    "stride": 1,
-                    "pooling": true,
+                    "arch": [64,64],
                     "actv": "relu"
                 },
                 "heads": {
                     "nb": 1,
-                    "arch": [[64]],
+                    "arch": [[]],
                     "actv": ["relu"],
                     "final": ["linear"]
                 }
@@ -87,7 +109,7 @@
         "retrn": {
             "type": "gae",
             "gamma": 0.99,
-            "gae_lambda": 0.95,
+            "gae_lambda": 0.99,
             "ret_norm": true
         },
         "termination": {
