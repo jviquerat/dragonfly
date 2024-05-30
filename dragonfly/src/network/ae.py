@@ -37,7 +37,7 @@ class ae(base_network):
 
         # Define decoder
         for l in range(len(self.arch)):
-            self.net.append(Dense(self.arch[-l],
+            self.net.append(Dense(self.arch[-l-1],
                                   activation = self.actv))
         self.net.append(Dense(self.inp_dim, activation = "linear"))
 
