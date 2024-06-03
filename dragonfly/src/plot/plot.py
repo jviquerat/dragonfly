@@ -10,7 +10,7 @@ plt.rcParams['figure.titlesize'] = 12
 plt.rcParams['figure.titleweight'] = 'bold'
 
 # Plot averaged fields
-def plot_avg(data, filename):
+def plot_avg(data, name):
 
     stp         = data[:,0]
     score_avg   = data[:,5]
@@ -18,7 +18,7 @@ def plot_avg(data, filename):
     score_m     = data[:,7]
 
     fig, ax = plt.subplots(1,1,figsize=(5,5))
-    fig.suptitle(filename)
+    fig.suptitle(name)
 
     ax.set_title('score')
     ax.set_xlabel('transitions')
@@ -33,4 +33,4 @@ def plot_avg(data, filename):
     ax.legend()
 
     fig.tight_layout()
-    fig.savefig(filename+'.png')
+    fig.savefig(name+'.png')

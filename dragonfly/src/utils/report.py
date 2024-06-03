@@ -75,7 +75,7 @@ class report:
             # Reset
             self.count = 0
 
-    def write(self, path, run, force=False):
+    def write(self, path, force=False):
         # Set filename with method name and run number
-        filename = path + "/" + str(run) + "/" + str(run) + ".dat"
+        filename = path + "/data.dat"
         self._write(filename, force)

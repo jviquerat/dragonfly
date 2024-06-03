@@ -4,6 +4,7 @@ import shutil
 
 # Custom imports
 from dragonfly.src.core.constants   import *
+from dragonfly.src.core.paths       import *
 from dragonfly.src.utils.json       import *
 from dragonfly.src.utils.data       import *
 from dragonfly.src.env.environments import *
@@ -28,26 +29,32 @@ def runner(json_file, agent_type):
     trainer = trainer_factory.create(reader.pms.trainer.style,
                                      env_pms   = reader.pms.env,
                                      agent_pms = reader.pms.agent,
-                                     path      = ".",
                                      n_stp_max = reader.pms.n_stp_max,
                                      pms       = reader.pms.trainer)
 
     print("Test "+agent_type)
-    os.makedirs("0/", exist_ok=True)
-    os.makedirs("1/", exist_ok=True)
-    trainer.reset()
-    trainer.loop(".", 0)
 
-    averager.store("0/0.dat", 0)
+    paths.run = paths.results + '/0'
+    os.makedirs(paths.run, exist_ok=True)
     trainer.reset()
-    trainer.loop(".", 1)
-    trainer.agent.save_policy("0/checkpoint")
-    averager.store("1/1.dat", 1)
+    trainer.loop()
+    filename = paths.run + '/data.dat'
+    averager.store(filename, 0)
+
+    paths.run = paths.results + '/1'
+    os.makedirs(paths.run, exist_ok=True)
+    trainer.reset()
+    trainer.loop()
+    filename = paths.run + '/checkpoint'
+    trainer.agent.save_policy(filename)
+    filename = paths.run + '/data.dat'
+    averager.store(filename, 1)
 
     # Test of the `control` method
     trainer.reset()
     obs = trainer.env.reset_all()
-    trainer.agent.load_policy("0/checkpoint")
+    filename = paths.run + '/checkpoint'
+    trainer.agent.load_policy(filename)
     act = trainer.agent.control(obs)
     trainer.env.step(act)
     #############################

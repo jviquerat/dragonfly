@@ -7,6 +7,7 @@ import numpy as np
 # Custom imports
 from dragonfly.src.env.mpi          import *
 from dragonfly.src.core.constants   import *
+from dragonfly.src.core.paths       import paths
 from dragonfly.src.utils.timer      import timer
 from dragonfly.src.env.environments import environments
 from dragonfly.src.agent.agent      import agent_factory
@@ -16,8 +17,10 @@ from dragonfly.src.utils.renderer   import renderer
 from dragonfly.src.utils.counter    import counter
 from dragonfly.src.utils.error      import error
 
+###############################################
+### Base trainer class
 class base_trainer:
-    def __init__(self, env_pms, path, n_stp_max, pms):
+    def __init__(self, env_pms, n_stp_max, pms):
         """
         Initializes the base trainer class.
 
@@ -27,7 +30,7 @@ class base_trainer:
             n_stp_max (int): Maximum number of steps.
             pms (Any): Parameters for the trainer.
         """
-        self.env = environments(path, env_pms)
+        self.env = environments(paths.base, env_pms)
         self.obs_dim = self.env.obs_dim
         self.act_dim = self.env.act_dim
         self.n_stp_max = n_stp_max
@@ -66,24 +69,24 @@ class base_trainer:
             np.array: The initial observation from the environment after reset.
         """
         self.timer_global.tic()
+
         # Reset environment
         obs = self.env.reset_all()
+
         # Reset counter
         self.counter.reset()
         return obs
 
-    def loop(self, path, run):
+    def loop(self):
         raise NotImplementedError
 
-    def monitor(self, path, run, obs, act):
+    def monitor(self, obs, act):
         """
         Monitors and logs the actions and observations during training.
         This method handles the logging of actions and observations for each episode
         and step during the training process.
 
         Args:
-            path (str): The base path for logging.
-            run (int): The current run number.
             obs (np.array): The observation array from the environment.
             act (np.array): The action array taken by the agent.
 
@@ -98,8 +101,8 @@ class base_trainer:
                     "monitoring does not work with parallel environments",
                 )
 
-            apath = path + "/" + str(run) + "/actions"
-            opath = path + "/" + str(run) + "/observations"
+            apath = paths.run + "/actions"
+            opath = paths.run + "/observations"
 
             if (self.counter.ep == 0) and (self.counter.ep_step[0] == 0):
                 if os.path.exists(apath):
@@ -133,7 +136,7 @@ class base_trainer:
             with open(filename, "a") as f:
                 f.write(s)
 
-    def apply_next_step(self, obs: np.array, path: str, run: int):
+    def apply_next_step(self, obs: np.array):
         """
         Executes the next step in the environment using the current observation, updates the agent's state,
         and handles monitoring and rendering.
@@ -145,20 +148,21 @@ class base_trainer:
 
         Args:
             obs (np.array): The current observation from the environment.
-            path (str): The base path for logging and monitoring.
-            run (int): The current run number.
 
         Returns:
             tuple: A tuple containing the next state (np.array), reward (float), done flag (bool),
         """
+        # Retrieve action and ste^p
         act = self.agent.actions(obs)
         nxt, rwd, dne, trc = self.env.step(act)
 
         # Store transition
         self.agent.store(obs, nxt, act, rwd, dne, trc)
-        self.monitor(path, run, obs, act)
+        self.monitor(obs, act)
+
         # Update counter
         self.counter.update(rwd)
+
         # Handle rendering
         self.renderer.store(self.env)
         return nxt, rwd, dne, trc
@@ -217,7 +221,7 @@ class base_trainer:
                 end=end,
             )
 
-    def end_training(self, path, run):
+    def end_training(self):
         """
         Finalizes a training by printing a summary, writing reports, and closing timers.
 
@@ -227,13 +231,13 @@ class base_trainer:
         is logged and that resources are properly managed at the conclusion of a training.
 
         Args:
-            path (str): The base path for logging and monitoring.
-            run (int): The current run number.
         """
         # Last printing
         self.print_episode()
+
         # Last writing
-        self.report.write(path, run, force=True)
+        self.report.write(paths.run, force=True)
+
         # Close timers and show
         self.timer_global.toc()
         self.timer_global.show()
