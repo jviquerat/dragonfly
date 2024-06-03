@@ -19,24 +19,24 @@
         "n_buff": 1,
         "batch_frac": 0.5,
         "n_epochs": 16,
-        "render_every": 500,
+        "render_every": 5000,
         "warmup": 4000
     },
     "agent": {
 	      "srl": {
 	          "type": "sae",
-            "latent_dim": 4,
+            "latent_dim": 2,
 	          "update_freq": 4000,
-	          "n_epochs" : 512,
+	          "n_epochs" : 2000,
             "n_updates": 1,
-	          "batch_size": 100,
+	          "batch_size": 400,
             "network": {
-                "arch": [64,32],
-                "actv": "relu"
+                "arch": [4,2],
+                "actv": "selu"
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3
+                "lr": 5.0e-4
             },
             "loss": {
                 "type": "mse_ae"
