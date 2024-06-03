@@ -1,17 +1,18 @@
 # Custom imports
-from dragonfly.src.trainer.base   import *
+from dragonfly.src.trainer.base import *
 
+###############################################
+### Buffer-based trainer class
 class buffer(base_trainer):
-    def __init__(self, env_pms, agent_pms, path, n_stp_max, pms):
+    def __init__(self, env_pms, agent_pms, n_stp_max, pms):
         """
         Args:
             env_pms (Any): Parameters for the environment.
             agent_pms (Any): Parameters for the agent.
-            path (str): Path for saving or loading data.
             n_stp_max (int): Maximum number of steps.
             pms (Any): Parameters for the trainer.
         """
-        super().__init__(env_pms=env_pms, path=path, n_stp_max=n_stp_max, pms=pms)
+        super().__init__(env_pms=env_pms, n_stp_max=n_stp_max, pms=pms)
 
         self.buff_size = pms.buff_size
         self.n_buff = pms.n_buff
@@ -42,7 +43,7 @@ class buffer(base_trainer):
             self.freq_report, ["step", "episode", "score", "smooth_score"]
         )
 
-    def loop(self, path, run):
+    def loop(self):
         """
         Executes the main training loop until the maximum number of steps is reached.
 
@@ -51,39 +52,44 @@ class buffer(base_trainer):
         the agent for training, executing steps until the buffer is filled, processing completed episodes,
         and training the agent with the collected data. The loop continues until the predefined maximum
         number of steps is reached. It concludes by finalizing the training session.
-
-        Args:
-            path (str): The base path for saving models and reports.
-            run (int): The current run identifier.
         """
-        obs = self.start_training()
         # Loop until max episode number is reached
+        obs = self.start_training()
         while self.counter.step < self.n_stp_max:
+
             # Prepare inner training loop
             self.agent.pre_loop()
+
             # Loop over buff size
             while not (self.agent.buff.size() >= self.buff_size):
-                nxt, _, dne, _ = self.apply_next_step(obs, path, run)
+                nxt, _, dne, _ = self.apply_next_step(obs)
+
                 # Finish if some episodes are done
                 for cpu in range(mpi.size):
                     if dne[cpu]:
                         for _ in range(self.counter.ep_step[cpu]):
                             self.report.store(cpu=cpu, counter=self.counter)
                             self.counter.step += 1
+
                         self.print_episode()
-                        self.renderer.finish(path, run, self.counter.ep, cpu)
+                        self.renderer.finish(paths.run, self.counter.ep, cpu)
                         best = self.counter.reset_ep(cpu)
-                        name = path + "/" + str(run) + "/" + self.agent.name
+                        name = paths.run + "/" + self.agent.name
                         if best:
                             self.agent.save_policy(name)
+
                 # Update observation
                 obs = nxt
+
                 # Reset only finished environments
                 obs = self.env.reset(dne, obs)
+
             # Finalize inner training loop
             self.agent.post_loop(style="buffer")
+
             # Write report data to file
-            self.report.write(path, run)
+            self.report.write(paths.run)
+
             # Train agent
             self.timer_training.tic()
             btc_size = math.floor(self.size * self.btc_frac)
@@ -94,4 +100,4 @@ class buffer(base_trainer):
 
             self.timer_training.toc()
 
-        self.end_training(path, run)
+        self.end_training()

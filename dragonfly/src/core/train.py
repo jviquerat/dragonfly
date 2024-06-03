@@ -8,6 +8,7 @@ import numpy as np
 # Custom imports
 from dragonfly.src.env.mpi         import *
 from dragonfly.src.core.constants  import *
+from dragonfly.src.core.paths      import *
 from dragonfly.src.utils.json      import *
 from dragonfly.src.utils.data      import *
 from dragonfly.src.utils.prints    import *
@@ -22,15 +23,14 @@ def train(json_file):
     pms    = parser.read(json_file)
 
     # Create paths for results and open repositories
-    base_path     = os.path.abspath(os.getcwd())
-    results_path  = 'results'
-    os.makedirs(results_path, exist_ok=True)
-    path          = folder_name(pms)
-    results_path += '/'+path
-    os.makedirs(results_path, exist_ok=True)
+    paths.base     = os.path.abspath(os.getcwd())
+    paths.results  = 'results'
+    os.makedirs(paths.results, exist_ok=True)
+    paths.results += '/' + folder_name(pms)
+    os.makedirs(paths.results, exist_ok=True)
 
     # Copy json file to results folder
-    shutil.copyfile(json_file, results_path+'/params.json')
+    shutil.copyfile(json_file, paths.results+'/params.json')
 
     # Intialize averager
     averager = data_avg(2, int(pms.n_stp_max/step_report), pms.n_avg)
@@ -39,7 +39,6 @@ def train(json_file):
     trainer = trainer_factory.create(pms.trainer.style,
                                      env_pms   = pms.env,
                                      agent_pms = pms.agent,
-                                     path      = base_path,
                                      n_stp_max = pms.n_stp_max,
                                      pms       = pms.trainer)
 
@@ -47,22 +46,23 @@ def train(json_file):
     for run in range(pms.n_avg):
         liner()
         print('Avg run #'+str(run))
-        os.makedirs(results_path+'/'+str(run), exist_ok=True)
+        paths.run = paths.results + '/'+str(run)
+        os.makedirs(paths.run, exist_ok=True)
         trainer.reset()
-        trainer.loop(results_path, run)
-        filename = results_path+'/'+str(run)+'/'+str(run)+'.dat'
+        trainer.loop()
+        filename = paths.run + '/data.dat'
         averager.store(filename, run)
 
     # Close environments
     trainer.env.close()
 
     # Write to file
-    filename = results_path+'/avg.dat'
+    filename = paths.results + '/avg.dat'
     data = averager.average(filename)
 
     # Plot
-    filename = results_path+'/'+path
-    plot_avg(data, filename)
+    name = paths.results + '/' + folder_name(pms)
+    plot_avg(data, name)
 
     # Finalize main process
     mpi.finalize()
