@@ -15,7 +15,7 @@ class ppo_srl(base_agent_on_policy):
         self.size      = size
 
         # Initialize srl class
-        self.init_srl(pms, obs_dim, 1000*size)
+        self.init_srl(pms, obs_dim, 100*size)
         self.latent_dim = self.srl.latent_dim
 
         # Build policies
