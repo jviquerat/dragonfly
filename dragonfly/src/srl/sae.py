@@ -3,6 +3,7 @@ import numpy as np
 
 # Custom imports
 from dragonfly.src.srl.base            import *
+from dragonfly.src.core.paths          import *
 from dragonfly.src.network.network     import net_factory
 from dragonfly.src.optimizer.optimizer import opt_factory
 from dragonfly.src.loss.loss           import loss_factory
@@ -60,23 +61,19 @@ class sae(base_srl):
 
         if (self.n_update >= self.n_updates): return
 
-        print("UPDATE AE")
-
         # Update
+        arr = np.zeros((self.n_epochs, 2))
         for i in range(self.n_epochs):
-            obs = self.gbuff.get_batches(["obs"], self.batch_size)["obs"]
+            obs  = self.gbuff.get_batches(["obs"], self.batch_size)["obs"]
             loss = self.loss.train(obs, self)
+            arr[i,0] = i
+            arr[i,1] = loss
 
-            # Write to file
-            with open("ae_loss.dat", "a") as f:
-                f.write(str(loss.numpy())+"\n")
+        # Write to file
+        filename = paths.run + '/ae_loss.dat'
+        np.savetxt(filename, arr)
 
         self.n_update += 1
-
-	# 2D compressed respresentation
-        #obs = self.gbuff.get_batches(["obs"], 1000)["obs"]
-        #encoded = self.net.encoder(obs)[0].numpy()
-        #self.plot2Dencoded(encoded)
 
     # Full network forward pass
     def forward(self, state):
