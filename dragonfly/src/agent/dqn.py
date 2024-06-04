@@ -130,6 +130,7 @@ class dqn(base_agent_off_policy):
 
     # Load parameters
     # This function overrides the base_agent::load_policy
-    def load_policy(self, filename):
+    def load_policy(self, folder):
 
+        filename = folder + '/' + self.name
         self.q.load(filename)
