@@ -18,10 +18,11 @@ class sae(base_srl):
         self.obs_dim       = obs_dim
         self.buff_size     = buff_size
         self.latent_dim    = pms.latent_dim
+        self.warmup        = pms.warmup
         self.update_freq   = pms.update_freq
+        self.n_update_max  = pms.n_update_max
         self.batch_size    = pms.batch_size
         self.n_epochs      = pms.n_epochs
-        self.n_updates     = pms.n_updates
 
         # Initialize network
         self.net = net_factory.create("ae",
@@ -54,31 +55,29 @@ class sae(base_srl):
         self.net.reset()
         self.opt.reset()
 
+        self.loss_log = np.zeros((self.n_epochs*self.n_update_max, 2))
+        self.n_epoch  = 0
         self.counter  = 0
         self.n_update = 0
 
     # Update autoencoder
     def update(self):
 
-        if (self.n_update >= self.n_updates): return
-
         # Update
-        arr = np.zeros((self.n_epochs, 2))
         for i in range(self.n_epochs):
             obs  = self.gbuff.get_batches(["obs"], self.batch_size)["obs"]
             loss = self.loss.train(obs, self)
-            arr[i,0] = i
-            arr[i,1] = loss
+            self.loss_log[self.n_epoch,0] = self.n_epoch
+            self.loss_log[self.n_epoch,1] = loss
+            self.n_epoch += 1
 
         # Write loss to file
         filename = paths.run + '/ae_loss.dat'
-        np.savetxt(filename, arr)
+        np.savetxt(filename, self.loss_log)
 
         # Save weights
         filename = paths.run + '/' + self.name
         self.save(filename)
-
-        self.n_update += 1
 
     # Full network forward pass
     def forward(self, state):
@@ -88,14 +87,7 @@ class sae(base_srl):
     # Process raw observations
     def process(self, obs):
 
-        # Check if it's the update time
-        if ((self.gbuff.length() > 0) and (self.counter > self.update_freq)):
-            self.update()
-            self.counter = 0
-
-        encoded = self.net.encoder(obs)[0].numpy()
-
-        return encoded
+        return self.net.encoder(obs)[0].numpy()
 
     # Save network weights
     def save(self, filename):

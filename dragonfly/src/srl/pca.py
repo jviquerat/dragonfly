@@ -16,8 +16,9 @@ class pca(base_srl):
         self.obs_dim       = obs_dim
         self.buff_size     = buff_size
         self.latent_dim    = pms.latent_dim
+        self.warmup        = pms.warmup
         self.update_freq   = pms.update_freq
-        self.n_updates     = pms.n_updates
+        self.n_update_max  = pms.n_update_max
 
         # Initialize projection matrix
         self.matrix = np.zeros((self.obs_dim, self.latent_dim))
@@ -37,10 +38,8 @@ class pca(base_srl):
         self.counter  = 0
         self.n_update = 0
 
-    # Update compression process according to the new buffer
+    # Update pca
     def update(self):
-
-        if (self.n_update >= self.n_updates): return
 
         # Get data
         obs = self.gbuff.get_buffers(["obs"], self.gbuff.length())["obs"]
@@ -60,15 +59,8 @@ class pca(base_srl):
         filename = paths.run + '/' + self.name
         self.save(filename)
 
-        self.n_update += 1
-
     # Process raw observations
     def process(self, obs):
-
-        # Check if it's the update time
-        if ((self.gbuff.length() > 0) and (self.counter > self.update_freq)):
-            self.update()
-            self.counter = 0
 
         # Project obs into latent space
         x          = np.reshape(obs, (len(obs), -1))

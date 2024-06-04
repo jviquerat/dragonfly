@@ -19,15 +19,16 @@
         "n_buff": 1,
         "batch_frac": 0.5,
         "n_epochs": 16,
-        "render_every": 500,
+        "render_every": 50000,
         "warmup": 4000
     },
     "agent": {
     	  "srl": {
 	          "type": "pca",
             "latent_dim": 2,
+            "warmup": 4000,
 	          "update_freq": 4000,
-            "n_updates": 1
+            "n_update_max": 1
     	  },
         "type": "ppo-srl",
         "policy": {
