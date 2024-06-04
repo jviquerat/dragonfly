@@ -13,6 +13,8 @@ class ppo_srl(base_agent_on_policy):
         self.obs_dim = obs_dim
         self.n_cpu   = n_cpu
         self.size    = size
+        self.warmup  = pms.srl.warmup
+        self.step    = 0
 
         # Initialize srl class
         self.srl = srl_factory.create(pms.srl.type,
@@ -66,9 +68,12 @@ class ppo_srl(base_agent_on_policy):
     # Get actions
     def actions(self, obs):
 
-        pobs = self.process_obs(obs)
+        # If warmup is not over, we return random actions
+        # if (self.step < self.warmup):
+        #     return self.p.random_uniform(obs)
 
-        # Get actions and associated log-prob
+        # Otherwise, compute regular actions
+        pobs = self.process_obs(obs)
         self.timer_actions.tic()
         act, lgp = self.p.actions(pobs)
 
@@ -93,6 +98,8 @@ class ppo_srl(base_agent_on_policy):
 
     # Training
     def train(self, start, end):
+
+        if (self.step < self.warmup): return
 
         obs = self.data["obs"][start:end]
         act = self.data["act"][start:end]
@@ -141,6 +148,7 @@ class ppo_srl(base_agent_on_policy):
         self.buff.reset()
         self.gbuff.reset()
         self.srl.reset()
+        self.step = 0
 
     # Store transition
     def store(self, obs, nxt, act, rwd, dne, trc):
@@ -151,6 +159,9 @@ class ppo_srl(base_agent_on_policy):
 
         # Store in SRL buffer
         self.srl.store_obs(obs)
+
+        # Update step
+        self.step += len(obs)
 
     # Load policy parameters
     def load_policy(self, folder):

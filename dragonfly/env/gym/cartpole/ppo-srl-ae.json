@@ -19,8 +19,7 @@
         "n_buff": 1,
         "batch_frac": 0.5,
         "n_epochs": 16,
-        "render_every": 5000,
-        "warmup": 4000
+        "render_every": 5000
     },
     "agent": {
 	      "srl": {
@@ -29,7 +28,7 @@
             "warmup": 4000,
 	          "update_freq": 4000,
 	          "n_epochs" : 2000,
-            "n_update_max": 2,
+            "n_update_max": 1,
 	          "batch_size": 400,
             "network": {
                 "arch": [4,2],
