@@ -14,6 +14,7 @@ class sae(base_srl):
     def __init__(self, obs_dim, buff_size, pms):
 
         # Initialize from arguments
+        self.name          = "ae"
         self.obs_dim       = obs_dim
         self.buff_size     = buff_size
         self.latent_dim    = pms.latent_dim
@@ -69,9 +70,13 @@ class sae(base_srl):
             arr[i,0] = i
             arr[i,1] = loss
 
-        # Write to file
+        # Write loss to file
         filename = paths.run + '/ae_loss.dat'
         np.savetxt(filename, arr)
+
+        # Save weights
+        filename = paths.run + '/' + self.name
+        self.save(filename)
 
         self.n_update += 1
 
@@ -91,3 +96,14 @@ class sae(base_srl):
         encoded = self.net.encoder(obs)[0].numpy()
 
         return encoded
+
+    # Save network weights
+    def save(self, filename):
+
+        self.net.save_weights(filename)
+
+    # Load network weights
+    def load(self, filename):
+
+        load_status = self.net.load_weights(filename)
+        load_status.assert_consumed()

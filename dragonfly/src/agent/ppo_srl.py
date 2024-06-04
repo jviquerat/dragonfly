@@ -8,15 +8,17 @@ class ppo_srl(base_agent_on_policy):
     def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
-        self.name      = 'ppo'
-        self.act_dim   = act_dim
-        self.obs_dim  = obs_dim
-        self.n_cpu     = n_cpu
-        self.size      = size
+        self.name    = 'ppo_srl'
+        self.act_dim = act_dim
+        self.obs_dim = obs_dim
+        self.n_cpu   = n_cpu
+        self.size    = size
 
         # Initialize srl class
-        self.init_srl(pms, obs_dim, 100*size)
-        self.latent_dim = self.srl.latent_dim
+        self.srl = srl_factory.create(pms.srl.type,
+                                      obs_dim   = self.obs_dim,
+                                      buff_size = 100*self.size,
+                                      pms       = pms.srl)
 
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
@@ -24,7 +26,7 @@ class ppo_srl(base_agent_on_policy):
                     "Loss type for ppo agent is not surrogate")
 
         self.p = pol_factory.create(pms.policy.type,
-                                    obs_dim = self.latent_dim,
+                                    obs_dim = self.srl.latent_dim,
                                     act_dim = act_dim,
                                     pms     = pms.policy)
 
@@ -38,7 +40,7 @@ class ppo_srl(base_agent_on_policy):
                     "Value type for ppo agent is not v_value")
 
         self.v = val_factory.create(pms.value.type,
-                                    inp_dim = self.latent_dim,
+                                    inp_dim = self.srl.latent_dim,
                                     pms     = pms.value)
 
         # Build advantage
@@ -60,21 +62,6 @@ class ppo_srl(base_agent_on_policy):
     def process_obs(self, obs):
 
         return self.srl.process(obs)
-
-    # Initialize srl
-    def init_srl(self, pms, obs_dim, buff_size):
-
-        # Check inputs
-        if not hasattr(pms, "srl"):
-            pms.srl  = None
-            srl_type = "dummy"
-        else: srl_type = pms.srl.type
-
-        # Create srl
-        self.srl = srl_factory.create(srl_type,
-                                      obs_dim   = obs_dim,
-                                      buff_size = buff_size,
-                                      pms       = pms.srl)
 
     # Get actions
     def actions(self, obs):
@@ -164,6 +151,14 @@ class ppo_srl(base_agent_on_policy):
 
         # Store in SRL buffer
         self.srl.store_obs(obs)
+
+    # Load policy parameters
+    def load_policy(self, folder):
+
+        filename = folder + '/' + self.srl.name
+        self.srl.load(filename)
+        filename = folder + '/' + self.name
+        self.p.load(filename)
 
     # Save value parameters
     def save_value(self, filename):

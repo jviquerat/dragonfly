@@ -39,8 +39,9 @@ class base_agent():
         self.p.save(filename)
 
     # Load policy parameters
-    def load_policy(self, filename):
+    def load_policy(self, folder):
 
+        filename = folder + '/' + self.name
         self.p.load(filename)
 
 ###############################################
