@@ -39,7 +39,8 @@ def runner(json_file, agent_type):
         os.makedirs(paths.run, exist_ok=True)
         trainer.reset()
         trainer.loop()
-        trainer.agent.save_policy(paths.run)
+        name = paths.run + '/' + trainer.agent.name
+        trainer.agent.save_policy(name)
         filename = paths.run + '/data.dat'
         averager.store(filename, i)
 
