@@ -17,8 +17,29 @@ class base_srl():
 
     def store_obs(self, obs):
 
-        self.gbuff.store(["obs"], [obs])
-        self.counter += len(obs)
+        # Store
+        if (self.n_update < self.n_update_max):
+            self.gbuff.store(["obs"], [obs])
+            self.counter += len(obs)
+
+        # If warmup has not been done yet
+        if (self.n_update == 0 and
+            self.counter  > self.warmup):
+
+            self.update()
+            self.n_update += 1
+            self.counter   = 0
+            return
+
+        # Otherwise
+        if (self.n_update > 0 and
+            self.n_update < self.n_update_max and
+            self.counter  > self.update_freq):
+
+            self.update()
+            self.n_update += 1
+            self.counter   = 0
+            return
 
     def save(self, filename):
         pass

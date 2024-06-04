@@ -26,9 +26,10 @@
 	      "srl": {
 	          "type": "sae",
             "latent_dim": 2,
+            "warmup": 4000,
 	          "update_freq": 4000,
 	          "n_epochs" : 2000,
-            "n_updates": 1,
+            "n_update_max": 2,
 	          "batch_size": 400,
             "network": {
                 "arch": [4,2],

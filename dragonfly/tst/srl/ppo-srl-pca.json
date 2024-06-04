@@ -25,8 +25,9 @@
     	  "srl": {
 	          "type": "pca",
             "latent_dim": 2,
+            "warmup": 200,
 	          "update_freq": 200,
-            "n_updates": 2
+            "n_update_max": 2
     	  },
         "type": "ppo-srl",
         "policy": {
