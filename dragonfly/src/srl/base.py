@@ -20,16 +20,8 @@ class base_srl():
         self.gbuff.store(["obs"], [obs])
         self.counter += len(obs)
 
-    def plot2Dencoded(self, obs):
+    def save(self, filename):
+        pass
 
-        filename = 'compression2D'+str(self.counter)
-        fig, ax = plt.subplots(1,1,figsize=(5,5))
-
-        ax.set_title('observations compressed in 2D')
-
-        t = np.arange(len(obs))
-        ax.scatter(obs[:,0],obs[:,1],c=t)
-        ax.grid(True)
-        ax.legend()
-        fig.tight_layout()
-        fig.savefig(filename+'.png')
+    def load(self, filename):
+        pass

@@ -20,13 +20,13 @@
         "batch_frac": 0.5,
         "n_epochs": 16,
         "render_every": 500,
-        "warmup": 10000
+        "warmup": 4000
     },
     "agent": {
     	  "srl": {
 	          "type": "pca",
-            "latent_dim": 3,
-	          "update_freq": 10000,
+            "latent_dim": 2,
+	          "update_freq": 4000,
             "n_updates": 1
     	  },
         "type": "ppo-srl",

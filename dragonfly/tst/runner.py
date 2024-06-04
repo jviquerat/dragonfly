@@ -32,29 +32,24 @@ def runner(json_file, agent_type):
                                      n_stp_max = reader.pms.n_stp_max,
                                      pms       = reader.pms.trainer)
 
-    print("Test "+agent_type)
+    print("Test " + agent_type)
 
-    paths.run = paths.results + '/0'
-    os.makedirs(paths.run, exist_ok=True)
-    trainer.reset()
-    trainer.loop()
-    filename = paths.run + '/data.dat'
-    averager.store(filename, 0)
+    for i in range(2):
+        paths.run = paths.results + '/' + str(i)
+        os.makedirs(paths.run, exist_ok=True)
+        trainer.reset()
+        trainer.loop()
+        trainer.agent.save_policy(paths.run)
+        filename = paths.run + '/data.dat'
+        averager.store(filename, i)
 
-    paths.run = paths.results + '/1'
-    os.makedirs(paths.run, exist_ok=True)
-    trainer.reset()
-    trainer.loop()
-    filename = paths.run + '/checkpoint'
-    trainer.agent.save_policy(filename)
     filename = paths.run + '/data.dat'
     averager.store(filename, 1)
 
     # Test of the `control` method
     trainer.reset()
     obs = trainer.env.reset_all()
-    filename = paths.run + '/checkpoint'
-    trainer.agent.load_policy(filename)
+    trainer.agent.load_policy(paths.run)
     act = trainer.agent.control(obs)
     trainer.env.step(act)
     #############################

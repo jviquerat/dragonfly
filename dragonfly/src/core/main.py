@@ -12,7 +12,7 @@ def error():
     new_line()
     errr("""Command line error. Possible behaviors:
     dgf --train <json_file>
-    dgf --eval -net    <net_file>
+    dgf --eval -net    <net_folder>
                -json   <json_file>
                -steps  <n_steps> (optional)
                -warmup <n_warmup> <a_warmup> (optional, requires -steps option)
@@ -43,7 +43,7 @@ def main():
         bold('Evaluation mode')
 
         if ("-net" not in args): error()
-        net_file  = args[args.index("-net")+1]
+        net_folder  = args[args.index("-net")+1]
 
         if ("-json" not in args): error()
         json_file = args[args.index("-json")+1]
@@ -70,7 +70,7 @@ def main():
                         a_warmup.append(a)
                         i += 1
 
-        evaluate(net_file, json_file, n_steps, n_warmup, a_warmup)
+        evaluate(net_folder, json_file, n_steps, n_warmup, a_warmup)
         return
 
     # Averaging mode

@@ -9,7 +9,7 @@ from dragonfly.src.utils.renderer   import renderer
 from dragonfly.src.utils.prints     import new_line, spacer
 
 # Evaluate agent
-def evaluate(net_file, json_file, ns, nw, aw):
+def evaluate(net_folder, json_file, ns, nw, aw):
 
     # Initialize json parser and read parameters
     parser = json_parser()
@@ -37,7 +37,7 @@ def evaluate(net_file, json_file, ns, nw, aw):
                                  pms     = pms.agent)
 
     # Load network
-    agent.load_policy(net_file)
+    agent.load_policy(net_folder)
 
     # Specify termination
     term_ns = True
@@ -80,7 +80,7 @@ def evaluate(net_file, json_file, ns, nw, aw):
         if (term_ns and n >= ns): break
         if (term_dn and dne):     break
 
-    rnd.finish(".", "/", 0, 0)
+    rnd.finish(".", 0, 0)
     env.close()
 
     # Print
