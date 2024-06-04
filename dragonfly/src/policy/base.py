@@ -100,6 +100,13 @@ class base_policy():
 
         return tf.reshape(act, [-1, self.act_dim])
 
+    # Random uniform actions for warmup
+    def random_uniform(self, obs):
+
+        n_cpu = obs.shape[0]
+        act   = np.random.uniform(-1.0, 1.0, size=self.store_dim)
+        return act
+
 ###############################################
 ### Base policy for normal laws
 class base_normal(base_policy):

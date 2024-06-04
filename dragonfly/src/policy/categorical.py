@@ -74,3 +74,11 @@ class categorical(base_policy):
     def reshape_actions(self, act):
 
         return tf.reshape(act, [-1])
+
+    # Random uniform actions for warmup
+    def random_uniform(self, obs):
+
+        n_cpu = obs.shape[0]
+        act   = np.random.randint(0, self.act_dim, size=(n_cpu,1))
+
+        return np.reshape(act, (-1))
