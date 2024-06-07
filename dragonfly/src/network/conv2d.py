@@ -64,11 +64,15 @@ class conv2d(base_network):
         # Initialize network
         self.net = []
 
+        assert len(self.trunk.filters) == len(
+            self.trunk.kernel
+        ), f"Wrong kernel list. Expected {len(self.trunk.filters)} elements, got {len(self.trunk.kernel)}."
+
         # Define trunk
         for l in range(len(self.trunk.filters)):
             if (l == 0):
                 self.net.append(Conv2D(filters            = self.trunk.filters[l],
-                                       kernel_size        = self.trunk.kernel,
+                                       kernel_size        = self.trunk.kernel[l],
                                        strides            = self.trunk.stride,
                                        kernel_initializer = self.k_init,
                                        activation         = self.trunk.actv,
@@ -76,7 +80,7 @@ class conv2d(base_network):
                                        padding            = "same"))
             else:
                 self.net.append(Conv2D(filters            = self.trunk.filters[l],
-                                       kernel_size        = self.trunk.kernel,
+                                       kernel_size        = self.trunk.kernel[l],
                                        strides            = self.trunk.stride,
                                        kernel_initializer = self.k_init,
                                        activation         = self.trunk.actv,
