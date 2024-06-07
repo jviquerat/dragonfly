@@ -38,7 +38,7 @@ class conv2d(base_network):
         # Check inputs
         if hasattr(pms,       "trunk"):        self.trunk         = pms.trunk
         if hasattr(pms.trunk, "filters"):      self.trunk.filters = pms.trunk.filters
-        if hasattr(pms.trunk, "k_size"):       self.trunk.kernel  = pms.trunk.kernel
+        if hasattr(pms.trunk, "kernel"):       self.trunk.kernel  = pms.trunk.kernel
         if hasattr(pms.trunk, "strides"):      self.trunk.stride  = pms.trunk.stride
         if hasattr(pms.trunk, "actv"):         self.trunk.actv    = pms.trunk.actv
         if hasattr(pms,       "heads"):        self.heads         = pms.heads
