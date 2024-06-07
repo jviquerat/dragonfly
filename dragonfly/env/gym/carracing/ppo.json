@@ -5,8 +5,8 @@
         "obs_norm": true,
         "obs_noise": 0.0,
         "obs_grayscale": true,
-        "obs_downscale": 2,
-	"obs_stack": 1
+        "obs_downscale": 4,
+	      "obs_stack": 4
     },
     "naming": {
         "env": true,
@@ -30,11 +30,11 @@
             "type": "normal",
             "network": {
                 "type": "conv2d",
-		"original_dim": [48,48,1],
+		            "original_dim": [24,24,4],
                 "trunk": {
                     "filters": [8,16],
-		    "kernel": 3,
-		    "stride": 1,
+		                "kernel": 3,
+		                "stride": 1,
                     "pooling": true,
                     "actv": "relu"
                 },
@@ -60,11 +60,11 @@
             "type": "v_value",
             "network": {
                 "type": "conv2d",
-		"original_dim": [48,48,1],
+		            "original_dim": [24,24,4],
                 "trunk": {
                     "filters": [8,16],
-		    "kernel": 3,
-		    "stride": 1,
+		                "kernel": 3,
+		                "stride": 1,
                     "pooling": true,
                     "actv": "relu"
                 },
