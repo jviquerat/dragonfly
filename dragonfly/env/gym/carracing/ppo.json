@@ -33,7 +33,7 @@
 		            "original_dim": [24,24,4],
                 "trunk": {
                     "filters": [8,16],
-		                "kernel": [12,3],
+		                "kernels": [12,3],
 		                "stride": 1,
                     "pooling": true,
                     "actv": "relu"
@@ -63,7 +63,7 @@
 		            "original_dim": [24,24,4],
                 "trunk": {
                     "filters": [8,16],
-		                "kernel": [12,3],
+		                "kernels": [12,3],
 		                "stride": 1,
                     "pooling": true,
                     "actv": "relu"

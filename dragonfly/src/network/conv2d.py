@@ -22,7 +22,7 @@ class conv2d(base_network):
         # Set default values
         self.trunk         = trunk()
         self.trunk.filters = [64]
-        self.trunk.kernel  = 3
+        self.trunk.kernels = [3]
         self.trunk.stride  = 1
         self.trunk.actv    = "relu"
         self.heads         = heads()
@@ -38,7 +38,7 @@ class conv2d(base_network):
         # Check inputs
         if hasattr(pms,       "trunk"):        self.trunk         = pms.trunk
         if hasattr(pms.trunk, "filters"):      self.trunk.filters = pms.trunk.filters
-        if hasattr(pms.trunk, "kernel"):       self.trunk.kernel  = pms.trunk.kernel
+        if hasattr(pms.trunk, "kernels"):      self.trunk.kernels  = pms.trunk.kernels
         if hasattr(pms.trunk, "strides"):      self.trunk.stride  = pms.trunk.stride
         if hasattr(pms.trunk, "actv"):         self.trunk.actv    = pms.trunk.actv
         if hasattr(pms,       "heads"):        self.heads         = pms.heads
@@ -65,14 +65,14 @@ class conv2d(base_network):
         self.net = []
 
         assert len(self.trunk.filters) == len(
-            self.trunk.kernel
-        ), f"Wrong kernel list. Expected {len(self.trunk.filters)} elements, got {len(self.trunk.kernel)}."
+            self.trunk.kernels
+        ), f"Wrong kernel list. Expected {len(self.trunk.filters)} elements, got {len(self.trunk.kernels)}."
 
         # Define trunk
         for l in range(len(self.trunk.filters)):
             if (l == 0):
                 self.net.append(Conv2D(filters            = self.trunk.filters[l],
-                                       kernel_size        = self.trunk.kernel[l],
+                                       kernel_size        = self.trunk.kernels[l],
                                        strides            = self.trunk.stride,
                                        kernel_initializer = self.k_init,
                                        activation         = self.trunk.actv,
@@ -80,7 +80,7 @@ class conv2d(base_network):
                                        padding            = "same"))
             else:
                 self.net.append(Conv2D(filters            = self.trunk.filters[l],
-                                       kernel_size        = self.trunk.kernel[l],
+                                       kernel_size        = self.trunk.kernels[l],
                                        strides            = self.trunk.stride,
                                        kernel_initializer = self.k_init,
                                        activation         = self.trunk.actv,
