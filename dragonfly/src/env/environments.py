@@ -20,6 +20,7 @@ class environments:
         self.obs_stack     = 1
         self.obs_grayscale = False
         self.obs_downscale = 1
+        self.frameskip     = 1
         self.args          = None
 
         if hasattr(pms, "args"):          self.args          = pms.args
@@ -30,6 +31,7 @@ class environments:
         if hasattr(pms, "obs_stack"):     self.obs_stack     = pms.obs_stack
         if hasattr(pms, "obs_grayscale"): self.obs_grayscale = pms.obs_grayscale
         if hasattr(pms, "obs_downscale"): self.obs_downscale = pms.obs_downscale
+        if hasattr(pms, "frameskip"):     self.frameskip     = pms.frameskip
 
         # Generate workers
         self.worker = worker(self.name, self.args, mpi.rank, path)
@@ -95,44 +97,52 @@ class environments:
 
         self.timer_env.tic()
 
-        # Send
-        data = [('step', None)]*mpi.size
-        for p in range(mpi.size):
-            act = actions[p]
-            if (self.act_norm):
-                act = np.clip(act,-1.0,1.0)
-                for i in range(self.act_dim):
-                    act[i] = self.act_rng[i]*act[i] + self.act_avg[i]
-            data[p] = ('step', act)
-        mpi.comm.scatter(data, root=0)
+        rwd   = np.zeros((mpi.size))
+        done  = np.zeros((mpi.size))
+        trunc = np.zeros((mpi.size))
 
-        # Main process executing
-        n, r, d, t = self.worker.step(data[0][1])
+        # The whole step part is looped over frameskip times
+        # Yet if a stack of observations is used, we keep the
+        # fine-grain history of observations
+        for _ in range(self.frameskip):
 
-        # Handle stacked observations
-        # Latest observation is put in last position
-        for p in range(mpi.size):
-            for s in range(self.obs_stack-1):
-                self.nxt[p,:,s] = self.nxt[p,:,s+1]
+            # Send
+            data = [('step', None)]*mpi.size
+            for p in range(mpi.size):
+                act = actions[p]
+                if (self.act_norm):
+                    act = np.clip(act,-1.0,1.0)
+                    for i in range(self.act_dim):
+                        act[i] = self.act_rng[i]*act[i] + self.act_avg[i]
+                data[p] = ('step', act)
+            mpi.comm.scatter(data, root=0)
 
-        rwd   = np.empty((mpi.size))
-        done  = np.empty((mpi.size))
-        trunc = np.empty((mpi.size))
+            # Main process executing
+            n, r, d, t = self.worker.step(data[0][1])
 
-        # Receive
-        data = mpi.comm.gather((n, r, d, t), root=0)
+            # Handle stacked observations
+            # Latest observation is put in last position
+            for p in range(mpi.size):
+                for s in range(self.obs_stack-1):
+                    self.nxt[p,:,s] = self.nxt[p,:,s+1]
 
-        for p in range(mpi.size):
-            vals       = data[p]
-            n, r, d, t = vals[0], vals[1], vals[2], vals[3]
-            nn         = self.process_obs(n)
+            # Receive
+            data = mpi.comm.gather((n, r, d, t), root=0)
 
-            # New observation is put in last position
-            self.nxt[p,:,-1] = nn[:].flatten()
-            rwd  [p]         = r
-            done [p]         = bool(d)
-            trunc[p]         = bool(t)
+            for p in range(mpi.size):
+                vals       = data[p]
+                n, r, d, t = vals[0], vals[1], vals[2], vals[3]
+                nn         = self.process_obs(n)
 
+                # New observation is put in last position
+                self.nxt[p,:,-1] = nn[:].flatten()
+
+                # Reward is updated to account for possible frameskip
+                rwd  [p]        += r
+                done [p]         = bool(d)
+                trunc[p]         = bool(t)
+
+        # Reshape observations for returning
         nxt = np.reshape(self.nxt, (mpi.size, self.obs_dim)).copy()
 
         self.timer_env.toc()
