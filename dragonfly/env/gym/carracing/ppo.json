@@ -6,7 +6,7 @@
         "obs_noise": 0.0,
         "obs_grayscale": true,
         "obs_downscale": 4,
-	      "obs_stack": 4,
+	"obs_stack": 4,
         "frameskip": 4
     },
     "naming": {
@@ -16,10 +16,10 @@
         "time": false
     },
     "n_avg": 2,
-    "n_stp_max": 1000000,
+    "n_stp_max": 500000,
     "trainer": {
         "style": "buffer",
-        "buff_size": 4000,
+        "buff_size": 2000,
         "n_buff": 1,
         "batch_frac": 0.5,
         "n_epochs": 32,
@@ -31,12 +31,12 @@
             "type": "normal",
             "network": {
                 "type": "conv2d",
-		            "original_dim": [24,24,4],
+		"original_dim": [24,24,4],
                 "trunk": {
-                    "filters": [8,16],
-		                "kernels": [12,3],
-		                "stride": 1,
-                    "pooling": true,
+                    "filters": [8,8],
+		    "kernels": [7,3],
+		    "stride": 1,
+                    "pooling": false,
                     "actv": "relu"
                 },
                 "heads": {
@@ -48,25 +48,25 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 2.0e-4,
                 "grd_clip": 0.1
             },
             "loss": {
                 "type": "surrogate",
                 "pol_clip": 0.2,
-                "ent_coef": 0.0
+                "ent_coef": 0.01
             }
         },
         "value": {
             "type": "v_value",
             "network": {
                 "type": "conv2d",
-		            "original_dim": [24,24,4],
+		"original_dim": [24,24,4],
                 "trunk": {
-                    "filters": [8,16],
-		                "kernels": [12,3],
-		                "stride": 1,
-                    "pooling": true,
+                    "filters": [8,8],
+		    "kernels": [7,3],
+		    "stride": 1,
+                    "pooling": false,
                     "actv": "relu"
                 },
                 "heads": {
@@ -78,7 +78,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-3,
+                "lr": 2.0e-4,
                 "grd_clip": 0.1
             },
             "loss": {
