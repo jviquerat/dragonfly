@@ -20,7 +20,7 @@ class environments:
         self.obs_stack     = 1
         self.obs_grayscale = False
         self.obs_downscale = 1
-        self.frameksip     = 4
+        self.frameskip     = 1
         self.args          = None
 
         if hasattr(pms, "args"):          self.args          = pms.args
