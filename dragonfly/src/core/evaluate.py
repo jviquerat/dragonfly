@@ -39,6 +39,14 @@ def evaluate(net_folder, json_file, ns, nw, aw):
     # Load network
     agent.load_policy(net_folder)
 
+    # import numpy as np
+    # w = agent.p.net.net[0].get_weights()[0]
+    # b = agent.p.net.net[0].get_weights()[1]
+    # w = np.mean(w, axis=1)
+    # print(w.shape)
+    # np.savetxt('w_ppo', w)
+    # np.savetxt('b_ppo', b)
+
     # Specify termination
     term_ns = True
     term_dn = False
@@ -79,6 +87,26 @@ def evaluate(net_folder, json_file, ns, nw, aw):
         rnd.store(env)
         if (term_ns and n >= ns): break
         if (term_dn and dne):     break
+
+    import numpy as np
+    x = np.reshape(np.arange(0, 1000, 1, dtype=int), (-1,1))
+    y = np.ones((1000,1))
+    mean_original = np.reshape(np.mean(agent.obs_original, axis=1), (-1,1))
+    std_original  = np.reshape(np.std(agent.obs_original, axis=1), (-1,1))
+    original = np.hstack((x, mean_original, std_original))
+
+    mean_pca = np.reshape(np.mean(agent.obs_pca, axis=1), (-1,1))
+    std_pca  = np.reshape(np.std(agent.obs_pca, axis=1), (-1,1))
+    pca = np.hstack((x, mean_pca, std_pca))
+
+    np.savetxt('original', original, fmt='%10.5f', delimiter=',')
+    np.savetxt('pca', pca, fmt='%10.5f', delimiter=',')
+
+    #w_x_mean_original = np.multiply(mean_original, w)
+    #np.savetxt('w_x_mean_original', w_x_mean_original)
+    #print(mean_pca.shape, w.shape)
+    #w_x_mean_pca = np.multiply(mean_pca[:,0], w)
+    # np.savetxt('w_x_mean_pca', w_x_mean_pca)
 
     rnd.finish(".", 0, 0)
     env.close()

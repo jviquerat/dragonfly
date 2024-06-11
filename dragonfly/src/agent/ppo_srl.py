@@ -22,6 +22,10 @@ class ppo_srl(base_agent_on_policy):
                                       buff_size = 100*self.size,
                                       pms       = pms.srl)
 
+        self.obs_counter  = 0
+        self.obs_original = np.zeros((self.obs_dim,400))
+        self.obs_pca      = np.zeros((self.obs_dim,400))
+
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
             warning("ppo", "__init__",
@@ -92,7 +96,13 @@ class ppo_srl(base_agent_on_policy):
     # Control (deterministic actions)
     def control(self, obs):
 
+        self.obs_original[:,self.obs_counter] = obs[:]
+
+
         pobs = self.process_obs(obs)
+
+        self.obs_pca[:,self.obs_counter] = pobs[:]
+        self.obs_counter += 1
 
         return self.p.control(pobs)
 

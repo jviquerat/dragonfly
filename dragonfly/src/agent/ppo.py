@@ -13,6 +13,9 @@ class ppo(base_agent_on_policy):
         self.n_cpu     = n_cpu
         self.size      = size
 
+        self.obs_counter  = 0
+        self.obs_original = np.zeros((self.obs_dim,400))
+
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
             warning("ppo", "__init__",
@@ -50,6 +53,14 @@ class ppo(base_agent_on_policy):
 
         # Initialize timer
         self.timer_actions = timer("actions  ")
+
+    # Control (deterministic actions)
+    def control(self, obs):
+
+        self.obs_original[:,self.obs_counter] = obs[:]
+        self.obs_counter += 1
+
+        return self.p.control(obs)
 
     # Training
     def train(self, start, end):
