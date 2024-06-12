@@ -14,15 +14,16 @@ class sae(base_srl):
     def __init__(self, obs_dim, buff_size, pms):
 
         # Initialize from arguments
-        self.name          = "ae"
-        self.obs_dim       = obs_dim
-        self.buff_size     = buff_size
-        self.latent_dim    = pms.latent_dim
-        self.warmup        = pms.warmup
-        self.update_freq   = pms.update_freq
-        self.n_update_max  = pms.n_update_max
-        self.batch_size    = pms.batch_size
-        self.n_epochs      = pms.n_epochs
+        self.name             = "ae"
+        self.obs_dim          = obs_dim
+        self.buff_size        = buff_size
+        self.latent_dim       = pms.latent_dim
+        self.warmup           = pms.warmup
+        self.retrain_freq     = pms.retrain_freq
+        self.n_update_max     = pms.n_update_max
+        self.batch_size       = pms.batch_size
+        self.n_epochs_warmup  = pms.n_epochs_warmup
+        self.n_epochs_retrain = pms.n_epochs_retrain
 
         # Initialize network
         self.net = net_factory.create("ae",
@@ -55,7 +56,8 @@ class sae(base_srl):
         self.net.reset()
         self.opt.reset()
 
-        self.loss_log = np.zeros((self.n_epochs*self.n_update_max, 2))
+        log_length = self.n_epochs_warmup + (self.n_update_max-1)*self.n_epochs_retrain
+        self.loss_log = np.zeros((log_length, 2))
         self.n_epoch  = 0
         self.counter  = 0
         self.n_update = 0
@@ -63,8 +65,11 @@ class sae(base_srl):
     # Update autoencoder
     def update(self):
 
+        if (self.n_update == 0): n_epochs = self.n_epochs_warmup
+        else: n_epochs = self.n_epochs_retrain
+
         # Update
-        for i in range(self.n_epochs):
+        for i in range(n_epochs):
             obs  = self.gbuff.get_batches(["obs"], self.batch_size)["obs"]
             loss = self.loss.train(obs, self)
             self.loss_log[self.n_epoch,0] = self.n_epoch

@@ -26,8 +26,9 @@
 	          "type": "sae",
             "latent_dim": 2,
             "warmup": 200,
-	          "update_freq": 200,
-	          "n_epochs" : 500,
+	          "retrain_freq": 200,
+	          "n_epochs_warmup" : 500,
+            "n_epochs_retrain": 50,
             "n_update_max": 2,
 	          "batch_size": 100,
             "network": {
