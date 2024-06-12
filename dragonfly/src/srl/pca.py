@@ -17,7 +17,7 @@ class pca(base_srl):
         self.buff_size     = buff_size
         self.latent_dim    = pms.latent_dim
         self.warmup        = pms.warmup
-        self.update_freq   = pms.update_freq
+        self.retrain_freq  = pms.retrain_freq
         self.n_update_max  = pms.n_update_max
 
         # Initialize projection matrix

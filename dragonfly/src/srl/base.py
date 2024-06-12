@@ -34,7 +34,7 @@ class base_srl():
         # Otherwise
         if (self.n_update > 0 and
             self.n_update < self.n_update_max and
-            self.counter  > self.update_freq):
+            self.counter  > self.retrain_freq):
 
             self.update()
             self.n_update += 1
