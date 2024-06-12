@@ -90,17 +90,26 @@ def evaluate(net_folder, json_file, ns, nw, aw):
 
     import numpy as np
     x = np.reshape(np.arange(0, 1000, 1, dtype=int), (-1,1))
+    xp = np.reshape(np.arange(0, 500, 1, dtype=int), (-1,1)) 
     y = np.ones((1000,1))
+
     mean_original = np.reshape(np.mean(agent.obs_original, axis=1), (-1,1))
     std_original  = np.reshape(np.std(agent.obs_original, axis=1), (-1,1))
     original = np.hstack((x, mean_original, std_original))
 
     mean_pca = np.reshape(np.mean(agent.obs_pca, axis=1), (-1,1))
     std_pca  = np.reshape(np.std(agent.obs_pca, axis=1), (-1,1))
-    pca = np.hstack((x, mean_pca, std_pca))
+    pca = np.hstack((xp, mean_pca, std_pca))
+
+    xx = np.reshape(np.arange(0, 400, 1, dtype=int), (-1,1))
+    pca_2d = np.reshape(np.transpose(agent.obs_pca[0:2,:]), (-1,2))
+    pca_2d = np.hstack((xx, pca_2d))
 
     np.savetxt('original', original, fmt='%10.5f', delimiter=',')
     np.savetxt('pca', pca, fmt='%10.5f', delimiter=',')
+    np.savetxt('pca_2d', pca_2d, fmt='%10.5f')
+
+
 
     #w_x_mean_original = np.multiply(mean_original, w)
     #np.savetxt('w_x_mean_original', w_x_mean_original)

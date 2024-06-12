@@ -24,7 +24,7 @@ class ppo_srl(base_agent_on_policy):
 
         self.obs_counter  = 0
         self.obs_original = np.zeros((self.obs_dim,400))
-        self.obs_pca      = np.zeros((self.obs_dim,400))
+        self.obs_pca      = np.zeros((500,400))
 
         # Build policies
         if (pms.policy.loss.type != "surrogate"):
