@@ -35,6 +35,7 @@ class base_trainer:
         self.act_dim = self.env.act_dim
         self.n_stp_max = n_stp_max
 
+        self.cnt   = None
         self.agent = None
 
         if hasattr(pms, "update"):
@@ -197,12 +198,12 @@ class base_trainer:
         bst_ep = self.counter.best_ep
 
         # Handle no-printing after max step
-        self.cnt = 0
         if stp < n_stp_max - 1:
             end = "\r"
             self.cnt = 0
         else:
             end = "\n"
+            if (self.cnt is None): self.cnt = 0
             self.cnt += 1
 
         if self.cnt <= 1:
