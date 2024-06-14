@@ -15,7 +15,7 @@
         "time": false
     },
     "n_avg": 2,
-    "n_stp_max": 30,
+    "n_stp_max": 20,
     "trainer": {
         "style": "buffer",
         "buff_size": 20,
