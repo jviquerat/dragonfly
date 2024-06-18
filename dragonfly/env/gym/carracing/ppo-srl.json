@@ -1,0 +1,117 @@
+{
+    "env": {
+        "name": "CarRacing-v2",
+        "obs_clip": false,
+        "obs_norm": true,
+        "obs_noise": 0.0,
+        "obs_grayscale": true,
+        "obs_downscale": 4,
+	      "obs_stack": 4,
+        "frameskip": 4
+    },
+    "naming": {
+        "env": true,
+        "agent": true,
+        "tag": "cnn",
+        "time": false
+    },
+    "n_avg": 2,
+    "n_stp_max": 500000,
+    "trainer": {
+        "style": "buffer",
+        "buff_size": 2000,
+        "n_buff": 1,
+        "batch_frac": 0.5,
+        "n_epochs": 32,
+        "render_every": 50000
+    },
+    "agent": {
+        "type": "ppo-srl",
+        "srl": {
+	          "type": "cae",
+            "latent_dim": 100,
+            "warmup": 2000,
+	          "retrain_freq": 2000,
+	          "n_epochs_warmup" : 5000,
+            "n_epochs_retrain": 50,
+            "n_update_max": 1,
+	          "batch_size": 100,
+            "network": {
+                "original_dim": [24,24,4],
+                "trunk": {
+                    "filters": [8,8],
+                    "kernels": [7,3],
+                    "stride": 1,
+                    "pooling": false,
+                    "actv": "relu"
+                }
+            },
+            "optimizer": {
+                "type": "adam",
+                "lr": 2.0e-4
+            },
+            "loss": {
+                "type": "mse_ae"
+            }
+	      },
+        "policy": {
+            "type": "normal",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [64],
+                    "actv": "tanh"
+                },
+                "heads": {
+                    "nb": 2,
+                    "arch": [[64],[64]],
+                    "actv": ["tanh","tanh"],
+                    "final": ["tanh","sigmoid"]
+                }
+            },
+            "optimizer": {
+                "type": "adam",
+                "lr": 5.0e-4,
+                "grd_clip": 0.1
+            },
+            "loss": {
+                "type": "surrogate",
+                "pol_clip": 0.2,
+                "ent_coef": 0.01
+            }
+        },
+        "value": {
+            "type": "v_value",
+            "network": {
+                "type": "fc",
+                "trunk": {
+                    "arch": [64,64],
+                    "actv": "relu"
+                },
+                "heads": {
+                    "nb": 1,
+                    "arch": [[]],
+                    "actv": ["relu"],
+                    "final": ["linear"]
+                }
+            },
+            "optimizer": {
+                "type": "adam",
+                "lr": 5.0e-3,
+                "grd_clip": 0.1
+            },
+            "loss": {
+                "type": "mse_pg"
+            }
+        },
+        "retrn": {
+            "type": "gae",
+            "gamma": 0.99,
+            "gae_lambda": 0.95,
+            "ret_norm": true
+        },
+        "termination": {
+            "type": "bootstrap"
+        }
+    }
+}
