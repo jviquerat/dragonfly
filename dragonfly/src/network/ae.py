@@ -27,19 +27,20 @@ class ae(base_network):
         self.actv = tf.nn.leaky_relu
 
         # Initialize network
-        self.net = []
+        self.enc = []
+        self.dec = []
 
         # Define encoder
         for l in range(len(self.arch)):
-            self.net.append(Dense(self.arch[l],
+            self.enc.append(Dense(self.arch[l],
                                   activation = self.actv))
-        self.net.append(Dense(self.lat_dim, activation = "linear"))
+        self.enc.append(Dense(self.lat_dim, activation = "linear"))
 
         # Define decoder
         for l in range(len(self.arch)):
-            self.net.append(Dense(self.arch[-l-1],
+            self.dec.append(Dense(self.arch[-l-1],
                                   activation = self.actv))
-        self.net.append(Dense(self.inp_dim, activation = "linear"))
+        self.dec.append(Dense(self.inp_dim, activation = "linear"))
 
         # Initialize weights
         dummy = self.call(tf.ones([1,self.inp_dim]))
@@ -51,46 +52,42 @@ class ae(base_network):
     @tf.function
     def call(self, var):
 
-        # Initialize
-        i   = 0
-        out = []
+        v = self.encoder(var)[0]
+        v = self.decoder(v)
 
-        # Compute encoder
-        for l in range(len(self.arch)):
-            var = self.net[i](var)
-            i  += 1
-        var = self.net[i](var)
-        i += 1
+        return v
 
-        # Compute decoder
-        for l in range(len(self.arch)):
-            var = self.net[i](var)
-            i  += 1
-        var = self.net[i](var)
-        i += 1
-
-        out.append(var)
-
-        return out
-
-    # Network forward pass
+    # Encoder forward pass
     @tf.function
     def encoder(self, var):
 
         # Initialize
-        i   = 0
-        out = []
+        i = 0
 
         # Compute encoder
         for l in range(len(self.arch)):
-            var = self.net[i](var)
+            var = self.enc[i](var)
             i  += 1
-        lat = self.net[i](var)
+        var = self.enc[i](var)
         i += 1
 
-        out.append(lat)
+        return [var]
 
-        return out
+    # Decoder forward pass
+    @tf.function
+    def decoder(self, var):
+
+        # Initialize
+        i = 0
+
+        # Compute decoder
+        for l in range(len(self.arch)):
+            var = self.dec[i](var)
+            i  += 1
+        var = self.dec[i](var)
+        i += 1
+
+        return [var]
 
     # Reset weights
     def reset(self):
