@@ -1,6 +1,10 @@
 # Custom imports
-from dragonfly.src.policy.tfd  import *
+from dragonfly.src.policy.tfd import *
 from dragonfly.src.policy.base import base_normal
+import torch
+import torch.nn as nn
+import torch.distributions as dist
+import math
 
 ###############################################
 ### Normal policy class with full covariance matrix (continuous)
@@ -21,18 +25,18 @@ class normal_full(base_normal):
         self.target      = target
 
         self.sigma       = 1.0
-        if (hasattr(pms, "sigma")): self.sigma = pms.sigma
+        if hasattr(pms, "sigma"): self.sigma = pms.sigma
 
         # Check parameters
-        if (pms.network.heads.final[0] != "tanh"):
+        if pms.network.heads.final[0] != "tanh":
             warning("normal", "__init__",
                     "Final activation for mean of policy is not tanh")
 
-        if (pms.network.heads.final[1] != "sigmoid"):
+        if pms.network.heads.final[1] != "sigmoid":
             warning("normal", "__init__",
                     "Final activation for stddev of policy is not sigmoid")
 
-        if (pms.network.heads.final[2] != "sigmoid"):
+        if pms.network.heads.final[2] != "sigmoid":
             warning("normal", "__init__",
                     "Final activation for correlations of policy is not sigmoid")
 
@@ -41,95 +45,61 @@ class normal_full(base_normal):
 
     # Control (deterministic actions)
     def control(self, obs):
-
-        mu, sg, cr = self.forward(tf.cast(obs, tf.float32))
-        act        = np.reshape(mu.numpy(), (-1,self.store_dim))
-
+        mu, _, _ = self.forward(obs.float())
+        act = mu.detach().cpu().numpy().reshape(-1, self.store_dim)
         return act
 
     # Compute pdf
     def compute_pdf(self, obs):
-
         # Get pdf
         mu, sg, cr = self.forward(obs)
-        cov        = self.get_cov(sg[0], cr[0])
+        cov = self.get_cov(sg[0], cr[0])
 
-        scl        = tf.linalg.cholesky(cov)
-        pdf        = tfd.MultivariateNormalTriL(loc        = mu,
-                                                scale_tril = scl)
+        scl = torch.linalg.cholesky(cov)
+        pdf = dist.MultivariateNormal(loc=mu, scale_tril=scl)
 
         return pdf
 
     # Compute covariance matrix
     def get_cov(self, sg, cr):
-
-        # # Create skew-symmetric matrix
-        # t = tf.zeros([self.dim, self.dim])
-
-        # idx = 0
-        # for dg in range(self.dim-1):
-        #     diag = cr[idx:idx+self.dim-(dg+1)]
-        #     idx += self.dim-(dg+1)
-        #     t    = tf.linalg.set_diag(t,  diag, k=-(dg+1))
-        #     t    = tf.linalg.set_diag(t, -diag, k= (dg+1))
-
-        # # Exponentiate to get orthogonal matrix
-        # et = tf.linalg.expm(t)
-
-        # # Generate diagonal matrix
-        # s = tf.zeros([self.dim, self.dim])
-        # s = tf.linalg.set_diag(s, sg, k=0)
-
-        # # Generate covariance matrix
-        # cov = tf.matmul(et,s)
-        # cov = tf.matmul(cov, tf.transpose(et))
-
         # Extract sigmas and thetas
         sigmas = sg
-        thetas = cr*math.pi
-
-        #print(sg, cr)
+        thetas = cr * math.pi
 
         # Build initial theta matrix
-        t   = tf.ones([self.dim,self.dim])*math.pi/2.0
-        t   = tf.linalg.set_diag(t, tf.zeros(self.dim), k=0)
+        t = torch.ones(self.dim, self.dim) * math.pi/2.0
+        t.diagonal().fill_(0)
         idx = 0
         for dg in range(self.dim-1):
             diag = thetas[idx:idx+self.dim-(dg+1)]
             idx += self.dim-(dg+1)
-            t    = tf.linalg.set_diag(t, diag, k=-(dg+1))
-        cor = tf.cos(t)
+            t.diagonal(-dg-1).copy_(diag)
+        cor = torch.cos(t)
 
         # Correct upper part to exact zero
         for dg in range(self.dim-1):
             size = self.dim-(dg+1)
-            cor  = tf.linalg.set_diag(cor, tf.zeros(size), k=(dg+1))
+            cor.diagonal(dg+1).zero_()
 
         # Roll and compute additional terms
         for roll in range(self.dim-1):
-            vec = tf.ones([self.dim, 1])
-            vec = tf.scalar_mul(math.pi/2, vec)
-            t   = tf.concat([vec, t[:, :self.dim-1]], axis=1)
+            vec = torch.ones(self.dim, 1) * math.pi/2
+            t = torch.cat([vec, t[:, :self.dim-1]], dim=1)
             for dg in range(self.dim-1):
-                zero = tf.zeros(self.dim-(dg+1))
-                t    = tf.linalg.set_diag(t, zero, k=dg+1)
-            cor = tf.multiply(cor, tf.sin(t))
+                t.diagonal(dg+1).zero_()
+            cor = cor * torch.sin(t)
 
-        cor = tf.matmul(cor, tf.transpose(cor))
-        scl = tf.zeros([self.dim, self.dim])
-        scl = tf.linalg.set_diag(scl, tf.sqrt(sigmas), k=0)
-        cov = tf.matmul(scl, cor)
-        cov = tf.matmul(cov, scl)
+        cor = cor @ cor.t()
+        scl = torch.diag(torch.sqrt(sigmas))
+        cov = scl @ cor @ scl
 
         return cov
 
     # Networks forward pass
-    @tf.function
     def forward(self, state):
-
-        out = self.net.call(state)
+        out = self.net(state)
         mu  = out[0]
-        sg  = out[1]*self.sigma
+        sg  = out[1] * self.sigma
         cr  = out[2]
 
         return mu, sg, cr

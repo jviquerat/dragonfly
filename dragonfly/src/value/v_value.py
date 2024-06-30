@@ -7,7 +7,7 @@ from dragonfly.src.value.base import *
 ### pms     : parameters
 class v_value(base_value):
     def __init__(self, inp_dim, pms, target=False):
-
+        super(v_value, self).__init__()
         # Fill structure
         self.inp_dim = inp_dim
         self.out_dim = 1

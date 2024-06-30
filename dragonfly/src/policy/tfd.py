@@ -4,14 +4,29 @@ import math
 import numpy as np
 import warnings
 
-# Import tensorflow and filter warning messages
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '10'
-warnings.filterwarnings('ignore',category=FutureWarning)
-import tensorflow             as tf
-import tensorflow_probability as tfp
+# Import PyTorch and filter warning messages
+import torch
+import torch.distributions as dist
 
-# Define alias
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-tfd = tfp.distributions
+# Set warnings
+warnings.filterwarnings('ignore', category=FutureWarning)
 
-tf.random.set_seed(0)
+# Set random seed for reproducibility
+torch.manual_seed(0)
+np.random.seed(0)
+
+# Check if CUDA is available and set the device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Suppress CUDA warnings if not using GPU
+if not torch.cuda.is_available():
+    os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
+
+# Set default tensor type to float32
+torch.set_default_tensor_type(torch.FloatTensor)
+
+# Define alias for distributions (similar to tfp.distributions)
+tfd = dist
+
+# Set PyTorch to behave deterministically
+torch.use_deterministic_algorithms(True)

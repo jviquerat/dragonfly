@@ -1,6 +1,8 @@
 # Custom imports
-from dragonfly.src.agent.base   import *
+from dragonfly.src.agent.base import *
 from dragonfly.src.utils.polyak import polyak
+import torch
+import numpy as np
 
 ###############################################
 ### SAC agent
@@ -81,12 +83,13 @@ class sac(base_agent_off_policy):
             act = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
             act = act.astype(np.float32)
         else:
-            act, _ = self.p.actions(obs)
+            act, _ = self.p.actions(torch.tensor(obs, dtype=torch.float32))
+            #act = act.detach().numpy()
 
         self.step += 1
 
         # Check for NaNs
-        if (np.isnan(act).any()):
+        if np.isnan(act).any():
             error("sac", "get_actions",
                   "Detected NaN in generated actions")
         self.timer_actions.toc()
@@ -103,9 +106,9 @@ class sac(base_agent_off_policy):
         trm = self.data["trm"][start:end]
 
         size = end - start
-        act  = self.p.reshape_actions(act)
-        rwd  = tf.reshape(rwd, [size,-1])
-        trm  = tf.reshape(trm, [size,-1])
+        act = self.p.reshape_actions(act)
+        rwd = rwd.reshape(size, -1)
+        trm = trm.reshape(size, -1)
 
         # Train q network
         self.q1.loss.train(obs, nxt, act, rwd, trm, self.gamma,

@@ -1,22 +1,25 @@
-# Tensorflow imports
-import tensorflow as tf
+# PyTorch imports
+import torch
+import torch.nn as nn
 
 ###############################################
 ### Alpha SAC loss
-class alpha_sac():
+class alpha_sac(nn.Module):
     def __init__(self):
-        pass
+        super(alpha_sac, self).__init__()
 
     # Train
-    @tf.function
     def train(self, obs, p, log_alpha, tgt_entropy, opt):
-        with tf.GradientTape() as tape:
+        opt.zero_grad()
 
-            # Compute loss
-            act, lgp = p.sample(obs)
-            loss     = log_alpha*(lgp + tgt_entropy)
-            loss     =-tf.reduce_mean(loss)
-            grads    = tape.gradient(loss, [log_alpha])
+        # Compute loss
+        act, lgp = p.sample(obs)
+        loss = log_alpha * (lgp + tgt_entropy)
+        loss = -torch.mean(loss)
 
-        opt.apply_grads(zip(grads, [log_alpha]))
+        # Compute gradients and update
+        loss.backward()
+        opt.apply_grads()
+
+        return loss.item()
 

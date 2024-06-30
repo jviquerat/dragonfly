@@ -1,5 +1,5 @@
-# Tensorflow imports
-import tensorflow as tf
+# PyTorch imports
+import torch
 
 ###############################################
 ### Q-policy loss class for SAC policy update
@@ -8,20 +8,18 @@ class q_pol_sac():
         pass
 
     # Train
-    @tf.function
     def train(self, obs, p, q1, q2, alpha, opt):
-        with tf.GradientTape() as tape:
+        # Compute loss
+        act, lgp = p.sample(obs)
+        cct = torch.cat([obs, act], dim=-1)
+        tgt1 = q1(cct)[0].reshape(-1, 1)
+        tgt2 = q2(cct)[0].reshape(-1, 1)
+        tgt = torch.min(tgt1, tgt2)
+        loss = -torch.mean(tgt - alpha * lgp)
 
-            # Compute loss
-            act, lgp = p.sample(obs)
-            cct      = tf.concat([obs,act], axis=-1)
-            tgt1     = tf.reshape(q1.call(cct), [-1,1])
-            tgt2     = tf.reshape(q2.call(cct), [-1,1])
-            tgt      = tf.minimum(tgt1, tgt2)
-            loss     =-tf.reduce_mean(tgt - alpha*lgp)
+        # Apply gradients
+        opt.zero_grad()
+        loss.backward()
+        opt.apply_grads()
 
-            # Apply gradients
-            var   = p.net.trainables()
-            grads = tape.gradient(loss, var)
-
-        opt.apply_grads(zip(grads, var))
+        return loss

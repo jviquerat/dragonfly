@@ -1,5 +1,5 @@
-# Tensorflow imports
-import tensorflow as tf
+# PyTorch imports
+import torch
 
 ###############################################
 ### MSE loss class for DDPG-style q networks
@@ -8,26 +8,25 @@ class mse_ddpg():
         pass
 
     # Train
-    @tf.function
     def train(self,
               obs, nxt, act, rwd, trm, gamma,
               p_tgt, q, q_tgt, opt):
-        with tf.GradientTape() as tape:
+        # Compute target
+        nac = p_tgt(nxt)[0].reshape(rwd.size(0), -1)
+        nct = torch.cat([nxt, nac], dim=-1)
+        tgt = q_tgt(nct)[0].reshape(-1, 1)
+        trm = torch.clamp(trm, 0.0, 1.0)
+        tgt = rwd + trm * gamma * tgt
 
-            # Compute target
-            nac = tf.reshape(p_tgt.call(nxt), [tf.size(rwd),-1])
-            nct = tf.concat([nxt, nac], axis=-1)
-            tgt = tf.reshape(q_tgt.call(nct), [-1,1])
-            trm = tf.clip_by_value(trm, 0.0, 1.0)
-            tgt = rwd + trm*gamma*tgt
+        # Compute loss
+        oac = torch.cat([obs, act], dim=-1)
+        val = q(oac)[0].reshape(-1, 1)
+        diff = torch.square(tgt - val)
+        loss = torch.mean(diff)
 
-            # Compute loss
-            oac  = tf.concat([obs, act], axis=-1)
-            val  = tf.reshape(q.call(oac), [-1,1])
-            diff = tf.square(tgt - val)
-            loss = tf.reduce_mean(diff)
+        # Apply gradients
+        opt.zero_grad()
+        loss.backward()
+        opt.apply_grads()
 
-            # Apply gradients
-            var   = q.trainables()
-            grads = tape.gradient(loss, var)
-        opt.apply_grads(zip(grads, var))
+        return loss

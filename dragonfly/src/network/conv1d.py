@@ -1,19 +1,20 @@
 # Generic imports
-from  tensorflow.keras.layers    import Conv1D
+import torch
+import torch.nn as nn
 
 # Custom imports
-from  dragonfly.src.network.base import *
+from dragonfly.src.network.base import *
 
 ###############################################
 ### Fully-connected network class
 ### inp_dim  : dimension of input  layer
 ### out_dim  : dimension of output layer
 ### pms      : network parameters
-class conv1d(base_network):
+class conv1d(BaseNetwork):
     def __init__(self, inp_dim, out_dim, pms):
 
         # Initialize base class
-        super().__init__()
+        super(conv1d, self).__init__()
 
         # Set inputs
         self.inp_dim = inp_dim
@@ -24,15 +25,15 @@ class conv1d(base_network):
         self.trunk.arch     = [64]
         self.trunk.k_size   = [4]
         self.trunk.strides  = [2]
-        self.trunk.actv     = "relu"
+        self.trunk.actv     = nn.ReLU()
         self.heads          = heads()
         self.heads.nb       = 1
         self.heads.arch     = [[64]]
-        self.heads.actv     = ["relu"]
-        self.heads.final    = ["linear"]
-        self.k_init         = Orthogonal(gain=1.0)
-        self.k_init_final   = Orthogonal(gain=0.0)
-        self.original_dim   = [inp_dim,1]
+        self.heads.actv     = [nn.ReLU()]
+        self.heads.final    = [nn.Identity()]
+        self.k_init         = nn.init.orthogonal_
+        self.k_init_final   = lambda x: nn.init.orthogonal_(x, gain=0.0)
+        self.original_dim   = [inp_dim, 1]
 
         # Check inputs
         if hasattr(pms,       "trunk"):        self.trunk         = pms.trunk
@@ -55,67 +56,65 @@ class conv1d(base_network):
                   "Out_dim and heads should have same dimension")
 
         # Initialize network
-        self.net = []
+        self.net = nn.ModuleList()
 
         # Define trunk
         for l in range(len(self.trunk.arch)):
-            self.net.append(Conv1D(filters            = self.trunk.arch[l],
-                                   kernel_size        = self.trunk.k_size[l],
-                                   strides            = self.trunk.strides[l],
-                                   padding            = "valid",
-                                   activation         = self.trunk.actv,
-                                   input_shape        = self.original_dim,
-                                   kernel_initializer = self.k_init))
+            self.net.append(
+                nn.Sequential(
+                    nn.Conv1d(in_channels = 1 if l == 0 else self.trunk.arch[l-1],
+                                      out_channels = self.trunk.arch[l],
+                                      kernel_size = self.trunk.k_size[l],
+                                      stride = self.trunk.strides[l],
+                                      padding = 0),
+                    get_activation(self.trunk.actv)
+                )
+            )
 
         # Define heads
         for h in range(self.heads.nb):
-            for l in range(len(self.heads.arch[h])):
-                self.net.append(Dense(self.heads.arch[h][l],
-                                      kernel_initializer = self.k_init,
-                                      activation         = self.heads.actv[h]))
-            self.net.append(Dense(self.out_dim[h],
-                                  kernel_initializer = self.k_init_final,
-                                  activation         = self.heads.final[h]))
+            in_features = self.trunk.arch[l]
+            for l_ in range(len(self.heads.arch[h])):
+                self.net.append(self.create_dense_layer(in_features, self.heads.arch[h][l_], self.k_init, self.heads.actv[h]))
+                in_features = self.heads.arch[h][l_]
+            self.net.append(self.create_dense_layer(in_features, self.out_dim[h], self.k_init_final, self.heads.final[h]))
 
         # Initialize weights
-        dummy = self.call(tf.ones([1]+self.original_dim))
+        self.apply(self._init_weights)
 
         # Save initial weights
-        self.init_weights = self.get_weights()
+        self.init_weights = self.state_dict()
 
-    # Network forward pass
-    @tf.function
-    def call(self, var):
+    def _init_weights(self, module):
+        if isinstance(module, (nn.Linear, nn.Conv1d)):
+            self.k_init(module.weight)
+            if module.bias is not None:
+                nn.init.zeros_(module.bias)
+        if isinstance(module, nn.Linear) and module.out_features in self.out_dim:
+            self.k_init_final(module.weight)
 
-        # Initialize
-        i   = 0
+    def forward(self, x):
         out = []
-
-        var = Reshape(self.original_dim)(var)
-
+        x = x.view(-1, 1, self.original_dim[0])
+        
         # Compute trunk
         for l in range(len(self.trunk.arch)):
-            var = self.net[i](var)
-            i  += 1
-
-        var = Flatten()(var)
-
+            x = self.net[l](x)
+        x = x.flatten(1)
         # Compute heads
-        # Each head output is stored in a tf.tensor, and
-        # is appended to the global output
+        i = len(self.trunk.arch)
         for h in range(self.heads.nb):
-            hvar = var
+            hx = x
             for l in range(len(self.heads.arch[h])):
-                hvar = self.net[i](hvar)
-                i   += 1
-            hvar = self.net[i](hvar)
-            i   += 1
-            hvar = Reshape([self.out_dim[h]])(hvar)
-            out.append(hvar)
+                hx = self.net[i](hx)
+                i += 1
+            hx = self.net[i](hx)
+            i += 1
+            out.append(hx.view(-1, self.out_dim[h]))    
 
         return out
 
+
     # Reset weights
     def reset(self):
-
-        self.set_weights(self.init_weights)
+        self.load_state_dict(self.init_weights)

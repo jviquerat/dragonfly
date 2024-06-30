@@ -1,5 +1,5 @@
-# Tensorflow imports
-import tensorflow as tf
+# PyTorch imports
+import torch
 
 ###############################################
 ### MSE loss class for auto-encoder
@@ -8,18 +8,15 @@ class mse_ae():
         pass
 
     # Train
-    @tf.function
     def train(self, x, ae):
-        with tf.GradientTape() as tape:
+        # Compute loss
+        y = ae(x)
+        diff = torch.square(y - x)
+        loss = torch.mean(diff)
 
-            # Compute loss
-            y    = ae.forward(x)
-            diff = tf.square(y - x)
-            loss = tf.reduce_mean(diff)
-
-            # Apply gradients
-            ae_var = ae.trainables
-            grads   = tape.gradient(loss, ae_var)
-        ae.opt.apply_grads(zip(grads, ae_var))
+        # Apply gradients
+        ae.opt.zero_grad()
+        loss.backward()
+        ae.opt.apply_grads()
 
         return loss

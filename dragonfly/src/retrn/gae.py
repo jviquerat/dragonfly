@@ -1,5 +1,6 @@
 # Generic imports
 import numpy as np
+import torch 
 
 # Custom imports
 from dragonfly.src.core.constants import *
@@ -21,36 +22,38 @@ class gae():
         if hasattr(pms, "ret_norm"):   self.ret_norm   = pms.ret_norm
 
     # Compute GAE
-    # rwd : reward array
-    # val : value array
-    # nxt : value array shifted by one timestep
-    # trm : array of terminal values
+    # rwd : reward array np array
+    # val : value array torch tensor
+    # nxt : value array shifted by one timestep torch tensor
+    # trm : array of terminal values np array
     def compute(self, rwd, val, nxt, trm):
+
+        rwd_ = torch.as_tensor(rwd, dtype=torch.float32)
+        trm_ = torch.as_tensor(trm, dtype=torch.float32)
 
         # Shortcuts
         gm  = self.gamma
         lbd = self.gae_lambda
 
         # Initialize return and check bootstrapping
-        ret = np.where(trm == 2.0, rwd + gm*nxt, rwd)
+        ret = torch.where(trm_ == 2.0, rwd_ + gm * nxt, rwd_)
 
         # Remove bootstrap information from trm buffer
-        tmn = np.where(trm == 2.0, 0.0, trm)
+        tmn = torch.where(trm_ == 2.0, torch.tensor(0.0), trm_)
 
         # Compute TD residual
-        dlt    = np.zeros_like(rwd)
-        dlt[:] = ret[:] + gm*tmn[:]*nxt[:] - val[:]
+        dlt = ret + gm * tmn * nxt - val
 
         # Compute advantages
-        adv = dlt.copy()
-        for t in reversed(range(len(adv)-1)):
-            adv[t] += gm*lbd*adv[t+1]
+        adv = dlt.clone()
+        for t in reversed(range(len(adv) - 1)):
+            adv[t] += gm * lbd * adv[t + 1]
 
         # Compute targets
-        tgt = adv.copy() + val
+        tgt = adv + val
 
         # Normalize
         if self.ret_norm:
-            adv = (adv-np.mean(adv))/(np.std(adv) + ret_eps)
+            adv = (adv - adv.mean()) / (adv.std() + ret_eps)
 
         return tgt, adv

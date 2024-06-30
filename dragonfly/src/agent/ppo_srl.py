@@ -1,6 +1,8 @@
 # Custom imports
 from dragonfly.src.agent.base import *
-from dragonfly.src.srl.srl    import *
+from dragonfly.src.srl.srl import *
+import torch
+import numpy as np
 
 ###############################################
 ### PPO-SRL agent
@@ -78,7 +80,7 @@ class ppo_srl(base_agent_on_policy):
         act, lgp = self.p.actions(pobs)
 
         # Check for NaNs
-        if (np.isnan(act).any()):
+        if np.isnan(act).any():
             error("a2c", "get_actions",
                   "Detected NaN in generated actions")
 
@@ -94,7 +96,7 @@ class ppo_srl(base_agent_on_policy):
 
         pobs = self.process_obs(obs)
 
-        return self.p.control(pobs)
+        return self.p.control(pobs).numpy()
 
     # Training
     def train(self, start, end):
@@ -110,12 +112,12 @@ class ppo_srl(base_agent_on_policy):
         # Train policy
         pobs = self.process_obs(obs)
         act = self.p.reshape_actions(act)
-        adv = tf.reshape(adv, [-1])
-        lgp = tf.reshape(lgp, [-1])
+        adv = adv.reshape(-1)
+        lgp = lgp.reshape(-1)
         self.p.loss.train(pobs, adv, act, lgp, self.p, self.p.opt)
 
         # Train v network
-        tgt = tf.reshape(tgt, [-1])
+        tgt = tgt.reshape(-1)
         self.v.loss.train(pobs, tgt, self.v.net, self.v.opt)
 
     # Actions to execute after the inner training loop

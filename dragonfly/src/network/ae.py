@@ -1,16 +1,18 @@
 # Custom imports
 from dragonfly.src.network.base import *
+import torch
+import torch.nn as nn
 
 ###############################################
 ### Autoencoder network class
 ### inp_dim  : dimension of input  layer
 ### out_dim  : dimension of output layer
 ### pms      : network parameters
-class ae(base_network):
+class ae(BaseNetwork):
     def __init__(self, inp_dim, lat_dim, pms):
 
         # Initialize base class
-        super().__init__()
+        super(ae, self).__init__()
 
         # Set inputs
         self.inp_dim = inp_dim
@@ -24,72 +26,46 @@ class ae(base_network):
         if hasattr(pms, "arch"):  self.arch = pms.arch
         if hasattr(pms, "actv"):  self.actv = pms.actv
 
-        self.actv = tf.nn.leaky_relu
-
         # Initialize network
-        self.enc = []
-        self.dec = []
+        self.enc = nn.ModuleList()
+        self.dec = nn.ModuleList()
 
         # Define encoder
         for l in range(len(self.arch)):
-            self.enc.append(Dense(self.arch[l],
-                                  activation = self.actv))
-        self.enc.append(Dense(self.lat_dim, activation = "linear"))
+            self.enc.append(nn.Linear(inp_dim if l == 0 else self.arch[l-1], self.arch[l]))
+            self.enc.append(get_activation(self.actv))
+        self.enc.append(nn.Linear(self.arch[-1], self.lat_dim))
 
         # Define decoder
         for l in range(len(self.arch)):
-            self.dec.append(Dense(self.arch[-l-1],
-                                  activation = self.actv))
-        self.dec.append(Dense(self.inp_dim, activation = "linear"))
+            self.dec.append(nn.Linear(self.lat_dim if l == 0 else self.arch[-l], self.arch[-l-1]))
+            self.dec.append(get_activation(self.actv))
+        self.dec.append(nn.Linear(self.arch[0], self.inp_dim))
 
         # Initialize weights
-        dummy = self.call(tf.ones([1,self.inp_dim]))
+        dummy = self.forward(torch.ones(1, self.inp_dim))
 
         # Save initial weights
-        self.init_weights = self.get_weights()
+        self.init_weights = self.state_dict()
 
     # Network forward pass
-    @tf.function
-    def call(self, var):
-
-        v = self.encoder(var)[0]
+    def forward(self, var):
+        v = self.encoder(var)
         v = self.decoder(v)
-
         return v
 
     # Encoder forward pass
-    @tf.function
     def encoder(self, var):
-
-        # Initialize
-        i = 0
-
-        # Compute encoder
-        for l in range(len(self.arch)):
-            var = self.enc[i](var)
-            i  += 1
-        var = self.enc[i](var)
-        i += 1
-
-        return [var]
+        for layer in self.enc:
+            var = layer(var)
+        return var
 
     # Decoder forward pass
-    @tf.function
     def decoder(self, var):
-
-        # Initialize
-        i = 0
-
-        # Compute decoder
-        for l in range(len(self.arch)):
-            var = self.dec[i](var)
-            i  += 1
-        var = self.dec[i](var)
-        i += 1
-
-        return [var]
+        for layer in self.dec:
+            var = layer(var)
+        return var
 
     # Reset weights
     def reset(self):
-
-        self.set_weights(self.init_weights)
+        self.load_state_dict(self.init_weights)

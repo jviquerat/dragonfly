@@ -1,6 +1,8 @@
 # Custom imports
-from dragonfly.src.agent.base   import *
+from dragonfly.src.agent.base import *
 from dragonfly.src.utils.polyak import polyak
+import torch
+import numpy as np
 
 ###############################################
 ### DDPG agent
@@ -74,24 +76,23 @@ class ddpg(base_agent_off_policy):
 
         self.timer_actions.tic()
         if (self.step < self.n_warmup):
-            act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
+            act = torch.rand(self.n_cpu, self.act_dim) * 2 - 1
         else:
-            act   = self.p.actions(obs)
-            noise = np.random.normal(0.0, self.sigma,
-                                     (self.n_cpu, self.act_dim))
-            act  += noise
-            act   = np.clip(act, -1.0, 1.0)
-        act = act.astype(np.float32)
+            act = torch.as_tensor(self.p.actions(obs))
+            noise = torch.normal(0.0, self.sigma, (self.n_cpu, self.act_dim))
+            act += noise
+            act = torch.clamp(act, -1.0, 1.0)
+        act = act.float()
 
         self.step += 1
 
         # Check for NaNs
-        if (np.isnan(act).any()):
+        if torch.isnan(act).any():
             error("ddpg", "get_actions",
                   "Detected NaN in generated actions")
         self.timer_actions.toc()
 
-        return act
+        return act.numpy()
 
     # Training
     def train(self, start, end):
@@ -103,9 +104,9 @@ class ddpg(base_agent_off_policy):
         trm = self.data["trm"][start:end]
 
         size = end - start
-        act  = self.p.reshape_actions(act)
-        rwd  = tf.reshape(rwd, [size,-1])
-        trm  = tf.reshape(trm, [size,-1])
+        act = self.p.reshape_actions(act)
+        rwd = rwd.reshape(size, -1)
+        trm = trm.reshape(size, -1)
 
         # Train q network
         self.q.loss.train(obs, nxt, act, rwd, trm,

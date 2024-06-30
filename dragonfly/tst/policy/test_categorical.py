@@ -23,7 +23,7 @@ def test_categorical():
 
     # Test action values
     print("Test categorical policy")
-    obs = [[1.0]]
+    obs = torch.Tensor([[1.0]])
     act, lgp = policy.actions(obs)
     print("Actions:",act)
 

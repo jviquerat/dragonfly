@@ -1,6 +1,9 @@
 # Custom imports
-from dragonfly.src.policy.tfd  import *
+from dragonfly.src.policy.tfd import *
 from dragonfly.src.policy.base import base_normal
+import torch
+import torch.nn as nn
+import torch.distributions as dist
 
 ###############################################
 ### Normal policy class with isotropic covariance matrix (continuous)
@@ -20,14 +23,14 @@ class normal_iso(base_normal):
         self.target      = target
 
         self.sigma       = 1.0
-        if (hasattr(pms, "sigma")): self.sigma = pms.sigma
+        if hasattr(pms, "sigma"): self.sigma = pms.sigma
 
         # Check parameters
-        if (pms.network.heads.final[0] != "tanh"):
+        if pms.network.heads.final[0] != "tanh":
             warning("normal", "__init__",
                     "Final activation for mean of policy is not tanh")
 
-        if (pms.network.heads.final[1] != "sigmoid"):
+        if pms.network.heads.final[1] != "sigmoid":
             warning("normal", "__init__",
                     "Final activation for stddev of policy is not sigmoid")
 
@@ -36,29 +39,25 @@ class normal_iso(base_normal):
 
     # Control (deterministic actions)
     def control(self, obs):
-
-        mu, sg = self.forward(tf.cast(obs, tf.float32))
-        act    = np.reshape(mu.numpy(), (-1,self.store_dim))
-
+        mu, _ = self.forward(obs)
+        act = mu.detach().cpu().numpy().reshape(-1, self.store_dim)
         return act
 
     # Compute pdf
     def compute_pdf(self, obs):
-
         # Get pdf
         mu, sg = self.forward(obs)
-        sigma  = tf.tile(sg,[1,self.dim])
-        pdf    = tfd.MultivariateNormalDiag(loc        = mu,
-                                            scale_diag = sigma)
-
+        sigma = sg.repeat(1, self.dim)
+        pdf = dist.MultivariateNormal(loc=mu, scale_tril=torch.diag_embed(sigma))
         return pdf
 
     # Networks forward pass
-    @tf.function
     def forward(self, state):
-
-        out = self.net.call(state)
+        if not isinstance(state, torch.Tensor):
+            state_tensor = torch.from_numpy(state).to(torch.float32)
+        else:
+            state_tensor = state
+        out = self.net(state_tensor)
         mu  = out[0]
-        sg  = out[1]*self.sigma
-
+        sg  = out[1] * self.sigma
         return mu, sg

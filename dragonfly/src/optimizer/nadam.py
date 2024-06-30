@@ -1,12 +1,12 @@
-# Tensorflow imports
-import tensorflow                    as     tf
-from   tensorflow.keras.optimizers   import Nadam
+# PyTorch imports
+import torch
+from torch.optim import NAdam
 
 ###############################################
 ### Nadam optimizer class
 ### lr        : learning rate
 ### grd_clip  : gradient clipping value
-### grad_vars : trainable variables from the associated network
+### grad_vars : trainable parameters from the associated network
 class nadam():
     def __init__(self, pms, grad_vars):
 
@@ -19,29 +19,27 @@ class nadam():
         if hasattr(pms, "grd_clip"): self.grd_clip = pms.grd_clip
 
         # Initialize optimizer
-        # A fake optimization step is applied so the saved
-        # weights and config have the correct sizes
-        self.opt = Nadam(learning_rate   = self.lr,
-                         global_clipnorm = self.grd_clip)
-        zero_grads = [tf.zeros_like(w) for w in grad_vars]
-        self.opt.apply_gradients(zip(zero_grads, grad_vars))
+        self.opt = NAdam(grad_vars, lr=self.lr)
 
-        # Save weights and config
-        self.init_weights = self.opt.get_weights()
-        self.config       = self.opt.get_config()
+        # Save initial state
+        self.init_state = self.opt.state_dict()
 
     # Get current learning rate
     def get_lr(self):
-
-        return self.opt._decayed_lr(tf.float32)
+        return self.opt.param_groups[0]['lr']
+    
+    def zero_grad(self):
+        self.opt.zero_grad()
 
     # Apply gradients
-    def apply_grads(self, grds):
+    def apply_grads(self):
+        # Clip gradients
+        if self.grd_clip:
+            torch.nn.utils.clip_grad_norm_(self.opt.param_groups[0]['params'], self.grd_clip)
 
-        self.opt.apply_gradients(grds)
+        # Perform optimization step
+        self.opt.step()
 
     # Reset weights and config
     def reset(self):
-
-        self.opt.set_weights(self.init_weights)
-        self.opt.from_config(self.config)
+        self.opt.load_state_dict(self.init_state)

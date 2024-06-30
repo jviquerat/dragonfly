@@ -1,7 +1,7 @@
 # Generic imports
 import random
 import numpy      as np
-import tensorflow as tf
+import torch 
 
 # Custom imports
 from dragonfly.src.core.constants          import *
@@ -104,6 +104,11 @@ class base_agent_on_policy(base_agent):
         lgt = len(self.data["obs"])
 
         return lgt, True
+    
+    def _ensure_numpy(self, data):
+        if isinstance(data, torch.Tensor):
+            return data.cpu().detach().numpy()
+        return np.array(data)
 
     # Actions to execute after the inner training loop
     def post_loop(self, style=None):
@@ -120,6 +125,12 @@ class base_agent_on_policy(base_agent):
         data  = self.buff.serialize(names)
         gobs, gnxt, gact, glgp, grwd, gtrm = (data[name] for name in names)
         gtgt, gadv = self.returns(gobs, gnxt, grwd, gtrm)
+
+        gobs = self._ensure_numpy(gobs)
+        gact = self._ensure_numpy(gact)
+        gadv = self._ensure_numpy(gadv)
+        gtgt = self._ensure_numpy(gtgt)
+        glgp = self._ensure_numpy(glgp)
 
         self.gbuff.store(self.gnames, [gobs, gact, gadv, gtgt, glgp])
 

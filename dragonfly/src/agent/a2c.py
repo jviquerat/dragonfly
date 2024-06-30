@@ -1,5 +1,6 @@
 # Custom imports
 from dragonfly.src.agent.base import *
+import torch
 
 ###############################################
 ### A2C agent
@@ -61,9 +62,9 @@ class a2c(base_agent_on_policy):
 
         # Train policy
         act = self.p.reshape_actions(act)
-        adv = tf.reshape(adv, [-1])
+        adv = adv.reshape(-1)
         self.p.loss.train(obs, adv, act, self.p, self.p.opt)
 
         # Train v network
-        tgt = tf.reshape(tgt, [-1])
+        tgt = tgt.reshape(-1)
         self.v.loss.train(obs, tgt, self.v.net, self.v.opt)

@@ -1,5 +1,6 @@
 # Generic imports
-from tensorflow.keras.layers    import Conv2D, MaxPool2D
+import torch
+import torch.nn as nn
 
 # Custom imports
 from dragonfly.src.network.base import *
@@ -9,11 +10,11 @@ from dragonfly.src.network.base import *
 ### inp_dim  : dimension of input  layer
 ### out_dim  : dimension of output layer
 ### pms      : network parameters
-class conv2d(base_network):
+class conv2d(BaseNetwork):
     def __init__(self, inp_dim, out_dim, pms):
 
         # Initialize base class
-        super().__init__()
+        super(conv2d, self).__init__()
 
         # Set inputs
         self.inp_dim = inp_dim
@@ -24,21 +25,21 @@ class conv2d(base_network):
         self.trunk.filters = [64]
         self.trunk.kernels = [3]
         self.trunk.stride  = 1
-        self.trunk.actv    = "relu"
+        self.trunk.actv    = nn.ReLU()
         self.heads         = heads()
         self.heads.nb      = 1
         self.heads.arch    = [[64]]
-        self.heads.actv    = ["relu"]
-        self.heads.final   = ["linear"]
-        self.k_init        = Orthogonal(gain=1.0)
-        self.k_init_final  = Orthogonal(gain=0.0)
+        self.heads.actv    = [nn.ReLU()]
+        self.heads.final   = [nn.Identity()]
+        self.k_init        = nn.init.orthogonal_
+        self.k_init_final  = lambda x: nn.init.orthogonal_(x, gain=0.0)
         self.original_dim  = None
         self.pooling       = False
 
         # Check inputs
         if hasattr(pms,       "trunk"):        self.trunk         = pms.trunk
         if hasattr(pms.trunk, "filters"):      self.trunk.filters = pms.trunk.filters
-        if hasattr(pms.trunk, "kernels"):      self.trunk.kernels  = pms.trunk.kernels
+        if hasattr(pms.trunk, "kernels"):      self.trunk.kernels = pms.trunk.kernels
         if hasattr(pms.trunk, "strides"):      self.trunk.stride  = pms.trunk.stride
         if hasattr(pms.trunk, "actv"):         self.trunk.actv    = pms.trunk.actv
         if hasattr(pms,       "heads"):        self.heads         = pms.heads
@@ -62,7 +63,7 @@ class conv2d(base_network):
                   "Out_dim and heads should have same dimension")
 
         # Initialize network
-        self.net = []
+        self.net = nn.ModuleList()
 
         assert len(self.trunk.filters) == len(
             self.trunk.kernels
@@ -70,79 +71,74 @@ class conv2d(base_network):
 
         # Define trunk
         for l in range(len(self.trunk.filters)):
-            if (l == 0):
-                self.net.append(Conv2D(filters            = self.trunk.filters[l],
-                                       kernel_size        = self.trunk.kernels[l],
-                                       strides            = self.trunk.stride,
-                                       kernel_initializer = self.k_init,
-                                       activation         = self.trunk.actv,
-                                       input_shape        = self.original_dim,
-                                       padding            = "same"))
+            if l == 0:
+                layer_conv = nn.Conv2d(in_channels=self.stack,
+                                          out_channels=self.trunk.filters[l],
+                                          kernel_size=self.trunk.kernels[l],
+                                          stride=self.trunk.stride,
+                                          padding='same')
             else:
-                self.net.append(Conv2D(filters            = self.trunk.filters[l],
-                                       kernel_size        = self.trunk.kernels[l],
-                                       strides            = self.trunk.stride,
-                                       kernel_initializer = self.k_init,
-                                       activation         = self.trunk.actv,
-                                       padding            = "same"))
+                layer_conv = nn.Conv2d(in_channels=self.trunk.filters[l-1],
+                                          out_channels=self.trunk.filters[l],
+                                          kernel_size=self.trunk.kernels[l],
+                                          stride=self.trunk.stride,
+                                          padding='same')
 
-            if (self.pooling):
-                self.net.append(MaxPool2D(pool_size = 2))
+            self.net.append(
+                nn.Sequential(
+                    layer_conv,
+                    get_activation(self.trunk.actv)
+                )
+            )
+
+            if self.pooling:
+                self.net.append(nn.MaxPool2d(kernel_size=2))
 
         # Define heads
         for h in range(self.heads.nb):
-            for l in range(len(self.heads.arch[h])):
-                self.net.append(Dense(self.heads.arch[h][l],
-                                      kernel_initializer = self.k_init,
-                                      activation         = self.heads.actv[h]))
-            self.net.append(Dense(self.out_dim[h],
-                                  kernel_initializer = self.k_init_final,
-                                  activation         = self.heads.final[h]))
+            in_features = self.trunk.arch[l]
+            for l_ in range(len(self.heads.arch[h])):
+                self.net.append(self.create_dense_layer(in_features, self.heads.arch[h][l_], self.k_init, self.heads.actv[h]))
+                in_features = self.heads.arch[h][l_]
+            self.net.append(self.create_dense_layer(in_features, self.out_dim[h], self.k_init_final, self.heads.final[h]))
 
         # Initialize weights
-        dummy = self.call(tf.ones([1, self.nx, self.ny, self.stack]))
+        self.apply(self._init_weights)
 
         # Save initial weights
-        self.init_weights = self.get_weights()
+        self.init_weights = self.state_dict()
+
+    def _init_weights(self, module):
+        if isinstance(module, (nn.Linear, nn.Conv2d)):
+            self.k_init(module.weight)
+            if module.bias is not None:
+                nn.init.zeros_(module.bias)
+        if isinstance(module, nn.Linear) and module.out_features in self.out_dim:
+            self.k_init_final(module.weight)
 
     # Network forward pass
-    @tf.function
-    def call(self, var):
-
-        # Initialize
-        i   = 0
-        out = []
-
-        # Back to the original dimension
-        # Reminder : the new shape will be (batch_size, self.original_dim)
-        var = Reshape(self.original_dim)(var)
+    def forward(self, var):
+        # Reshape to original dimension
+        var = var.view(-1, self.stack, self.nx, self.ny)
 
         # Compute trunk
-        for l in range(len(self.trunk.filters)):
-            var = self.net[i](var)
-            i  += 1
+        for layer in self.net[:3*len(self.trunk.filters) if self.pooling else 2*len(self.trunk.filters)]:
+            var = layer(var)
 
-            if (self.pooling):
-                var = self.net[i](var)
-                i  += 1
-
-        var = Flatten()(var)
+        var = var.flatten(1)
 
         # Compute heads
-        # Each head output is stored in a tf.tensor, and
-        # is appended to the global output
+        out = []
+        start = 3*len(self.trunk.filters) if self.pooling else 2*len(self.trunk.filters)
         for h in range(self.heads.nb):
             hvar = var
-            for l in range(len(self.heads.arch[h])):
-                hvar = self.net[i](hvar)
-                i   += 1
-            hvar = self.net[i](hvar)
-            i   += 1
+            for layer in self.net[start:start+2*len(self.heads.arch[h])+2]:
+                hvar = layer(hvar)
             out.append(hvar)
+            start += 2*len(self.heads.arch[h])+2
 
         return out
 
     # Reset weights
     def reset(self):
-
-        self.set_weights(self.init_weights)
+        self.load_state_dict(self.init_weights)

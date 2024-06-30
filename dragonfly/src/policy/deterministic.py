@@ -1,6 +1,8 @@
 # Custom imports
-from dragonfly.src.policy.tfd  import *
+from dragonfly.src.policy.tfd import *
 from dragonfly.src.policy.base import base_policy
+import torch
+import torch.nn as nn
 
 ###############################################
 ### Deterministic policy class (continuous)
@@ -20,7 +22,7 @@ class deterministic(base_policy):
         self.target     = target
 
         # Define and init network
-        if (pms.network.heads.final[0] != "tanh"):
+        if pms.network.heads.final[0] != "tanh":
             warning("normal", "__init__",
                     "Final activation for network of deterministic policy is not tanh")
 
@@ -29,21 +31,19 @@ class deterministic(base_policy):
 
     # Get actions
     def actions(self, obs):
-
-        act   = self.forward(tf.cast(obs, tf.float32))
-        act   = np.reshape(act.numpy(), (-1,self.store_dim))
+        if isinstance(obs, torch.Tensor):
+            act = self.forward(obs)
+        else:
+            act = self.forward(torch.as_tensor(obs, dtype=torch.float32))
+        act = act.detach().cpu().numpy().reshape(-1, self.store_dim)
 
         return act
 
     # Control (deterministic actions)
     def control(self, obs):
-
         return self.actions(obs)
 
     # Networks forward pass
-    @tf.function
     def forward(self, state):
-
-        out = self.net.call(state)[0]
-
+        out = self.net(state)[0]
         return out

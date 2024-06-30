@@ -1,5 +1,6 @@
 # Custom imports
 from dragonfly.src.agent.base import *
+import torch
 
 ###############################################
 ### PPO agent
@@ -62,20 +63,20 @@ class ppo(base_agent_on_policy):
 
         # Train policy
         act = self.p.reshape_actions(act)
-        adv = tf.reshape(adv, [-1])
-        lgp = tf.reshape(lgp, [-1])
+        adv = adv.reshape(-1)
+        lgp = lgp.reshape(-1)
         self.p.loss.train(obs, adv, act, lgp, self.p, self.p.opt)
 
         # Train v network
-        tgt = tf.reshape(tgt, [-1])
+        tgt = tgt.reshape(-1)
         self.v.loss.train(obs, tgt, self.v.net, self.v.opt)
 
     # Save value parameters
     def save_value(self, filename):
 
-        self.v.save(filename)
+        torch.save(self.v.state_dict(), filename)
 
     # Load value parameters
     def load_value(self, filename):
 
-        self.v.load(filename)
+        self.v.load_state_dict(torch.load(filename))

@@ -1,18 +1,15 @@
 # Generic imports
-import tensorflow as tf
+import torch
 
 ###############################################
 ### Polyak averager for neural networks
 class polyak:
     def __init__(self, rho):
-
         self.rho = rho
 
     # Update network by polyak average
-    @tf.function
     def average(self, net, tgt):
-
-        for wv, wt in zip(net.weights, tgt.weights):
-            w = self.rho*wt + (1.0-self.rho)*wv
-            wt.assign(w)
+        with torch.no_grad():
+            for param_v, param_t in zip(net.parameters(), tgt.parameters()):
+                param_t.data.copy_(self.rho * param_t.data + (1.0 - self.rho) * param_v.data)
 

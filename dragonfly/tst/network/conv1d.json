@@ -30,7 +30,7 @@
                 "type": "conv1d",
                 "trunk": {
                     "arch": [64],
-		                "k_size" : [2],
+		                "k_size" : [3],
 		                "strides" : [1],
                     "actv": "tanh"
                 },
@@ -58,7 +58,7 @@
                 "type": "conv1d",
                 "trunk": {
                     "arch": [64],
-		                "k_size" : [2],
+		                "k_size" : [3],
 		                "strides" : [1],
                     "actv": "relu"
                 },

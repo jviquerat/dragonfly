@@ -1,6 +1,7 @@
 # Generic imports
 import math
-from tensorflow.keras.layers    import Conv2D, MaxPool2D, Conv2DTranspose
+import torch
+import torch.nn as nn
 
 # Custom imports
 from dragonfly.src.network.base import *
@@ -10,11 +11,11 @@ from dragonfly.src.network.base import *
 ### inp_dim  : dimension of input  layer
 ### out_dim  : dimension of output layer
 ### pms      : network parameters
-class conv2d_ae(base_network):
+class conv2d_ae(BaseNetwork):
     def __init__(self, inp_dim, lat_dim, pms):
 
         # Initialize base class
-        super().__init__()
+        super(conv2d_ae, self).__init__()
 
         # Set inputs
         self.inp_dim = inp_dim
@@ -25,8 +26,8 @@ class conv2d_ae(base_network):
         self.trunk.filters = [64]
         self.trunk.kernels = [3]
         self.trunk.stride  = 1
-        self.trunk.actv    = "relu"
-        self.k_init        = Orthogonal(gain=1.0)
+        self.trunk.actv    = nn.ReLU()
+        self.k_init        = nn.init.orthogonal_
         self.original_dim  = None
         self.pooling       = False
 
@@ -46,130 +47,88 @@ class conv2d_ae(base_network):
         self.stack = self.original_dim[2]
 
         # Initialize network
-        self.enc = []
-        self.dec = []
+        self.enc = nn.ModuleList()
+        self.dec = nn.ModuleList()
         self.w   = self.nx
         self.h   = self.ny
 
         # Define encoder
         for l in range(len(self.trunk.filters)):
-            if (l == 0):
-                self.enc.append(Conv2D(filters            = self.trunk.filters[l],
-                                       kernel_size        = self.trunk.kernels[l],
-                                       strides            = self.trunk.stride,
-                                       kernel_initializer = self.k_init,
-                                       activation         = self.trunk.actv,
-                                       input_shape        = self.original_dim,
-                                       padding            = "same"))
+            if l == 0:
+                self.enc.append(nn.Conv2d(in_channels=self.stack,
+                                          out_channels=self.trunk.filters[l],
+                                          kernel_size=self.trunk.kernels[l],
+                                          stride=self.trunk.stride,
+                                          padding='same'))
             else:
-                self.enc.append(Conv2D(filters            = self.trunk.filters[l],
-                                       kernel_size        = self.trunk.kernels[l],
-                                       strides            = self.trunk.stride,
-                                       kernel_initializer = self.k_init,
-                                       activation         = self.trunk.actv,
-                                       padding            = "same"))
+                self.enc.append(nn.Conv2d(in_channels=self.trunk.filters[l-1],
+                                          out_channels=self.trunk.filters[l],
+                                          kernel_size=self.trunk.kernels[l],
+                                          stride=self.trunk.stride,
+                                          padding='same'))
+            self.enc.append(get_activation(self.trunk.actv))
             self.w = self.compute_shape(self.w, self.trunk.kernels[l], 2, self.trunk.stride)
             self.h = self.compute_shape(self.h, self.trunk.kernels[l], 2, self.trunk.stride)
 
-            if (self.pooling):
-                self.enc.append(MaxPool2D(pool_size = 2))
+            if self.pooling:
+                self.enc.append(nn.MaxPool2d(kernel_size=2))
                 self.w = self.compute_shape(self.w, 2, 0, 1)
                 self.h = self.compute_shape(self.h, 2, 0, 1)
 
-
         # Linear layer to bottleneck
-        self.enc.append(Dense(self.lat_dim, activation = "linear"))
+        self.enc.append(nn.Flatten())
+        self.enc.append(nn.Linear(self.w * self.h * self.trunk.filters[-1], self.lat_dim))
 
         # Linear layer from bottleneck
-        d = self.w*self.h*self.trunk.filters[-1]
-        self.dec.append(Dense(d, activation = "linear"))
+        d = self.w * self.h * self.trunk.filters[-1]
+        self.dec.append(nn.Linear(self.lat_dim, d))
+        self.dec.append(nn.Unflatten(1, (self.trunk.filters[-1], self.w, self.h)))
 
         # Define decoder
-        for l in range(len(self.trunk.filters)):
-            self.dec.append(Conv2DTranspose(filters     = self.trunk.filters[-l-1],
-                                            kernel_size = self.trunk.kernels[-l-1],
-                                            strides     = self.trunk.stride,
-                                            activation  = self.trunk.actv,
-                                            padding     = "same"))
-
-        self.dec.append(Conv2D(filters     = self.stack,
-                               kernel_size = self.trunk.kernels[0],
-                               strides     = self.trunk.stride,
-                               activation  = "sigmoid",
-                               padding     = "same"))
+        for l in range(len(self.trunk.filters)-1, -1, -1):
+            self.dec.append(nn.ConvTranspose2d(in_channels=self.trunk.filters[l],
+                                               out_channels=self.trunk.filters[l-1] if l > 0 else self.stack,
+                                               kernel_size=self.trunk.kernels[l],
+                                               stride=self.trunk.stride,
+                                               padding='same'))
+            if l > 0:
+                self.dec.append(get_activation(self.trunk.actv))
+            else:
+                self.dec.append(nn.Sigmoid())
 
         # Initialize weights
-        dummy = self.call(tf.ones([1, self.nx, self.ny, self.stack]))
+        self.apply(self._init_weights)
 
         # Save initial weights
-        self.init_weights = self.get_weights()
+        self.init_weights = self.state_dict()
+
+    def _init_weights(self, module):
+        if isinstance(module, (nn.Linear, nn.Conv2d, nn.ConvTranspose2d)):
+            self.k_init(module.weight)
+            if module.bias is not None:
+                nn.init.zeros_(module.bias)
 
     # Network forward pass
-    @tf.function
-    def call(self, var):
-
-        v = self.encoder(var)[0]
+    def forward(self, var):
+        v = self.encoder(var)
         v = self.decoder(v)
-
         return v
 
     # Encoder forward pass
-    @tf.function
     def encoder(self, var):
-
-        # Initialize
-        i = 0
-
-        # Back to the original dimension
-        # Reminder : the new shape will be (batch_size, self.original_dim)
-        var = Reshape(self.original_dim)(var)
-
-        # Convolutional layers
-        for l in range(len(self.trunk.filters)):
-            var = self.enc[i](var)
-            i  += 1
-
-            if (self.pooling):
-                var = self.enc[i](var)
-                i  += 1
-
-        # Linear layer to bottleneck
-        var        = Flatten()(var)
-        var        = self.enc[i](var)
-        i         += 1
-
-        return [var]
+        for layer in self.enc:
+            var = layer(var)
+        return var
 
     # Decoder forward pass
-    @tf.function
     def decoder(self, var):
-
-        # Initialize
-        i = 0
-
-        # Linear layer from bottleneck
-        var        = self.dec[i](var)
-        i         += 1
-        var        = Reshape([self.w, self.h, self.trunk.filters[-1]])(var)
-
-        # Transposed convolutional layers
-        for l in range(len(self.trunk.filters)):
-            var = self.dec[i](var)
-            i  += 1
-
-        # Last conv layer
-        var = self.dec[i](var)
-        i  += 1
-
-        var = Flatten()(var)
-
-        return [var]
-
+        for layer in self.dec:
+            var = layer(var)
+        return var.flatten(1)
 
     # Reset weights
     def reset(self):
-
-        self.set_weights(self.init_weights)
+        self.load_state_dict(self.init_weights)
 
     # Compute output shape for conv layers
     # w = width (and height, assuming square images)
@@ -178,5 +137,4 @@ class conv2d_ae(base_network):
     # s = stride
     # d = dilation
     def compute_shape(self, w, k=3, p=0, s=1, d=1):
-
         return math.floor((w + 2*p - d*(k - 1) - 1)/s + 1)

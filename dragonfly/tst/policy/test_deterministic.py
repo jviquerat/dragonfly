@@ -1,10 +1,11 @@
 # Generic imports
 import pytest
+import torch
 
 # Custom imports
-from dragonfly.tst.tst                  import *
+from dragonfly.tst.tst import *
 from dragonfly.src.policy.deterministic import *
-from dragonfly.src.utils.json           import *
+from dragonfly.src.utils.json import *
 
 ###############################################
 ### Test deterministic policy
@@ -23,11 +24,11 @@ def test_deterministic():
 
     # Test action values
     print("Test deterministic policy")
-    obs = [[1.0]]
+    obs = torch.Tensor([[1.0]])
     act = policy.actions(obs)
-    print("Actions:",act)
+    print("Actions:", act)
 
-    obs = tf.cast([obs], tf.float32)
+    obs = torch.tensor(obs, dtype=torch.float32)
     out = policy.forward(obs)
 
     print("")

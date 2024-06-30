@@ -1,8 +1,10 @@
 # Custom imports
-from dragonfly.src.agent.sac           import *
+from dragonfly.src.agent.sac import *
 from dragonfly.src.optimizer.optimizer import opt_factory
-from dragonfly.src.loss.alpha_sac      import alpha_sac
-from dragonfly.src.utils.polyak        import polyak
+from dragonfly.src.loss.alpha_sac import alpha_sac
+from dragonfly.src.utils.polyak import polyak
+import torch
+import torch.nn as nn
 
 ###############################################
 ### SAC auto agent
@@ -13,17 +15,18 @@ class sac_auto(sac):
         super().__init__(obs_dim, act_dim, n_cpu, size, pms)
 
         # Possible auto temperature
-        self.alpha_pms   = self.alpha
-        self.alpha       = self.alpha_pms.alpha_0
-        self.log_alpha   = tf.Variable(tf.math.log(self.alpha))
-        self.alpha_opt   = opt_factory.create(self.alpha_pms.optimizer.type,
-                                              pms = self.alpha_pms.optimizer,
-                                              grad_vars = [self.log_alpha])
-        self.alpha_loss  = alpha_sac()
-        self.tgt_entropy =-self.act_dim
+        self.alpha_pms = self.alpha
+        self.alpha = self.alpha_pms.alpha_0
+        self.log_alpha = nn.Parameter(torch.log(torch.tensor(self.alpha)))
+        self.alpha_opt = opt_factory.create(self.alpha_pms.optimizer.type,
+                                            pms=self.alpha_pms.optimizer,
+                                            grad_vars=[self.log_alpha])
+        self.alpha_loss = alpha_sac()
+        self.tgt_entropy = -self.act_dim
 
         self.monitor = False
-        if (hasattr(self.alpha_pms, "monitor")): self.monitor = self.alpha_pms.monitor
+        if hasattr(self.alpha_pms, "monitor"):
+            self.monitor = self.alpha_pms.monitor
 
     # Training
     def train(self, start, end):
@@ -35,9 +38,9 @@ class sac_auto(sac):
         trm = self.data["trm"][start:end]
 
         size = end - start
-        act  = self.p.reshape_actions(act)
-        rwd  = tf.reshape(rwd, [size,-1])
-        trm  = tf.reshape(trm, [size,-1])
+        act = self.p.reshape_actions(act)
+        rwd = rwd.reshape(size, -1)
+        trm = trm.reshape(size, -1)
 
         # Train q network
         self.q1.loss.train(obs, nxt, act, rwd, trm, self.gamma,
@@ -54,12 +57,12 @@ class sac_auto(sac):
         # Update alpha
         self.alpha_loss.train(obs, self.p, self.log_alpha,
                               self.tgt_entropy, self.alpha_opt)
-        self.alpha = tf.math.exp(self.log_alpha)
+        self.alpha = torch.exp(self.log_alpha)
 
         # Monitor if required
-        if (self.monitor):
+        if self.monitor:
             with open("alpha", "a") as f:
-                f.write(str(self.alpha.numpy())+"\n")
+                f.write(str(self.alpha.item()) + "\n")
 
         # Update target networks
         self.polyak.average(self.q1.net, self.q1.tgt)
@@ -69,5 +72,5 @@ class sac_auto(sac):
     def reset(self):
 
         super().reset()
-        self.alpha     = self.alpha_pms.alpha_0
-        self.log_alpha = tf.Variable(tf.math.log(self.alpha))
+        self.alpha = self.alpha_pms.alpha_0
+        self.log_alpha = nn.Parameter(torch.log(torch.tensor(self.alpha)))

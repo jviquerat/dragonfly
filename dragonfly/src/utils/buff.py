@@ -1,7 +1,7 @@
 # Generic imports
 import math
-import numpy      as np
-import tensorflow as tf
+import numpy as np
+import torch
 
 # Custom imports
 from dragonfly.src.utils.error import error
@@ -11,30 +11,24 @@ from dragonfly.src.utils.error import error
 ### store data from parallel environments
 class pbuff:
     def __init__(self, n_cpu, dim):
-
         self.n_cpu = n_cpu
-        self.dim   = dim
+        self.dim = dim
         self.reset()
 
     def reset(self):
-
         self.buff = [np.array([]) for _ in range(self.n_cpu)]
 
     def append(self, vec):
-
         for cpu in range(self.n_cpu):
             self.buff[cpu] = np.append(self.buff[cpu], vec[cpu])
 
     def length(self):
-
         return int(len(self.buff[0])/self.dim)
 
     def serialize(self):
-
         arr = np.array([])
         for cpu in range(self.n_cpu):
             arr = np.append(arr, self.buff[cpu])
-
         return np.reshape(arr, (-1,self.dim))
 
 ###############################################
@@ -42,88 +36,72 @@ class pbuff:
 ### data between two updates of the agent
 class buff:
     def __init__(self, n_cpu, names, dims):
-
         self.n_cpu = n_cpu
         self.names = names
-        self.dims  = dims
+        self.dims = dims
         self.reset()
 
     def reset(self):
-
         self.data = {}
         for name, dim in zip(self.names, self.dims):
             self.data[name] = pbuff(self.n_cpu, dim)
 
     def store(self, names, fields):
-
         n,f = zip(*[(i,j) for i,j in zip(names,fields) if i in self.names])
         for name, field in zip(n, f):
             self.data[name].append(field)
 
     def size(self):
-
         return self.length()*self.n_cpu
 
     def length(self):
-
         return self.data[self.names[0]].length()
 
     def serialize(self, names):
-
         return {name : self.data[name].serialize() for name in names}
 
 ###############################################
 ### Ring buffer class, used as element of gbuff
 class rbuff:
     def __init__(self, size, dim):
-
-        self.size  = size
-        self.dim   = dim
+        self.size = size
+        self.dim = dim
         self.reset()
 
     def reset(self):
-
-        self.i    = 0 # Filling index
-        self.n    = 0 # Global  index
+        self.i = 0 # Filling index
+        self.n = 0 # Global index
         self.full = False
         self.buff = np.zeros([self.size,self.dim])
 
     def length(self):
-
         return self.n
 
     def store(self, field):
-
         for j in range(len(field)):
             self.buff[self.i,:] = field[j,:]
-            self.i             += 1
-
+            self.i += 1
             # Handle filling and global index
-            if (self.i == self.size): self.i    = 0
-            if (not self.full):       self.n   += 1
+            if (self.i == self.size): self.i = 0
+            if (not self.full): self.n += 1
             if (self.n == self.size): self.full = True
 
     def get_dim(self):
-
         return self.dim
 
     def get_buffer_indexes(self, size):
-
-        if (    self.full):
-            end   = size
+        if self.full:
+            end = size
             start = end-size
-        if (not self.full):
-            end   = self.i
+        if not self.full:
+            end = self.i
             start = max(0, end-size)
-
         return start, end
 
     def get_batch_indexes(self):
-
         start = 0
-        if (    self.full): end = self.size
-        if (not self.full): end = min(self.i, self.size)
-
+        if self.full: end = self.size
+        if not self.full: end = min(self.i, self.size)
         return start, end
 
 ###############################################
@@ -131,33 +109,26 @@ class rbuff:
 ### all data since the beginning of learning
 class gbuff:
     def __init__(self, size, names, dims):
-
-        self.size  = size
+        self.size = size
         self.names = names
-        self.dims  = dims
+        self.dims = dims
         self.reset()
 
     def reset(self):
-
         self.data = {}
         for name, dim in zip(self.names, self.dims):
             self.data[name] = rbuff(self.size, dim)
 
     def store(self, names, fields):
-
         for name, field in zip(names, fields):
             self.data[name].store(field)
 
     def length(self):
-
         return self.data[self.names[0]].length()
 
     def get_buffers(self, names, size, shuffle=True):
-
         if (size > self.size):
-            error("gbuff",
-                  "get_buffers",
-                  "Size too large for buffer")
+            error("gbuff", "get_buffers", "Size too large for buffer")
 
         # Start/end indices
         start, end = self.data[self.names[0]].get_buffer_indexes(size)
@@ -170,37 +141,29 @@ class gbuff:
         out = {}
         for name in names:
             tmp = self.data[name].buff[p]
-            tmp = tf.cast(tmp, tf.float32)
+            tmp = torch.tensor(tmp, dtype=torch.float32)
             dim = self.data[name].get_dim()
-            out[name] = tf.reshape(tmp, [-1, dim])
+            out[name] = tmp.reshape(-1, dim)
 
         return {name : out[name] for name in names}
 
     def get_batches(self, names, size, shuffle=True):
-
         if (size > self.size):
-            error("gbuff",
-                  "get_batch",
-                  "Size too large for buffer")
+            error("gbuff", "get_batch", "Size too large for buffer")
 
         # Start/end indices
         start, end = self.data[self.names[0]].get_batch_indexes()
 
         # Randomized indices
-        # We don't use np.random.permutation as it is too expensive
-        # and this function may be called thousands to millions of times
-        # for off-policy agents. Using np.random.randint is almost
-        # as good, as the risk to select twice the same sample
-        # in large buffers is very low, and the impact very limited
         if (shuffle): p = np.random.randint(start, end, size)
-        else:         p = np.arange(end-start, end)
+        else: p = np.arange(end-start, end)
 
         # Return shuffled fields
         out = {}
         for name in names:
             tmp = self.data[name].buff[p]
-            tmp = tf.cast(tmp, tf.float32)
+            tmp = torch.tensor(tmp, dtype=torch.float32)
             dim = self.data[name].get_dim()
-            out[name] = tf.reshape(tmp, [-1, dim])
+            out[name] = tmp.reshape(-1, dim)
 
         return {name : out[name] for name in names}

@@ -1,5 +1,5 @@
-# Tensorflow imports
-import tensorflow as tf
+# PyTorch imports
+import torch
 
 ###############################################
 ### Q-policy loss class for DDPG policy update
@@ -8,18 +8,17 @@ class q_pol():
         pass
 
     # Train
-    @tf.function
     def train(self, obs, p, q, opt):
-        with tf.GradientTape() as tape:
+        # Compute loss
+        lgt = obs.shape[0]
+        act = p(obs)[0].reshape(lgt, -1)
+        cct = torch.cat([obs, act], dim=-1)
+        tgt = q(cct)[0].reshape(lgt, -1)
+        loss = -torch.mean(tgt)
 
-            # Compute loss
-            lgt  = tf.shape(obs)[0]
-            act  = tf.reshape(p.call(obs), [lgt,-1])
-            cct  = tf.concat([obs,act], axis=-1)
-            tgt  = tf.reshape(q.call(cct), [lgt,-1])
-            loss =-tf.reduce_mean(tgt)
+        # Apply gradients
+        opt.zero_grad()
+        loss.backward()
+        opt.apply_grads()
 
-            # Apply gradients
-            var   = p.trainables()
-            grads = tape.gradient(loss, var)
-        opt.apply_grads(zip(grads, var))
+        return loss

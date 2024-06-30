@@ -1,7 +1,10 @@
 # Custom imports
 from dragonfly.src.core.constants import *
-from dragonfly.src.policy.tfd     import *
-from dragonfly.src.policy.base    import base_normal
+from dragonfly.src.policy.tfd import *
+from dragonfly.src.policy.base import base_normal
+import torch
+import torch.nn as nn
+import math
 
 ###############################################
 ### Tanh-normal policy class (continuous)
@@ -20,11 +23,11 @@ class tanh_normal(base_normal):
         self.max_log_std = pms.max_log_std
 
         # Check parameters
-        if (pms.network.heads.final[0] != "linear"):
+        if pms.network.heads.final[0] != "linear":
             warning("tanh_normal", "__init__",
                     "Final activation for mean of policy is not linear")
 
-        if (pms.network.heads.final[1] != "linear"):
+        if pms.network.heads.final[1] != "linear":
             warning("tanh_normal", "__init__",
                     "Final activation for stddev of policy is not linear")
 
@@ -33,54 +36,47 @@ class tanh_normal(base_normal):
 
     # Control (deterministic actions)
     def control(self, obs):
-
-        mu, sg   = self.forward(tf.cast(obs, tf.float32))
-        act      = tf.reshape(mu, [-1,self.store_dim])
-        tanh_act = tf.tanh(act)
-        tanh_act = np.reshape(tanh_act.numpy(), (-1,self.store_dim))
-
+        if not isinstance(obs, torch.Tensor):
+            obs_tensor = torch.from_numpy(obs).to(torch.float32)
+        else:
+            obs_tensor = obs
+        mu, _   = self.forward(obs_tensor)
+        act     = mu.reshape(-1, self.store_dim)
+        tanh_act = torch.tanh(act)
+        tanh_act = tanh_act.detach().cpu().numpy().reshape(-1, self.store_dim)
         return tanh_act
 
     # Networks forward pass
-    @tf.function
     def forward(self, state):
-
-        out     = self.net.call(state)
+        out     = self.net(state)
         mu      = out[0]
         log_std = out[1]
-        log_std = tf.clip_by_value(log_std,
-                                   self.min_log_std,
-                                   self.max_log_std)
-        std     = tf.exp(log_std)
-
+        log_std = torch.clamp(log_std,
+                              self.min_log_std,
+                              self.max_log_std)
+        std     = torch.exp(log_std)
         return mu, std
 
     # Sample actions
     # Mostly taken from openAI implementation
-    @tf.function
     def sample(self, obs):
-
         # Reparameterization trick
         mu, std = self.forward(obs)
-        act     = mu + tf.random.normal(tf.shape(mu))*std
+        act     = mu + torch.randn_like(mu) * std
 
         # Compute gaussian likelihood
-        lkh = -0.5*(((act - mu)/(std + eps))**2 +
-                    2.0*tf.math.log(std) +
-                    tf.math.log(2.0*math.pi))
-        lgp = tf.reduce_sum(lkh, axis=1)
+        lkh = -0.5 * (((act - mu) / (std + eps)) ** 2 +
+                      2.0 * torch.log(std) +
+                      math.log(2.0 * math.pi))
+        lgp = torch.sum(lkh, dim=1)
 
         # Squash actions
-        tanh_act = tf.tanh(act)
+        tanh_act = torch.tanh(act)
 
         # Compute log-prob of reparameterized action
-        # Regular version, possibly numerically unstable
-        # sth = tf.math.log(1.0 - tf.square(tanh_act) + 1.0e-8)
-
         # OpenAI version, numerically stable
-        sth  = 2.0*(np.log(2.0) - act - tf.nn.softplus(-2.0*act))
-        sth  = tf.reduce_sum(sth, axis=1)
-        sth  = tf.reshape(sth, [-1,1])
+        sth  = 2.0 * (math.log(2.0) - act - torch.nn.functional.softplus(-2.0 * act))
+        sth  = torch.sum(sth, dim=1)
         lgp -= sth
 
         return tanh_act, lgp

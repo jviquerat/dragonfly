@@ -1,6 +1,8 @@
 # Custom imports
-from dragonfly.src.agent.base   import *
+from dragonfly.src.agent.base import *
 from dragonfly.src.utils.polyak import polyak
+import torch
+import numpy as np
 
 ###############################################
 ### TD3 agent
@@ -83,19 +85,19 @@ class td3(base_agent_off_policy):
 
         self.timer_actions.tic()
         if (self.step < self.n_warmup):
-            act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
+            act = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
         else:
-            act   = self.p.actions(obs)
+            act = self.p.actions(torch.tensor(obs, dtype=torch.float32))
             noise = np.random.normal(0.0, self.sigma_act,
                                      (self.n_cpu, self.act_dim))
-            act  += noise
-            act   = np.clip(act, -1.0, 1.0)
+            act += noise
+            act = np.clip(act, -1.0, 1.0)
         act = act.astype(np.float32)
 
         self.step += 1
 
         # Check for NaNs
-        if (np.isnan(act).any()):
+        if np.isnan(act).any():
             error("td3", "get_actions",
                   "Detected NaN in generated actions")
         self.timer_actions.toc()
@@ -112,9 +114,9 @@ class td3(base_agent_off_policy):
         trm = self.data["trm"][start:end]
 
         size = end - start
-        act  = self.p.reshape_actions(act)
-        rwd  = tf.reshape(rwd, [size,-1])
-        trm  = tf.reshape(trm, [size,-1])
+        act = self.p.reshape_actions(act)
+        rwd = rwd.reshape(size, -1)
+        trm = trm.reshape(size, -1)
 
         # Train q network
         self.q1.loss.train(obs, nxt, act, rwd, trm, self.gamma,

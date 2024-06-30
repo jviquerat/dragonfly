@@ -1,5 +1,8 @@
 # Custom imports
 from dragonfly.src.agent.base import *
+import torch
+import random
+import numpy as np
 
 ###############################################
 ### DQN agent
@@ -52,7 +55,7 @@ class dqn(base_agent_off_policy):
     def actions(self, obs):
 
         self.timer_actions.tic()
-        act = np.zeros([self.n_cpu, 1], dtype=int)
+        act = torch.zeros(self.n_cpu, 1, dtype=torch.long)
 
         for i in range(self.n_cpu):
             self.eps.decay()
@@ -60,11 +63,11 @@ class dqn(base_agent_off_policy):
             if (p < self.eps.get()):
                 act[i] = random.randrange(0, self.act_dim)
             else:
-                cob = tf.cast([obs[i]], tf.float32)
+                cob = torch.tensor([obs[i]], dtype=torch.float32)
                 val = self.q.values(cob)
-                act[i] = np.argmax(val)
+                act[i] = torch.argmax(val)
 
-        act = np.reshape(act, (-1))
+        act = act.reshape(-1).numpy()
         self.timer_actions.toc()
 
         return act
@@ -72,8 +75,8 @@ class dqn(base_agent_off_policy):
     # Control (deterministic actions)
     def control(self, obs):
 
-        val = self.q.values(obs)
-        act = np.reshape(np.argmax(val), (-1))
+        val = self.q.values(torch.tensor(obs, dtype=torch.float32))
+        act = torch.argmax(val, dim=1).reshape(-1).numpy()
 
         return act
 
@@ -97,10 +100,10 @@ class dqn(base_agent_off_policy):
         trm = self.data["trm"][start:end]
 
         size = end - start
-        act  = tf.reshape(act, [size,-1])
-        rwd  = tf.reshape(rwd, [size,-1])
-        trm  = tf.reshape(trm, [size,-1])
-        act  = tf.cast(act, tf.int32)
+        act = act.reshape(size, -1)
+        rwd = rwd.reshape(size, -1)
+        trm = trm.reshape(size, -1)
+        act = act.long()
 
         self.q.loss.train(obs, nxt, act, rwd, trm,
                           self.gamma, self.q.net,

@@ -1,6 +1,9 @@
 # Custom imports
-from dragonfly.src.policy.tfd  import *
+from dragonfly.src.policy.tfd import *
 from dragonfly.src.policy.base import base_policy
+import torch
+import torch.nn as nn
+import torch.distributions as dist
 
 ###############################################
 ### Categorical policy class (discrete)
@@ -20,7 +23,7 @@ class categorical(base_policy):
         self.target     = target
 
         # Define and init network
-        if (pms.network.heads.final[0] != "softmax"):
+        if pms.network.heads.final[0] != "softmax":
             warning("categorical", "__init__",
                     "Chosen final activation for categorical policy is not softmax")
 
@@ -29,56 +32,51 @@ class categorical(base_policy):
 
     # Get actions
     def actions(self, obs):
-
-        act, lgp = self.sample(tf.cast(obs, tf.float32))
-        act      = np.reshape(act.numpy()[0], (-1))
-        lgp      = np.reshape(lgp.numpy()[0], (-1))
+        act, lgp = self.sample(obs)
+        act = act.detach().numpy().reshape(-1)
+        lgp = lgp.detach().numpy().reshape(-1)
 
         return act, lgp
 
     # Control (deterministic actions)
     def control(self, obs):
-
-        probs = self.forward(tf.cast(obs, tf.float32))
-        act   = tf.argmax(probs[0][0])
-        act   = np.reshape(act.numpy(), (-1))
+        probs = self.forward(obs)
+        act = torch.argmax(probs[0], dim=-1)
+        act = act.detach().numpy().reshape(-1)
 
         return act
 
     # Sample actions
-    @tf.function
     def sample(self, obs):
-
         # Generate pdf
         pdf = self.compute_pdf(obs)
 
         # Sample actions
-        act = pdf.sample(1)
+        act = pdf.sample((1,))
         lgp = pdf.log_prob(act)
 
         return act, lgp
 
     # Compute pdf
     def compute_pdf(self, obs):
-
         probs = self.forward(obs)
-        return tfd.Categorical(probs=probs[0])
+        return dist.Categorical(probs=probs[0])
 
     # Network forward pass
-    @tf.function
     def forward(self, obs):
-
-        return self.net.call(obs)
+        if not isinstance(obs, torch.Tensor):
+            obs_tensor = torch.from_numpy(obs).to(torch.float32)
+        else:
+            obs_tensor = obs
+        return self.net(obs_tensor)
 
     # Reshape actions
     def reshape_actions(self, act):
-
-        return tf.reshape(act, [-1])
+        return act.reshape(-1)
 
     # Random uniform actions for warmup
     def random_uniform(self, obs):
-
         n_cpu = obs.shape[0]
-        act   = np.random.randint(0, self.act_dim, size=(n_cpu,1))
+        act = torch.randint(0, self.act_dim, size=(n_cpu, 1))
 
-        return np.reshape(act, (-1))
+        return act.reshape(-1).numpy()
