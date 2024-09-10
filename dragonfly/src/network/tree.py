@@ -1,19 +1,20 @@
 ###############################################
 ### Trunk class
-class trunk():
+class trunk:
     def __init__(self):
 
         # Feel empty struct
-        self.arch     = None
-        self.actv     = None
+        self.arch = [64]
+        self.actv = "relu"
+
 
 ###############################################
 ### Heads class
-class heads():
+class heads:
     def __init__(self):
 
         # Feel empty struct
-        self.nb       = None
-        self.arch     = None
-        self.actv     = None
-        self.final    = None
+        self.nb = 1
+        self.arch = [[64]]
+        self.actv = ["relu"]
+        self.final = ["linear"]

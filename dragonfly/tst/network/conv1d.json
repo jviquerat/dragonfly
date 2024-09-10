@@ -31,7 +31,7 @@
                 "trunk": {
                     "arch": [64],
 		                "k_size" : [3],
-		                "strides" : [1],
+		                "stride" : [1],
                     "actv": "tanh"
                 },
                 "heads": {

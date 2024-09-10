@@ -6,8 +6,8 @@ from dragonfly.tst.tst    import *
 from dragonfly.tst.runner import *
 
 ###############################################
-### Test lstm
-def test_lstm():
+### Test d2rl
+def test_gated_fc():
 
-    runner("dragonfly/tst/network/lstm.json",
-           "lstm")
+    runner("dragonfly/tst/network/fc.json",
+           "fc")
