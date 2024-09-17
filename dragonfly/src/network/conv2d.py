@@ -60,7 +60,7 @@ class conv2d(BaseNetwork):
 
         self.trunk_net = nn.Sequential(*layers)
         # Define head
-        self.trunk.arch = [9216]
+        self.trunk.arch = [len(self.trunk_net(torch.randn(self.stack, self.nx, self.ny)).flatten())]
         self._build_heads()
 
         # Initialize weights
