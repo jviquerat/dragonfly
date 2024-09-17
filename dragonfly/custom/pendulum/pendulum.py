@@ -3,7 +3,7 @@ from typing import Optional
 
 import numpy as np
 
-import gym
+import gymnasium as gym
 from gym import spaces
 from gym.error import DependencyNotInstalled
 

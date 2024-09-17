@@ -153,7 +153,7 @@ class base_trainer:
         Returns:
             tuple: A tuple containing the next state (np.array), reward (float), done flag (bool),
         """
-        # Retrieve action and ste^p
+        # Retrieve action and step
         act = self.agent.actions(obs)
         nxt, rwd, dne, trc = self.env.step(act)
 

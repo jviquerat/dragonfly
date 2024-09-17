@@ -1,5 +1,5 @@
 # Generic imports
-import gym
+import gymnasium as gym
 
 # Custom imports
 from dragonfly.src.utils.json       import json_parser

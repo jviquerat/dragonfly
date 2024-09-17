@@ -22,9 +22,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest
         pip install -r requirements.txt
-        pip install "gymnasium[box2d]"
+    - name: Show dependencies
+      run: |
+        pip freeze
     - name: Test with pytest
       run: |
         pytest

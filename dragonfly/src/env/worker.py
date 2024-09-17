@@ -1,6 +1,6 @@
 # Generic imports
 import sys
-import gym
+import gymnasium as gym
 
 # Custom imports
 from dragonfly.src.env.mpi import *
