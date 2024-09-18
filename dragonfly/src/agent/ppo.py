@@ -79,4 +79,4 @@ class ppo(base_agent_on_policy):
     # Load value parameters
     def load_value(self, filename):
 
-        self.v.load_state_dict(torch.load(filename))
+        self.v.load_state_dict(torch.load(filename, weights_only=True))

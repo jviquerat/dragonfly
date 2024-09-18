@@ -29,7 +29,6 @@ def test_normal_diag():
     act, lgp = policy.actions(obs)
     print("Actions:", act)
 
-    obs = torch.tensor(obs, dtype=torch.float32)
     mu, sg = policy.forward(obs)
     assert(np.all(np.abs(mu.detach().numpy()) < 1.0))
     assert(np.all(np.abs(sg.detach().numpy()) < 1.0))

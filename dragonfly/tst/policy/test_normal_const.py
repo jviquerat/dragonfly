@@ -29,7 +29,6 @@ def test_normal_const():
     act, lgp = policy.actions(obs)
     print("Actions:", act)
 
-    obs = torch.tensor(obs, dtype=torch.float32)
     mu = policy.forward(obs)
     assert(np.all(np.abs(mu.detach().numpy()) < 1.0))
 

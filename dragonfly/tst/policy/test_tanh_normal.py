@@ -29,7 +29,6 @@ def test_normal():
     act, lgp = policy.actions(obs)
     print("Actions:", act)
 
-    obs = torch.tensor(obs, dtype=torch.float32)
     tanh_act, lgp = policy.sample(obs)
     assert(np.all(np.abs(tanh_act.detach().cpu().numpy()) < 1.0))
 

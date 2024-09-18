@@ -84,7 +84,7 @@ class base_policy(nn.Module):
 
     # Load
     def load(self, filename):
-        self.net.load_state_dict(torch.load(filename))
+        self.net.load_state_dict(torch.load(filename, weights_only=True))
 
     # Copy net into tgt
     def copy_tgt(self):

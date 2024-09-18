@@ -63,7 +63,7 @@ class dqn(base_agent_off_policy):
             if (p < self.eps.get()):
                 act[i] = random.randrange(0, self.act_dim)
             else:
-                cob = torch.tensor([obs[i]], dtype=torch.float32)
+                cob = torch.tensor(np.array([obs[i]]), dtype=torch.float32)
                 val = self.q.values(cob)
                 act[i] = torch.argmax(val)
 

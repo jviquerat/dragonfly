@@ -29,7 +29,6 @@ def test_normal_full():
     act, lgp = policy.actions(obs)
     print("Actions:", act)
 
-    obs = torch.tensor(obs, dtype=torch.float32)
     mu, sg, cr = policy.forward(obs)
     assert(np.all(np.abs(mu.detach().cpu().numpy()) < 1.0))
     assert(np.all(np.abs(sg.detach().cpu().numpy()) < 1.0))

@@ -19,7 +19,9 @@ class base_value(torch.nn.Module):
 
     # Network forward pass
     def forward(self, x):
-        return self.net(torch.tensor(x, dtype=torch.float32))[0]
+        if not isinstance(x, torch.Tensor):
+            x = torch.tensor(x, dtype=torch.float32)
+        return self.net(x)[0]
 
     # Get values
     def values(self, x):
@@ -52,7 +54,7 @@ class base_value(torch.nn.Module):
 
     # Load
     def load(self, filename):
-        self.net.load_state_dict(torch.load(filename))
+        self.net.load_state_dict(torch.load(filename, weights_only=True))
 
     # Copy net into tgt
     def copy_tgt(self):

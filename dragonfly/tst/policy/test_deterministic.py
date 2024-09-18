@@ -28,7 +28,6 @@ def test_deterministic():
     act = policy.actions(obs)
     print("Actions:", act)
 
-    obs = torch.tensor(obs, dtype=torch.float32)
     out = policy.forward(obs)
 
     print("")
