@@ -12,10 +12,10 @@ from dragonfly.src.network.base import *
 ### out_dim  : dimension of output layer
 ### pms      : network parameters
 class conv2d(BaseNetwork):
-    def __init__(self, inp_dim, out_dim, pms, agent_type = AgentType.ON_POLICY):
+    def __init__(self, inp_dim, out_dim, pms):
 
         # Initialize base class
-        super(conv2d, self).__init__(inp_dim, out_dim, agent_type)
+        super(conv2d, self).__init__(inp_dim, out_dim)
 
         # Set default values
         self.trunk.filters = [64]
@@ -52,7 +52,7 @@ class conv2d(BaseNetwork):
                     stride=self.trunk.stride,
                     padding="same",
                 ),
-                get_activation(self.trunk.actv),
+                torch_activations[self.trunk.actv],
             )
             if self.pooling:
                 layer.append(nn.MaxPool2d(kernel_size=2))
@@ -71,13 +71,11 @@ class conv2d(BaseNetwork):
 
     def _init_weights(self, module):
         if isinstance(module, (nn.Linear, nn.Conv2d)):
-            if self.k_init is not None:
-                self.k_init(module.weight)
+            torch_initializations[self.k_init](module.weight)
             if module.bias is not None:
                 nn.init.zeros_(module.bias)
         if isinstance(module, nn.Linear) and module.out_features in self.out_dim:
-            if self.k_init_final is not None:
-                self.k_init_final(module.weight)
+            torch_initializations[self.k_final](module.weight)
 
     # Network forward pass
     def forward(self, var):

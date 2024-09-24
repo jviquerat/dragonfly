@@ -1,6 +1,5 @@
 # Custom imports
 from dragonfly.src.agent.base import *
-import torch
 
 ###############################################
 ### A2C agent

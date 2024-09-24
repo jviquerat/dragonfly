@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
-from torch.nn.init import orthogonal_
 
 from dragonfly.src.network.base import *
 
-
 class fc(BaseNetwork):
-    def __init__(self, inp_dim, out_dim, pms, agent_type = AgentType.ON_POLICY):
-        super(fc, self).__init__(inp_dim, out_dim, agent_type)
+    def __init__(self, inp_dim, out_dim, pms):
+
+        # Initialize base class
+        super(fc, self).__init__(inp_dim, out_dim)
 
         # Check inputs
         self._fetch_input(pms=pms)

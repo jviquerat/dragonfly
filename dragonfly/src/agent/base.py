@@ -1,7 +1,7 @@
 # Generic imports
 import random
-import numpy      as np
-import torch 
+import numpy as np
+import torch
 
 # Custom imports
 from dragonfly.src.core.constants          import *
@@ -104,7 +104,7 @@ class base_agent_on_policy(base_agent):
         lgt = len(self.data["obs"])
 
         return lgt, True
-    
+
     def _ensure_numpy(self, data):
         if isinstance(data, torch.Tensor):
             return data.cpu().detach().numpy()

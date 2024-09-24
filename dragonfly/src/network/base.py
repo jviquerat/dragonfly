@@ -9,50 +9,48 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 # PyTorch imports
 import torch
 import torch.nn as nn
-from torch.nn.init import orthogonal_
 
 # Custom imports
 from dragonfly.src.utils.error import error, warning
 from dragonfly.src.network.tree import trunk, heads
-from dragonfly.src.utils.agent_type import AgentType
 
+torch_activations = {
+    'relu': nn.ReLU(),
+    'swish': nn.SiLU(),
+    'tanh': nn.Tanh(),
+    'softmax': nn.Softmax(),
+    'sigmoid': nn.Sigmoid(),
+    'selu': nn.SELU(),
+    'gelu': nn.GELU(),
+    'linear': nn.Identity(),
+    None: nn.Identity()
+}
 
-def get_activation(activation_name):
-    if activation_name == "relu":
-        return nn.ReLU()
-    elif activation_name == "swish" or activation_name == "silu":
-        return nn.SiLU()  # SiLU is PyTorch's implementation of Swish
-    elif activation_name == "tanh":
-        return nn.Tanh()
-    elif activation_name == "linear" or activation_name is None:
-        return nn.Identity()
-    elif activation_name == "softmax":
-        return nn.Softmax()
-    elif activation_name == "sigmoid":
-        return nn.Sigmoid()
-    elif activation_name == "selu":
-        return nn.SELU()
-    elif activation_name == "gelu":
-        return nn.GELU()
-    # Add more activations as needed
-    else:
-        raise ValueError(f"Unsupported activation function: {activation_name}")
+torch_initializations = {
+    'orthogonal1': lambda x: nn.init.orthogonal_(x, gain=1.0),
+    'orthogonal0': lambda x: nn.init.orthogonal_(x, gain=0.0),
+    'glorot_uniform': lambda x: nn.init.xavier_uniform_(x),
+    'xavier_uniform': lambda x: nn.init.xavier_uniform_(x),
+    'lecun_normal': lambda x: nn.init.kaiming_normal_(x)
+}
 
 def create_dense_layer(in_features, out_features, init_func, activation):
     layer = nn.Linear(in_features, out_features)
-    if init_func is not None:
-        init_func(layer.weight)
+    torch_initializations[init_func](layer.weight)
     nn.init.zeros_(layer.bias)
-    return nn.Sequential(layer, get_activation(activation))
+    return nn.Sequential(layer, torch_activations[activation])
 
 
 def build_trunk(
-    in_size: int, hidden_sizes: list[int], init_func, activation_function: str
+    in_size: int,
+    hidden_sizes: list[int],
+    k_init: str,
+    activation_function: str
 ):
     new_hidden_sizes = [in_size] + hidden_sizes
     layers = [
         create_dense_layer(
-            new_hidden_sizes[k], new_hidden_sizes[k + 1], init_func, activation_function
+            new_hidden_sizes[k], new_hidden_sizes[k + 1], k_init, activation_function
         )
         for k in range(0, len(new_hidden_sizes) - 1)
     ]
@@ -66,8 +64,8 @@ def build_heads(
     out_sizes: list[int],
     activation_functions: list[str],
     finals: list[str],
-    k_init,
-    k_init_final,
+    k_init: str,
+    k_final: str
 ):
     heads = []
     for h in range(nb_heads):
@@ -83,7 +81,7 @@ def build_heads(
         ]
         layers.append(
             create_dense_layer(
-                new_hidden_sizes[-1], out_sizes[h], k_init_final, finals[h]
+                new_hidden_sizes[-1], out_sizes[h], k_final, finals[h]
             )
         )
 
@@ -95,7 +93,7 @@ def build_heads(
 ###############################################
 ### Base network
 class BaseNetwork(nn.Module):
-    def __init__(self, inp_dim, out_dim, agent_type = AgentType.ON_POLICY):
+    def __init__(self, inp_dim, out_dim):
         super(BaseNetwork, self).__init__()
 
         self.inp_dim = inp_dim
@@ -104,15 +102,6 @@ class BaseNetwork(nn.Module):
         # Set default values
         self.trunk = trunk()
         self.heads = heads()
-
-        if agent_type == AgentType.ON_POLICY:
-            self.k_init = lambda x: orthogonal_(x, gain=1.0)
-            self.k_init_final = lambda x: orthogonal_(x, gain=0.0)
-        elif agent_type == AgentType.OFF_POLICY:
-            self.k_init = None
-            self.k_init_final = None
-        else:
-            raise ValueError(f"Agent Type {agent_type} not recognized.")
 
     # Network forward pass
     def forward(self, x):
@@ -143,6 +132,10 @@ class BaseNetwork(nn.Module):
             self.heads.actv = pms.heads.actv
         if hasattr(pms.heads, "final"):
             self.heads.final = pms.heads.final
+        if hasattr(pms, "k_init"):
+            self.k_init = pms.k_init
+        if hasattr(pms, "k_final"):
+            self.k_final = pms.k_final
 
         if conv:
             if hasattr(pms.trunk, "kernels"):
@@ -160,7 +153,7 @@ class BaseNetwork(nn.Module):
         return build_trunk(
             in_size=self.inp_dim,
             hidden_sizes=self.trunk.arch,
-            init_func=self.k_init,
+            k_init=self.k_init,
             activation_function=self.trunk.actv,
         )
 
@@ -173,7 +166,7 @@ class BaseNetwork(nn.Module):
             activation_functions=self.heads.actv,
             finals=self.heads.final,
             k_init=self.k_init,
-            k_init_final=self.k_init_final,
+            k_final=self.k_final,
         )
         for h, head in enumerate(heads):
             setattr(self, f"head_{h}", head)
