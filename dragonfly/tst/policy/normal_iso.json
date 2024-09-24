@@ -3,6 +3,8 @@
         "type": "normal_iso",
         "network": {
             "type": "fc",
+            "k_init": "orthogonal1",
+            "k_final": "orthogonal0",
             "trunk": {
                 "arch": [32,32],
                 "actv": "swish"

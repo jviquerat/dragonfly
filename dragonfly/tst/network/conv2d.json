@@ -30,6 +30,8 @@
             "type": "normal",
             "network": {
                 "type": "conv2d",
+                "k_init": "orthogonal1",
+                "k_final": "orthogonal0",
 		            "original_dim": [48,48,4],
                 "trunk": {
                     "filters": [4,4],
@@ -59,6 +61,8 @@
             "type": "v_value",
             "network": {
                 "type": "conv2d",
+                "k_init": "orthogonal1",
+                "k_final": "orthogonal0",
 		            "original_dim": [48,48,4],
                 "trunk": {
                     "filters": [4,4],

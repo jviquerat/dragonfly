@@ -28,6 +28,8 @@
             "type": "normal",
             "network": {
                 "type": "fc",
+                "k_init":  "orthogonal0",
+                "k_final": "orthogonal1",
                 "trunk": {
                     "arch": [64],
                     "actv": "tanh"
@@ -54,6 +56,8 @@
             "type": "v_value",
             "network": {
                 "type": "fc",
+                "k_init":  "orthogonal0",
+                "k_final": "orthogonal1",
                 "trunk": {
                     "arch": [64,64],
                     "actv": "relu"

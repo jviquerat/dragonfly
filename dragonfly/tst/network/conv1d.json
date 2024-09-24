@@ -28,6 +28,8 @@
             "type": "normal",
             "network": {
                 "type": "conv1d",
+                "k_init": "orthogonal1",
+                "k_final": "orthogonal0",
                 "trunk": {
                     "arch": [64],
 		                "k_size" : [3],
@@ -56,6 +58,8 @@
             "type": "v_value",
             "network": {
                 "type": "conv1d",
+                "k_init": "orthogonal1",
+                "k_final": "orthogonal0",
                 "trunk": {
                     "arch": [64],
 		                "k_size" : [3],

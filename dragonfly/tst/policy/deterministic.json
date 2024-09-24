@@ -3,6 +3,8 @@
         "type": "deterministic",
         "network": {
             "type": "fc",
+            "k_init": "orthogonal1",
+            "k_final": "orthogonal0",
             "trunk": {
                 "arch": [64,64],
                 "actv": "tanh"

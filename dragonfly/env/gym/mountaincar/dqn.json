@@ -34,6 +34,8 @@
             "type": "q_value",
             "network": {
                 "type": "fc",
+                "k_init":  "lecun_normal",
+                "k_final": "lecun_normal",
                 "trunk": {
                     "arch": [32,32],
                     "actv": "relu"

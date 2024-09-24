@@ -34,6 +34,8 @@
             "max_log_std": 2.0,
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
+                "k_final": "lecun_normal",
                 "trunk": {
                     "arch": [64],
                     "actv": "relu"
@@ -58,6 +60,8 @@
             "type": "q_value",
             "network": {
                 "type": "fc",
+                "k_init": "lecun_normal",
+                "k_final": "lecun_normal",
                 "trunk": {
                     "arch": [64,64],
                     "actv": "relu"
