@@ -6,8 +6,8 @@ from dragonfly.src.network.base import *
 
 
 class fc(BaseNetwork):
-    def __init__(self, inp_dim, out_dim, pms):
-        super(fc, self).__init__(inp_dim, out_dim)
+    def __init__(self, inp_dim, out_dim, pms, agent_type = AgentType.ON_POLICY):
+        super(fc, self).__init__(inp_dim, out_dim, agent_type)
 
         # Check inputs
         self._fetch_input(pms=pms)

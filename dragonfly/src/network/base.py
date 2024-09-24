@@ -14,6 +14,7 @@ from torch.nn.init import orthogonal_
 # Custom imports
 from dragonfly.src.utils.error import error, warning
 from dragonfly.src.network.tree import trunk, heads
+from dragonfly.src.utils.agent_type import AgentType
 
 
 def get_activation(activation_name):
@@ -37,10 +38,10 @@ def get_activation(activation_name):
     else:
         raise ValueError(f"Unsupported activation function: {activation_name}")
 
-
 def create_dense_layer(in_features, out_features, init_func, activation):
     layer = nn.Linear(in_features, out_features)
-    init_func(layer.weight)
+    if init_func is not None:
+        init_func(layer.weight)
     nn.init.zeros_(layer.bias)
     return nn.Sequential(layer, get_activation(activation))
 
@@ -94,7 +95,7 @@ def build_heads(
 ###############################################
 ### Base network
 class BaseNetwork(nn.Module):
-    def __init__(self, inp_dim, out_dim):
+    def __init__(self, inp_dim, out_dim, agent_type = AgentType.ON_POLICY):
         super(BaseNetwork, self).__init__()
 
         self.inp_dim = inp_dim
@@ -104,8 +105,14 @@ class BaseNetwork(nn.Module):
         self.trunk = trunk()
         self.heads = heads()
 
-        self.k_init = lambda x: orthogonal_(x, gain=1.0)
-        self.k_init_final = lambda x: orthogonal_(x, gain=0.0)
+        if agent_type == AgentType.ON_POLICY:
+            self.k_init = lambda x: orthogonal_(x, gain=1.0)
+            self.k_init_final = lambda x: orthogonal_(x, gain=0.0)
+        elif agent_type == AgentType.OFF_POLICY:
+            self.k_init = None
+            self.k_init_final = None
+        else:
+            raise ValueError(f"Agent Type {agent_type} not recognized.")
 
     # Network forward pass
     def forward(self, x):
@@ -136,10 +143,6 @@ class BaseNetwork(nn.Module):
             self.heads.actv = pms.heads.actv
         if hasattr(pms.heads, "final"):
             self.heads.final = pms.heads.final
-        if hasattr(pms, "k_init"):
-            self.k_init = pms.k_init
-        if hasattr(pms, "k_init_final"):
-            self.k_init_final = pms.k_init_final
 
         if conv:
             if hasattr(pms.trunk, "kernels"):

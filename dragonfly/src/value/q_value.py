@@ -1,6 +1,6 @@
 # Custom imports
 from dragonfly.src.value.base import *
-
+from dragonfly.src.utils.agent_type import AgentType
 ###############################################
 ### q_value class
 ### inp_dim : input  dimension
@@ -22,12 +22,14 @@ class q_value(base_value):
         self.net = net_factory.create(pms.network.type,
                                       inp_dim = self.inp_dim,
                                       out_dim = [self.out_dim],
+                                      agent_type = AgentType.OFF_POLICY,
                                       pms     = pms.network)
 
         if (self.target):
             self.tgt = net_factory.create(pms.network.type,
                                           inp_dim = self.inp_dim,
                                           out_dim = [self.out_dim],
+                                          agent_type = AgentType.OFF_POLICY,
                                           pms     = pms.network)
             self.copy_tgt()
 
