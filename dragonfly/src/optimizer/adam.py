@@ -27,7 +27,6 @@ class adam():
         self.opt.apply_gradients(zip(zero_grads, grad_vars))
 
         # Save weights and config
-        self.init_weights = self.opt.get_weights()
         self.config       = self.opt.get_config()
 
     # Get current learning rate
@@ -43,5 +42,4 @@ class adam():
     # Reset weights and config
     def reset(self):
 
-        self.opt.set_weights(self.init_weights)
         self.opt.from_config(self.config)
