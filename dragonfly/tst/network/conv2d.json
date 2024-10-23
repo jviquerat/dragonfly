@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "CarRacing-v2",
+        "name": "CarRacing-v3",
         "obs_clip": false,
         "obs_norm": false,
 	      "obs_stack": 4,
