@@ -61,7 +61,6 @@ class base_value():
     def load(self, filename):
 
         load_status = self.net.load_weights(filename)
-        load_status.assert_consumed()
 
     # Copy net into tgt
     def copy_tgt(self):

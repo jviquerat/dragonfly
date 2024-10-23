@@ -82,7 +82,7 @@ class sae(base_srl):
         np.savetxt(filename, self.loss_log)
 
         # Save weights
-        filename = paths.run + '/' + self.name
+        filename = paths.run + '/' + self.name + '.weights.h5'
         self.save(filename)
 
     # Full network forward pass
@@ -103,5 +103,4 @@ class sae(base_srl):
     # Load network weights
     def load(self, filename):
 
-        load_status = self.net.load_weights(filename)
-        load_status.assert_consumed()
+        load_status = self.net.load_weights(filename + '.weights.h5')

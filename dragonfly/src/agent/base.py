@@ -36,12 +36,12 @@ class base_agent():
     # Save policy parameters
     def save_policy(self, filename):
 
-        self.p.save(filename)
+        self.p.save(filename + '.weights.h5')
 
     # Load policy parameters
     def load_policy(self, folder):
 
-        filename = folder + '/' + self.name
+        filename = folder + '/' + self.name + '.weights.h5'
         self.p.load(filename)
 
 ###############################################

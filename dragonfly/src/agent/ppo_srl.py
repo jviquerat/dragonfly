@@ -168,7 +168,7 @@ class ppo_srl(base_agent_on_policy):
 
         filename = folder + '/' + self.srl.name
         self.srl.load(filename)
-        filename = folder + '/' + self.name
+        filename = folder + '/' + self.name + '.weights.h5'
         self.p.load(filename)
 
     # Save value parameters
