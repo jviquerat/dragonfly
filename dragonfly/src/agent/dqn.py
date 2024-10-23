@@ -126,11 +126,11 @@ class dqn(base_agent_off_policy):
     # This function overrides the base_agent::save_policy
     def save_policy(self, filename):
 
-        self.q.save(filename)
+        self.q.save(filename + '.weights.h5')
 
     # Load parameters
     # This function overrides the base_agent::load_policy
     def load_policy(self, folder):
 
-        filename = folder + '/' + self.name
+        filename = folder + '/' + self.name + '.weights.h5'
         self.q.load(filename)

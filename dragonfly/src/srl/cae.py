@@ -98,10 +98,9 @@ class cae(base_srl):
     # Save network weights
     def save(self, filename):
 
-        self.net.save_weights(filename)
+        self.net.save_weights(filename + '.weights.h5')
 
     # Load network weights
     def load(self, filename):
 
-        load_status = self.net.load_weights(filename)
-        load_status.assert_consumed()
+        load_status = self.net.load_weights(filename + '.weights.h5')

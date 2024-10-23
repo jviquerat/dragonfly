@@ -46,7 +46,7 @@ def train(json_file):
     for run in range(pms.n_avg):
         liner()
         print('Avg run #'+str(run))
-        paths.run = paths.results + '/'+str(run)
+        paths.run = paths.results + '/' + str(run)
         os.makedirs(paths.run, exist_ok=True)
         trainer.reset()
         trainer.loop()
