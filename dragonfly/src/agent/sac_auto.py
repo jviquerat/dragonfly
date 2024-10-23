@@ -14,11 +14,6 @@ class sac_auto(sac):
 
         # Possible auto temperature
         self.alpha_pms   = self.alpha
-        self.alpha       = self.alpha_pms.alpha_0
-        self.log_alpha   = tf.Variable(tf.math.log(self.alpha))
-        self.alpha_opt   = opt_factory.create(self.alpha_pms.optimizer.type,
-                                              pms = self.alpha_pms.optimizer,
-                                              grad_vars = [self.log_alpha])
         self.alpha_loss  = alpha_sac()
         self.tgt_entropy =-self.act_dim
 
@@ -69,5 +64,9 @@ class sac_auto(sac):
     def reset(self):
 
         super().reset()
-        self.alpha     = self.alpha_pms.alpha_0
-        self.log_alpha = tf.Variable(tf.math.log(self.alpha))
+
+        self.alpha       = self.alpha_pms.alpha_0
+        self.log_alpha   = tf.Variable(tf.math.log(self.alpha))
+        self.alpha_opt   = opt_factory.create(self.alpha_pms.optimizer.type,
+                                              pms = self.alpha_pms.optimizer,
+                                              grad_vars = [self.log_alpha])
