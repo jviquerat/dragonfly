@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "LunarLanderContinuous-v2",
+        "name": "LunarLanderContinuous-v3",
         "args": {
             "enable_wind": true
         },

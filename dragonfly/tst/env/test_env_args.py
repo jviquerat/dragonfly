@@ -24,7 +24,7 @@ def test_env_args():
     env  = environments(path, pms.env)
 
     # Check
-    assert(env.worker.env.enable_wind == True)
+    assert(env.worker.env.env.env.env.enable_wind == True)
     assert(env.obs_clip  == False)
     assert(env.obs_norm  == True)
     assert(env.obs_noise == False)
