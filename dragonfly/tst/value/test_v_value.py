@@ -19,7 +19,7 @@ def test_v_value():
     reader.read("dragonfly/tst/value/v_value.json")
 
     # Initialize v_value
-    value = v_value(1, reader.pms.value)
+    value = v_value(1, [1], reader.pms.value)
 
     # Test action values
     print("Test v_value")

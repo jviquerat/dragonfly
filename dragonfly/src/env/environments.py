@@ -5,10 +5,16 @@ import numpy as np
 from dragonfly.src.core.constants import *
 from dragonfly.src.env.worker     import *
 from dragonfly.src.utils.timer    import timer
+from dragonfly.src.utils.prints   import liner, spacer
+
+###############################################
+### Shapes declared as global
+
 
 ###############################################
 ### A wrapper class for parallel environments
 class environments:
+    # Class variable
     def __init__(self, path, pms):
 
         # Default parameters
@@ -51,9 +57,17 @@ class environments:
         # Handle action and observation dimensions
         self.get_dims()
 
-        # Handle possible observation stacking
-        self.obs_base = self.obs_dim
-        self.obs_dim *= self.obs_stack
+        # Output dimensions
+        liner()
+        print("Problem dimensions")
+        spacer()
+        print("Natural obs shape: " + str(self.natural_obs_shape))
+        spacer()
+        print("Natural obs dim:   " + str(self.natural_obs_dim))
+        spacer()
+        print("True obs shape:    " + str(self.true_obs_shape))
+        spacer()
+        print("True obs dim:      " + str(self.true_obs_dim))
 
         # Handle actions bounds
         self.get_act_bounds()
@@ -87,7 +101,7 @@ class environments:
                 self.obs_rng = self.obs_rng[::s,::s]
 
         # Initialize an observation array for stacking
-        self.nxt = np.zeros((mpi.size, self.obs_base, self.obs_stack))
+        self.nxt = np.zeros((mpi.size, self.processed_obs_dim, self.obs_stack))
 
         # Initialize timer
         self.timer_env = timer("env      ")
@@ -143,7 +157,7 @@ class environments:
                 trunc[p]         = bool(t)
 
         # Reshape observations for returning
-        nxt = np.reshape(self.nxt, (mpi.size, self.obs_dim)).copy()
+        nxt = np.reshape(self.nxt, (mpi.size, self.true_obs_dim)).copy()
 
         self.timer_env.toc()
 
@@ -166,7 +180,7 @@ class environments:
             self.nxt[p,:,:]  = 0.0
             self.nxt[p,:,-1] = obs[:].flatten()
 
-        nxt = np.reshape(self.nxt, (mpi.size, self.obs_dim)).copy()
+        nxt = np.reshape(self.nxt, (mpi.size, self.true_obs_dim)).copy()
 
         return nxt
 
@@ -209,35 +223,60 @@ class environments:
     # Get environment dimensions
     def get_dims(self):
 
+        self.natural_obs_shape   = None
+        self.natural_obs_dim     = None
+        self.processed_obs_shape = None
+        self.processed_obs_dim   = None
+        self.true_obs_shape      = None
+        self.true_obs_dim        = None
+        self.act_dim             = None
+
         # Discrete action space
         if (type(self.worker.env.action_space).__name__ == "Discrete"):
             self.act_dim = int(self.worker.env.action_space.n)
         # Continuous action space
         if (type(self.worker.env.action_space).__name__ == "Box"):
             self.act_dim = int(self.worker.env.action_space.shape[0])
-        # Discrete observation space
-        if (type(self.worker.env.observation_space).__name__ == "Discrete"):
-            self.obs_dim = int(self.worker.env.observation_space.n)
         # Continuous observation space
         if (type(self.worker.env.observation_space).__name__ == "Box"):
-            shape     = self.worker.env.observation_space.shape
-            n_dims    = len(shape)
+            # Retrieve natural obs shape
+            self.natural_obs_shape = list(self.worker.env.observation_space.shape)
+            n_dims            = len(self.natural_obs_shape)
 
-            # First dimension in any case
-            shape_x   = shape[0]//self.obs_downscale
-            total_dim = shape_x
+            # Compute natural_obs_dim
+            self.natural_obs_dim = 1
+            for i in range(n_dims):
+                self.natural_obs_dim *= self.natural_obs_shape[i]
+
+            # Compute processed_obs_shape
+            self.processed_obs_shape = self.natural_obs_shape.copy()
+            for i in range(n_dims):
+                self.processed_obs_shape[i] = self.processed_obs_shape[i]//self.obs_downscale
 
             # Second and third dimensions if image
-            # Alpha channel dimension is mandatory
             if (n_dims > 1):
-                shape_y    = shape[1]//self.obs_downscale
-                total_dim *= shape_y
 
-                if self.obs_grayscale: shape_z = 1
-                else: shape_z = shape[2]
-                total_dim *= shape_z
+                # Alpha channel dimension is mandatory
+                if (n_dims == 2):
+                    self.processed_obs_shape.append(1);
+                    n_dims = 3
 
-            self.obs_dim = total_dim
+                # Possible grayscaling
+                if self.obs_grayscale: self.processed_obs_shape[2] = 1
+
+            # Compute processed_obs_dim
+            self.processed_obs_dim = 1
+            for i in range(n_dims):
+                self.processed_obs_dim *= self.processed_obs_shape[i]
+
+        # Handle possible observation stacking
+        self.true_obs_shape = self.processed_obs_shape.copy()
+        if (n_dims == 1): self.true_obs_shape[0] *= self.obs_stack
+        if (n_dims == 3): self.true_obs_shape[2] *= self.obs_stack
+
+        self.true_obs_dim = 1
+        for i in range(n_dims):
+            self.true_obs_dim *= self.true_obs_shape[i]
 
     # Get action boundaries
     def get_act_bounds(self):
@@ -358,7 +397,7 @@ class environments:
     # Clip observations
     def clip_obs(self, obs):
 
-        for i in range(self.obs_base):
+        for i in range(self.processed_obs_dim):
             obs[i] = np.clip(obs[i], self.obs_min[i], self.obs_max[i])
 
         return obs
@@ -374,8 +413,8 @@ class environments:
     # Add noise to observations
     def noise_obs(self, obs):
 
-        noise = np.random.normal(0.0, self.obs_noise, self.obs_base)
-        for i in range(self.obs_base):
+        noise = np.random.normal(0.0, self.obs_noise, self.processed_obs_dim)
+        for i in range(self.processed_obs_dim):
             obs[i] += noise[i]
 
         return obs

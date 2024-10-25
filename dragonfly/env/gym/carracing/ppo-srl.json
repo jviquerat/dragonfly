@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "CarRacing-v2",
+        "name": "CarRacing-v3",
         "obs_clip": false,
         "obs_norm": true,
         "obs_noise": 0.0,
@@ -37,7 +37,6 @@
             "n_update_max": 1,
 	          "batch_size": 100,
             "network": {
-                "original_dim": [24,24,4],
                 "trunk": {
                     "filters": [8,8],
                     "kernels": [7,3],

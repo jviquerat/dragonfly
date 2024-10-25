@@ -37,7 +37,6 @@
             "n_update_max": 1,
 	          "batch_size": 100,
             "network": {
-                "original_dim": [24,24,4],
                 "trunk": {
                     "filters": [8,8],
                     "kernels": [7,3],

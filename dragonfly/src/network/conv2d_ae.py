@@ -11,14 +11,15 @@ from dragonfly.src.network.base import *
 ### out_dim  : dimension of output layer
 ### pms      : network parameters
 class conv2d_ae(base_network):
-    def __init__(self, inp_dim, lat_dim, pms):
+    def __init__(self, inp_dim, inp_shape, lat_dim, pms):
 
         # Initialize base class
         super().__init__()
 
         # Set inputs
-        self.inp_dim = inp_dim
-        self.lat_dim = lat_dim
+        self.inp_dim   = inp_dim
+        self.inp_shape = inp_shape
+        self.lat_dim   = lat_dim
 
         # Set default values
         self.trunk         = trunk()
@@ -37,19 +38,13 @@ class conv2d_ae(base_network):
         if hasattr(pms.trunk, "strides"):       self.trunk.stride  = pms.trunk.stride
         if hasattr(pms.trunk, "actv"):          self.trunk.actv    = pms.trunk.actv
         if hasattr(pms,       "k_init"):        self.k_init        = pms.k_init
-        if hasattr(pms,       "original_dim"):  self.original_dim  = pms.original_dim
         if hasattr(pms,       "pooling"):       self.pooling       = pms.pooling
-
-        # Specific dimensions
-        self.nx    = self.original_dim[0]
-        self.ny    = self.original_dim[1]
-        self.stack = self.original_dim[2]
 
         # Initialize network
         self.enc = []
         self.dec = []
-        self.w   = self.nx
-        self.h   = self.ny
+        self.w   = self.inp_shape[0]
+        self.h   = self.inp_shape[1]
 
         # Define encoder
         for l in range(len(self.trunk.filters)):
@@ -59,7 +54,7 @@ class conv2d_ae(base_network):
                                        strides            = self.trunk.stride,
                                        kernel_initializer = self.k_init,
                                        activation         = self.trunk.actv,
-                                       input_shape        = self.original_dim,
+                                       input_shape        = self.inp_shape,
                                        padding            = "same"))
             else:
                 self.enc.append(Conv2D(filters            = self.trunk.filters[l],
@@ -92,14 +87,14 @@ class conv2d_ae(base_network):
                                             activation  = self.trunk.actv,
                                             padding     = "same"))
 
-        self.dec.append(Conv2D(filters     = self.stack,
+        self.dec.append(Conv2D(filters     = self.inp_shape[2],
                                kernel_size = self.trunk.kernels[0],
                                strides     = self.trunk.stride,
                                activation  = "sigmoid",
                                padding     = "same"))
 
         # Initialize weights
-        dummy = self.call(tf.ones([1, self.nx, self.ny, self.stack]))
+        dummy = self.call(tf.ones([1] + self.inp_shape))
 
         # Save initial weights
         self.init_weights = self.get_weights()
@@ -122,7 +117,7 @@ class conv2d_ae(base_network):
 
         # Back to the original dimension
         # Reminder : the new shape will be (batch_size, self.original_dim)
-        var = Reshape(self.original_dim)(var)
+        var = Reshape(self.inp_shape)(var)
 
         # Convolutional layers
         for l in range(len(self.trunk.filters)):

@@ -19,7 +19,7 @@ def test_normal_diag():
     reader.read("dragonfly/tst/policy/normal_diag.json")
 
     # Initialize discrete agent
-    policy = normal_diag(1, 5, reader.pms.policy)
+    policy = normal_diag(1, [1], 5, reader.pms.policy)
 
     # Test action values
     print("Test diagonal normal policy")

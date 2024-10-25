@@ -30,7 +30,6 @@
             "type": "normal",
             "network": {
                 "type": "conv2d",
-		            "original_dim": [48,48,4],
                 "trunk": {
                     "filters": [4,4],
 		                "kernels": [3,3],
@@ -59,7 +58,6 @@
             "type": "v_value",
             "network": {
                 "type": "conv2d",
-		            "original_dim": [48,48,4],
                 "trunk": {
                     "filters": [4,4],
 		                "kernels": [3,3],

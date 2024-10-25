@@ -30,9 +30,10 @@ class base_trainer:
             n_stp_max (int): Maximum number of steps.
             pms (Any): Parameters for the trainer.
         """
-        self.env = environments(paths.base, env_pms)
-        self.obs_dim = self.env.obs_dim
-        self.act_dim = self.env.act_dim
+        self.env       = environments(paths.base, env_pms)
+        self.obs_dim   = self.env.true_obs_dim
+        self.obs_shape = self.env.true_obs_shape
+        self.act_dim   = self.env.act_dim
         self.n_stp_max = n_stp_max
 
         self.cnt   = None

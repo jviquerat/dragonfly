@@ -19,7 +19,7 @@ def test_categorical():
     reader.read("dragonfly/tst/policy/categorical.json")
 
     # Initialize discrete agent
-    policy = categorical(1, 2, reader.pms.policy)
+    policy = categorical(1, [1], 2, reader.pms.policy)
 
     # Test action values
     print("Test categorical policy")
