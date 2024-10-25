@@ -19,7 +19,7 @@ def test_normal_iso():
     reader.read("dragonfly/tst/policy/normal_iso.json")
 
     # Initialize discrete agent
-    policy = normal_iso(1, 5, reader.pms.policy)
+    policy = normal_iso(1, [1], 5, reader.pms.policy)
 
     # Test action values
     print("Test isotropic normal policy")

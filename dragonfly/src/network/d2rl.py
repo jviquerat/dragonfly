@@ -1,14 +1,15 @@
 from dragonfly.src.network.base import *
 
 class d2rl(base_network):
-    def __init__(self, inp_dim, out_dim, pms):
+    def __init__(self, inp_dim, inp_shape, out_dim, pms):
 
         # Initialize base class
         super().__init__()
 
         # Set inputs
-        self.inp_dim = inp_dim
-        self.out_dim = out_dim
+        self.inp_dim   = inp_dim
+        self.inp_shape = inp_shape
+        self.out_dim   = out_dim
 
         self.trunk = pms.trunk if hasattr(pms, "trunk") else trunk()
         self.trunk.arch = pms.trunk.arch if hasattr(pms.trunk, "arch") else [64]

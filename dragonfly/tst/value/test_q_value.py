@@ -19,7 +19,7 @@ def test_q_value():
     reader.read("dragonfly/tst/value/q_value.json")
 
     # Initialize q_value
-    value = q_value(1, 4, reader.pms.value)
+    value = q_value(1, [1], 4, reader.pms.value)
 
     # Test action values
     print("Test q_value")

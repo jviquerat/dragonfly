@@ -4,12 +4,13 @@ from dragonfly.src.agent.base import *
 ###############################################
 ### DQN agent
 class dqn(base_agent_off_policy):
-    def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
+    def __init__(self, obs_dim, obs_shape, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
         self.name       = 'dqn'
         self.act_dim    = act_dim
         self.obs_dim    = obs_dim
+        self.obs_shape = obs_shape
         self.n_cpu      = n_cpu
         self.mem_size   = size
         self.gamma      = pms.gamma
@@ -32,10 +33,11 @@ class dqn(base_agent_off_policy):
                   "Loss type for dqn agent is not mse_dqn")
 
         self.q = val_factory.create(pms.value.type,
-                                    inp_dim = obs_dim,
-                                    out_dim = act_dim,
-                                    pms     = pms.value,
-                                    target  = True)
+                                    inp_dim   = obs_dim,
+                                    inp_shape = obs_shape,
+                                    out_dim   = act_dim,
+                                    pms       = pms.value,
+                                    target    = True)
 
         # Create buffers
         self.create_buffers(act_dim=1)

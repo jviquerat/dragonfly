@@ -9,11 +9,12 @@ from dragonfly.src.core.paths import *
 ### Class for PCA srl
 ### pms : parameters
 class pca(base_srl):
-    def __init__(self, obs_dim, buff_size, pms):
+    def __init__(self, obs_dim, obs_shape, buff_size, pms):
 
         # Initialize from arguments
         self.name          = "pca"
         self.obs_dim       = obs_dim
+        self.obs_shape     = obs_shape
         self.buff_size     = buff_size
         self.latent_dim    = pms.latent_dim
         self.warmup        = pms.warmup

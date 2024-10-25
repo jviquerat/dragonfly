@@ -29,6 +29,7 @@ class td(base_trainer):
         self.agent = agent_factory.create(
             agent_pms.type,
             obs_dim=self.obs_dim,
+            obs_shape=self.obs_shape,
             act_dim=self.act_dim,
             n_cpu=mpi.size,
             size=self.mem_size,

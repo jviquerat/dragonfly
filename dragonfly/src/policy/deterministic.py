@@ -8,11 +8,12 @@ from dragonfly.src.policy.base import base_policy
 ### act_dim : output dimension
 ### pms     : parameters
 class deterministic(base_policy):
-    def __init__(self, obs_dim, act_dim, pms, target=False):
+    def __init__(self, obs_dim, obs_shape, act_dim, pms, target=False):
 
         # Fill structure
         self.act_dim    = act_dim
         self.obs_dim    = obs_dim
+        self.obs_shape  = obs_shape
         self.dim        = self.act_dim
         self.out_dim    = [self.dim]
         self.store_dim  = self.act_dim

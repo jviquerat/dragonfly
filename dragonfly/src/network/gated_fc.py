@@ -8,7 +8,7 @@ from dragonfly.src.utils.rmsnorm import RMSNorm
 ### out_dim  : dimension of output layer
 ### pms      : network parameters
 class gated_fc(base_network):
-    def __init__(self, inp_dim, out_dim, pms):
+    def __init__(self, inp_dim, inp_shape, out_dim, pms):
         """
         We consider that the block of the network is not a simple dense layer,
         but a gated block made of 3 dense layers with a RMSNorm layer beforehand.
@@ -20,8 +20,9 @@ class gated_fc(base_network):
         super().__init__()
 
         # Set inputs
-        self.inp_dim = inp_dim
-        self.out_dim = out_dim
+        self.inp_dim   = inp_dim
+        self.inp_shape = inp_shape
+        self.out_dim   = out_dim
 
         # Set default values
         self.trunk = trunk()

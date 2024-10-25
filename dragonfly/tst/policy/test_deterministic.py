@@ -19,7 +19,7 @@ def test_deterministic():
     reader.read("dragonfly/tst/policy/deterministic.json")
 
     # Initialize discrete agent
-    policy = deterministic(1, 5, reader.pms.policy)
+    policy = deterministic(1, [1], 5, reader.pms.policy)
 
     # Test action values
     print("Test deterministic policy")

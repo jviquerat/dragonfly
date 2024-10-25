@@ -5,20 +5,22 @@ from dragonfly.src.srl.srl    import *
 ###############################################
 ### PPO-SRL agent
 class ppo_srl(base_agent_on_policy):
-    def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
+    def __init__(self, obs_dim, obs_shape, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
-        self.name    = 'ppo_srl'
-        self.act_dim = act_dim
-        self.obs_dim = obs_dim
-        self.n_cpu   = n_cpu
-        self.size    = size
-        self.warmup  = pms.srl.warmup
-        self.step    = 0
+        self.name      = 'ppo_srl'
+        self.act_dim   = act_dim
+        self.obs_dim   = obs_dim
+        self.obs_shape = obs_shape
+        self.n_cpu     = n_cpu
+        self.size      = size
+        self.warmup    = pms.srl.warmup
+        self.step      = 0
 
         # Initialize srl class
         self.srl = srl_factory.create(pms.srl.type,
                                       obs_dim   = self.obs_dim,
+                                      obs_shape = self.obs_shape,
                                       buff_size = 100*self.size,
                                       pms       = pms.srl)
 
@@ -29,6 +31,7 @@ class ppo_srl(base_agent_on_policy):
 
         self.p = pol_factory.create(pms.policy.type,
                                     obs_dim = self.srl.latent_dim,
+                                    obs_shape = None,
                                     act_dim = act_dim,
                                     pms     = pms.policy)
 
@@ -43,6 +46,7 @@ class ppo_srl(base_agent_on_policy):
 
         self.v = val_factory.create(pms.value.type,
                                     inp_dim = self.srl.latent_dim,
+                                    inp_shape = None,
                                     pms     = pms.value)
 
         # Build advantage

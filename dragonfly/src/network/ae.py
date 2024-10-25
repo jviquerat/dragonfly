@@ -7,14 +7,15 @@ from dragonfly.src.network.base import *
 ### out_dim  : dimension of output layer
 ### pms      : network parameters
 class ae(base_network):
-    def __init__(self, inp_dim, lat_dim, pms):
+    def __init__(self, inp_dim, inp_shape, lat_dim, pms):
 
         # Initialize base class
         super().__init__()
 
         # Set inputs
-        self.inp_dim = inp_dim
-        self.lat_dim = lat_dim
+        self.inp_dim   = inp_dim
+        self.inp_shape = inp_shape
+        self.lat_dim   = lat_dim
 
         # Set default values
         self.arch = [64]

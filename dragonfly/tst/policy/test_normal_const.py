@@ -19,7 +19,7 @@ def test_normal_const():
     reader.read("dragonfly/tst/policy/normal_const.json")
 
     # Initialize discrete agent
-    policy = normal_const(1, 5, reader.pms.policy)
+    policy = normal_const(1, [1], 5, reader.pms.policy)
 
     # Test action values
     print("Test const normal policy")

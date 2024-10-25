@@ -10,14 +10,15 @@ from dragonfly.src.network.base import *
 ### out_dim  : dimension of output layer
 ### pms      : network parameters
 class conv2d(base_network):
-    def __init__(self, inp_dim, out_dim, pms):
+    def __init__(self, inp_dim, inp_shape, out_dim, pms):
 
         # Initialize base class
         super().__init__()
 
         # Set inputs
-        self.inp_dim = inp_dim
-        self.out_dim = out_dim
+        self.inp_dim   = inp_dim
+        self.inp_shape = inp_shape
+        self.out_dim   = out_dim
 
         # Set default values
         self.trunk         = trunk()
@@ -32,7 +33,6 @@ class conv2d(base_network):
         self.heads.final   = ["linear"]
         self.k_init        = Orthogonal(gain=1.0)
         self.k_init_final  = Orthogonal(gain=0.0)
-        self.original_dim  = None
         self.pooling       = False
 
         # Check inputs
@@ -48,13 +48,7 @@ class conv2d(base_network):
         if hasattr(pms.heads, "final"):        self.heads.final   = pms.heads.final
         if hasattr(pms,       "k_init"):       self.k_init        = pms.k_init
         if hasattr(pms,       "k_init_final"): self.k_init_final  = pms.k_init_final
-        if hasattr(pms,       "original_dim"): self.original_dim  = pms.original_dim
         if hasattr(pms,       "pooling"):      self.pooling       = pms.pooling
-
-        # Specific dimensions
-        self.nx    = self.original_dim[0]
-        self.ny    = self.original_dim[1]
-        self.stack = self.original_dim[2]
 
         # Check that out_dim and heads have same dimension
         if (len(self.out_dim) != pms.heads.nb):
@@ -76,7 +70,7 @@ class conv2d(base_network):
                                        strides            = self.trunk.stride,
                                        kernel_initializer = self.k_init,
                                        activation         = self.trunk.actv,
-                                       input_shape        = self.original_dim,
+                                       input_shape        = self.inp_shape,
                                        padding            = "same"))
             else:
                 self.net.append(Conv2D(filters            = self.trunk.filters[l],
@@ -100,7 +94,7 @@ class conv2d(base_network):
                                   activation         = self.heads.final[h]))
 
         # Initialize weights
-        dummy = self.call(tf.ones([1, self.nx, self.ny, self.stack]))
+        dummy = self.call(tf.ones([1] + self.inp_shape))
 
         # Save initial weights
         self.init_weights = self.get_weights()
@@ -114,8 +108,7 @@ class conv2d(base_network):
         out = []
 
         # Back to the original dimension
-        # Reminder : the new shape will be (batch_size, self.original_dim)
-        var = Reshape(self.original_dim)(var)
+        var = Reshape(self.inp_shape)(var)
 
         # Compute trunk
         for l in range(len(self.trunk.filters)):

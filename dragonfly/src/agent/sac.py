@@ -5,12 +5,13 @@ from dragonfly.src.utils.polyak import polyak
 ###############################################
 ### SAC agent
 class sac(base_agent_off_policy):
-    def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
+    def __init__(self, obs_dim, obs_shape, act_dim, n_cpu, size, pms):
 
         # Initialize from arguments
         self.name       = 'sac'
         self.act_dim    = act_dim
         self.obs_dim    = obs_dim
+        self.obs_shape  = obs_shape
         self.n_cpu      = n_cpu
         self.mem_size   = size
         self.gamma      = pms.gamma
@@ -31,9 +32,10 @@ class sac(base_agent_off_policy):
                   "Policy type for sac agent is not tanh_normal")
 
         self.p = pol_factory.create(pms.policy.type,
-                                    obs_dim = obs_dim,
-                                    act_dim = act_dim,
-                                    pms     = pms.policy)
+                                    obs_dim   = obs_dim,
+                                    obs_shape = obs_shape,
+                                    act_dim   = act_dim,
+                                    pms       = pms.policy)
 
         # pol_dim is the true dimension of the action provided to the env
         # This allows compatibility between continuous and discrete envs
@@ -50,11 +52,13 @@ class sac(base_agent_off_policy):
 
         self.q1 = val_factory.create(pms.value.type,
                                      inp_dim = obs_dim+act_dim,
+                                     inp_shape = None,
                                      out_dim = 1,
                                      pms     = pms.value,
                                      target  = True)
         self.q2 = val_factory.create(pms.value.type,
                                      inp_dim = obs_dim+act_dim,
+                                     inp_shape = None,
                                      out_dim = 1,
                                      pms     = pms.value,
                                      target  = True)

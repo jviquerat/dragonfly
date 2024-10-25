@@ -7,10 +7,10 @@ from dragonfly.src.utils.polyak        import polyak
 ###############################################
 ### SAC auto agent
 class sac_auto(sac):
-    def __init__(self, obs_dim, act_dim, n_cpu, size, pms):
+    def __init__(self, obs_dim, obs_shape, act_dim, n_cpu, size, pms):
 
         # Init from base class
-        super().__init__(obs_dim, act_dim, n_cpu, size, pms)
+        super().__init__(obs_dim, obs_shape, act_dim, n_cpu, size, pms)
 
         # Possible auto temperature
         self.alpha_pms   = self.alpha

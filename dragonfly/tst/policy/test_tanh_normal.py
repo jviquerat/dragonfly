@@ -19,7 +19,7 @@ def test_normal():
     reader.read("dragonfly/tst/policy/tanh_normal.json")
 
     # Initialize discrete agent
-    policy = tanh_normal(1, 5, reader.pms.policy)
+    policy = tanh_normal(1, [1], 5, reader.pms.policy)
 
     # Test action values
     print("Test tanh-normal policy")

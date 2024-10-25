@@ -11,11 +11,12 @@ from dragonfly.src.loss.loss           import loss_factory
 ###############################################
 ### Standard autoencoder srl class
 class sae(base_srl):
-    def __init__(self, obs_dim, buff_size, pms):
+    def __init__(self, obs_dim, obs_shape, buff_size, pms):
 
         # Initialize from arguments
         self.name             = "ae"
         self.obs_dim          = obs_dim
+        self.obs_shape        = obs_shape
         self.buff_size        = buff_size
         self.latent_dim       = pms.latent_dim
         self.warmup           = pms.warmup
@@ -27,10 +28,11 @@ class sae(base_srl):
 
         # Initialize network
         self.net = net_factory.create("ae",
-                                      inp_dim = self.obs_dim,
-                                      lat_dim = self.latent_dim,
-                                      pms     = pms.network)
-        
+                                      inp_dim   = self.obs_dim,
+                                      inp_shape = self.obs_shape,
+                                      lat_dim   = self.latent_dim,
+                                      pms       = pms.network)
+
         # Define trainables
         self.trainables = self.net.trainable_weights
 

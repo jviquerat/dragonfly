@@ -19,7 +19,7 @@ def test_normal_full():
     reader.read("dragonfly/tst/policy/normal_full.json")
 
     # Initialize discrete agent
-    policy = normal_full(1, 5, reader.pms.policy)
+    policy = normal_full(1, [1], 5, reader.pms.policy)
 
     # Test action values
     print("Test full normal policy")

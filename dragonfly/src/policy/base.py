@@ -13,15 +13,17 @@ class base_policy():
     def __init__(self, pms):
 
         self.net = net_factory.create(pms.network.type,
-                                      inp_dim = self.obs_dim,
-                                      out_dim = self.out_dim,
-                                      pms     = pms.network)
+                                      inp_dim   = self.obs_dim,
+                                      inp_shape = self.obs_shape,
+                                      out_dim   = self.out_dim,
+                                      pms       = pms.network)
 
         if (self.target):
             self.tgt = net_factory.create(pms.network.type,
-                                          inp_dim = self.obs_dim,
-                                          out_dim = [self.dim],
-                                          pms     = pms.network)
+                                          inp_dim   = self.obs_dim,
+                                          inp_shape = self.obs_shape,
+                                          out_dim   = [self.dim],
+                                          pms       = pms.network)
             self.copy_tgt()
 
         # Define optimizer
