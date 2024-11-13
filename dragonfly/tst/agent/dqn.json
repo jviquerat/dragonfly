@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "CartPole-v0",
+        "name": "CartPole-v1",
         "obs_clip": true,
         "obs_norm": true,
         "obs_noise": 0.0
