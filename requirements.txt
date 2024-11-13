@@ -1,4 +1,4 @@
-gymnasium[all]
+gymnasium[box2d, classic-control]
 mpi4py
 numpy
 tensorflow
