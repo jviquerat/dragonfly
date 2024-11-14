@@ -21,22 +21,11 @@ from dragonfly.src.utils.error      import error
 ### Base trainer class
 class base_trainer:
     def __init__(self, env_pms, n_stp_max, pms):
-        """
-        Initializes the base trainer class.
 
-        Args:
-            env_pms (Any): Parameters for the environment.
-            n_stp_max (int): Maximum number of steps.
-            pms (Any): Parameters for the trainer.
-        """
         self.env       = environment(paths.base, env_pms)
         self.n_stp_max = n_stp_max
 
-        self.cnt   = None
-        self.agent = None
-
-        if hasattr(pms, "update"):
-            self.update_type = pms.update
+        self.cnt = None
 
         self.monitoring = False
         if hasattr(pms, "monitoring"):
@@ -52,27 +41,15 @@ class base_trainer:
         self.renderer = renderer(mpi.size, self.rnd_style, pms.render_every)
 
         # Initialize timers
-        self.timer_global = timer("global   ")
+        self.timer_global   = timer("global   ")
         self.timer_training = timer("training ")
 
-    def start_training(self) -> np.array:
-        """
-        Initiates the training process by resetting the environment and counters.
+    def start_training(self):
 
-        This method marks the beginning of the training process. It starts the global timer,
-        resets the environment to its initial state, and resets the training counter. It returns
-        the initial observation from the environment to start the training loop.
-
-        Returns:
-            np.array: The initial observation from the environment after reset.
-        """
         self.timer_global.tic()
-
-        # Reset environment
         obs = self.env.reset_all()
-
-        # Reset counter
         self.counter.reset()
+
         return obs
 
     def loop(self):
@@ -150,7 +127,7 @@ class base_trainer:
         Returns:
             tuple: A tuple containing the next state (np.array), reward (float), done flag (bool),
         """
-        # Retrieve action and ste^p
+        # Retrieve action and step
         act = self.agent.actions(obs)
         nxt, rwd, dne, trc = self.env.step(act)
 
@@ -180,11 +157,10 @@ class base_trainer:
         maximum number of steps is reached, after which it starts printing on new lines.
         """
         # No initial printing
-        if self.counter.ep == 0:
-            return
+        if self.counter.ep == 0: return
 
-        ep = self.counter.ep
-        stp = self.counter.step
+        ep        = self.counter.ep
+        stp       = self.counter.step
         n_stp_max = self.n_stp_max
 
         # Retrieve data
