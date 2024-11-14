@@ -3,8 +3,6 @@ from dragonfly.src.value.base import *
 
 ###############################################
 ### v_value class
-### inp_dim : input dimension
-### pms     : parameters
 class v_value(base_value):
     def __init__(self, inp_dim, inp_shape, pms, target=False):
 
@@ -13,11 +11,6 @@ class v_value(base_value):
         self.inp_shape = inp_shape
         self.out_dim   = 1
         self.target    = target
-
-        # Define and init network
-        if (pms.network.heads.final[0] != "linear"):
-            warning("v_value", "__init__",
-                    "Chosen final activation for v_value is not linear")
 
         self.net = net_factory.create(pms.network.type,
                                       inp_dim   = self.inp_dim,
