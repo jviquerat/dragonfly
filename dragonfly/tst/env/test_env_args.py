@@ -25,10 +25,10 @@ def test_env_args():
 
     # Check
     assert(env.worker.env.env.env.env.enable_wind == True)
-    assert(env.spaces.obs_clip  == False)
-    assert(env.spaces.obs_norm  == True)
-    assert(env.spaces.obs_noise == False)
-    assert(env.spaces.obs_stack == 4)
+    assert(env.spaces.obs_clip_  == False)
+    assert(env.spaces.obs_norm_  == True)
+    assert(env.spaces.obs_noise_ == False)
+    assert(env.spaces.obs_stack_ == 4)
     print("")
 
     #########################

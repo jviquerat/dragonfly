@@ -11,147 +11,171 @@ class environment_spaces:
     def __init__(self, pms, spaces):
 
         # Constants
-        self.inf_obs_value = 1.0e8
+        self.inf_obs_value_ = 1.0e8
 
         # Default values
-        self.act_norm       = True
-        self.obs_norm       = True
-        self.obs_clip       = False
-        self.obs_noise      = False
-        self.obs_stack      = 1
-        self.obs_grayscale  = False
-        self.obs_downscale  = 1
-        self.obs_frameskip  = 1
-        self.manual_obs_max = 1.0
+        self.act_norm_       = True
+        self.obs_norm_       = True
+        self.obs_clip_       = False
+        self.obs_noise_      = False
+        self.obs_stack_      = 1
+        self.obs_grayscale_  = False
+        self.obs_downscale_  = 1
+        self.obs_frameskip_  = 1
+        self.manual_obs_max_ = 1.0
 
         # Optional values in parameters
-        if hasattr(pms, "act_norm"):      self.act_norm       = pms.act_norm
-        if hasattr(pms, "obs_norm"):      self.obs_norm       = pms.obs_norm
-        if hasattr(pms, "obs_clip"):      self.obs_clip       = pms.obs_clip
-        if hasattr(pms, "obs_noise"):     self.obs_noise      = pms.obs_noise
-        if hasattr(pms, "obs_stack"):     self.obs_stack      = pms.obs_stack
-        if hasattr(pms, "obs_grayscale"): self.obs_grayscale  = pms.obs_grayscale
-        if hasattr(pms, "obs_downscale"): self.obs_downscale  = pms.obs_downscale
-        if hasattr(pms, "obs_frameskip"): self.obs_frameskip  = pms.obs_frameskip
-        if hasattr(pms, "obs_max"):       self.manual_obs_max = pms.obs_max
+        if hasattr(pms, "act_norm"):      self.act_norm_       = pms.act_norm
+        if hasattr(pms, "obs_norm"):      self.obs_norm_       = pms.obs_norm
+        if hasattr(pms, "obs_clip"):      self.obs_clip_       = pms.obs_clip
+        if hasattr(pms, "obs_noise"):     self.obs_noise_      = pms.obs_noise
+        if hasattr(pms, "obs_stack"):     self.obs_stack_      = pms.obs_stack
+        if hasattr(pms, "obs_grayscale"): self.obs_grayscale_  = pms.obs_grayscale
+        if hasattr(pms, "obs_downscale"): self.obs_downscale_  = pms.obs_downscale
+        if hasattr(pms, "obs_frameskip"): self.obs_frameskip_  = pms.obs_frameskip
+        if hasattr(pms, "obs_max"):       self.manual_obs_max_ = pms.obs_max
 
         # Action space
         action_space = spaces[0]
-        self.act_type = type(action_space).__name__
-        if (self.act_type not in ["Discrete", "Box"]):
+        self.act_type_ = type(action_space).__name__
+        if (self.act_type_ not in ["Discrete", "Box"]):
             error("environment_spaces", "__init__",
-                  "Unknown action space: "+self.act_type)
+                  "Unknown action space: "+self.act_type_)
 
-        if (self.act_type == "Discrete"):
-            self.act_dim  = int(action_space.n)
-            self.act_norm = False
-            self.act_min  = 1.0
-            self.act_max  = 1.0
+        if (self.act_type_ == "Discrete"):
+            self.act_dim_  = int(action_space.n)
+            self.act_norm_ = False
+            self.act_min_  = 1.0
+            self.act_max_  = 1.0
 
-        if (self.act_type == "Box"):
-            self.act_dim = int(action_space.shape[0])
-            self.act_min = action_space.low
-            self.act_max = action_space.high
+        if (self.act_type_ == "Box"):
+            self.act_dim_ = int(action_space.shape[0])
+            self.act_min_ = action_space.low
+            self.act_max_ = action_space.high
 
-        self.act_avg = 0.5*(self.act_max + self.act_min)
-        self.act_rng = 0.5*(self.act_max - self.act_min)
+        self.act_avg_ = 0.5*(self.act_max_ + self.act_min_)
+        self.act_rng_ = 0.5*(self.act_max_ - self.act_min_)
 
         # Observation space
         obs_space = spaces[1]
-        self.obs_type = type(obs_space).__name__
-        if (self.obs_type not in ["Box"]):
+        self.obs_type_ = type(obs_space).__name__
+        if (self.obs_type_ not in ["Box"]):
             error("environment_spaces", "__init__",
-                  "Unknown observation space: "+self.obs_type)
+                  "Unknown observation space: "+self.obs_type_)
 
-        if (self.obs_type == "Box"):
-            self.obs_min  = obs_space.low
-            self.obs_max  = obs_space.high
+        if (self.obs_type_ == "Box"):
+            self.obs_min_  = obs_space.low
+            self.obs_max_  = obs_space.high
 
             # Retrieve natural obs shape
-            self.natural_obs_shape = list(obs_space.shape)
-            n_dims                 = len(self.natural_obs_shape)
+            self.natural_obs_shape_ = list(obs_space.shape)
+            n_dims                  = len(self.natural_obs_shape_)
 
             # Compute natural_obs_dim
-            self.natural_obs_dim = 1
+            self.natural_obs_dim_ = 1
             for i in range(n_dims):
-                self.natural_obs_dim *= self.natural_obs_shape[i]
+                self.natural_obs_dim_ *= self.natural_obs_shape_[i]
 
             # Compute processed_obs_shape
-            self.processed_obs_shape = self.natural_obs_shape.copy()
+            self.processed_obs_shape_ = self.natural_obs_shape_.copy()
             for i in range(n_dims):
-                self.processed_obs_shape[i] = self.processed_obs_shape[i]//self.obs_downscale
+                self.processed_obs_shape_[i] = self.processed_obs_shape_[i]//self.obs_downscale_
 
             # Second and third dimensions if image
             if (n_dims > 1):
 
                 # Alpha channel dimension is mandatory
                 if (n_dims == 2):
-                    self.processed_obs_shape.append(1);
+                    self.processed_obs_shape_.append(1);
                     n_dims = 3
 
                 # Possible grayscaling
-                if self.obs_grayscale: self.processed_obs_shape[2] = 1
+                if self.obs_grayscale_: self.processed_obs_shape_[2] = 1
 
             # Compute processed_obs_dim
-            self.processed_obs_dim = 1
+            self.processed_obs_dim_ = 1
             for i in range(n_dims):
-                self.processed_obs_dim *= self.processed_obs_shape[i]
+                self.processed_obs_dim_ *= self.processed_obs_shape_[i]
 
             # Handle possible observation stacking
-            self.true_obs_shape = self.processed_obs_shape.copy()
-            if (n_dims == 1): self.true_obs_shape[0] *= self.obs_stack
-            if (n_dims == 3): self.true_obs_shape[2] *= self.obs_stack
+            self.true_obs_shape_ = self.processed_obs_shape_.copy()
+            if (n_dims == 1): self.true_obs_shape_[0] *= self.obs_stack_
+            if (n_dims == 3): self.true_obs_shape_[2] *= self.obs_stack_
 
-            self.true_obs_dim = 1
+            self.true_obs_dim_ = 1
             for i in range(n_dims):
-                self.true_obs_dim *= self.true_obs_shape[i]
+                self.true_obs_dim_ *= self.true_obs_shape_[i]
 
-        self.obs_min = np.where(self.obs_min < -self.inf_obs_value,
-                                -self.manual_obs_max,
-                                self.obs_min)
-        self.obs_max = np.where(self.obs_max >  self.inf_obs_value,
-                                self.manual_obs_max,
-                                self.obs_max)
-        self.obs_avg = 0.5*(self.obs_max + self.obs_min)
-        self.obs_rng = 0.5*(self.obs_max - self.obs_min)
+        self.obs_min_ = np.where(self.obs_min_ < -self.inf_obs_value_,
+                                -self.manual_obs_max_,
+                                 self.obs_min_)
+        self.obs_max_ = np.where(self.obs_max_ >  self.inf_obs_value_,
+                                 self.manual_obs_max_,
+                                 self.obs_max_)
+        self.obs_avg_ = 0.5*(self.obs_max_ + self.obs_min_)
+        self.obs_rng_ = 0.5*(self.obs_max_ - self.obs_min_)
 
         # For pixel-based envs
-        if (self.obs_grayscale):
-            self.obs_avg = self.obs_avg[:,:,0]
-            self.obs_rng = self.obs_rng[:,:,0]
+        if (self.obs_grayscale_):
+            self.obs_avg_ = self.obs_avg_[:,:,0]
+            self.obs_rng_ = self.obs_rng_[:,:,0]
 
-        if (self.obs_downscale):
-            s = self.obs_downscale
+        if (self.obs_downscale_):
+            s = self.obs_downscale_
 
-            if (len(self.obs_avg.shape) == 1):
-                self.obs_avg = self.obs_avg[::s]
-                self.obs_rng = self.obs_rng[::s]
-            if (len(self.obs_avg.shape) == 2):
-                self.obs_avg = self.obs_avg[::s,::s]
-                self.obs_rng = self.obs_rng[::s,::s]
+            if (len(self.obs_avg_.shape) == 1):
+                self.obs_avg_ = self.obs_avg_[::s]
+                self.obs_rng_ = self.obs_rng_[::s]
+            if (len(self.obs_avg_.shape) == 2):
+                self.obs_avg_ = self.obs_avg_[::s,::s]
+                self.obs_rng_ = self.obs_rng_[::s,::s]
+
+    # Accessor
+    def obs_dim(self):
+        return self.true_obs_dim_
+
+    # Accessor
+    def obs_shape(self):
+        return self.true_obs_shape_
+
+    # Accessor
+    def processed_obs_dim(self):
+        return self.processed_obs_dim_
+
+    # Accessor
+    def obs_stack(self):
+        return self.obs_stack_
+
+    # Accessor
+    def obs_frameskip(self):
+        return self.obs_frameskip_
+
+    # Accessor
+    def act_dim(self):
+        return self.act_dim_
 
     # Process actions based on options
     def process_actions(self, act):
 
-        if (self.act_norm):
+        if (self.act_norm_):
             act = np.clip(act, -1.0, 1.0)
-            for i in range(self.act_dim):
-                act[i] = self.act_rng[i]*act[i] + self.act_avg[i]
+            for i in range(self.act_dim_):
+                act[i] = self.act_rng_[i]*act[i] + self.act_avg_[i]
 
         return act
 
     # Process observations
     def process_observations(self, obs):
 
-        if (self.obs_grayscale):
+        if (self.obs_grayscale_):
             obs = self.grayscale_obs(obs)
-        if (self.obs_downscale):
+        if (self.obs_downscale_):
             obs = self.downscale_obs(obs)
-        if (self.obs_clip):
+        if (self.obs_clip_):
             obs = self.clip_obs(obs)
-        if (self.obs_norm):
+        if (self.obs_norm_):
             obs = self.norm_obs(obs)
-        if (self.obs_noise > 0.0):
+        if (self.obs_noise_ > 0.0):
             obs = self.noise_obs(obs)
 
         return obs
@@ -169,33 +193,33 @@ class environment_spaces:
     def downscale_obs(self, obs):
 
         if (len(obs.shape) == 1):
-            x = obs[::self.obs_downscale]
+            x = obs[::self.obs_downscale_]
         if (len(obs.shape) == 2):
-            x = obs[::self.obs_downscale,::self.obs_downscale]
+            x = obs[::self.obs_downscale_,::self.obs_downscale_]
 
         return x
 
     # Clip observations
     def clip_obs(self, obs):
 
-        for i in range(self.processed_obs_dim):
-            obs[i] = np.clip(obs[i], self.obs_min[i], self.obs_max[i])
+        for i in range(self.processed_obs_dim_):
+            obs[i] = np.clip(obs[i], self.obs_min_[i], self.obs_max_[i])
 
         return obs
 
     # Normalize observations
     def norm_obs(self, obs):
 
-        obs -= self.obs_avg
-        obs /= self.obs_rng
+        obs -= self.obs_avg_
+        obs /= self.obs_rng_
 
         return obs
 
     # Add noise to observations
     def noise_obs(self, obs):
 
-        noise = np.random.normal(0.0, self.obs_noise, self.processed_obs_dim)
-        for i in range(self.processed_obs_dim):
+        noise = np.random.normal(0.0, self.obs_noise_, self.processed_obs_dim_)
+        for i in range(self.processed_obs_dim_):
             obs[i] += noise[i]
 
         return obs
@@ -206,12 +230,12 @@ class environment_spaces:
         liner()
         print("Problem dimensions")
         spacer()
-        print("Action dim:        " + str(self.act_dim))
+        print("Action dim:        " + str(self.act_dim_))
         spacer()
-        print("Natural obs shape: " + str(self.natural_obs_shape))
+        print("Natural obs shape: " + str(self.natural_obs_shape_))
         spacer()
-        print("Natural obs dim:   " + str(self.natural_obs_dim))
+        print("Natural obs dim:   " + str(self.natural_obs_dim_))
         spacer()
-        print("True obs shape:    " + str(self.true_obs_shape))
+        print("True obs shape:    " + str(self.true_obs_shape_))
         spacer()
-        print("True obs dim:      " + str(self.true_obs_dim))
+        print("True obs dim:      " + str(self.true_obs_dim_))
