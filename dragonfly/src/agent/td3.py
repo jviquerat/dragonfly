@@ -5,13 +5,11 @@ from dragonfly.src.utils.polyak import polyak
 ###############################################
 ### TD3 agent
 class td3(base_agent_off_policy):
-    def __init__(self, obs_dim, obs_shape, act_dim, n_cpu, size, pms):
+    def __init__(self, spaces, n_cpu, size, pms):
+        super().__init__(spaces)
 
         # Initialize from arguments
         self.name       = 'td3'
-        self.act_dim    = act_dim
-        self.obs_dim    = obs_dim
-        self.obs_shape  = obs_shape
         self.n_cpu      = n_cpu
         self.mem_size   = size
         self.gamma      = pms.gamma
@@ -36,9 +34,9 @@ class td3(base_agent_off_policy):
                   "Policy loss type for td3 agent is not q_pol")
 
         self.p = pol_factory.create(pms.policy.type,
-                                    obs_dim   = obs_dim,
-                                    obs_shape = obs_shape,
-                                    act_dim   = act_dim,
+                                    obs_dim   = self.obs_dim(),
+                                    obs_shape = self.obs_shape(),
+                                    act_dim   = self.act_dim(),
                                     pms       = pms.policy,
                                     target    = True)
 
@@ -56,13 +54,13 @@ class td3(base_agent_off_policy):
                   "Loss type for td3 agent is not mse_td3")
 
         self.q1 = val_factory.create(pms.value.type,
-                                     inp_dim = obs_dim+act_dim,
+                                     inp_dim = self.obs_dim() + self.act_dim(),
                                      inp_shape = None,
                                      out_dim = 1,
                                      pms     = pms.value,
                                      target  = True)
         self.q2 = val_factory.create(pms.value.type,
-                                     inp_dim = obs_dim+act_dim,
+                                     inp_dim = self.obs_dim() + self.act_dim(),
                                      inp_shape = None,
                                      out_dim = 1,
                                      pms     = pms.value,
@@ -87,11 +85,11 @@ class td3(base_agent_off_policy):
 
         self.timer_actions.tic()
         if (self.step < self.n_warmup):
-            act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim))
+            act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim()))
         else:
             act   = self.p.actions(obs)
             noise = np.random.normal(0.0, self.sigma_act,
-                                     (self.n_cpu, self.act_dim))
+                                     (self.n_cpu, self.act_dim()))
             act  += noise
             act   = np.clip(act, -1.0, 1.0)
         act = act.astype(np.float32)
