@@ -26,6 +26,7 @@ class ddpg(base_agent_off_policy):
         if (pms.policy.type != "deterministic"):
             error("ddpg", "__init__",
                   "Policy type for ddpg agent is not deterministic")
+
         if (pms.policy.loss.type != "q_pol"):
             error("ddpg", "__init__",
                   "Policy loss type for ddpg agent is not q_pol")
@@ -85,8 +86,8 @@ class ddpg(base_agent_off_policy):
 
         # Check for NaNs
         if (np.isnan(act).any()):
-            error("ddpg", "get_actions",
-                  "Detected NaN in generated actions")
+            error("ddpg", "get_actions", "Detected NaN in generated actions")
+
         self.timer_actions.toc()
 
         return act

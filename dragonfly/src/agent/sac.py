@@ -25,6 +25,7 @@ class sac(base_agent_off_policy):
         if (pms.policy.loss.type != "q_pol_sac"):
             error("sac", "__init__",
                   "Policy loss type for sac agent is not q_pol_sac")
+
         if (pms.policy.type != "tanh_normal"):
             error("sac", "__init__",
                   "Policy type for sac agent is not tanh_normal")
@@ -85,8 +86,8 @@ class sac(base_agent_off_policy):
 
         # Check for NaNs
         if (np.isnan(act).any()):
-            error("sac", "get_actions",
-                  "Detected NaN in generated actions")
+            error("sac", "get_actions", "Detected NaN in generated actions")
+
         self.timer_actions.toc()
 
         return act
