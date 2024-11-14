@@ -9,7 +9,7 @@ from dragonfly.src.utils.timer import timer
 
 ###############################################
 ### A wrapper class for parallel environments
-class environments:
+class environment:
     # Class variable
     def __init__(self, path, pms):
 

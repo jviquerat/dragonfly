@@ -9,7 +9,7 @@ from dragonfly.src.core.constants   import *
 from dragonfly.src.env.mpi          import mpi
 from dragonfly.src.core.paths       import paths
 from dragonfly.src.utils.timer      import timer
-from dragonfly.src.env.environments import environments
+from dragonfly.src.env.environment  import environment
 from dragonfly.src.agent.agent      import agent_factory
 from dragonfly.src.update.update    import update_factory
 from dragonfly.src.utils.report     import report
@@ -26,11 +26,10 @@ class base_trainer:
 
         Args:
             env_pms (Any): Parameters for the environment.
-            path (str): Path for saving or loading data.
             n_stp_max (int): Maximum number of steps.
             pms (Any): Parameters for the trainer.
         """
-        self.env       = environments(paths.base, env_pms)
+        self.env       = environment(paths.base, env_pms)
         self.obs_dim   = self.env.spaces.true_obs_dim
         self.obs_shape = self.env.spaces.true_obs_shape
         self.act_dim   = self.env.spaces.act_dim
