@@ -21,7 +21,7 @@ class environment_spaces:
         self.obs_stack      = 1
         self.obs_grayscale  = False
         self.obs_downscale  = 1
-        self.frameskip      = 1
+        self.obs_frameskip  = 1
         self.manual_obs_max = 1.0
 
         # Optional values in parameters
@@ -32,7 +32,7 @@ class environment_spaces:
         if hasattr(pms, "obs_stack"):     self.obs_stack      = pms.obs_stack
         if hasattr(pms, "obs_grayscale"): self.obs_grayscale  = pms.obs_grayscale
         if hasattr(pms, "obs_downscale"): self.obs_downscale  = pms.obs_downscale
-        if hasattr(pms, "frameskip"):     self.frameskip      = pms.frameskip
+        if hasattr(pms, "obs_frameskip"): self.obs_frameskip  = pms.obs_frameskip
         if hasattr(pms, "obs_max"):       self.manual_obs_max = pms.obs_max
 
         # Action space

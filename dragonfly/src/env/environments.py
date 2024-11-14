@@ -50,7 +50,7 @@ class environments:
         # The whole step part is looped over frameskip times
         # Yet if a stack of observations is used, we keep the
         # fine-grain history of observations
-        for _ in range(self.spaces.frameskip):
+        for _ in range(self.spaces.obs_frameskip):
 
             # Send
             data = [('step', None)]*mpi.size
