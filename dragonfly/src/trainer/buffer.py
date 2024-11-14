@@ -26,15 +26,11 @@ class buffer(base_trainer):
         if hasattr(pms, "warmup"): self.warmup = pms.warmup
 
         # Initialize agent
-        self.agent = agent_factory.create(
-            agent_pms.type,
-            obs_dim=self.obs_dim,
-            obs_shape=self.obs_shape,
-            act_dim=self.act_dim,
-            n_cpu=mpi.size,
-            size=self.size,
-            pms=agent_pms,
-        )
+        self.agent = agent_factory.create(agent_pms.type,
+                                          spaces = self.env.spaces,
+                                          n_cpu  = mpi.size,
+                                          size   = self.size,
+                                          pms    = agent_pms)
 
         # Initialize update
         self.update = update_factory.create(self.update_type)

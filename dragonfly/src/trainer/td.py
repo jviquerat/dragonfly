@@ -26,15 +26,11 @@ class td(base_trainer):
         self.unroll = 0
 
         # Initialize agent
-        self.agent = agent_factory.create(
-            agent_pms.type,
-            obs_dim=self.obs_dim,
-            obs_shape=self.obs_shape,
-            act_dim=self.act_dim,
-            n_cpu=mpi.size,
-            size=self.mem_size,
-            pms=agent_pms,
-        )
+        self.agent = agent_factory.create(agent_pms.type,
+                                          spaces = self.env.spaces,
+                                          n_cpu  = mpi.size,
+                                          size   = self.mem_size,
+                                          pms    = agent_pms)
 
         # Initialize update
         self.update = update_factory.create(self.update_type)

@@ -30,9 +30,6 @@ class base_trainer:
             pms (Any): Parameters for the trainer.
         """
         self.env       = environment(paths.base, env_pms)
-        self.obs_dim   = self.env.spaces.true_obs_dim_
-        self.obs_shape = self.env.spaces.true_obs_shape_
-        self.act_dim   = self.env.spaces.act_dim_
         self.n_stp_max = n_stp_max
 
         self.cnt   = None

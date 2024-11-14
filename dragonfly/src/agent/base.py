@@ -17,16 +17,20 @@ from dragonfly.src.utils.error             import error
 ###############################################
 ### Base agent
 class base_agent():
-    def __init__(self):
-        pass
+    def __init__(self, spaces):
+        self.spaces = spaces
 
-    # Get actions
-    def actions(self, obs):
-        raise NotImplementedError
+    # Accessor
+    def act_dim(self):
+        return self.spaces.act_dim()
 
-    # Reset
-    def reset(self):
-        raise NotImplementedError
+    # Accessor
+    def obs_dim(self):
+        return self.spaces.obs_dim()
+
+    # Accessor
+    def obs_shape(self):
+        return self.spaces.obs_shape()
 
     # Actions to execute before the inner training loop
     def pre_loop(self):
@@ -47,18 +51,18 @@ class base_agent():
 ###############################################
 ### Base for on-policy agents
 class base_agent_on_policy(base_agent):
-    def __init__(self):
-        pass
+    def __init__(self, spaces):
+        super().__init__(spaces)
 
     # Create storage buffers
     def create_buffers(self):
 
         self.lnames = ["obs", "nxt", "act", "lgp", "rwd", "trm"]
-        self.lsizes = [self.obs_dim, self.obs_dim, self.pol_dim, 1, 1, 1]
+        self.lsizes = [self.obs_dim(), self.obs_dim(), self.pol_dim, 1, 1, 1]
         self.buff   = buff(self.n_cpu, self.lnames, self.lsizes)
 
         self.gnames = ["obs", "act", "adv", "tgt", "lgp"]
-        self.gsizes = [self.obs_dim, self.pol_dim, 1, 1, 1]
+        self.gsizes = [self.obs_dim(), self.pol_dim, 1, 1, 1]
         self.gbuff  = gbuff(self.size, self.gnames, self.gsizes)
 
     # Get actions
@@ -141,14 +145,14 @@ class base_agent_on_policy(base_agent):
 ###############################################
 ### Base for off-policy agents
 class base_agent_off_policy(base_agent):
-    def __init__(self):
-        pass
+    def __init__(self, spaces):
+        super().__init__(spaces)
 
     # Create storage buffers
     def create_buffers(self, act_dim):
 
         self.names = ["obs", "nxt", "act", "rwd", "trm"]
-        self.sizes = [self.obs_dim, self.obs_dim, act_dim, 1, 1]
+        self.sizes = [self.obs_dim(), self.obs_dim(), act_dim, 1, 1]
         self.buff  = buff(self.n_cpu, self.names, self.sizes)
         self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
 
