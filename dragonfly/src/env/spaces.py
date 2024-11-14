@@ -43,15 +43,17 @@ class environment_spaces:
                   "Unknown action space: "+self.act_type_)
 
         if (self.act_type_ == "Discrete"):
-            self.act_dim_  = int(action_space.n)
-            self.act_norm_ = False
-            self.act_min_  = 1.0
-            self.act_max_  = 1.0
+            self.act_dim_      = int(action_space.n)
+            self.true_act_dim_ = 1
+            self.act_norm_     = False
+            self.act_min_      = 1.0
+            self.act_max_      = 1.0
 
         if (self.act_type_ == "Box"):
-            self.act_dim_ = int(action_space.shape[0])
-            self.act_min_ = action_space.low
-            self.act_max_ = action_space.high
+            self.act_dim_      = int(action_space.shape[0])
+            self.true_act_dim_ = self.act_dim_
+            self.act_min_      = action_space.low
+            self.act_max_      = action_space.high
 
         self.act_avg_ = 0.5*(self.act_max_ + self.act_min_)
         self.act_rng_ = 0.5*(self.act_max_ - self.act_min_)
@@ -153,6 +155,10 @@ class environment_spaces:
     # Accessor
     def act_dim(self):
         return self.act_dim_
+
+    # Accessor
+    def true_act_dim(self):
+        return self.true_act_dim_
 
     # Process actions based on options
     def process_actions(self, act):

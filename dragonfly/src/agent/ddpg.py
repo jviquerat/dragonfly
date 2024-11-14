@@ -37,10 +37,6 @@ class ddpg(base_agent_off_policy):
                                     pms       = pms.policy,
                                     target    = True)
 
-        # pol_dim is the true dimension of the action provided to the env
-        # This allows compatibility between continuous and discrete envs
-        self.pol_dim = self.p.store_dim
-
         # Build values
         if (pms.value.type != "q_value"):
             error("ddpg", "__init__",
@@ -61,7 +57,7 @@ class ddpg(base_agent_off_policy):
         self.polyak = polyak(self.rho)
 
         # Create buffers
-        self.create_buffers(act_dim=self.pol_dim)
+        self.create_buffers()
 
         # Initialize termination
         self.term = termination_factory.create(pms.termination.type,

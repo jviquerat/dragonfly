@@ -38,7 +38,7 @@ class dqn(base_agent_off_policy):
                                     target    = True)
 
         # Create buffers
-        self.create_buffers(act_dim=1)
+        self.create_buffers()
 
         # Initialize termination
         self.term = termination_factory.create(pms.termination.type,

@@ -23,10 +23,6 @@ class a2c(base_agent_on_policy):
                                     act_dim   = self.act_dim(),
                                     pms       = pms.policy)
 
-        # pol_dim is the true dimension of the action provided to the env
-        # This allows compatibility between continuous and discrete envs
-        self.pol_dim = self.p.store_dim
-
         # Build values
         if (pms.value.type != "v_value"):
             warning("ppo", "__init__",
