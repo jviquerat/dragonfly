@@ -33,7 +33,9 @@ class environment:
         self.spaces.print()
 
         # Initialize an observation array for stacking
-        self.nxt = np.zeros((mpi.size, self.spaces.processed_obs_dim, self.spaces.obs_stack))
+        self.nxt = np.zeros((mpi.size,
+                             self.spaces.processed_obs_dim(),
+                             self.spaces.obs_stack()))
 
         # Initialize timer
         self.timer_env = timer("env      ")
@@ -50,7 +52,7 @@ class environment:
         # The whole step part is looped over frameskip times
         # Yet if a stack of observations is used, we keep the
         # fine-grain history of observations
-        for _ in range(self.spaces.obs_frameskip):
+        for _ in range(self.spaces.obs_frameskip()):
 
             # Send
             data = [('step', None)]*mpi.size
@@ -65,7 +67,7 @@ class environment:
             # Handle stacked observations
             # Latest observation is put in last position
             for p in range(mpi.size):
-                for s in range(self.spaces.obs_stack-1):
+                for s in range(self.spaces.obs_stack()-1):
                     self.nxt[p,:,s] = self.nxt[p,:,s+1]
 
             # Receive
@@ -85,7 +87,7 @@ class environment:
                 trunc[p]         = bool(t)
 
         # Reshape observations for returning
-        nxt = np.reshape(self.nxt, (mpi.size, self.spaces.true_obs_dim)).copy()
+        nxt = np.reshape(self.nxt, (mpi.size, self.spaces.obs_dim())).copy()
 
         self.timer_env.toc()
 
@@ -108,7 +110,7 @@ class environment:
             self.nxt[p,:,:]  = 0.0
             self.nxt[p,:,-1] = obs[:].flatten()
 
-        nxt = np.reshape(self.nxt, (mpi.size, self.spaces.true_obs_dim)).copy()
+        nxt = np.reshape(self.nxt, (mpi.size, self.spaces.obs_dim())).copy()
 
         return nxt
 
@@ -129,7 +131,7 @@ class environment:
         for p in range(mpi.size):
             if (done[p]):
                 obs = self.spaces.process_observations(data[p])
-                obs_array[p,:] = np.tile(obs.flatten(), self.spaces.obs_stack)[:]
+                obs_array[p,:] = np.tile(obs.flatten(), self.spaces.obs_stack())[:]
 
                 self.nxt[p,:,:]  = 0.0
                 self.nxt[p,:,-1] = obs[:].flatten()
