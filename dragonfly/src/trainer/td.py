@@ -5,13 +5,6 @@ from dragonfly.src.trainer.base import *
 ### TD-based trainer class
 class td(base_trainer):
     def __init__(self, env_pms, agent_pms, n_stp_max, pms):
-        """
-        Args:
-            env_pms (Any): Parameters for the environment.
-            agent_pms (Any): Parameters for the agent.
-            n_stp_max (int): Maximum number of steps.
-            pms (Any): Parameters for the trainer.
-        """
         super().__init__(env_pms=env_pms, n_stp_max=n_stp_max, pms=pms)
 
         self.mem_size = pms.mem_size
@@ -41,17 +34,7 @@ class td(base_trainer):
         )
 
     def loop(self):
-        """
-        Executes the training loop for temporal difference learning until the maximum number of steps is reached.
 
-        This method manages the training process for temporal difference (TD) learning. It starts with the initial
-        observation and continues through the training steps until the maximum number of steps is reached. The loop
-        involves preparing the agent for training, executing steps to progress through the training, handling the
-        completion of episodes, and resetting environments as necessary. The training steps are unrolled in batches,
-        and the agent is trained based on the collected data after each batch. The loop includes storing reports,
-        printing episode summaries, saving the agent's state under certain conditions, and updating the observation
-        for the next step. The process concludes with final training adjustments and reporting.
-        """
         # Loop until max episode number is reached
         obs = self.start_training()
         while self.counter.step < self.n_stp_max:

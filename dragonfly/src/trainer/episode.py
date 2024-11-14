@@ -5,13 +5,6 @@ from dragonfly.src.trainer.base import *
 ### Episode-based trainer class
 class episode(base_trainer):
     def __init__(self, env_pms, agent_pms, n_stp_max, pms):
-        """
-        Args:
-            env_pms (Any): Parameters for the environment.
-            agent_pms (Any): Parameters for the agent.
-            n_stp_max (int): Maximum number of steps.
-            pms (Any): Parameters for the trainer.
-        """
         super().__init__(env_pms=env_pms, n_stp_max=n_stp_max, pms=pms)
 
         self.n_ep_unroll = pms.n_ep_unroll * (mpi.size)
@@ -42,17 +35,7 @@ class episode(base_trainer):
         )
 
     def loop(self):
-        """
-        Executes the training loop for a specified number of episodes, managing the training process.
 
-        This method oversees the training loop, starting with the initial observation and continuing
-        until the maximum number of steps is reached. It involves preparing the agent for training,
-        executing steps to progress through episodes, handling the completion of episodes, and
-        resetting environments as necessary. The loop includes collecting data on episode lengths,
-        storing reports, printing episode summaries, and saving the agent's state under certain
-        conditions. Training episodes are processed in batches, and the agent is trained based on
-        the collected data. The loop concludes with final training adjustments and reporting.
-        """
         # Loop until max episode number is reached
         obs = self.start_training()
         while self.counter.step < self.n_stp_max:
