@@ -7,7 +7,7 @@
         "obs_grayscale": true,
         "obs_downscale": 4,
 	      "obs_stack": 4,
-        "frameskip": 4
+        "obs_frameskip": 4
     },
     "naming": {
         "env": true,
