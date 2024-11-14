@@ -3,7 +3,7 @@ import sys
 import gymnasium as gym
 
 # Custom imports
-from dragonfly.src.env.mpi import *
+from dragonfly.src.env.mpi import mpi
 
 ###############################################
 # Worker class for slave processes
