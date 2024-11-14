@@ -5,8 +5,8 @@ import math
 import numpy as np
 
 # Custom imports
-from dragonfly.src.env.mpi          import *
 from dragonfly.src.core.constants   import *
+from dragonfly.src.env.mpi          import mpi
 from dragonfly.src.core.paths       import paths
 from dragonfly.src.utils.timer      import timer
 from dragonfly.src.env.environments import environments
