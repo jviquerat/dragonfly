@@ -2,10 +2,10 @@
 import os
 
 # Custom imports
-from dragonfly.src.utils.json       import *
-from dragonfly.src.env.environments import *
-from dragonfly.tst.tst              import *
-from dragonfly.tst.runner           import *
+from dragonfly.src.utils.json      import *
+from dragonfly.src.env.environment import *
+from dragonfly.tst.tst             import *
+from dragonfly.tst.runner          import *
 
 ###############################################
 ### Test environment interface
@@ -21,7 +21,7 @@ def test_env_args():
 
     # Initialize environment
     path = os.path.abspath(os.getcwd())
-    env  = environments(path, pms.env)
+    env  = environment(path, pms.env)
 
     # Check
     assert(env.worker.env.env.env.env.enable_wind == True)
