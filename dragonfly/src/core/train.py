@@ -6,14 +6,14 @@ import shutil
 import numpy as np
 
 # Custom imports
-from dragonfly.src.env.mpi         import *
-from dragonfly.src.core.constants  import *
 from dragonfly.src.core.paths      import *
-from dragonfly.src.utils.json      import *
-from dragonfly.src.utils.data      import *
-from dragonfly.src.utils.prints    import *
-from dragonfly.src.trainer.trainer import *
-from dragonfly.src.plot.plot       import *
+from dragonfly.src.core.constants  import *
+from dragonfly.src.env.mpi         import mpi
+from dragonfly.src.utils.json      import json_parser
+from dragonfly.src.utils.data      import data_avg
+from dragonfly.src.utils.prints    import liner
+from dragonfly.src.trainer.trainer import trainer_factory
+from dragonfly.src.plot.plot       import plot_avg
 
 # Average training over multiple runs
 def train(json_file):
@@ -50,19 +50,16 @@ def train(json_file):
         os.makedirs(paths.run, exist_ok=True)
         trainer.reset()
         trainer.loop()
-        filename = paths.run + '/data.dat'
-        averager.store(filename, run)
+        averager.store(paths.run + '/data.dat', run)
 
     # Close environments
     trainer.env.close()
 
     # Write to file
-    filename = paths.results + '/avg.dat'
-    data = averager.average(filename)
+    data = averager.average(paths.results + '/avg.dat')
 
     # Plot
-    name = paths.results + '/' + folder_name(pms)
-    plot_avg(data, name)
+    plot_avg(data, paths.results + '/' + folder_name(pms))
 
     # Finalize main process
     mpi.finalize()
