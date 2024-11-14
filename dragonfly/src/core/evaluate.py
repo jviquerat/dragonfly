@@ -2,11 +2,11 @@
 import gymnasium as gym
 
 # Custom imports
-from dragonfly.src.utils.json       import json_parser
-from dragonfly.src.agent.agent      import agent_factory
-from dragonfly.src.env.environments import environments
-from dragonfly.src.utils.renderer   import renderer
-from dragonfly.src.utils.prints     import new_line, spacer
+from dragonfly.src.utils.json      import json_parser
+from dragonfly.src.agent.agent     import agent_factory
+from dragonfly.src.env.environment import environment
+from dragonfly.src.utils.renderer  import renderer
+from dragonfly.src.utils.prints    import new_line, spacer
 
 # Evaluate agent
 def evaluate(net_folder, json_file, ns, nw, aw):
@@ -16,7 +16,7 @@ def evaluate(net_folder, json_file, ns, nw, aw):
     pms    = parser.read(json_file)
 
     # Load environment
-    env = environments(".", pms.env)
+    env = environment(".", pms.env)
 
     # Set environment control tag to true if possible
     env.set_control()
