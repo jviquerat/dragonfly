@@ -12,21 +12,11 @@ class a2c(base_agent_on_policy):
         self.n_cpu  = n_cpu
         self.size   = size
 
-        # Build policies
-        if (pms.policy.loss.type != "pg"):
-            warning("a2c", "__init__",
-                    "Loss type for a2c agent is not pg")
-
         self.p = pol_factory.create(pms.policy.type,
                                     obs_dim   = self.obs_dim(),
                                     obs_shape = self.obs_shape(),
                                     act_dim   = self.act_dim(),
                                     pms       = pms.policy)
-
-        # Build values
-        if (pms.value.type != "v_value"):
-            warning("ppo", "__init__",
-                    "Value type for ppo agent is not v_value")
 
         self.v = val_factory.create(pms.value.type,
                                     inp_dim   = self.obs_dim(),

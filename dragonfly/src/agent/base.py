@@ -78,8 +78,7 @@ class base_agent_on_policy(base_agent):
 
         # Check for NaNs
         if (np.isnan(act).any()):
-            error("a2c", "get_actions",
-                  "Detected NaN in generated actions")
+            error("a2c", "get_actions", "Detected NaN in generated actions")
 
         # Store log-prob
         self.buff.store(["lgp"], [lgp])

@@ -29,6 +29,7 @@ class td3(base_agent_off_policy):
         if (pms.policy.type != "deterministic"):
             error("td3", "__init__",
                   "Policy type for td3 agent is not deterministic")
+
         if (pms.policy.loss.type != "q_pol"):
             error("td3", "__init__",
                   "Policy loss type for td3 agent is not q_pol")
@@ -94,8 +95,7 @@ class td3(base_agent_off_policy):
 
         # Check for NaNs
         if (np.isnan(act).any()):
-            error("td3", "get_actions",
-                  "Detected NaN in generated actions")
+            error("td3", "get_actions", "Detected NaN in generated actions")
         self.timer_actions.toc()
 
         return act
