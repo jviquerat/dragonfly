@@ -12,8 +12,7 @@ class tanh_normal(base_normal):
         self.act_dim     = act_dim
         self.obs_dim     = obs_dim
         self.obs_shape   = obs_shape
-        self.dim         = self.act_dim
-        self.out_dim     = [self.dim, self.dim]
+        self.out_dim     = [self.act_dim, self.act_dim]
         self.store_type  = float
         self.target      = target
         self.min_log_std = pms.min_log_std
