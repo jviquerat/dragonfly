@@ -14,8 +14,7 @@ class normal_iso(base_normal):
         self.act_dim     = act_dim
         self.obs_dim     = obs_dim
         self.obs_shape   = obs_shape
-        self.dim         = self.act_dim
-        self.out_dim     = [self.dim, 1]
+        self.out_dim     = [self.act_dim, 1]
         self.store_type  = float
         self.target      = target
 
@@ -47,7 +46,7 @@ class normal_iso(base_normal):
 
         # Get pdf
         mu, sg = self.forward(obs)
-        sigma  = tf.tile(sg,[1,self.dim])
+        sigma  = tf.tile(sg,[1,self.act_dim])
         pdf    = tfd.MultivariateNormalDiag(loc        = mu,
                                             scale_diag = sigma)
 

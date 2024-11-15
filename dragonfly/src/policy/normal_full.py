@@ -14,9 +14,8 @@ class normal_full(base_normal):
         self.act_dim     = act_dim
         self.obs_dim     = obs_dim
         self.obs_shape   = obs_shape
-        self.dim         = self.act_dim
-        self.cov_dim     = math.floor(self.dim*(self.dim - 1)/2)
-        self.out_dim     = [self.dim, self.dim, self.cov_dim]
+        self.cov_dim     = math.floor(self.act_dim*(self.act_dim - 1)/2)
+        self.out_dim     = [self.act_dim, self.act_dim, self.cov_dim]
         self.store_type  = float
         self.target      = target
 
@@ -89,32 +88,32 @@ class normal_full(base_normal):
         thetas = cr*math.pi
 
         # Build initial theta matrix
-        t   = tf.ones([self.dim,self.dim])*math.pi/2.0
-        t   = tf.linalg.set_diag(t, tf.zeros(self.dim), k=0)
+        t   = tf.ones([self.act_dim,self.act_dim])*math.pi/2.0
+        t   = tf.linalg.set_diag(t, tf.zeros(self.act_dim), k=0)
         idx = 0
-        for dg in range(self.dim-1):
-            diag = thetas[idx:idx+self.dim-(dg+1)]
-            idx += self.dim-(dg+1)
+        for dg in range(self.act_dim-1):
+            diag = thetas[idx:idx+self.act_dim-(dg+1)]
+            idx += self.act_dim-(dg+1)
             t    = tf.linalg.set_diag(t, diag, k=-(dg+1))
         cor = tf.cos(t)
 
         # Correct upper part to exact zero
-        for dg in range(self.dim-1):
-            size = self.dim-(dg+1)
+        for dg in range(self.act_dim-1):
+            size = self.act_dim-(dg+1)
             cor  = tf.linalg.set_diag(cor, tf.zeros(size), k=(dg+1))
 
         # Roll and compute additional terms
-        for roll in range(self.dim-1):
-            vec = tf.ones([self.dim, 1])
+        for roll in range(self.act_dim-1):
+            vec = tf.ones([self.act_dim, 1])
             vec = tf.scalar_mul(math.pi/2, vec)
-            t   = tf.concat([vec, t[:, :self.dim-1]], axis=1)
-            for dg in range(self.dim-1):
-                zero = tf.zeros(self.dim-(dg+1))
+            t   = tf.concat([vec, t[:, :self.act_dim-1]], axis=1)
+            for dg in range(self.act_dim-1):
+                zero = tf.zeros(self.act_dim-(dg+1))
                 t    = tf.linalg.set_diag(t, zero, k=dg+1)
             cor = tf.multiply(cor, tf.sin(t))
 
         cor = tf.matmul(cor, tf.transpose(cor))
-        scl = tf.zeros([self.dim, self.dim])
+        scl = tf.zeros([self.act_dim, self.act_dim])
         scl = tf.linalg.set_diag(scl, tf.sqrt(sigmas), k=0)
         cov = tf.matmul(scl, cor)
         cov = tf.matmul(cov, scl)

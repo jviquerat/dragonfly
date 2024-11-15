@@ -22,7 +22,7 @@ class base_policy():
             self.tgt = net_factory.create(pms.network.type,
                                           inp_dim   = self.obs_dim,
                                           inp_shape = self.obs_shape,
-                                          out_dim   = [self.dim],
+                                          out_dim   = self.out_dim,
                                           pms       = pms.network)
             self.copy_tgt()
 
