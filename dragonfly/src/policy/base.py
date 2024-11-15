@@ -105,7 +105,7 @@ class base_policy():
     def random_uniform(self, obs):
 
         n_cpu = obs.shape[0]
-        act   = np.random.uniform(-1.0, 1.0, size=self.store_dim)
+        act   = np.random.uniform(-1.0, 1.0, size=self.act_dim)
         return act
 
 ###############################################
@@ -119,7 +119,7 @@ class base_normal(base_policy):
     def actions(self, obs):
 
         act, lgp = self.sample(tf.cast(obs, tf.float32))
-        act      = np.reshape(act.numpy(), (-1,self.store_dim))
+        act      = np.reshape(act.numpy(), (-1,self.act_dim))
         lgp      = np.reshape(lgp.numpy(), (-1))
 
         return act, lgp
@@ -132,7 +132,7 @@ class base_normal(base_policy):
         pdf = self.compute_pdf(obs)
 
         # Sample actions
-        act = tf.reshape(pdf.sample(1), [-1,self.store_dim])
+        act = tf.reshape(pdf.sample(1), [-1,self.act_dim])
         lgp = tf.reshape(pdf.log_prob(act), [-1,1])
 
         return act, lgp
