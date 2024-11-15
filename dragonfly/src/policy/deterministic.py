@@ -16,7 +16,6 @@ class deterministic(base_policy):
         self.obs_shape  = obs_shape
         self.dim        = self.act_dim
         self.out_dim    = [self.dim]
-        self.store_dim  = self.act_dim
         self.store_type = float
         self.target     = target
 
@@ -32,7 +31,7 @@ class deterministic(base_policy):
     def actions(self, obs):
 
         act   = self.forward(tf.cast(obs, tf.float32))
-        act   = np.reshape(act.numpy(), (-1,self.store_dim))
+        act   = np.reshape(act.numpy(), (-1, self.act_dim))
 
         return act
 

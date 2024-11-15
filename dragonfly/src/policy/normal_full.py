@@ -17,7 +17,6 @@ class normal_full(base_normal):
         self.dim         = self.act_dim
         self.cov_dim     = math.floor(self.dim*(self.dim - 1)/2)
         self.out_dim     = [self.dim, self.dim, self.cov_dim]
-        self.store_dim   = self.act_dim
         self.store_type  = float
         self.target      = target
 
@@ -44,7 +43,7 @@ class normal_full(base_normal):
     def control(self, obs):
 
         mu, sg, cr = self.forward(tf.cast(obs, tf.float32))
-        act        = np.reshape(mu.numpy(), (-1,self.store_dim))
+        act        = np.reshape(mu.numpy(), (-1, self.act_dim))
 
         return act
 
@@ -88,8 +87,6 @@ class normal_full(base_normal):
         # Extract sigmas and thetas
         sigmas = sg
         thetas = cr*math.pi
-
-        #print(sg, cr)
 
         # Build initial theta matrix
         t   = tf.ones([self.dim,self.dim])*math.pi/2.0

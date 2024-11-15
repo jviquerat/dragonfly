@@ -16,7 +16,6 @@ class categorical(base_policy):
         self.obs_shape  = obs_shape
         self.dim        = self.act_dim
         self.out_dim    = [self.dim]
-        self.store_dim  = 1
         self.store_type = int
         self.target     = target
 

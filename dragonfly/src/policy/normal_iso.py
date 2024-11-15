@@ -16,7 +16,6 @@ class normal_iso(base_normal):
         self.obs_shape   = obs_shape
         self.dim         = self.act_dim
         self.out_dim     = [self.dim, 1]
-        self.store_dim   = self.act_dim
         self.store_type  = float
         self.target      = target
 
@@ -39,7 +38,7 @@ class normal_iso(base_normal):
     def control(self, obs):
 
         mu, sg = self.forward(tf.cast(obs, tf.float32))
-        act    = np.reshape(mu.numpy(), (-1,self.store_dim))
+        act    = np.reshape(mu.numpy(), (-1, self.act_dim))
 
         return act
 
