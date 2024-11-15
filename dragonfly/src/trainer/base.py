@@ -36,11 +36,7 @@ class base_trainer:
         self.update = update_factory.create(update_type)
 
         # Initialize learning data report
-        self.report = report(
-            self.freq_report, ["step", "episode", "score", "smooth_score"]
-        )
-
-        self.cnt = None
+        self.report = report(self.freq_report, ["step", "episode", "score", "smooth_score"])
 
         self.monitoring = False
         if hasattr(pms, "monitoring"): self.monitoring = pms.monitoring
@@ -81,19 +77,24 @@ class base_trainer:
 
     # Reset trainer
     def reset(self):
+
         self.agent.reset()
         self.report.reset()
         self.renderer.reset()
+        self.stop_print = False
 
     # Print summary at the end of each episode
     def print_episode(self):
 
-        # No initial printing
-        if self.counter.ep == 0: return
-
         ep        = self.counter.ep
         stp       = self.counter.step
         n_stp_max = self.n_stp_max
+
+        # No initial printing
+        if ep == 0: return
+
+        # No printing beyond final print
+        if self.stop_print: return
 
         # Retrieve data
         avg = self.report.avg("score", n_smooth)
@@ -103,29 +104,23 @@ class base_trainer:
         bst_ep = self.counter.best_ep
 
         # Handle no-printing after max step
-        if stp < n_stp_max - 1:
-            end = "\r"
-            self.cnt = 0
-        else:
+        end = "\r"
+        if (stp >= n_stp_max-1):
             end = "\n"
-            if (self.cnt is None): self.cnt = 0
-            self.cnt += 1
+            self.stop_print = True
 
-        if self.cnt <= 1:
-            print(
-                "# Ep #"
-                + str(ep)
-                + ", step = "
-                + str(stp)
-                + ", avg score = "
-                + str(avg)
-                + ", best score = "
-                + str(bst)
-                + " at ep "
-                + str(bst_ep)
-                + "                 ",
-                end=end,
-            )
+        print("# Ep #"
+              + str(ep)
+              + ", step = "
+              + str(stp)
+              + ", avg score = "
+              + str(avg)
+              + ", best score = "
+              + str(bst)
+              + " at ep "
+              + str(bst_ep)
+              + "                 ",
+              end=end)
 
     # Finalizes a training by printing a summary, writing reports, and closing timers.
     def end_training(self):
