@@ -5,65 +5,52 @@ from dragonfly.src.trainer.base import *
 ### Episode-based trainer class
 class episode(base_trainer):
     def __init__(self, env_pms, agent_pms, n_stp_max, pms):
-        super().__init__(env_pms=env_pms, n_stp_max=n_stp_max, pms=pms)
 
-        self.n_ep_unroll = pms.n_ep_unroll * (mpi.size)
-        self.n_ep_train = pms.n_ep_train
-        self.btc_frac = pms.batch_frac
-        self.n_epochs = pms.n_epochs
-        self.size = 1000 * self.n_ep_train
+        self.n_stp_max   = n_stp_max
+        self.n_ep_unroll = pms.n_ep_unroll*mpi.size
+        self.n_ep_train  = pms.n_ep_train
+        self.btc_frac    = pms.batch_frac
+        self.n_epochs    = pms.n_epochs
+        self.mem_size    = 1000*self.n_ep_train
         self.freq_report = 10
-        self.update_type = "on_policy"
 
-        # Local variables
-        self.lengths = np.array([], dtype=int)
-        self.unroll = 0
+        self.lengths   = np.array([], dtype=int)
+        self.ep_unroll = 0
 
-        # Initialize agent
-        self.agent = agent_factory.create(agent_pms.type,
-                                          spaces = self.env.spaces,
-                                          n_cpu  = mpi.size,
-                                          size   = self.size,
-                                          pms    = agent_pms)
-
-        # Initialize update
-        self.update = update_factory.create(self.update_type)
-
-        # Initialize learning data report
-        self.report = report(
-            self.freq_report, ["step", "episode", "score", "smooth_score"]
-        )
+        super().__init__("on_policy", env_pms, agent_pms, pms)
 
     def loop(self):
 
-        # Loop until max episode number is reached
-        obs = self.start_training()
+        self.timer_global.tic()
+        obs = self.env.reset_all()
+        self.counter.reset()
+
+        # Loop until max number of steps is reached
         while self.counter.step < self.n_stp_max:
 
             # Prepare inner training loop
             self.agent.pre_loop()
 
             # Loop over training episodes
-            while not (self.unroll >= self.n_ep_unroll):
+            while not (self.ep_unroll >= self.n_ep_unroll):
                 nxt, _, dne, _ = self.apply_next_step(obs)
 
                 # Finish if some episodes are done
                 for cpu in range(mpi.size):
                     if dne[cpu]:
-                        self.lengths = np.append(
-                            self.lengths, self.counter.ep_step[cpu]
-                        )
+                        self.lengths = np.append(self.lengths, self.counter.ep_step[cpu])
+
                         for _ in range(self.counter.ep_step[cpu]):
                             self.report.store(cpu=cpu, counter=self.counter)
                             self.counter.step += 1
 
                         self.print_episode()
                         self.renderer.finish(paths.run, self.counter.ep, cpu)
+
                         best = self.counter.reset_ep(cpu)
-                        name = paths.run + "/" + self.agent.name
-                        if best:
-                            self.agent.save_policy(name)
-                        self.unroll += 1
+                        if best: self.agent.save_policy(paths.run + "/" + self.agent.name)
+
+                        self.ep_unroll += 1
 
                 # Update observation
                 obs = nxt
@@ -85,6 +72,6 @@ class episode(base_trainer):
             self.timer_training.toc()
 
             # Reset unroll
-            self.unroll = 0
+            self.ep_unroll = 0
 
         self.end_training()

@@ -20,37 +20,42 @@ from dragonfly.src.utils.error      import error
 ###############################################
 ### Base trainer class
 class base_trainer:
-    def __init__(self, env_pms, n_stp_max, pms):
+    def __init__(self, update_type, env_pms, agent_pms, pms):
 
-        self.env       = environment(paths.base, env_pms)
-        self.n_stp_max = n_stp_max
+        # Initialize environment
+        self.env = environment(paths.base, env_pms)
+
+        # Initialize agent
+        self.agent = agent_factory.create(agent_pms.type,
+                                          spaces = self.env.spaces,
+                                          n_cpu  = mpi.size,
+                                          size   = self.mem_size,
+                                          pms    = agent_pms)
+
+        # Initialize update
+        self.update = update_factory.create(update_type)
+
+        # Initialize learning data report
+        self.report = report(
+            self.freq_report, ["step", "episode", "score", "smooth_score"]
+        )
 
         self.cnt = None
 
         self.monitoring = False
-        if hasattr(pms, "monitoring"):
-            self.monitoring = pms.monitoring
+        if hasattr(pms, "monitoring"): self.monitoring = pms.monitoring
 
         # Initialize counter
         self.counter = counter(mpi.size)
 
         # Initialize renderer
         self.rnd_style = "rgb_array"
-        if hasattr(pms, "rnd_style"):
-            self.rnd_style = pms.rnd_style
+        if hasattr(pms, "rnd_style"): self.rnd_style = pms.rnd_style
         self.renderer = renderer(mpi.size, self.rnd_style, pms.render_every)
 
         # Initialize timers
         self.timer_global   = timer("global   ")
         self.timer_training = timer("training ")
-
-    def start_training(self):
-
-        self.timer_global.tic()
-        obs = self.env.reset_all()
-        self.counter.reset()
-
-        return obs
 
     def loop(self):
         raise NotImplementedError
