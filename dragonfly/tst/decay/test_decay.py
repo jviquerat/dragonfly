@@ -2,9 +2,9 @@
 import pytest
 
 # Custom imports
-from dragonfly.tst.tst         import *
-from dragonfly.src.decay.decay import *
-from dragonfly.src.utils.json  import *
+from dragonfly.tst.tst          import *
+from dragonfly.src.decay.linear import linear
+from dragonfly.src.utils.json   import json_parser
 
 ###############################################
 ### Test decay class

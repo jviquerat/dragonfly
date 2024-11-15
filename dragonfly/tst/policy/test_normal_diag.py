@@ -1,10 +1,12 @@
 # Generic imports
 import pytest
+import numpy      as np
+import tensorflow as tf
 
 # Custom imports
 from dragonfly.tst.tst                import *
-from dragonfly.src.policy.normal_diag import *
-from dragonfly.src.utils.json         import *
+from dragonfly.src.policy.normal_diag import normal_diag
+from dragonfly.src.utils.json         import json_parser
 
 ###############################################
 ### Test diagonal normal policy

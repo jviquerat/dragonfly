@@ -3,7 +3,7 @@ import pytest
 
 # Custom imports
 from dragonfly.tst.tst    import *
-from dragonfly.tst.runner import *
+from dragonfly.tst.runner import runner
 
 ###############################################
 ### Test continuous ppo agent

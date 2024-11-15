@@ -1,12 +1,14 @@
 # Generic imports
 import pytest
+import numpy as np
 
 # Custom imports
+from dragonfly.src.core.constants  import *
 from dragonfly.tst.tst             import *
-from dragonfly.src.retrn.full      import *
-from dragonfly.src.retrn.advantage import *
-from dragonfly.src.retrn.gae       import *
-from dragonfly.src.utils.json      import *
+from dragonfly.src.retrn.full      import full
+from dragonfly.src.retrn.advantage import advantage
+from dragonfly.src.retrn.gae       import gae
+from dragonfly.src.utils.json      import json_parser
 
 ###############################################
 ### Test return classes

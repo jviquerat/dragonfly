@@ -1,9 +1,10 @@
 # Generic imports
 import pytest
+import numpy as np
 
 # Custom imports
 from dragonfly.tst.tst        import *
-from dragonfly.src.utils.buff import *
+from dragonfly.src.utils.buff import pbuff
 
 ###############################################
 ### Test parallel buffer class

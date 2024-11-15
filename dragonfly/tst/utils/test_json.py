@@ -3,7 +3,7 @@ import pytest
 
 # Custom imports
 from dragonfly.tst.tst        import *
-from dragonfly.src.utils.json import *
+from dragonfly.src.utils.json import json_parser
 
 ###############################################
 ### Test json reader

@@ -3,7 +3,7 @@ import numpy      as np
 import tensorflow as tf
 
 # Custom imports
-from dragonfly.src.utils.rmsnorm import *
+from dragonfly.src.utils.rmsnorm import RMSNorm
 
 ###############################################
 ### Test rmsnorm shape

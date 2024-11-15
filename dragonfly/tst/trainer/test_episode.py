@@ -3,7 +3,8 @@ import pytest
 
 # Custom imports
 from dragonfly.tst.tst    import *
-from dragonfly.tst.runner import *
+from dragonfly.tst.runner import runner
+
 ###############################################
 ### Test episode-based training
 def test_episode():

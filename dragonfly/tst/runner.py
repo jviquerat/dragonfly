@@ -5,10 +5,9 @@ import shutil
 # Custom imports
 from dragonfly.src.core.constants  import *
 from dragonfly.src.core.paths      import *
-from dragonfly.src.utils.json      import *
-from dragonfly.src.utils.data      import *
-from dragonfly.src.env.environment import *
-from dragonfly.src.trainer.trainer import *
+from dragonfly.src.utils.json      import json_parser
+from dragonfly.src.utils.data      import data_avg
+from dragonfly.src.trainer.trainer import trainer_factory
 
 ###############################################
 ### Generic runner used in agent and trainer tests

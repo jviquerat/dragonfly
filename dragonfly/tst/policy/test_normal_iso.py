@@ -1,10 +1,12 @@
 # Generic imports
 import pytest
+import numpy      as np
+import tensorflow as tf
 
 # Custom imports
 from dragonfly.tst.tst               import *
-from dragonfly.src.policy.normal_iso import *
-from dragonfly.src.utils.json        import *
+from dragonfly.src.policy.normal_iso import normal_iso
+from dragonfly.src.utils.json        import json_parser
 
 ###############################################
 ### Test isotropic normal policy

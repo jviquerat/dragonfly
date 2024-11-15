@@ -3,7 +3,7 @@ import pytest
 
 # Custom imports
 from dragonfly.tst.tst        import *
-from dragonfly.src.utils.buff import *
+from dragonfly.src.utils.buff import buff
 
 ###############################################
 ### Test buffer class
