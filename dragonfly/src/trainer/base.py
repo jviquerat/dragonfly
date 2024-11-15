@@ -57,81 +57,13 @@ class base_trainer:
         self.timer_global   = timer("global   ")
         self.timer_training = timer("training ")
 
+    # Mandatory re-implementation in daughter classes
     def loop(self):
         raise NotImplementedError
 
-    def monitor(self, obs, act):
-        """
-        Monitors and logs the actions and observations during training.
-        This method handles the logging of actions and observations for each episode
-        and step during the training process.
+    # Execute next step in the environment
+    def apply_next_step(self, obs):
 
-        Args:
-            obs (np.array): The observation array from the environment.
-            act (np.array): The action array taken by the agent.
-
-        Raises:
-            error: If monitoring is attempted in a parallel environment setup.
-        """
-        if self.monitoring:
-            if mpi.size > 1:
-                error(
-                    "base_trainer",
-                    "monitor",
-                    "monitoring does not work with parallel environments",
-                )
-
-            apath = paths.run + "/actions"
-            opath = paths.run + "/observations"
-
-            if (self.counter.ep == 0) and (self.counter.ep_step[0] == 0):
-                if os.path.exists(apath):
-                    shutil.rmtree(apath)
-                if os.path.exists(opath):
-                    shutil.rmtree(opath)
-                os.makedirs(apath)
-                os.makedirs(opath)
-
-            # Write actions
-            s = str(self.counter.ep_step[0])
-            a = act.flatten()
-            for i in range(act.size):
-                s += " "
-                s += str(a[i])
-            s += "\n"
-
-            filename = apath + "/" + str(self.counter.ep) + ".dat"
-            with open(filename, "a") as f:
-                f.write(s)
-
-            # Write observations
-            s = str(self.counter.ep_step[0])
-            o = obs.flatten()
-            for i in range(obs.size):
-                s += " "
-                s += str(o[i])
-            s += "\n"
-
-            filename = opath + "/" + str(self.counter.ep) + ".dat"
-            with open(filename, "a") as f:
-                f.write(s)
-
-    def apply_next_step(self, obs: np.array):
-        """
-        Executes the next step in the environment using the current observation, updates the agent's state,
-        and handles monitoring and rendering.
-
-        This method sends the current observation to the agent to decide on an action, then applies this action
-        in the environment to get the next state and reward. It stores the transition (current state, action,
-        next state, reward, done flag, and trace) in the agent's memory. It also updates the training counter
-        with the received reward and handles the rendering of the environment's current state.
-
-        Args:
-            obs (np.array): The current observation from the environment.
-
-        Returns:
-            tuple: A tuple containing the next state (np.array), reward (float), done flag (bool),
-        """
         # Retrieve action and step
         act = self.agent.actions(obs)
         nxt, rwd, dne, trc = self.env.step(act)
@@ -147,20 +79,15 @@ class base_trainer:
         self.renderer.store(self.env)
         return nxt, rwd, dne, trc
 
+    # Reset trainer
     def reset(self):
         self.agent.reset()
         self.report.reset()
         self.renderer.reset()
 
+    # Print summary at the end of each episode
     def print_episode(self):
-        """
-        Prints a summary at the end of each episode.
 
-        This method outputs the episode number, current step, average score, and the best score
-        achieved so far, along with the episode number where the best score was achieved. It
-        manages the printing format to ensure that the output is updated in place until the
-        maximum number of steps is reached, after which it starts printing on new lines.
-        """
         # No initial printing
         if self.counter.ep == 0: return
 
@@ -200,17 +127,9 @@ class base_trainer:
                 end=end,
             )
 
+    # Finalizes a training by printing a summary, writing reports, and closing timers.
     def end_training(self):
-        """
-        Finalizes a training by printing a summary, writing reports, and closing timers.
 
-        This method is called at the end of training to perform final housekeeping tasks:
-        it prints a summary of the episode, writes the episode's data to a report, and closes
-        all active timers, displaying their summaries. This ensures that all relevant information
-        is logged and that resources are properly managed at the conclusion of a training.
-
-        Args:
-        """
         # Last printing
         self.print_episode()
 
@@ -223,3 +142,48 @@ class base_trainer:
         self.env.timer_env.show()
         self.agent.timer_actions.show()
         self.timer_training.show()
+
+    # Monitor observations and actions during training
+    def monitor(self, obs, act):
+
+        if (not self.monitoring): return
+
+        # Monitoring only works in serial mode
+        if mpi.size > 1:
+            error("base_trainer", "monitor",
+                  "monitoring does not work with parallel environments")
+
+        apath = paths.run + "/actions"
+        opath = paths.run + "/observations"
+
+        if (self.counter.ep == 0) and (self.counter.ep_step[0] == 0):
+            if os.path.exists(apath):
+                shutil.rmtree(apath)
+            if os.path.exists(opath):
+                shutil.rmtree(opath)
+            os.makedirs(apath)
+            os.makedirs(opath)
+
+        # Write actions
+        s = str(self.counter.ep_step[0])
+        a = act.flatten()
+        for i in range(act.size):
+            s += " "
+            s += str(a[i])
+        s += "\n"
+
+        filename = apath + "/" + str(self.counter.ep) + ".dat"
+        with open(filename, "a") as f:
+            f.write(s)
+
+        # Write observations
+        s = str(self.counter.ep_step[0])
+        o = obs.flatten()
+        for i in range(obs.size):
+            s += " "
+            s += str(o[i])
+        s += "\n"
+
+        filename = opath + "/" + str(self.counter.ep) + ".dat"
+        with open(filename, "a") as f:
+            f.write(s)
