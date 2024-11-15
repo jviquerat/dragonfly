@@ -3,8 +3,8 @@ import pytest
 
 # Custom imports
 from dragonfly.tst.tst           import *
-from dragonfly.src.value.q_value import *
-from dragonfly.src.utils.json    import *
+from dragonfly.src.value.q_value import q_value
+from dragonfly.src.utils.json    import json_parser
 
 ###############################################
 ### Test q_value

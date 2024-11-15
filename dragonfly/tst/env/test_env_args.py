@@ -2,10 +2,10 @@
 import os
 
 # Custom imports
-from dragonfly.src.utils.json      import *
-from dragonfly.src.env.environment import *
 from dragonfly.tst.tst             import *
-from dragonfly.tst.runner          import *
+from dragonfly.src.utils.json      import json_parser
+from dragonfly.src.env.environment import environment
+from dragonfly.tst.runner          import runner
 
 ###############################################
 ### Test environment interface

@@ -1,10 +1,11 @@
 # Generic imports
 import pytest
+import tensorflow as tf
 
 # Custom imports
 from dragonfly.tst.tst                  import *
-from dragonfly.src.policy.deterministic import *
-from dragonfly.src.utils.json           import *
+from dragonfly.src.policy.deterministic import deterministic
+from dragonfly.src.utils.json           import json_parser
 
 ###############################################
 ### Test deterministic policy

@@ -1,10 +1,12 @@
 # Generic imports
 import pytest
+import numpy      as np
+import tensorflow as tf
 
 # Custom imports
 from dragonfly.tst.tst                import *
-from dragonfly.src.policy.normal_full import *
-from dragonfly.src.utils.json         import *
+from dragonfly.src.policy.normal_full import normal_full
+from dragonfly.src.utils.json         import json_parser
 
 ###############################################
 ### Test full normal policy
