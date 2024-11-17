@@ -8,7 +8,7 @@ from dragonfly.src.env.environment import environment
 from dragonfly.tst.runner          import runner
 
 ###############################################
-### Test environment interface
+### Test passing arguments to environment
 def test_env_args():
 
     # Initial space
