@@ -5,13 +5,13 @@ from dragonfly.src.utils.polyak import polyak
 ###############################################
 ### SAC agent
 class sac(base_agent_off_policy):
-    def __init__(self, spaces, n_cpu, size, pms):
+    def __init__(self, spaces, n_cpu, mem_size, pms):
         super().__init__(spaces)
 
         # Initialize from arguments
         self.name       = 'sac'
         self.n_cpu      = n_cpu
-        self.mem_size   = size
+        self.mem_size   = mem_size
         self.gamma      = pms.gamma
         self.alpha      = pms.alpha
         self.rho        = pms.rho
