@@ -4,8 +4,7 @@
         "obs_clip": false,
         "obs_norm": false,
         "obs_noise": 0.0,
-        "obs_downscale": 4,
-        "obs_stack": 4
+        "obs_grayscale": true
     },
     "naming": {
         "env": true,
