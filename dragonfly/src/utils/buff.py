@@ -10,49 +10,75 @@ from dragonfly.src.utils.error import error
 ### Parallel buffer class, used to temporarily
 ### store data from parallel environments
 class pbuff:
-    def __init__(self, n_cpu, dim):
+    def __init__(self, n_cpu, dim, size):
 
         self.n_cpu = n_cpu
         self.dim   = dim
+        self.size  = size
+
+        if (self.dim == 1):
+            self.buff = np.zeros((self.n_cpu, self.size))
+        else:
+            self.buff = np.zeros((self.n_cpu, self.size, self.dim))
+
         self.reset()
 
     def reset(self):
 
-        self.buff = [np.array([]) for _ in range(self.n_cpu)]
+        self.k = 0
+        #self.buff = [np.array([]) for _ in range(self.n_cpu)]
 
     def append(self, vec):
 
         for cpu in range(self.n_cpu):
-            self.buff[cpu] = np.append(self.buff[cpu], vec[cpu])
+            #self.buff[cpu] = np.append(self.buff[cpu], vec[cpu])
+            self.buff[cpu,self.k] = vec[cpu]
+
+        self.k += 1
 
     def length(self):
 
-        return int(len(self.buff[0])/self.dim)
+        return self.k
+        #return int(len(self.buff[0])/self.dim)
 
     def serialize(self):
 
-        arr = np.array([])
+        if (self.dim == 1):
+            arr = np.zeros((self.size*self.n_cpu))
+        else:
+            arr = np.zeros((self.size*self.n_cpu, self.dim))
+
         for cpu in range(self.n_cpu):
-            arr = np.append(arr, self.buff[cpu])
+            start = cpu*self.size
+            end   = (cpu+1)*self.size
+
+            arr[start:end] = self.buff[cpu,:]
 
         return np.reshape(arr, (-1,self.dim))
+
+        # arr = np.array([])
+        # for cpu in range(self.n_cpu):
+        #     arr = np.append(arr, self.buff[cpu])
+
+        # return np.reshape(arr, (-1,self.dim))
 
 ###############################################
 ### Local parallel buffer class, used to store
 ### data between two updates of the agent
 class buff:
-    def __init__(self, n_cpu, names, dims):
+    def __init__(self, n_cpu, names, dims, parallel_buff_size):
 
-        self.n_cpu = n_cpu
-        self.names = names
-        self.dims  = dims
+        self.n_cpu              = n_cpu
+        self.names              = names
+        self.dims               = dims
+        self.parallel_buff_size = parallel_buff_size
         self.reset()
 
     def reset(self):
 
         self.data = {}
         for name, dim in zip(self.names, self.dims):
-            self.data[name] = pbuff(self.n_cpu, dim)
+            self.data[name] = pbuff(self.n_cpu, dim, self.parallel_buff_size)
 
     def store(self, names, fields):
 

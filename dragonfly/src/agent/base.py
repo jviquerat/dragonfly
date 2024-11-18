@@ -63,7 +63,7 @@ class base_agent_on_policy(base_agent):
 
         self.lnames = ["obs", "nxt", "act", "lgp", "rwd", "trm"]
         self.lsizes = [self.obs_dim(), self.obs_dim(), self.true_act_dim(), 1, 1, 1]
-        self.buff   = buff(self.n_cpu, self.lnames, self.lsizes)
+        self.buff   = buff(self.n_cpu, self.lnames, self.lsizes, self.mem_size)
 
         self.gnames = ["obs", "act", "adv", "tgt", "lgp"]
         self.gsizes = [self.obs_dim(), self.true_act_dim(), 1, 1, 1]
@@ -156,7 +156,7 @@ class base_agent_off_policy(base_agent):
 
         self.names = ["obs", "nxt", "act", "rwd", "trm"]
         self.sizes = [self.obs_dim(), self.obs_dim(), self.true_act_dim(), 1, 1]
-        self.buff  = buff(self.n_cpu, self.names, self.sizes)
+        self.buff  = buff(self.n_cpu, self.names, self.sizes, 1)
         self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
 
     # Control (deterministic actions)
