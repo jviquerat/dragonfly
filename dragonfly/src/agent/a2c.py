@@ -4,13 +4,13 @@ from dragonfly.src.agent.base import *
 ###############################################
 ### A2C agent
 class a2c(base_agent_on_policy):
-    def __init__(self, spaces, n_cpu, size, pms):
+    def __init__(self, spaces, n_cpu, mem_size, pms):
         super().__init__(spaces)
 
         # Initialize from arguments
-        self.name   = 'a2c'
-        self.n_cpu  = n_cpu
-        self.size   = size
+        self.name     = 'a2c'
+        self.n_cpu    = n_cpu
+        self.mem_size = mem_size
 
         self.p = pol_factory.create(pms.policy.type,
                                     obs_dim   = self.obs_dim(),

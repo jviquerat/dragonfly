@@ -67,7 +67,7 @@ class base_agent_on_policy(base_agent):
 
         self.gnames = ["obs", "act", "adv", "tgt", "lgp"]
         self.gsizes = [self.obs_dim(), self.true_act_dim(), 1, 1, 1]
-        self.gbuff  = gbuff(self.size, self.gnames, self.gsizes)
+        self.gbuff  = gbuff(self.mem_size, self.gnames, self.gsizes)
 
     # Get actions
     def actions(self, obs):
