@@ -80,7 +80,7 @@ class environment_spaces:
 
             # Compute processed_obs_shape
             self.processed_obs_shape_ = self.natural_obs_shape_.copy()
-            for i in range(n_dims):
+            for i in range(0, min(2,n_dims)):
                 self.processed_obs_shape_[i] = self.processed_obs_shape_[i]//self.obs_downscale_
 
             # Second and third dimensions if image
@@ -131,6 +131,9 @@ class environment_spaces:
             if (len(self.obs_avg_.shape) == 2):
                 self.obs_avg_ = self.obs_avg_[::s,::s]
                 self.obs_rng_ = self.obs_rng_[::s,::s]
+            if (len(self.obs_avg_.shape) == 3):
+                self.obs_avg_ = self.obs_avg_[::s,::s,:]
+                self.obs_rng_ = self.obs_rng_[::s,::s,:]
 
     # Accessor
     def obs_dim(self):
@@ -173,6 +176,9 @@ class environment_spaces:
     # Process observations
     def process_observations(self, obs):
 
+        if (obs.dtype.kind in ["u", "i"]):
+            obs = obs.astype(np.float32)
+
         if (self.obs_grayscale_):
             obs = self.grayscale_obs(obs)
         if (self.obs_downscale_):
@@ -199,11 +205,11 @@ class environment_spaces:
     def downscale_obs(self, obs):
 
         if (len(obs.shape) == 1):
-            x = obs[::self.obs_downscale_]
+            return obs[::self.obs_downscale_]
         if (len(obs.shape) == 2):
-            x = obs[::self.obs_downscale_,::self.obs_downscale_]
-
-        return x
+            return obs[::self.obs_downscale_,::self.obs_downscale_]
+        if (len(obs.shape) == 3):
+            return obs[::self.obs_downscale_,::self.obs_downscale_,:]
 
     # Clip observations
     def clip_obs(self, obs):
