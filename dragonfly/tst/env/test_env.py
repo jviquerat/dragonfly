@@ -14,7 +14,6 @@ def test_env_args():
     # Initial space
     print("")
 
-    #########################
     # Test environment optional arguments
     reader = json_parser()
     pms    = reader.read("dragonfly/tst/env/env_args.json")
@@ -31,7 +30,37 @@ def test_env_args():
     assert(env.spaces.obs_stack_ == 4)
     print("")
 
-    #########################
-    # Test obs stacking
+###############################################
+### Test observation stacking
+def test_obs_stacking():
+
     runner("dragonfly/tst/env/obs_stack.json",
            "observation stack")
+
+###############################################
+### Test 2D obs downscale
+def test_obs_2D_downscale():
+
+    runner("dragonfly/tst/env/obs_downscale.json",
+           "observation downscale")
+
+###############################################
+### Test 2D obs grayscale
+def test_obs_2D_grayscale():
+
+    runner("dragonfly/tst/env/obs_grayscale.json",
+           "observation grayscale")
+
+###############################################
+### Test 2D obs downscale + grayscale
+def test_obs_2D_downscale_grayscale():
+
+    runner("dragonfly/tst/env/obs_downscale_grayscale.json",
+           "observation downscale and grayscale")
+
+###############################################
+### Test 2D obs frameskip
+def test_obs_2D_frameskip():
+
+    runner("dragonfly/tst/env/obs_frameskip.json",
+           "observation frameskip")
