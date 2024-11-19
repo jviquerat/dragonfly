@@ -5,21 +5,22 @@ from dragonfly.src.utils.polyak import polyak
 ###############################################
 ### TD3 agent
 class td3(base_agent_off_policy):
-    def __init__(self, spaces, n_cpu, mem_size, pms):
+    def __init__(self, spaces, n_cpu, mem_size, n_stp_unroll, pms):
         super().__init__(spaces)
 
         # Initialize from arguments
-        self.name       = 'td3'
-        self.n_cpu      = n_cpu
-        self.mem_size   = mem_size
-        self.gamma      = pms.gamma
-        self.rho        = pms.rho
-        self.n_warmup   = pms.n_warmup
-        self.n_filling  = pms.n_filling
-        self.p_update   = pms.p_update
-        self.sigma_act  = pms.sigma_act
-        self.sigma_tgt  = pms.sigma_tgt
-        self.noise_clip = pms.noise_clip
+        self.name         = 'td3'
+        self.n_cpu        = n_cpu
+        self.mem_size     = mem_size
+        self.n_stp_unroll = n_stp_unroll
+        self.gamma        = pms.gamma
+        self.rho          = pms.rho
+        self.n_warmup     = pms.n_warmup
+        self.n_filling    = pms.n_filling
+        self.p_update     = pms.p_update
+        self.sigma_act    = pms.sigma_act
+        self.sigma_tgt    = pms.sigma_tgt
+        self.noise_clip   = pms.noise_clip
 
         # Local variables
         self.step   = 0

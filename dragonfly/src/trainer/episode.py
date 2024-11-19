@@ -6,13 +6,14 @@ from dragonfly.src.trainer.base import *
 class episode(base_trainer):
     def __init__(self, env_pms, agent_pms, n_stp_max, pms):
 
-        self.n_stp_max   = n_stp_max
-        self.n_ep_unroll = pms.n_ep_unroll*mpi.size
-        self.n_ep_train  = pms.n_ep_train
-        self.btc_frac    = pms.batch_frac
-        self.n_epochs    = pms.n_epochs
-        self.mem_size    = 1000*self.n_ep_train
-        self.freq_report = 10
+        self.n_stp_max    = n_stp_max
+        self.n_ep_unroll  = pms.n_ep_unroll*mpi.size
+        self.n_ep_train   = pms.n_ep_train
+        self.btc_frac     = pms.batch_frac
+        self.n_epochs     = pms.n_epochs
+        self.mem_size     = 1000*self.n_ep_train
+        self.n_stp_unroll = self.mem_size
+        self.freq_report  = 10
 
         self.lengths   = np.array([], dtype=int)
         self.ep_unroll = 0

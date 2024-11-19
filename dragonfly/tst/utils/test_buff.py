@@ -18,12 +18,12 @@ def test_buff():
     n_cpu = 1
     names = ["obs", "act", "rwd"]
     dims  = [3, 2, 1]
-    loc_buff = buff(n_cpu, names, dims)
+    loc_buff = buff(n_cpu, names, dims, 2)
 
     # Create buffers to append
     obs = [[1.0, 0.0, 0.5]]
     act = [[0.1, 0.2]]
-    rwd = [[1.0]]
+    rwd =  [1.0]
 
     # Append to par_buff several times
     loc_buff.store(["obs", "act", "rwd"], [obs, act, rwd])
@@ -55,7 +55,7 @@ def test_buff():
     n_cpu = 2
     names = ["obs", "act", "rwd"]
     dims  = [3, 2, 1]
-    loc_buff = buff(n_cpu, names, dims)
+    loc_buff = buff(n_cpu, names, dims, 2)
 
     # Create buffers to append
     obs = [[1.0, 0.0, 0.5],

@@ -6,11 +6,12 @@ from dragonfly.src.trainer.base import *
 class td(base_trainer):
     def __init__(self, env_pms, agent_pms, n_stp_max, pms):
 
-        self.n_stp_max    = n_stp_max
-        self.mem_size     = pms.mem_size
-        self.n_stp_unroll = pms.n_stp_unroll * mpi.size
-        self.btc_size     = pms.btc_size
-        self.freq_report  = max(int(self.n_stp_max / (freq_report * self.n_stp_unroll)), 1)
+        self.n_stp_max         = n_stp_max
+        self.mem_size          = pms.mem_size
+        self.n_stp_unroll      = pms.n_stp_unroll
+        self.n_true_stp_unroll = pms.n_stp_unroll * mpi.size
+        self.btc_size          = pms.btc_size
+        self.freq_report       = max(int(self.n_stp_max / (freq_report * self.n_true_stp_unroll)), 1)
 
         self.stp_unroll = 0
 
@@ -29,7 +30,7 @@ class td(base_trainer):
             self.agent.pre_loop()
 
             # Loop over training steps
-            while not (self.stp_unroll >= self.n_stp_unroll):
+            while not (self.stp_unroll >= self.n_true_stp_unroll):
                 nxt, _, dne, _ = self.apply_next_step(obs)
 
                 # Update unrolling counter

@@ -6,13 +6,14 @@ from dragonfly.src.trainer.base import *
 class buffer(base_trainer):
     def __init__(self, env_pms, agent_pms, n_stp_max, pms):
 
-        self.n_stp_max   = n_stp_max
-        self.buff_size   = pms.buff_size
-        self.n_buff      = pms.n_buff
-        self.btc_frac    = pms.batch_frac
-        self.n_epochs    = pms.n_epochs
-        self.mem_size    = self.n_buff * self.buff_size
-        self.freq_report = max(int(n_stp_max / (freq_report * self.buff_size)), 1)
+        self.n_stp_max    = n_stp_max
+        self.buff_size    = pms.buff_size
+        self.n_buff       = pms.n_buff
+        self.btc_frac     = pms.batch_frac
+        self.n_epochs     = pms.n_epochs
+        self.mem_size     = self.n_buff * self.buff_size
+        self.n_stp_unroll = self.buff_size
+        self.freq_report  = max(int(n_stp_max / (freq_report * self.buff_size)), 1)
 
         super().__init__("on_policy", env_pms, agent_pms, pms)
 

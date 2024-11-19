@@ -26,20 +26,17 @@ class pbuff:
     def reset(self):
 
         self.k = 0
-        #self.buff = [np.array([]) for _ in range(self.n_cpu)]
 
     def append(self, vec):
 
         for cpu in range(self.n_cpu):
-            #self.buff[cpu] = np.append(self.buff[cpu], vec[cpu])
-            self.buff[cpu,self.k] = vec[cpu]
+            self.buff[cpu,self.k,:] = vec[cpu,:]
 
         self.k += 1
 
     def length(self):
 
         return self.k
-        #return int(len(self.buff[0])/self.dim)
 
     def serialize(self):
 
@@ -52,15 +49,9 @@ class pbuff:
             start = cpu*self.size
             end   = (cpu+1)*self.size
 
-            arr[start:end] = self.buff[cpu,:]
+            arr[start:end,:] = self.buff[cpu,:,:]
 
         return np.reshape(arr, (-1,self.dim))
-
-        # arr = np.array([])
-        # for cpu in range(self.n_cpu):
-        #     arr = np.append(arr, self.buff[cpu])
-
-        # return np.reshape(arr, (-1,self.dim))
 
 ###############################################
 ### Local parallel buffer class, used to store
@@ -72,13 +63,15 @@ class buff:
         self.names              = names
         self.dims               = dims
         self.parallel_buff_size = parallel_buff_size
-        self.reset()
-
-    def reset(self):
 
         self.data = {}
         for name, dim in zip(self.names, self.dims):
             self.data[name] = pbuff(self.n_cpu, dim, self.parallel_buff_size)
+
+    def reset(self):
+
+        for name in self.names:
+            self.data[name].reset()
 
     def store(self, names, fields):
 

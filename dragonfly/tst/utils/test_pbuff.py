@@ -18,7 +18,7 @@ def test_pbuff():
     # First test is done with 1 cpu
     n_cpu   = 1
     obs_dim = 3
-    buff    = pbuff(n_cpu, obs_dim)
+    buff    = pbuff(n_cpu, obs_dim, 2)
 
     # Generate a vector to fill buffer
     vec = np.array([])
@@ -54,7 +54,7 @@ def test_pbuff():
     # Same test with 2 cpus
     n_cpu   = 2
     obs_dim = 3
-    buff    = pbuff(n_cpu, obs_dim)
+    buff    = pbuff(n_cpu, obs_dim, 2)
 
     # Generate a vector to fill buffer
     vec = np.array([])
@@ -94,7 +94,7 @@ def test_pbuff():
     # Same test with inputs of size 1
     n_cpu   = 2
     obs_dim = 1
-    buff    = pbuff(n_cpu, obs_dim)
+    buff    = pbuff(n_cpu, obs_dim, 2)
 
     # Generate a vector to fill buffer
     #vec = 1.0*np.ones((obs_dim))

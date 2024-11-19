@@ -27,10 +27,11 @@ class base_trainer:
 
         # Initialize agent
         self.agent = agent_factory.create(agent_pms.type,
-                                          spaces   = self.env.spaces,
-                                          n_cpu    = mpi.size,
-                                          mem_size = self.mem_size,
-                                          pms      = agent_pms)
+                                          spaces       = self.env.spaces,
+                                          n_cpu        = mpi.size,
+                                          mem_size     = self.mem_size,
+                                          n_stp_unroll = self.n_stp_unroll,
+                                          pms          = agent_pms)
 
         # Initialize update
         self.update = update_factory.create(update_type)

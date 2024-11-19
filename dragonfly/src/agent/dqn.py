@@ -4,15 +4,16 @@ from dragonfly.src.agent.base import *
 ###############################################
 ### DQN agent
 class dqn(base_agent_off_policy):
-    def __init__(self, spaces, n_cpu, mem_size, pms):
+    def __init__(self, spaces, n_cpu, mem_size, n_stp_unroll, pms):
         super().__init__(spaces)
 
         # Initialize from arguments
-        self.name       = 'dqn'
-        self.n_cpu      = n_cpu
-        self.mem_size   = mem_size
-        self.gamma      = pms.gamma
-        self.tgt_update = pms.tgt_update
+        self.name         = 'dqn'
+        self.n_cpu        = n_cpu
+        self.mem_size     = mem_size
+        self.n_stp_unroll = n_stp_unroll
+        self.gamma        = pms.gamma
+        self.tgt_update   = pms.tgt_update
 
         # Local variables
         self.tgt_step   = 0
