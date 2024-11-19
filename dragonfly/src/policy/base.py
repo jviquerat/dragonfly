@@ -1,6 +1,3 @@
-# Generic imports
-import numpy as np
-
 # Custom imports
 from dragonfly.src.policy.tfd          import *
 from dragonfly.src.network.network     import net_factory
@@ -101,13 +98,6 @@ class base_policy():
 
         return tf.reshape(act, [-1, self.act_dim])
 
-    # Random uniform actions for warmup
-    def random_uniform(self, obs):
-
-        n_cpu = obs.shape[0]
-        act   = np.random.uniform(-1.0, 1.0, size=self.act_dim)
-        return act
-
 ###############################################
 ### Base policy for normal laws
 class base_normal(base_policy):
@@ -118,9 +108,7 @@ class base_normal(base_policy):
     # Get actions
     def actions(self, obs):
 
-        act, lgp = self.sample(tf.cast(obs, tf.float32))
-        act      = np.reshape(act.numpy(), (-1,self.act_dim))
-        lgp      = np.reshape(lgp.numpy(), (-1))
+        act, lgp = self.sample(obs)
 
         return act, lgp
 

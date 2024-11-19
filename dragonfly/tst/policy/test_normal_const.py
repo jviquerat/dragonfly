@@ -25,12 +25,11 @@ def test_normal_const():
 
     # Test action values
     print("Test const normal policy")
-    obs = [[1.0]]
+    obs = tf.constant([[1.0]])
     act, lgp = policy.actions(obs)
     print("Actions:",act)
 
-    obs = tf.cast([obs], tf.float32)
-    mu  = policy.forward(obs)
+    mu = policy.forward(obs)
     assert(np.all(np.abs(mu) < 1.0))
 
     print("")

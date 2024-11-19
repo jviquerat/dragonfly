@@ -74,7 +74,9 @@ class base_agent_on_policy(base_agent):
 
         # Get actions and associated log-prob
         self.timer_actions.tic()
-        act, lgp = self.p.actions(obs)
+        act, lgp = self.p.actions(tf.cast(obs, tf.float32))
+        act      = act.numpy()
+        lgp      = lgp.numpy()
 
         # Check for NaNs
         if (np.isnan(act).any()):
@@ -90,14 +92,19 @@ class base_agent_on_policy(base_agent):
     # Control (deterministic actions)
     def control(self, obs):
 
-        return self.p.control(obs)
+        act = self.p.control(tf.cast(obs, tf.float32))
+
+        return act.numpy()
 
     # Finalize buffers before training
     def returns(self, obs, nxt, rwd, trm):
 
         # Get current and next values
-        cval = self.v.values(obs)
-        nval = self.v.values(nxt)
+        cval = self.v.forward(tf.convert_to_tensor(obs))
+        nval = self.v.forward(tf.convert_to_tensor(nxt))
+
+        cval = np.reshape(cval, (-1, 1))
+        nval = np.reshape(nval, (-1, 1))
 
         # Compute advantages
         tgt, adv = self.retrn.compute(rwd, cval, nval, trm)

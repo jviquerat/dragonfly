@@ -33,10 +33,9 @@ class tanh_normal(base_normal):
     # Control (deterministic actions)
     def control(self, obs):
 
-        mu, sg   = self.forward(tf.cast(obs, tf.float32))
+        mu, sg   = self.forward(obs)
         act      = tf.reshape(mu, [-1,self.act_dim])
         tanh_act = tf.tanh(act)
-        tanh_act = np.reshape(tanh_act.numpy(), (-1, self.act_dim))
 
         return tanh_act
 

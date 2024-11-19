@@ -41,8 +41,8 @@ class normal_full(base_normal):
     # Control (deterministic actions)
     def control(self, obs):
 
-        mu, sg, cr = self.forward(tf.cast(obs, tf.float32))
-        act        = np.reshape(mu.numpy(), (-1, self.act_dim))
+        mu, sg, cr = self.forward(obs)
+        act        = tf.reshape(mu, [-1, self.act_dim])
 
         return act
 

@@ -1,5 +1,6 @@
 # Generic imports
 import pytest
+import tensorflow as tf
 
 # Custom imports
 from dragonfly.tst.tst                import *
@@ -23,7 +24,7 @@ def test_categorical():
 
     # Test action values
     print("Test categorical policy")
-    obs = [[1.0]]
+    obs = tf.constant([[1.0]])
     act, lgp = policy.actions(obs)
     print("Actions:",act)
 

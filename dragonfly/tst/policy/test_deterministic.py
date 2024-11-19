@@ -24,11 +24,10 @@ def test_deterministic():
 
     # Test action values
     print("Test deterministic policy")
-    obs = [[1.0]]
+    obs = tf.constant([[1.0]])
     act = policy.actions(obs)
     print("Actions:",act)
 
-    obs = tf.cast([obs], tf.float32)
     out = policy.forward(obs)
 
     print("")

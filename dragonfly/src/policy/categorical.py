@@ -29,18 +29,16 @@ class categorical(base_policy):
     # Get actions
     def actions(self, obs):
 
-        act, lgp = self.sample(tf.cast(obs, tf.float32))
-        act      = np.reshape(act.numpy()[0], (-1))
-        lgp      = np.reshape(lgp.numpy()[0], (-1))
+        act, lgp = self.sample(obs)
 
         return act, lgp
 
     # Control (deterministic actions)
     def control(self, obs):
 
-        probs = self.forward(tf.cast(obs, tf.float32))
+        probs = self.forward(obs)
         act   = tf.argmax(probs[0][0])
-        act   = np.reshape(act.numpy(), (-1))
+        act   = tf.reshape(act, [-1])
 
         return act
 
@@ -52,8 +50,8 @@ class categorical(base_policy):
         pdf = self.compute_pdf(obs)
 
         # Sample actions
-        act = pdf.sample(1)
-        lgp = pdf.log_prob(act)
+        act = tf.reshape(pdf.sample(1), [-1])
+        lgp = tf.reshape(pdf.log_prob(act), [-1])
 
         return act, lgp
 
@@ -73,11 +71,3 @@ class categorical(base_policy):
     def reshape_actions(self, act):
 
         return tf.reshape(act, [-1])
-
-    # Random uniform actions for warmup
-    def random_uniform(self, obs):
-
-        n_cpu = obs.shape[0]
-        act   = np.random.randint(0, self.act_dim, size=(n_cpu,1))
-
-        return np.reshape(act, (-1))

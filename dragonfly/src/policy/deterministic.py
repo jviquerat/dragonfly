@@ -29,8 +29,7 @@ class deterministic(base_policy):
     # Get actions
     def actions(self, obs):
 
-        act   = self.forward(tf.cast(obs, tf.float32))
-        act   = np.reshape(act.numpy(), (-1, self.act_dim))
+        act = self.forward(obs)
 
         return act
 

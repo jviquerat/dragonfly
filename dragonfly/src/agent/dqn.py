@@ -61,7 +61,7 @@ class dqn(base_agent_off_policy):
                 act[i] = random.randrange(0, self.act_dim())
             else:
                 cob = tf.cast([obs[i]], tf.float32)
-                val = self.q.values(cob)
+                val = self.q.forward(cob)
                 act[i] = np.argmax(val)
 
         act = np.reshape(act, (-1))
@@ -72,7 +72,7 @@ class dqn(base_agent_off_policy):
     # Control (deterministic actions)
     def control(self, obs):
 
-        val = self.q.values(obs)
+        val = self.q.forward(obs)
         act = np.reshape(np.argmax(val), (-1))
 
         return act

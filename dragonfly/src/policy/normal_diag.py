@@ -36,8 +36,8 @@ class normal_diag(base_normal):
     # Control (deterministic actions)
     def control(self, obs):
 
-        mu, sg = self.forward(tf.cast(obs, tf.float32))
-        act    = np.reshape(mu.numpy(), (-1, self.act_dim))
+        mu, sg = self.forward(obs)
+        act    = tf.reshape(mu, [-1, self.act_dim])
 
         return act
 

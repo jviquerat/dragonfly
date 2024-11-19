@@ -1,5 +1,6 @@
 # Generic imports
 import pytest
+import tensorflow as tf
 
 # Custom imports
 from dragonfly.tst.tst           import *
@@ -23,8 +24,8 @@ def test_v_value():
 
     # Test action values
     print("Test v_value")
-    obs = [[1.0]]
-    val = value.values(obs)
+    obs = tf.constant([[1.0]])
+    val = value.forward(obs)
     print("Value:", val)
 
     assert(len(val) == 1)

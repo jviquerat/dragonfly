@@ -1,5 +1,4 @@
 # Generic imports
-import numpy      as np
 import tensorflow as tf
 
 # Custom imports
@@ -13,19 +12,10 @@ class base_value():
     def __init__(self):
         pass
 
-    # Get values
-    def values(self, obs):
-        raise NotImplementedError
-
     # Network forward pass
     def forward(self, x):
 
-        return self.net.call(tf.cast(x, tf.float32))[0]
-
-    # Get values
-    def values(self, x):
-
-        return np.reshape(self.forward(x), (-1,self.out_dim))
+        return self.net.call(x)[0]
 
     # Save network weights
     def save_weights(self):

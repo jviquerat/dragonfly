@@ -25,11 +25,10 @@ def test_normal():
 
     # Test action values
     print("Test tanh-normal policy")
-    obs = [[1.0]]
+    obs = tf.constant([[1.0]])
     act, lgp = policy.actions(obs)
     print("Actions:",act)
 
-    obs = tf.cast([obs], tf.float32)
     tanh_act, lgp = policy.sample(obs)
     assert(np.all(np.abs(tanh_act) < 1.0))
 
