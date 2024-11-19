@@ -1,5 +1,6 @@
 # Custom imports
 from dragonfly.src.agent.sac           import *
+from dragonfly.src.core.paths          import *
 from dragonfly.src.optimizer.optimizer import opt_factory
 from dragonfly.src.loss.alpha_sac      import alpha_sac
 from dragonfly.src.utils.polyak        import polyak
@@ -51,7 +52,7 @@ class sac_auto(sac):
 
         # Monitor if required
         if (self.monitor):
-            with open("alpha", "a") as f:
+            with open(paths.run+"/alpha", "a") as f:
                 f.write(str(self.alpha.numpy())+"\n")
 
         # Update target networks
