@@ -1,8 +1,9 @@
-gymnasium[box2d, classic-control]
-mpi4py
-numpy
-tensorflow
-tensorflow-probability
-tf_keras
-matplotlib
-pytest
+gymnasium[box2d, classic-control]==1.0.0
+mpi4py==4.0.1
+numpy==1.26.4
+tensorflow==2.17.0
+tensorflow-probability==0.24.0
+keras==3.6.0
+tf_keras==2.17.0
+matplotlib==3.9.2
+pytest==8.3.3
