@@ -16,6 +16,7 @@ class environment_spaces:
         # Default values
         self.act_norm_       = True
         self.obs_norm_       = True
+        self.norm_style_     = "min_max"
         self.obs_clip_       = False
         self.obs_noise_      = False
         self.obs_stack_      = 1
@@ -27,6 +28,7 @@ class environment_spaces:
         # Optional values in parameters
         if hasattr(pms, "act_norm"):      self.act_norm_       = pms.act_norm
         if hasattr(pms, "obs_norm"):      self.obs_norm_       = pms.obs_norm
+        if hasattr(pms, "norm_style_"):   self.norm_style_     = pms.norm_style
         if hasattr(pms, "obs_clip"):      self.obs_clip_       = pms.obs_clip
         if hasattr(pms, "obs_noise"):     self.obs_noise_      = pms.obs_noise
         if hasattr(pms, "obs_stack"):     self.obs_stack_      = pms.obs_stack
@@ -116,6 +118,12 @@ class environment_spaces:
                                  self.obs_max_)
         self.obs_avg_ = 0.5*(self.obs_max_ + self.obs_min_)
         self.obs_rng_ = 0.5*(self.obs_max_ - self.obs_min_)
+
+        # If obs normalization is rsnorm
+        if (self.norm_style_ == "rsnorm"):
+            self.obs_count_ = 0.0
+            self.obs_mu_    = np.zeros(self.true_obs_dim_)
+            self.obs_std_   = np.zeros(self.true_obs_dim_)
 
         # For pixel-based envs
         if (self.obs_grayscale_):
@@ -222,8 +230,17 @@ class environment_spaces:
     # Normalize observations
     def norm_obs(self, obs):
 
-        obs -= self.obs_avg_
-        obs /= self.obs_rng_
+        if (self.norm_style_ == "min_max"):
+            obs -= self.obs_avg_
+            obs /= self.obs_rng_
+
+        if (self.norm_style_ == "rsnorm"):
+            self.obs_count_ += 1
+            delta          = obs - self.obs_mu_
+            self.obs_mu_  += (1.0/self.obs_count_)*delta
+            self.obs_std_  = ((self.obs_count_-1.0)/self.obs_count_)*(self.obs_std_ + delta*delta/self.obs_count_)
+
+            obs = (obs - self.obs_mu_)/np.sqrt(self.obs_std_ + 1.0e-8)
 
         return obs
 
