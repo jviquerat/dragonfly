@@ -15,7 +15,7 @@
         "tag": "cnn",
         "time": false
     },
-    "n_avg": 2,
+    "n_avg": 3,
     "n_stp_max": 500000,
     "trainer": {
         "style": "buffer",
