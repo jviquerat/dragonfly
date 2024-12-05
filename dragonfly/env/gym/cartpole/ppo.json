@@ -3,6 +3,7 @@
         "name": "CartPole-v0",
         "obs_clip": false,
         "obs_norm": true,
+        "norm_type": "rsnorm",
         "obs_noise": 0.0
     },
     "naming": {
@@ -11,7 +12,7 @@
         "tag": false,
         "time": false
     },
-    "n_avg": 10,
+    "n_avg": 5,
     "n_stp_max": 50000,
     "trainer": {
         "style": "buffer",

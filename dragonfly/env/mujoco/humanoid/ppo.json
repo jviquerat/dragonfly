@@ -3,6 +3,7 @@
         "name": "Humanoid-v4",
         "obs_clip": true,
         "obs_norm": true,
+        "norm_type": "rsnorm",
         "obs_noise": 0.0,
 	      "obs_max": 10.0
     },

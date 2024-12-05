@@ -3,6 +3,7 @@
         "name": "Acrobot-v1",
         "obs_clip": false,
         "obs_norm": true,
+        "norm_type": "rsnorm",
         "obs_noise": 0.0
     },
     "naming": {
