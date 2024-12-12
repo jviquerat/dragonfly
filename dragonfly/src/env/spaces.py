@@ -16,7 +16,7 @@ class environment_spaces:
         # Default values
         self.act_norm_       = True
         self.obs_norm_       = True
-        self.norm_style_     = "min_max"
+        self.norm_type_      = "rsnorm"
         self.obs_clip_       = False
         self.obs_noise_      = False
         self.obs_stack_      = 1
@@ -28,7 +28,7 @@ class environment_spaces:
         # Optional values in parameters
         if hasattr(pms, "act_norm"):      self.act_norm_       = pms.act_norm
         if hasattr(pms, "obs_norm"):      self.obs_norm_       = pms.obs_norm
-        if hasattr(pms, "norm_style_"):   self.norm_style_     = pms.norm_style
+        if hasattr(pms, "norm_type"):     self.norm_type_      = pms.norm_type
         if hasattr(pms, "obs_clip"):      self.obs_clip_       = pms.obs_clip
         if hasattr(pms, "obs_noise"):     self.obs_noise_      = pms.obs_noise
         if hasattr(pms, "obs_stack"):     self.obs_stack_      = pms.obs_stack
@@ -36,6 +36,11 @@ class environment_spaces:
         if hasattr(pms, "obs_downscale"): self.obs_downscale_  = pms.obs_downscale
         if hasattr(pms, "obs_frameskip"): self.obs_frameskip_  = pms.obs_frameskip
         if hasattr(pms, "obs_max"):       self.manual_obs_max_ = pms.obs_max
+
+        # Check norm_type_
+        if (self.norm_type_ not in ["min_max", "rsnorm"]):
+            error("environment_spaces", "__init__",
+                  "Unknown norm type: "+self.norm_type_)
 
         # Action space
         action_space = spaces[0]
@@ -125,7 +130,7 @@ class environment_spaces:
         self.input_obs_shape_ = self.true_obs_shape_.copy()
 
         # If obs normalization is rsnorm
-        if (self.norm_style_ == "rsnorm"):
+        if (self.norm_type_ == "rsnorm"):
             self.obs_count_ = 0.0
             self.obs_mu_    = np.zeros(self.true_obs_dim_)
             self.obs_std_   = np.zeros(self.true_obs_dim_)
@@ -244,11 +249,11 @@ class environment_spaces:
     # Normalize observations
     def norm_obs(self, obs):
 
-        if (self.norm_style_ == "min_max"):
+        if (self.norm_type_ == "min_max"):
             obs -= self.obs_avg_
             obs /= self.obs_rng_
 
-        if (self.norm_style_ == "rsnorm"):
+        if (self.norm_type_ == "rsnorm"):
             self.obs_count_ += 1
             delta          = obs - self.obs_mu_
             self.obs_mu_  += (1.0/self.obs_count_)*delta
