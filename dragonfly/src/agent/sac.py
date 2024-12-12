@@ -30,6 +30,8 @@ class sac(base_agent_off_policy):
             error("sac", "__init__",
                   "Policy type for sac agent is not tanh_normal")
 
+        pms.policy.network.k_init       = "lecun_normal"
+        pms.policy.network.k_init_final = "lecun_normal"
         self.p = pol_factory.create(pms.policy.type,
                                     obs_dim   = self.obs_dim(),
                                     obs_shape = self.obs_shape(),
@@ -45,6 +47,8 @@ class sac(base_agent_off_policy):
             error("td3", "__init__",
                   "Loss type for sac agent is not mse_sac")
 
+        pms.value.network.k_init       = "lecun_normal"
+        pms.value.network.k_init_final = "lecun_normal"
         self.q1 = val_factory.create(pms.value.type,
                                      inp_dim = self.obs_dim() + self.true_act_dim(),
                                      inp_shape = None,
