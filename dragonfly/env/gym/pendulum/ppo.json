@@ -3,7 +3,6 @@
         "name": "Pendulum-v1",
         "obs_clip": false,
         "obs_norm": true,
-        "norm_type": "rsnorm",
         "obs_noise": 0.0
     },
     "naming": {
@@ -19,7 +18,7 @@
         "buff_size": 2000,
         "n_buff": 1,
         "batch_frac": 0.25,
-        "n_epochs": 64,
+        "n_epochs": 32,
         "render_every": 10000
     },
     "agent": {
@@ -30,12 +29,12 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64],
-                    "actv": "tanh"
+                    "actv": "swish"
                 },
                 "heads": {
                     "nb": 2,
                     "arch": [[64],[64]],
-                    "actv": ["tanh","tanh"],
+                    "actv": ["swish","swish"],
                     "final": ["tanh","sigmoid"]
                 }
             },
@@ -56,18 +55,18 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [64,64],
-                    "actv": "relu"
+                    "actv": "swish"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["relu"],
+                    "actv": ["swish"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-3,
+                "lr": 2.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {

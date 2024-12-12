@@ -2,7 +2,7 @@
     "env": {
         "name": "CartPole-v0",
         "obs_clip": false,
-        "obs_norm": true,
+        "obs_norm": false,
         "obs_noise": 0.0
     },
     "naming": {
@@ -36,18 +36,18 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [32,32],
-                    "actv": "relu"
+                    "actv": "swish"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["relu"],
+                    "actv": ["swish"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 3.0e-4,
                 "grd_clip": null
             },
             "loss": {

@@ -3,9 +3,7 @@
         "name": "Hopper-v4",
         "obs_clip": false,
         "obs_norm": true,
-        "norm_type": "rsnorm",
-        "obs_noise": 0.0,
-	      "obs_max": 10.0
+        "obs_noise": 0.0
     },
     "naming": {
         "env": true,
@@ -42,8 +40,8 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
-                "lr": 1.0e-3,
+                "type": "adamw",
+                "lr": 5.0e-4,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -68,8 +66,8 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
-                "lr": 5.0e-3,
+                "type": "adamw",
+                "lr": 2.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -78,7 +76,7 @@
         },
         "retrn": {
             "type": "gae",
-            "gamma": 0.999,
+            "gamma": 0.99,
             "gae_lambda": 0.95,
             "ret_norm": true
         },

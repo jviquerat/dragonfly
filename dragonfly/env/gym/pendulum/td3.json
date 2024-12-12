@@ -47,7 +47,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 3.0e-4,
                 "grd_clip": null
             },
             "loss": {
@@ -71,7 +71,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 3.0e-4,
                 "grd_clip": null
             },
             "loss": {
