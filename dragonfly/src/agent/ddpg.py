@@ -31,6 +31,8 @@ class ddpg(base_agent_off_policy):
             error("ddpg", "__init__",
                   "Policy loss type for ddpg agent is not q_pol")
 
+        pms.policy.network.k_init       = "lecun_normal"
+        pms.policy.network.k_init_final = "lecun_normal"
         self.p = pol_factory.create(pms.policy.type,
                                     obs_dim   = self.obs_dim(),
                                     obs_shape = self.obs_shape(),
@@ -47,6 +49,8 @@ class ddpg(base_agent_off_policy):
             error("ddpg", "__init__",
                   "Loss type for ddpg agent is not mse_ddpg")
 
+        pms.value.network.k_init       = "lecun_normal"
+        pms.value.network.k_init_final = "lecun_normal"
         self.q = val_factory.create(pms.value.type,
                                     inp_dim   = self.obs_dim() + self.act_dim(),
                                     inp_shape = None,

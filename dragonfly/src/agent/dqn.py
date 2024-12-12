@@ -30,6 +30,8 @@ class dqn(base_agent_off_policy):
             error("dqn", "__init__",
                   "Loss type for dqn agent is not mse_dqn")
 
+        pms.value.network.k_init       = "lecun_normal"
+        pms.value.network.k_init_final = "lecun_normal"
         self.q = val_factory.create(pms.value.type,
                                     inp_dim   = self.obs_dim(),
                                     inp_shape = self.obs_shape(),
