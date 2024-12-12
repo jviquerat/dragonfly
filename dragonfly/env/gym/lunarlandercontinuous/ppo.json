@@ -3,7 +3,6 @@
         "name": "LunarLanderContinuous-v3",
         "obs_clip": false,
         "obs_norm": true,
-        "norm_type": "rsnorm",
         "obs_noise": 0.0
     },
     "naming": {
@@ -12,7 +11,7 @@
         "tag": false,
         "time": false
     },
-    "n_avg": 5,
+    "n_avg": 3,
     "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
@@ -41,7 +40,7 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
+                "type": "adamw",
                 "lr": 5.0e-4,
                 "grd_clip": 0.1
             },
@@ -67,8 +66,8 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
-                "lr": 5.0e-3,
+                "type": "adamw",
+                "lr": 2.0e-3,
                 "grd_clip": 0.1
             },
             "loss": {

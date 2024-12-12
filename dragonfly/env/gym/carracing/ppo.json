@@ -3,7 +3,7 @@
         "name": "CarRacing-v3",
         "obs_clip": false,
         "obs_norm": true,
-        "norm_type": "rsnorm",
+        "norm_type": "min_max",
         "obs_noise": 0.0,
         "obs_grayscale": true,
         "obs_downscale": 4,
@@ -17,13 +17,13 @@
         "time": false
     },
     "n_avg": 3,
-    "n_stp_max": 500000,
+    "n_stp_max": 1000000,
     "trainer": {
         "style": "buffer",
         "buff_size": 2000,
         "n_buff": 1,
-        "batch_frac": 0.5,
-        "n_epochs": 32,
+        "batch_frac": 0.25,
+        "n_epochs": 16,
         "render_every": 50000
     },
     "agent": {
@@ -34,21 +34,21 @@
                 "type": "conv2d",
                 "trunk": {
                     "filters": [8,8],
-		                "kernels": [7,3],
-		                "stride": 1,
+		    "kernels": [7,3],
+		    "stride": 1,
                     "pooling": false,
                     "actv": "relu"
                 },
                 "heads": {
                     "nb": 2,
                     "arch": [[64],[64]],
-                    "actv": ["tanh","tanh"],
+                    "actv": ["relu","relu"],
                     "final": ["tanh","sigmoid"]
                 }
             },
             "optimizer": {
-                "type": "adam",
-                "lr": 2.0e-4,
+                "type": "adamw",
+                "lr": 5.0e-4,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -63,8 +63,8 @@
                 "type": "conv2d",
                 "trunk": {
                     "filters": [8,8],
-		                "kernels": [7,3],
-		                "stride": 1,
+		    "kernels": [7,3],
+		    "stride": 1,
                     "pooling": false,
                     "actv": "relu"
                 },
@@ -76,8 +76,8 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
-                "lr": 2.0e-4,
+                "type": "adamw",
+                "lr": 5.0e-4,
                 "grd_clip": 0.1
             },
             "loss": {
@@ -87,7 +87,7 @@
         "retrn": {
             "type": "gae",
             "gamma": 0.99,
-            "gae_lambda": 0.95,
+            "gae_lambda": 0.90,
             "ret_norm": true
         },
         "termination": {

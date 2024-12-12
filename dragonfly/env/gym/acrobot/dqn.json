@@ -16,8 +16,8 @@
     "trainer": {
         "style": "td",
         "mem_size": 50000,
-        "btc_size": 64,
-        "n_stp_unroll": 64,
+        "btc_size": 100,
+        "n_stp_unroll": 1,
         "render_every": 50000
     },
     "agent": {
@@ -36,18 +36,18 @@
                 "type": "fc",
                 "trunk": {
                     "arch": [32,32],
-                    "actv": "relu"
+                    "actv": "swish"
                 },
                 "heads": {
                     "nb": 1,
                     "arch": [[]],
-                    "actv": ["relu"],
+                    "actv": ["swish"],
                     "final": ["linear"]
                 }
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 5.0e-4,
+                "lr": 3.0e-4,
                 "grd_clip": null
             },
             "loss": {

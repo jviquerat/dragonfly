@@ -21,12 +21,20 @@
         "render_every": 500000
     },
     "agent": {
-        "type": "sac",
+        "type": "sac_auto",
         "gamma": 0.99,
         "rho": 0.995,
         "n_warmup": 10000,
         "n_filling": 1000,
-	      "alpha": 0.2,
+        "alpha": {
+            "alpha_0": 0.01,
+            "monitor": true,
+            "optimizer": {
+                "type": "adam",
+                "lr": 3.0e-4,
+                "grd_clip": null
+            }
+        },
         "policy": {
 	          "type": "tanh_normal",
             "min_log_std": -20.0,
@@ -46,7 +54,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 3.0e-4,
                 "grd_clip": null
             },
             "loss": {
@@ -70,7 +78,7 @@
             },
             "optimizer": {
                 "type": "adam",
-                "lr": 1.0e-3,
+                "lr": 3.0e-4,
                 "grd_clip": null
             },
             "loss": {

@@ -1,6 +1,6 @@
 {
     "env": {
-        "name": "LunarLanderContinuous-v2",
+        "name": "LunarLanderContinuous-v3",
         "obs_clip": false,
         "obs_norm": false,
         "obs_noise": 0.0
@@ -16,7 +16,7 @@
     "trainer": {
         "style": "td",
         "mem_size": 1000000,
-        "btc_size": 100,
+        "btc_size": 300,
         "n_stp_unroll": 50,
         "render_every": 500000
     },
@@ -46,8 +46,8 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
-                "lr": 1.0e-3,
+                "type": "adamw",
+                "lr": 5.0e-4,
                 "grd_clip": null
             },
             "loss": {
@@ -70,8 +70,8 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
-                "lr": 1.0e-3,
+                "type": "adamw",
+                "lr": 5.0e-4,
                 "grd_clip": null
             },
             "loss": {

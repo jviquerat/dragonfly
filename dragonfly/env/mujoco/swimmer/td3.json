@@ -16,7 +16,7 @@
     "trainer": {
         "style": "td",
         "mem_size": 1000000,
-        "btc_size": 100,
+        "btc_size": 300,
         "n_stp_unroll": 50,
         "render_every": 500000
     },
@@ -46,7 +46,7 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
+                "type": "adamw",
                 "lr": 1.0e-3,
                 "grd_clip": null
             },
@@ -70,7 +70,7 @@
                 }
             },
             "optimizer": {
-                "type": "adam",
+                "type": "adamw",
                 "lr": 1.0e-3,
                 "grd_clip": null
             },
