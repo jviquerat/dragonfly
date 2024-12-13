@@ -18,7 +18,3 @@ ppo_eps = 1.0e-8
 ### of the report itself, in terms of steps
 freq_report = 10
 step_report = 10
-
-### Smoothing horizon for score
-### The smoothing is made using data from the report
-n_smooth = int(5000/step_report)

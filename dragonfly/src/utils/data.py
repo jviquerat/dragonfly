@@ -32,7 +32,7 @@ class data_avg():
 
         for r in range(self.n_avg):
             for f in range(self.n_fields):
-                avg = ema(0.01, 50)
+                avg = ema(0.05, 20)
                 for i in range(self.n_stp):
                     avg.add(self.data[r,i,f])
                     self.data[r,i,f] = avg.avg()

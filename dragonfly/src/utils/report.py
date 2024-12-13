@@ -25,7 +25,7 @@ class report:
         self.davg = {}
         for name in self.names:
             self.data[name] = []
-            self.davg[name] = ema(0.01, 10)
+            self.davg[name] = ema(0.05, 100)
 
     # Append data to the report
     def append(self, name, value):
@@ -38,8 +38,8 @@ class report:
 
         return self.data[name]
 
-    # Return an average of n last values of given field
-    def avg(self, name, n):
+    # Return an average of given field
+    def avg(self, name):
 
         return self.davg[name].avg()
 
@@ -48,7 +48,7 @@ class report:
             self.append("step", counter.step)
             self.append("episode", counter.ep)
             self.append("score", counter.score[cpu])
-            smooth_score = self.avg("score", n_smooth)
+            smooth_score = self.avg("score")
             self.append("smooth_score", smooth_score)
 
     # Write report
