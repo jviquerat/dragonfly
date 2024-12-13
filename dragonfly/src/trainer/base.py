@@ -79,7 +79,7 @@ class base_trainer:
         if self.stop_print: return
 
         # Retrieve data
-        avg = self.report.avg("score", n_smooth)
+        avg = self.report.avg("score")
         avg = f"{avg:.3f}"
         bst = self.counter.best_score
         bst = f"{bst:.3f}"
