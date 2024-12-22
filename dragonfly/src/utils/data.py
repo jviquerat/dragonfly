@@ -28,15 +28,6 @@ class data_avg():
         for field in range(self.n_fields):
             self.data[run,:,field] = f[:self.n_stp,field+2]
 
-    def smooth(self):
-
-        for r in range(self.n_avg):
-            for f in range(self.n_fields):
-                avg = ema(0.05, 20)
-                for i in range(self.n_stp):
-                    avg.add(self.data[r,i,f])
-                    self.data[r,i,f] = avg.avg()
-
     def average(self, filename):
 
         array = np.vstack(self.stp)
