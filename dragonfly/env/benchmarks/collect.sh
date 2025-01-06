@@ -29,8 +29,6 @@ for f in ${lst[@]}; do
     # Check if folder has avg.dat file in it
     fdat="${f}/avg.dat"
     if [ -f $fdat ]; then
-	#echo $fdat
-
 	# Keep after last slash
 	f=${f##*/}
 	echo $f
@@ -43,13 +41,13 @@ for f in ${lst[@]}; do
 
 	# Get file size in kb
 	dataf=$new_dir/$f
-	fsize=`du -k "$dataf" | cut -f1`
+	fsize=`du -s --apparent-size $dataf | cut -f1`
 
-	# Make file smaller than 200k
-	size=200
+	# Make file smaller than 100k
+	size=100
 	while [[ $fsize -gt $size ]]; do
 	    sed -i '0~2d' $dataf
-	    fsize=`du -k "$dataf" | cut -f1`
+	    fsize=`du -s --apparent-size $dataf | cut -f1`
 	done
     fi
 done
