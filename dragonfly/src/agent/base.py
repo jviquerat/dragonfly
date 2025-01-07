@@ -22,7 +22,7 @@ class base_agent():
 
     # Accessor
     def act_dim(self):
-        return self.spaces.act_dim()
+        return self.spaces.natural_act_dim()
 
     # Accessor
     def true_act_dim(self):
@@ -30,11 +30,11 @@ class base_agent():
 
     # Accessor
     def obs_dim(self):
-        return self.spaces.obs_dim()
+        return self.spaces.input_obs_dim()
 
     # Accessor
     def obs_shape(self):
-        return self.spaces.obs_shape()
+        return self.spaces.input_obs_shape()
 
     # Actions to execute before the inner training loop
     def pre_loop(self):

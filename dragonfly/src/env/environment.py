@@ -87,7 +87,7 @@ class environment:
                 trunc[p]         = bool(t)
 
         # Reshape observations for returning
-        nxt = np.reshape(self.nxt, (mpi.size, self.spaces.obs_dim())).copy()
+        nxt = np.reshape(self.nxt, (mpi.size, self.spaces.true_obs_dim())).copy()
 
         self.timer_env.toc()
 
@@ -110,7 +110,7 @@ class environment:
             self.nxt[p,:,:]  = 0.0
             self.nxt[p,:,-1] = obs[:].flatten()
 
-        nxt = np.reshape(self.nxt, (mpi.size, self.spaces.obs_dim())).copy()
+        nxt = np.reshape(self.nxt, (mpi.size, self.spaces.true_obs_dim())).copy()
 
         return nxt
 
