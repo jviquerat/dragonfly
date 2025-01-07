@@ -24,6 +24,7 @@ class environment_spaces:
         self.obs_downscale_  = 1
         self.obs_frameskip_  = 1
         self.manual_obs_max_ = 1.0
+        self.separable_      = False
 
         # Optional values in parameters
         if hasattr(pms, "act_norm"):      self.act_norm_       = pms.act_norm
@@ -36,6 +37,7 @@ class environment_spaces:
         if hasattr(pms, "obs_downscale"): self.obs_downscale_  = pms.obs_downscale
         if hasattr(pms, "obs_frameskip"): self.obs_frameskip_  = pms.obs_frameskip
         if hasattr(pms, "obs_max"):       self.manual_obs_max_ = pms.obs_max
+        if hasattr(pms, "separable"):     self.separable_      = pms.separable
 
         # Action space
         action_space = spaces[0]
@@ -56,6 +58,11 @@ class environment_spaces:
             self.true_act_dim_    = self.natural_act_dim_
             self.act_min_         = action_space.low
             self.act_max_         = action_space.high
+
+            # Handle possible separable environment
+            # XXX For now, we assume that the resulting action dimension is 1
+            if (self.separable_):
+                self.true_act_dim_ = 1
 
         self.act_avg_ = 0.5*(self.act_max_ + self.act_min_)
         self.act_rng_ = 0.5*(self.act_max_ - self.act_min_)
