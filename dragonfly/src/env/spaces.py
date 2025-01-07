@@ -45,17 +45,17 @@ class environment_spaces:
                   "Unknown action space: "+self.act_type_)
 
         if (self.act_type_ == "Discrete"):
-            self.act_dim_      = int(action_space.n)
-            self.true_act_dim_ = 1
-            self.act_norm_     = False
-            self.act_min_      = 1.0
-            self.act_max_      = 1.0
+            self.natural_act_dim_ = int(action_space.n)
+            self.true_act_dim_    = 1
+            self.act_norm_        = False
+            self.act_min_         = 1.0
+            self.act_max_         = 1.0
 
         if (self.act_type_ == "Box"):
-            self.act_dim_      = int(action_space.shape[0])
-            self.true_act_dim_ = self.act_dim_
-            self.act_min_      = action_space.low
-            self.act_max_      = action_space.high
+            self.natural_act_dim_ = int(action_space.shape[0])
+            self.true_act_dim_    = self.natural_act_dim_
+            self.act_min_         = action_space.low
+            self.act_max_         = action_space.high
 
         self.act_avg_ = 0.5*(self.act_max_ + self.act_min_)
         self.act_rng_ = 0.5*(self.act_max_ - self.act_min_)
@@ -83,7 +83,7 @@ class environment_spaces:
             # Compute processed_obs_shape
             self.processed_obs_shape_ = self.natural_obs_shape_.copy()
             for i in range(0, min(2,n_dims)):
-                self.processed_obs_shape_[i] = self.processed_obs_shape_[i]//self.obs_downscale_
+                self.processed_obs_shape_[i] //= self.obs_downscale_
 
             # Second and third dimensions if image
             if (n_dims > 1):
@@ -110,6 +110,7 @@ class environment_spaces:
             for i in range(n_dims):
                 self.true_obs_dim_ *= self.true_obs_shape_[i]
 
+        # Obs min, max, avg and rng
         self.obs_min_ = np.where(self.obs_min_ < -self.inf_obs_value_,
                                 -self.manual_obs_max_,
                                  self.obs_min_)
@@ -119,17 +120,22 @@ class environment_spaces:
         self.obs_avg_ = 0.5*(self.obs_max_ + self.obs_min_)
         self.obs_rng_ = 0.5*(self.obs_max_ - self.obs_min_)
 
+        # Compute input_obs_dim and input_obs_shape
+        self.input_obs_dim_   = self.true_obs_dim_
+        self.input_obs_shape_ = self.true_obs_shape_.copy()
+
         # If obs normalization is rsnorm
         if (self.norm_style_ == "rsnorm"):
             self.obs_count_ = 0.0
             self.obs_mu_    = np.zeros(self.true_obs_dim_)
             self.obs_std_   = np.zeros(self.true_obs_dim_)
 
-        # For pixel-based envs
+        # Grayscale for pixel-based envs
         if (self.obs_grayscale_):
             self.obs_avg_ = self.obs_avg_[:,:,0]
             self.obs_rng_ = self.obs_rng_[:,:,0]
 
+        # Downscale for pixel-based envs
         if (self.obs_downscale_):
             s = self.obs_downscale_
 
@@ -144,11 +150,19 @@ class environment_spaces:
                 self.obs_rng_ = self.obs_rng_[::s,::s,:]
 
     # Accessor
-    def obs_dim(self):
+    def input_obs_dim(self):
+        return self.input_obs_dim_
+
+    # Accessor
+    def input_obs_shape(self):
+        return self.input_obs_shape_
+
+    # Accessor
+    def true_obs_dim(self):
         return self.true_obs_dim_
 
     # Accessor
-    def obs_shape(self):
+    def true_obs_shape(self):
         return self.true_obs_shape_
 
     # Accessor
@@ -164,8 +178,8 @@ class environment_spaces:
         return self.obs_frameskip_
 
     # Accessor
-    def act_dim(self):
-        return self.act_dim_
+    def natural_act_dim(self):
+        return self.natural_act_dim_
 
     # Accessor
     def true_act_dim(self):
@@ -176,7 +190,7 @@ class environment_spaces:
 
         if (self.act_norm_):
             act = np.clip(act, -1.0, 1.0)
-            for i in range(self.act_dim_):
+            for i in range(self.true_act_dim_):
                 act[i] = self.act_rng_[i]*act[i] + self.act_avg_[i]
 
         return act
@@ -259,7 +273,9 @@ class environment_spaces:
         liner()
         print("Problem dimensions")
         spacer()
-        print("Action dim:        " + str(self.act_dim_))
+        print("Natural act dim:   " + str(self.natural_act_dim_))
+        spacer()
+        print("True act dim       " + str(self.true_act_dim_))
         spacer()
         print("Natural obs shape: " + str(self.natural_obs_shape_))
         spacer()
