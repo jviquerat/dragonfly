@@ -34,7 +34,7 @@ class ddpg(base_agent_off_policy):
         self.p = pol_factory.create(pms.policy.type,
                                     obs_dim   = self.obs_dim(),
                                     obs_shape = self.obs_shape(),
-                                    act_dim   = self.act_dim(),
+                                    act_dim   = self.true_act_dim(),
                                     pms       = pms.policy,
                                     target    = True)
 
@@ -48,7 +48,7 @@ class ddpg(base_agent_off_policy):
                   "Loss type for ddpg agent is not mse_ddpg")
 
         self.q = val_factory.create(pms.value.type,
-                                    inp_dim   = self.obs_dim() + self.act_dim(),
+                                    inp_dim   = self.obs_dim() + self.true_act_dim(),
                                     inp_shape = None,
                                     out_dim   = 1,
                                     pms       = pms.value,
@@ -73,11 +73,11 @@ class ddpg(base_agent_off_policy):
 
         self.timer_actions.tic()
         if (self.step < self.n_warmup):
-            act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim()))
+            act   = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.true_act_dim()))
         else:
             act   = self.p.actions(obs)
             noise = np.random.normal(0.0, self.sigma,
-                                     (self.n_cpu, self.act_dim()))
+                                     (self.n_cpu, self.true_act_dim()))
             act  += noise
             act   = np.clip(act, -1.0, 1.0)
         act = act.astype(np.float32)

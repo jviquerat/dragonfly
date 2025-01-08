@@ -21,7 +21,7 @@ class base_agent():
         self.spaces = spaces
 
     # Accessor
-    def act_dim(self):
+    def natural_act_dim(self):
         return self.spaces.natural_act_dim()
 
     # Accessor
@@ -38,7 +38,6 @@ class base_agent():
 
     # Actions to execute before the inner training loop
     def pre_loop(self):
-
         self.buff.reset()
 
     # Save policy parameters
