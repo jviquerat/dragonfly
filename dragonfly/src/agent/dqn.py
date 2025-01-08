@@ -33,7 +33,7 @@ class dqn(base_agent_off_policy):
         self.q = val_factory.create(pms.value.type,
                                     inp_dim   = self.obs_dim(),
                                     inp_shape = self.obs_shape(),
-                                    out_dim   = self.act_dim(),
+                                    out_dim   = self.natural_act_dim(),
                                     pms       = pms.value,
                                     target    = True)
 
@@ -58,7 +58,7 @@ class dqn(base_agent_off_policy):
             self.eps.decay()
             p = random.uniform(0, 1)
             if (p < self.eps.get()):
-                act[i] = random.randrange(0, self.act_dim())
+                act[i] = random.randrange(0, self.natural_act_dim())
             else:
                 cob = tf.cast([obs[i]], tf.float32)
                 val = self.q.values(cob)

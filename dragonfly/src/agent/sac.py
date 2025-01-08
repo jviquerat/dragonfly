@@ -33,7 +33,7 @@ class sac(base_agent_off_policy):
         self.p = pol_factory.create(pms.policy.type,
                                     obs_dim   = self.obs_dim(),
                                     obs_shape = self.obs_shape(),
-                                    act_dim   = self.act_dim(),
+                                    act_dim   = self.true_act_dim(),
                                     pms       = pms.policy)
 
         # Build values
@@ -46,13 +46,13 @@ class sac(base_agent_off_policy):
                   "Loss type for sac agent is not mse_sac")
 
         self.q1 = val_factory.create(pms.value.type,
-                                     inp_dim = self.obs_dim() + self.act_dim(),
+                                     inp_dim = self.obs_dim() + self.true_act_dim(),
                                      inp_shape = None,
                                      out_dim = 1,
                                      pms     = pms.value,
                                      target  = True)
         self.q2 = val_factory.create(pms.value.type,
-                                     inp_dim = self.obs_dim() + self.act_dim(),
+                                     inp_dim = self.obs_dim() + self.true_act_dim(),
                                      inp_shape = None,
                                      out_dim = 1,
                                      pms     = pms.value,
@@ -77,7 +77,7 @@ class sac(base_agent_off_policy):
 
         self.timer_actions.tic()
         if (self.step < self.n_warmup):
-            act = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.act_dim()))
+            act = np.random.uniform(-1.0, 1.0, (self.n_cpu, self.true_act_dim()))
             act = act.astype(np.float32)
         else:
             act, _ = self.p.actions(obs)

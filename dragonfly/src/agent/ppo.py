@@ -15,7 +15,7 @@ class ppo(base_agent_on_policy):
         self.p = pol_factory.create(pms.policy.type,
                                     obs_dim   = self.obs_dim(),
                                     obs_shape = self.obs_shape(),
-                                    act_dim   = self.act_dim(),
+                                    act_dim   = self.true_act_dim(),
                                     pms       = pms.policy)
 
         self.v = val_factory.create(pms.value.type,

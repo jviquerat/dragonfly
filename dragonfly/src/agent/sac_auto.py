@@ -14,7 +14,7 @@ class sac_auto(sac):
         # Possible auto temperature
         self.alpha_pms   = self.alpha
         self.alpha_loss  = alpha_sac()
-        self.tgt_entropy =-self.act_dim()
+        self.tgt_entropy =-self.true_act_dim()
 
         self.monitor = False
         if (hasattr(self.alpha_pms, "monitor")): self.monitor = self.alpha_pms.monitor
