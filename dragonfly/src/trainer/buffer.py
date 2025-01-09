@@ -30,7 +30,20 @@ class buffer(base_trainer):
 
             # Loop over buff size
             while not (self.agent.buff.size() >= self.buff_size):
-                nxt, _, dne, _ = self.apply_next_step(obs)
+
+                # Retrieve action and step
+                act, lgp = self.agent.actions(obs)
+                nxt, rwd, dne, trc = self.env.step(act)
+
+                # Store transition
+                self.agent.store(obs, nxt, act, lgp, rwd, dne, trc)
+                self.monitor(obs, act)
+
+                # Update counter
+                self.counter.update(rwd)
+
+                # Handle rendering
+                self.renderer.store(self.env)
 
                 # Finish if some episodes are done
                 for cpu in range(mpi.size):

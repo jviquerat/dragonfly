@@ -30,7 +30,20 @@ class td(base_trainer):
 
             # Loop over training steps
             while not (self.stp_unroll >= self.n_stp_unroll):
-                nxt, _, dne, _ = self.apply_next_step(obs)
+
+                # Retrieve action and step
+                act = self.agent.actions(obs)
+                nxt, rwd, dne, trc = self.env.step(act)
+
+                # Store transition
+                self.agent.store(obs, nxt, act, rwd, dne, trc)
+                self.monitor(obs, act)
+
+                # Update counter
+                self.counter.update(rwd)
+
+                # Handle rendering
+                self.renderer.store(self.env)
 
                 # Update unrolling counter
                 self.stp_unroll += mpi.size

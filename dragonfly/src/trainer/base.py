@@ -57,24 +57,6 @@ class base_trainer:
     def loop(self):
         raise NotImplementedError
 
-    # Execute next step in the environment
-    def apply_next_step(self, obs):
-
-        # Retrieve action and step
-        act = self.agent.actions(obs)
-        nxt, rwd, dne, trc = self.env.step(act)
-
-        # Store transition
-        self.agent.store(obs, nxt, act, rwd, dne, trc)
-        self.monitor(obs, act)
-
-        # Update counter
-        self.counter.update(rwd)
-
-        # Handle rendering
-        self.renderer.store(self.env)
-        return nxt, rwd, dne, trc
-
     # Reset trainer
     def reset(self):
 
