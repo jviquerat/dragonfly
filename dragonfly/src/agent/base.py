@@ -80,12 +80,9 @@ class base_agent_on_policy(base_agent):
         if (np.isnan(act).any()):
             error("a2c", "get_actions", "Detected NaN in generated actions")
 
-        # Store log-prob
-        self.buff.store(["lgp"], [lgp])
-
         self.timer_actions.toc()
 
-        return act
+        return act, lgp
 
     # Control (deterministic actions)
     def control(self, obs):
@@ -139,11 +136,11 @@ class base_agent_on_policy(base_agent):
         self.gbuff.reset()
 
     # Store transition
-    def store(self, obs, nxt, act, rwd, dne, trc):
+    def store(self, obs, nxt, act, lgp, rwd, dne, trc):
 
         trm = self.term.terminate(dne, trc)
-        self.buff.store(["obs", "nxt", "act", "rwd", "trm"],
-                        [ obs,   nxt,   act,   rwd,   trm ])
+        self.buff.store(["obs", "nxt", "act", "lgp", "rwd", "trm"],
+                        [ obs,   nxt,   act,   lgp,   rwd,   trm ])
 
 ###############################################
 ### Base for off-policy agents
