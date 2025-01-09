@@ -38,8 +38,11 @@ class episode(base_trainer):
                 act, lgp = self.agent.actions(obs)
                 nxt, rwd, dne, trc = self.env.step(act)
 
+                # Terminate trajectories
+                trm = self.agent.terminate(dne, trc)
+
                 # Store transition
-                self.agent.store(obs, nxt, act, lgp, rwd, dne, trc)
+                self.agent.store(obs, nxt, act, lgp, rwd, trm)
                 self.monitor(obs, act)
 
                 # Update counter

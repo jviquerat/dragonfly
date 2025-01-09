@@ -52,6 +52,11 @@ class base_agent():
         filename = folder + '/' + self.name + '.weights.h5'
         self.p.load(filename)
 
+    # Terminate trajectories
+    def terminate(self, done, trunc):
+
+        return self.term.terminate(done, trunc)
+
 ###############################################
 ### Base for on-policy agents
 class base_agent_on_policy(base_agent):
@@ -136,9 +141,8 @@ class base_agent_on_policy(base_agent):
         self.gbuff.reset()
 
     # Store transition
-    def store(self, obs, nxt, act, lgp, rwd, dne, trc):
+    def store(self, obs, nxt, act, lgp, rwd, trm):
 
-        trm = self.term.terminate(dne, trc)
         self.buff.store(["obs", "nxt", "act", "lgp", "rwd", "trm"],
                         [ obs,   nxt,   act,   lgp,   rwd,   trm ])
 
@@ -180,7 +184,6 @@ class base_agent_off_policy(base_agent):
         self.gbuff.store(self.names, [gobs, gnxt, gact, grwd, gtrm])
 
     # Store transition
-    def store(self, obs, nxt, act, rwd, dne, trc):
+    def store(self, obs, nxt, act, rwd, trm):
 
-        trm = self.term.terminate(dne, trc)
         self.buff.store(self.names, [obs, nxt, act, rwd, trm])
