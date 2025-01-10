@@ -18,6 +18,8 @@ class a2c(base_agent_on_policy):
                                     act_dim   = self.act_dim(),
                                     pms       = pms.policy)
 
+        pms.value.network.k_init       = "lecun_normal"
+        pms.value.network.k_init_final = "lecun_normal"
         self.v = val_factory.create(pms.value.type,
                                     inp_dim   = self.obs_dim(),
                                     inp_shape = self.obs_shape(),
