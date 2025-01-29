@@ -30,10 +30,10 @@ def evaluate(net_folder, json_file, ns, nw, aw):
 
     # Initialize agent
     agent = agent_factory.create(pms.agent.type,
-                                 spaces = env.spaces,
-                                 n_cpu  = 1,
-                                 size   = 10000,
-                                 pms    = pms.agent)
+                                 spaces   = env.spaces,
+                                 n_cpu    = 1,
+                                 mem_size = 10000,
+                                 pms      = pms.agent)
 
     # Load network
     agent.load_policy(net_folder)
