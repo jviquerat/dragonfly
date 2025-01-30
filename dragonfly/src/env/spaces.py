@@ -53,13 +53,15 @@ class environment_spaces:
 
         if (self.act_type_ == "Discrete"):
             self.natural_act_dim_ = int(action_space.n)
-            self.true_act_dim_    = 1
+            self.store_act_dim_   = 1
+            self.true_act_dim_    = int(action_space.n)
             self.act_norm_        = False
             self.act_min_         = 1.0
             self.act_max_         = 1.0
 
         if (self.act_type_ == "Box"):
             self.natural_act_dim_ = int(action_space.shape[0])
+            self.store_act_dim_   = int(action_space.shape[0])
             self.true_act_dim_    = self.natural_act_dim_
             self.act_min_         = action_space.low
             self.act_max_         = action_space.high
@@ -67,7 +69,8 @@ class environment_spaces:
             # Handle possible separable environment
             # XXX For now, we assume that the resulting action dimension is 1
             if (self.separable_):
-                self.true_act_dim_ = 1
+                self.store_act_dim_   = 1
+                self.true_act_dim_    = 1
 
         self.act_avg_ = 0.5*(self.act_max_ + self.act_min_)
         self.act_rng_ = 0.5*(self.act_max_ - self.act_min_)
@@ -192,6 +195,10 @@ class environment_spaces:
     # Accessor
     def natural_act_dim(self):
         return self.natural_act_dim_
+
+    # Accessor
+    def store_act_dim(self):
+        return self.store_act_dim_
 
     # Accessor
     def true_act_dim(self):
