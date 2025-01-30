@@ -78,6 +78,6 @@ class categorical(base_policy):
     def random_uniform(self, obs):
 
         n_cpu = obs.shape[0]
-        act   = np.random.randint(0, self.act_dim, size=(n_cpu,1))
+        act   = np.random.randint(0, 1, size=(n_cpu,1))
 
         return np.reshape(act, (-1))

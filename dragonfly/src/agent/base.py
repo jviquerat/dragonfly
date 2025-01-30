@@ -29,6 +29,10 @@ class base_agent():
         return self.spaces.true_act_dim()
 
     # Accessor
+    def store_act_dim(self):
+        return self.spaces.store_act_dim()
+
+    # Accessor
     def obs_dim(self):
         return self.spaces.input_obs_dim()
 
@@ -66,11 +70,11 @@ class base_agent_on_policy(base_agent):
     def create_buffers(self):
 
         self.lnames = ["obs", "nxt", "act", "lgp", "rwd", "trm"]
-        self.lsizes = [self.obs_dim(), self.obs_dim(), self.true_act_dim(), 1, 1, 1]
+        self.lsizes = [self.obs_dim(), self.obs_dim(), self.store_act_dim(), 1, 1, 1]
         self.buff   = buff(self.n_cpu, self.lnames, self.lsizes)
 
         self.gnames = ["obs", "act", "adv", "tgt", "lgp"]
-        self.gsizes = [self.obs_dim(), self.true_act_dim(), 1, 1, 1]
+        self.gsizes = [self.obs_dim(), self.store_act_dim(), 1, 1, 1]
         self.gbuff  = gbuff(self.mem_size, self.gnames, self.gsizes)
 
     # Get actions
@@ -155,7 +159,7 @@ class base_agent_off_policy(base_agent):
     def create_buffers(self):
 
         self.names = ["obs", "nxt", "act", "rwd", "trm"]
-        self.sizes = [self.obs_dim(), self.obs_dim(), self.true_act_dim(), 1, 1]
+        self.sizes = [self.obs_dim(), self.obs_dim(), self.store_act_dim(), 1, 1]
         self.buff  = buff(self.n_cpu, self.names, self.sizes)
         self.gbuff = gbuff(self.mem_size, self.names, self.sizes)
 
