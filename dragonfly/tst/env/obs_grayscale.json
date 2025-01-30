@@ -13,13 +13,13 @@
         "time": false
     },
     "n_avg": 2,
-    "n_stp_max": 100,
+    "n_stp_max": 20,
     "trainer": {
         "style": "buffer",
-        "buff_size": 50,
+        "buff_size": 10,
         "n_buff": 1,
         "batch_frac": 0.5,
-        "n_epochs": 32,
+        "n_epochs": 4,
         "render_every": 50000
     },
     "agent": {
