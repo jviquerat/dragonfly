@@ -16,7 +16,7 @@ class environment_spaces:
         # Default values
         self.act_norm_       = True
         self.obs_norm_       = True
-        self.norm_type_      = "rsnorm"
+        self.norm_type_      = "min_max"
         self.obs_clip_       = False
         self.obs_noise_      = False
         self.obs_stack_      = 1
