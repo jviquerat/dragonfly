@@ -9,7 +9,7 @@ from dragonfly.src.utils.renderer  import renderer
 from dragonfly.src.utils.prints    import new_line, spacer
 
 # Evaluate agent
-def evaluate(net_folder, json_file, ns, nw, aw):
+def evaluate(net_folder, json_file, ns, nw, aw, eval_frequency):
 
     # Initialize json parser and read parameters
     parser = json_parser()
@@ -75,7 +75,7 @@ def evaluate(net_folder, json_file, ns, nw, aw):
         scr += rwd[0]
         n   += 1
 
-        rnd.store(env)
+        if (n%eval_frequency == 0): rnd.store(env)
         if (term_ns and n >= ns): break
         if (term_dn and dne):     break
 
