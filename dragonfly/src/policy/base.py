@@ -89,7 +89,7 @@ class base_policy():
     # Load
     def load(self, filename):
 
-        load_status = self.net.load_weights(filename)
+        self.net.load_weights(filename)
 
     # Copy net into tgt
     def copy_tgt(self):
