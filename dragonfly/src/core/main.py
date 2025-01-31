@@ -12,9 +12,10 @@ def error():
     new_line()
     errr("""Command line error. Possible behaviors:
     dgf --train <json_file>
-    dgf --eval -net    <net_folder>
-               -json   <json_file>
-               -steps  <n_steps> (optional)
+    dgf --eval -net <net_folder>
+               -json <json_file>
+               -steps <n_steps> (optional)
+               -eval_frequency <freq> (optional)
                -warmup <n_warmup> <a_warmup> (optional, requires -steps option)
     dgf --avg  <dat_file> ... <dat_file>""")
 
@@ -52,6 +53,10 @@ def main():
         if ("-steps" in args):
             n_steps = int(args[args.index("-steps")+1])
 
+        eval_frequency = 1
+        if ("-eval_frequency" in args):
+            eval_frequency = int(args[args.index("-eval_frequency")+1])
+
         n_warmup = 0
         a_warmup = []
         if ("-warmup" in args):
@@ -70,7 +75,7 @@ def main():
                         a_warmup.append(a)
                         i += 1
 
-        evaluate(net_folder, json_file, n_steps, n_warmup, a_warmup)
+        evaluate(net_folder, json_file, n_steps, n_warmup, a_warmup, eval_frequency)
         return
 
     # Averaging mode
