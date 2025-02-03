@@ -72,13 +72,15 @@ def evaluate(net_folder, json_file, ns, nw, aw, eval_frequency):
     while True:
         act                = agent.control(obs)
         obs, rwd, dne, trc = env.step(act)
-        scr += rwd[0]
-        n   += 1
+        scr               += rwd[0]
 
         if (n%eval_frequency == 0): rnd.store(env)
-        if (term_ns and n >= ns): break
-        if (term_dn and dne):     break
+        if (term_ns and n >= ns-1): break
+        if (term_dn and dne):       break
 
+        n  += 1
+
+    rnd.store(env)
     rnd.finish(".", 0, 0)
     env.close()
 
