@@ -8,6 +8,15 @@
 
 `dragonfly` is a small library for DRL. It follows a basic level of modularity based on a simple abstract factory to make new developments quick and easy.
 
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
 ## Installation and usage
 
 Clone this repository and install it locally:
@@ -31,10 +40,6 @@ dgf --eval -net <net_folder> -json <json_file> -steps <n_steps_control> -warmup 
 ```
 
 In that case, the environment will just rely on the `done` signal to stop the evaluation. Alternatively, you can provide a `-steps <n>` option, that will override the `done` signal of the environment, and force its execution for `n` steps. Trained agents for standard `gym` environements are available in `dragonfly/env`.
-
-## Running benchmarks
-
-It is possible to run many json files at once using the scripts in `env/benchmarks/`. You can either run directly `bench_folder.sh <folder_name>`, or submit it on a cluster using `sbatch job.sh "<folder_name>"`.
 
 ## CFD environments
 
