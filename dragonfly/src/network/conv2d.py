@@ -1,5 +1,5 @@
 # Generic imports
-from tensorflow.keras.layers    import Conv2D, MaxPool2D
+from tensorflow.keras.layers    import Conv2D, MaxPool2D, Input
 
 # Custom imports
 from dragonfly.src.network.base import *
@@ -36,19 +36,19 @@ class conv2d(base_network):
         self.pooling       = False
 
         # Check inputs
-        if hasattr(pms,       "trunk"):        self.trunk         = pms.trunk
-        if hasattr(pms.trunk, "filters"):      self.trunk.filters = pms.trunk.filters
+        if hasattr(pms,       "trunk"):        self.trunk          = pms.trunk
+        if hasattr(pms.trunk, "filters"):      self.trunk.filters  = pms.trunk.filters
         if hasattr(pms.trunk, "kernels"):      self.trunk.kernels  = pms.trunk.kernels
-        if hasattr(pms.trunk, "strides"):      self.trunk.stride  = pms.trunk.stride
-        if hasattr(pms.trunk, "actv"):         self.trunk.actv    = pms.trunk.actv
-        if hasattr(pms,       "heads"):        self.heads         = pms.heads
-        if hasattr(pms.heads, "nb"):           self.heads.nb      = pms.heads.nb
-        if hasattr(pms.heads, "arch"):         self.heads.arch    = pms.heads.arch
-        if hasattr(pms.heads, "actv"):         self.heads.actv    = pms.heads.actv
-        if hasattr(pms.heads, "final"):        self.heads.final   = pms.heads.final
-        if hasattr(pms,       "k_init"):       self.k_init        = pms.k_init
-        if hasattr(pms,       "k_init_final"): self.k_init_final  = pms.k_init_final
-        if hasattr(pms,       "pooling"):      self.pooling       = pms.pooling
+        if hasattr(pms.trunk, "stride"):       self.trunk.stride   = pms.trunk.stride
+        if hasattr(pms.trunk, "actv"):         self.trunk.actv     = pms.trunk.actv
+        if hasattr(pms,       "heads"):        self.heads          = pms.heads
+        if hasattr(pms.heads, "nb"):           self.heads.nb       = pms.heads.nb
+        if hasattr(pms.heads, "arch"):         self.heads.arch     = pms.heads.arch
+        if hasattr(pms.heads, "actv"):         self.heads.actv     = pms.heads.actv
+        if hasattr(pms.heads, "final"):        self.heads.final    = pms.heads.final
+        if hasattr(pms,       "k_init"):       self.k_init         = pms.k_init
+        if hasattr(pms,       "k_init_final"): self.k_init_final   = pms.k_init_final
+        if hasattr(pms,       "pooling"):      self.pooling        = pms.pooling
 
         # Check that out_dim and heads have same dimension
         if (len(self.out_dim) != pms.heads.nb):
@@ -64,21 +64,12 @@ class conv2d(base_network):
 
         # Define trunk
         for l in range(len(self.trunk.filters)):
-            if (l == 0):
-                self.net.append(Conv2D(filters            = self.trunk.filters[l],
-                                       kernel_size        = self.trunk.kernels[l],
-                                       strides            = self.trunk.stride,
-                                       kernel_initializer = self.k_init,
-                                       activation         = self.trunk.actv,
-                                       input_shape        = self.inp_shape,
-                                       padding            = "same"))
-            else:
-                self.net.append(Conv2D(filters            = self.trunk.filters[l],
-                                       kernel_size        = self.trunk.kernels[l],
-                                       strides            = self.trunk.stride,
-                                       kernel_initializer = self.k_init,
-                                       activation         = self.trunk.actv,
-                                       padding            = "same"))
+            self.net.append(Conv2D(filters            = self.trunk.filters[l],
+                                   kernel_size        = self.trunk.kernels[l],
+                                   strides            = self.trunk.stride,
+                                   kernel_initializer = self.k_init,
+                                   activation         = self.trunk.actv,
+                                   padding            = "same"))
 
             if (self.pooling):
                 self.net.append(MaxPool2D(pool_size = 2))
@@ -110,8 +101,8 @@ class conv2d(base_network):
         # Back to the original dimension
         var = Reshape(self.inp_shape)(var)
 
-        # Compute trunk
-        for l in range(len(self.trunk.filters)):
+        # Trunk
+        for _ in range(len(self.trunk.filters)):
             var = self.net[i](var)
             i  += 1
 
@@ -126,7 +117,7 @@ class conv2d(base_network):
         # is appended to the global output
         for h in range(self.heads.nb):
             hvar = var
-            for l in range(len(self.heads.arch[h])):
+            for _ in range(len(self.heads.arch[h])):
                 hvar = self.net[i](hvar)
                 i   += 1
             hvar = self.net[i](hvar)
