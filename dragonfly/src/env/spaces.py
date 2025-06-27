@@ -40,7 +40,7 @@ class environment_spaces:
         if hasattr(pms, "separable"):     self.separable_      = pms.separable
 
         # Check norm_type_
-        if (self.norm_type_ not in ["min_max", "rsnorm"]):
+        if (self.norm_type_ not in ["min_max"]):
             error("environment_spaces", "__init__",
                   "Unknown norm type: "+self.norm_type_)
 
@@ -138,12 +138,6 @@ class environment_spaces:
         # Compute input_obs_dim and input_obs_shape
         self.input_obs_dim_   = self.true_obs_dim_
         self.input_obs_shape_ = self.true_obs_shape_.copy()
-
-        # If obs normalization is rsnorm
-        if (self.norm_type_ == "rsnorm"):
-            self.obs_count_ = 0.0
-            self.obs_mu_    = np.zeros(self.true_obs_dim_)
-            self.obs_std_   = np.zeros(self.true_obs_dim_)
 
         # Grayscale for pixel-based envs
         if (self.obs_grayscale_):
@@ -266,14 +260,6 @@ class environment_spaces:
         if (self.norm_type_ == "min_max"):
             obs -= self.obs_avg_
             obs /= self.obs_rng_
-
-        if (self.norm_type_ == "rsnorm"):
-            self.obs_count_ += 1
-            delta          = obs - self.obs_mu_
-            self.obs_mu_  += (1.0/self.obs_count_)*delta
-            self.obs_std_  = ((self.obs_count_-1.0)/self.obs_count_)*(self.obs_std_ + delta*delta/self.obs_count_)
-
-            obs = (obs - self.obs_mu_)/np.sqrt(self.obs_std_ + 1.0e-8)
 
         return obs
 
