@@ -43,12 +43,12 @@ In that case, the environment will just rely on the `done` signal to stop the ev
 
 ## CFD environments
 
-| Environment   | Description                                                                                        | Illustration                                                 |
-|:--------------|:---------------------------------------------------------------------------------------------------|:------------------------------------------------------------:|
-| `turek-v0`    | A drag reduction problem exploiting two synthetic jets on a cylinder immersed in a flow at Re=100. | <img width="400" alt="gif" src="dragonfly/msc/turek.gif">    |
-| `shkadov-v0`  | A control problem with multiple jets trying to damp instabilities on a falling liquid film.        | <img width="400" alt="gif" src="dragonfly/msc/shkadov.gif">  |
-| `rayleigh-v0` | A control problem with local temperature control to kill a convection cell at Ra=1e4.              | <img width="200" alt="gif" src="dragonfly/msc/rayleigh.gif"> |
-| `mixing-v0`   | A problem where the agent must mix a scalar quantity by controlling the boundary velocities.       | <img width="200" alt="gif" src="dragonfly/msc/mixing.gif">   |
+| Environment   | Description                                                                                                                                                                                                                      | Illustration                                                 |
+|:--------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------:|
+| `turek-v0`    | A drag reduction problem exploiting two synthetic jets on a cylinder immersed in a flow at Re=100.                                                                                                                               | <img width="400" alt="gif" src="dragonfly/msc/turek.gif">    |
+| `shkadov-v0`  | A control problem with multiple jets trying to damp instabilities on a falling liquid film, from the <a href="https://github.com/jviquerat/beacon">beacon library</a>. Compatible with separability (see arxiv pre-print below). | <img width="400" alt="gif" src="dragonfly/msc/shkadov.gif">  |
+| `rayleigh-v0` | A control problem with local temperature control to kill a convection cell at Ra=1e4, from the <a href="https://github.com/jviquerat/beacon">beacon library</a>.                                                                 | <img width="200" alt="gif" src="dragonfly/msc/rayleigh.gif"> |
+| `mixing-v0`   | A problem where the agent must mix a scalar quantity by controlling the boundary velocities, from the <a href="https://github.com/jviquerat/beacon">beacon library</a>.                                                          | <img width="200" alt="gif" src="dragonfly/msc/mixing.gif">   |
 
 ## Mujoco environments
 
@@ -67,3 +67,19 @@ In that case, the environment will just rely on the `done` signal to stop the ev
 | <img height="200" alt="gif" src="dragonfly/msc/lunarlander.gif"> | <img height="200" alt="gif" src="dragonfly/msc/bipedalwalker.gif"> | <img height="200" alt="gif" src="dragonfly/msc/mountaincar.gif"> |
 | **`CarRacing-v2`**                                                         | **`?`**                                                            | **`?`**                                                          |
 | <img height="200" alt="gif" src="dragonfly/msc/carracing.gif">             |                                                                    |                                                                  |
+
+## Referencing
+
+If you end up using this library for research purpose, please consider citing one of the following papers (<a href="https://arxiv.org/abs/2505.03778">link</a> and <a href="https://www.mdpi.com/2311-5521/8/7/208">link</a>):
+
+```
+Dragonfly, a modular deep reinforcement learning library
+J. Viquerat, P. Garnier, A. Bateni, E. Hachem
+arXiv pre-print 2505.03778, 2025
+```
+
+```
+Parallel bootstrap-based on-policy deep reinforcement learning for continuous fluid flow control applications
+J. Viquerat, E. Hachem
+Fluids, vol. 8, iss. 7, 2023
+```
