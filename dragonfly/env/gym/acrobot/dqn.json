@@ -12,7 +12,7 @@
         "time": false
     },
     "n_avg": 5,
-    "n_stp_max": 50000,
+    "n_stp_max": 100000,
     "trainer": {
         "style": "td",
         "mem_size": 50000,
