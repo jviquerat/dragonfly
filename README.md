@@ -6,16 +6,19 @@
 
 ![master badge](https://github.com/jviquerat/dragonfly/workflows/dragonfly/badge.svg?branch=master)
 
-`dragonfly` is a small library for DRL. It follows a basic level of modularity based on a simple abstract factory to make new developments quick and easy.
+`dragonfly` is a small library for DRL. It follows a basic level of modularity based on a simple abstract factory to make new developments quick and easy. If you end up using this library for research purpose, please consider citing one of the following papers (<a href="https://arxiv.org/abs/2505.03778">link</a> and <a href="https://www.mdpi.com/2311-5521/8/7/208">link</a>):
 
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
+```
+Dragonfly, a modular deep reinforcement learning library
+J. Viquerat, P. Garnier, A. Bateni, E. Hachem
+arXiv pre-print 2505.03778, 2025
+```
+
+```
+Parallel bootstrap-based on-policy deep reinforcement learning for continuous fluid flow control applications
+J. Viquerat, E. Hachem
+Fluids, vol. 8, iss. 7, 2023
+```
 
 ## Installation and usage
 
@@ -60,26 +63,11 @@ In that case, the environment will just rely on the `done` signal to stop the ev
 
 ## Gym environments
 
-| **`Cartpole-v0`**                                                          | **`Pendulum-v0`**                                                  | **`Acrobot-v1`**                                                 |
-|:--------------------------------------------------------------------------:|:------------------------------------------------------------------:|:----------------------------------------------------------------:|
-| <img height="200" alt="gif" src="dragonfly/msc/cartpole.gif">              | <img height="200" alt="gif" src="dragonfly/msc/pendulum.gif">      | <img height="200" alt="gif" src="dragonfly/msc/acrobot.gif">     |
-| **`LunarLanderContinuous-v2`**                                             | **`BipedalWalker-v3`**                                             | **`MountainCar-v0`**                                             |
+| **`Cartpole-v0`**                                                | **`Pendulum-v0`**                                                  | **`Acrobot-v1`**                                                 |
+|:----------------------------------------------------------------:|:------------------------------------------------------------------:|:----------------------------------------------------------------:|
+| <img height="200" alt="gif" src="dragonfly/msc/cartpole.gif">    | <img height="200" alt="gif" src="dragonfly/msc/pendulum.gif">      | <img height="200" alt="gif" src="dragonfly/msc/acrobot.gif">     |
+| **`LunarLanderContinuous-v2`**                                   | **`BipedalWalker-v3`**                                             | **`MountainCar-v0`**                                             |
 | <img height="200" alt="gif" src="dragonfly/msc/lunarlander.gif"> | <img height="200" alt="gif" src="dragonfly/msc/bipedalwalker.gif"> | <img height="200" alt="gif" src="dragonfly/msc/mountaincar.gif"> |
-| **`CarRacing-v2`**                                                         | **`?`**                                                            | **`?`**                                                          |
-| <img height="200" alt="gif" src="dragonfly/msc/carracing.gif">             |                                                                    |                                                                  |
+| **`CarRacing-v2`**                                               | **`?`**                                                            | **`?`**                                                          |
+| <img height="200" alt="gif" src="dragonfly/msc/carracing.gif">   |                                                                    |                                                                  |
 
-## Referencing
-
-If you end up using this library for research purpose, please consider citing one of the following papers (<a href="https://arxiv.org/abs/2505.03778">link</a> and <a href="https://www.mdpi.com/2311-5521/8/7/208">link</a>):
-
-```
-Dragonfly, a modular deep reinforcement learning library
-J. Viquerat, P. Garnier, A. Bateni, E. Hachem
-arXiv pre-print 2505.03778, 2025
-```
-
-```
-Parallel bootstrap-based on-policy deep reinforcement learning for continuous fluid flow control applications
-J. Viquerat, E. Hachem
-Fluids, vol. 8, iss. 7, 2023
-```
