@@ -4,14 +4,20 @@ import gymnasium as gym
 
 # Custom imports
 from dragonfly.src.env.mpi import mpi
+from dragonfly.src.env.utils import find_class_in_folder, import_class_from_file
+from dragonfly.src.utils.error import error
 
 ###############################################
 # Worker class for slave processes
 class worker():
-    def __init__(self, env_name, args, cpu, path):
+    def __init__(self,
+                 env_name,
+                 cpu,
+                 path_hint,
+                 args):
 
         # Build environment
-        try:
+        try: # Test if this is a gym environment
             if args is not None:
                 self.env = gym.make(env_name,
                                     render_mode="rgb_array",
@@ -19,20 +25,24 @@ class worker():
             else:
                 self.env = gym.make(env_name,
                                     render_mode="rgb_array")
-        except:
-            sys.path.append(path)
-            module    = __import__(env_name)
-            env_build = getattr(module, env_name)
+        except: # Othwerise, look for env_name class in all files of path_hint folder
+            files = find_class_in_folder(path_hint, env_name)
+
+            if len(files) > 1:
+                error("worker", "init",
+                      f"Found more than one file containing class: {env_name}")
+
+            builder = import_class_from_file(files[0], env_name)
             try:
                 if args is not None:
-                    self.env = env_build(cpu, **args.__dict__)
+                    self.env = builder(cpu, **args.__dict__)
                 else:
-                    self.env = env_build(cpu)
+                    self.env = builder(cpu)
             except:
                 if args is not None:
-                    self.env = env_build(**args.__dict__)
+                    self.env = builder(**args.__dict__)
                 else:
-                    self.env = env_build()
+                    self.env = builder()
 
     # Working function for slaves
     def work(self):
