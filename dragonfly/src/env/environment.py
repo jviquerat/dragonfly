@@ -21,7 +21,7 @@ class environment:
         if hasattr(pms, "args"): self.args = pms.args
 
         # Generate workers
-        self.worker = worker(self.name, self.args, mpi.rank, path)
+        self.worker = worker(self.name, mpi.rank, path, self.args)
 
         # Set all slaves to wait for instructions
         if (mpi.rank != 0): self.worker.work()
