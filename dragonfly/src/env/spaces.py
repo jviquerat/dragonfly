@@ -198,6 +198,10 @@ class environment_spaces:
     def true_act_dim(self):
         return self.true_act_dim_
 
+    # Accessor
+    def separable(self):
+        return self.separable_
+
     # Process actions based on options
     def process_actions(self, act):
 
