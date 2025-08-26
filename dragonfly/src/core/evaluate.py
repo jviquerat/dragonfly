@@ -1,10 +1,12 @@
 # Generic imports
+import numpy as np
 import gymnasium as gym
 
 # Custom imports
 from dragonfly.src.utils.json      import json_parser
 from dragonfly.src.agent.agent     import agent_factory
 from dragonfly.src.env.environment import environment
+from dragonfly.src.env.mpi         import mpi
 from dragonfly.src.utils.renderer  import renderer
 from dragonfly.src.utils.prints    import new_line, spacer
 
@@ -46,43 +48,81 @@ def evaluate(net_folder, json_file, ns, nw, aw, eval_frequency):
         term_ns = False
         term_dn = True
 
-    # Reset
-    n   = 0
-    scr = 0.0
-    obs = env.reset_all()
+    # Check whether the environment is separable or not
+    if env.spaces.separable():
+        # Reset
+        n   = 0
+        scr = 0.0
+        natural_act_dim = env.spaces.natural_act_dim()
+        true_obs_dim    = env.spaces.true_obs_dim()
+        obs = np.zeros((natural_act_dim, mpi.size, true_obs_dim))
+        act = np.zeros((natural_act_dim, mpi.size))
+        rwd = np.zeros((natural_act_dim, mpi.size))
+        dne = np.zeros((natural_act_dim, mpi.size), dtype=bool)
+        for i in range(natural_act_dim):
+            obs[i,:] = env.reset_all()
 
-    # Specify warmup (unrolling without control)
-    if (nw > 0):
-        # Retrieve action type
-        t  = env.get_action_type()
-        if (t == "continuous"):
-            act = []
-            for a in aw: act.append(float(a))
-            act = [act]
-        if (t == "discrete"):
-            act = []
-            for a in aw: act.append(int(a))
+        # Unroll
+        while True:
+            for i in range(natural_act_dim):
+                actions  = agent.control(obs[i,:,:])
+                act[i,:] = np.reshape(actions, (mpi.size))
 
-        # Loop with neutral action
-        for i in range(nw):
+            for i in range(natural_act_dim):
+                o, r, d, t = env.step(np.transpose(act))
+                obs[i,:,:] = o[:,:]
+                rwd[i,:]   = r[:]
+                dne[i,:]   = d[:]
+
+            scr += np.sum(rwd[:,0], axis=0)
+
+            if (n%eval_frequency == 0): rnd.store(env)
+            if (term_ns and n >= ns-1): break
+            if (term_dn and dne[0]):    break
+
+            n  += 1
+
+        rnd.store(env)
+        rnd.finish(".", 0, 0)
+        env.close()
+    else:
+        # Reset
+        n   = 0
+        scr = 0.0
+        obs = env.reset_all()
+
+        # Specify warmup (unrolling without control)
+        if (nw > 0):
+            # Retrieve action type
+            t  = env.get_action_type()
+            if (t == "continuous"):
+                act = []
+                for a in aw: act.append(float(a))
+                act = [act]
+            if (t == "discrete"):
+                act = []
+                for a in aw: act.append(int(a))
+
+            # Loop with neutral action
+            for i in range(nw):
+                obs, rwd, dne, trc = env.step(act)
+                rnd.store(env)
+
+        # Unroll
+        while True:
+            act                = agent.control(obs)
             obs, rwd, dne, trc = env.step(act)
-            rnd.store(env)
+            scr               += rwd[0]
 
-    # Unroll
-    while True:
-        act                = agent.control(obs)
-        obs, rwd, dne, trc = env.step(act)
-        scr               += rwd[0]
+            if (n%eval_frequency == 0): rnd.store(env)
+            if (term_ns and n >= ns-1): break
+            if (term_dn and dne):       break
 
-        if (n%eval_frequency == 0): rnd.store(env)
-        if (term_ns and n >= ns-1): break
-        if (term_dn and dne):       break
+            n  += 1
 
-        n  += 1
-
-    rnd.store(env)
-    rnd.finish(".", 0, 0)
-    env.close()
+        rnd.store(env)
+        rnd.finish(".", 0, 0)
+        env.close()
 
     # Print
     new_line()
