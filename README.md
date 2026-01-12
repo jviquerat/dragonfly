@@ -6,7 +6,7 @@
 
 ![master badge](https://github.com/jviquerat/dragonfly/workflows/dragonfly/badge.svg?branch=master)
 
-`dragonfly` is a small library for DRL. It follows a basic level of modularity based on a simple abstract factory to make new developments quick and easy. If you end up using this library for research purpose, please consider citing one of the following papers (<a href="https://arxiv.org/abs/2505.03778">link</a> and <a href="https://www.mdpi.com/2311-5521/8/7/208">link</a>):
+`dragonfly` is a small library for DRL, which was mainly developed at CEMEF, in the CFL group. It follows a basic level of modularity based on a simple abstract factory to make new developments quick and easy. If you end up using this library for research purpose, please consider citing one of the following papers (<a href="https://arxiv.org/abs/2505.03778">link</a> and <a href="https://www.mdpi.com/2311-5521/8/7/208">link</a>):
 
 ```
 Dragonfly, a modular deep reinforcement learning library
